@@ -50,64 +50,64 @@ describe('GamificationService', () => {
       }),
     });
 
-    it('should award EASY points (10) for easy tasks', async () => {
+    it('should award EASY points (5) for easy tasks', async () => {
       const emp = mockEmployee(0);
       employeeModel.findByPk.mockResolvedValue(emp);
-      taskModel.count.mockResolvedValue(3); // no badge milestone
+      taskModel.count.mockResolvedValue(1); // no badge milestone
       employeeBadgeModel.findOne.mockResolvedValue(null);
 
       const result = await service.processTaskCompletion('emp-1', mockTask('EASY') as any);
 
-      expect(result.pointsEarned).toBe(10);
-      expect(result.totalPoints).toBe(10);
-      expect(emp.update).toHaveBeenCalledWith({ points: 10 });
+      expect(result.pointsEarned).toBe(5);
+      expect(result.totalPoints).toBe(5);
+      expect(emp.update).toHaveBeenCalledWith({ points: 5 }, expect.any(Object));
     });
 
-    it('should award MEDIUM points (20) for medium tasks', async () => {
+    it('should award MEDIUM points (10) for medium tasks', async () => {
       const emp = mockEmployee(50);
       employeeModel.findByPk.mockResolvedValue(emp);
-      taskModel.count.mockResolvedValue(3);
+      taskModel.count.mockResolvedValue(1);
 
       const result = await service.processTaskCompletion('emp-1', mockTask('MEDIUM') as any);
 
-      expect(result.pointsEarned).toBe(20);
-      expect(result.totalPoints).toBe(70);
+      expect(result.pointsEarned).toBe(10);
+      expect(result.totalPoints).toBe(60);
     });
 
-    it('should award HARD points (40) for hard tasks', async () => {
+    it('should award HARD points (15) for hard tasks', async () => {
       const emp = mockEmployee(100);
       employeeModel.findByPk.mockResolvedValue(emp);
-      taskModel.count.mockResolvedValue(3);
+      taskModel.count.mockResolvedValue(1);
 
       const result = await service.processTaskCompletion('emp-1', mockTask('HARD') as any);
 
-      expect(result.pointsEarned).toBe(40);
-      expect(result.totalPoints).toBe(140);
+      expect(result.pointsEarned).toBe(15);
+      expect(result.totalPoints).toBe(115);
     });
 
-    it('should default to 20 points for unknown difficulty', async () => {
+    it('should default to 10 points for unknown difficulty', async () => {
       const emp = mockEmployee(0);
       employeeModel.findByPk.mockResolvedValue(emp);
       taskModel.count.mockResolvedValue(1);
 
       const result = await service.processTaskCompletion('emp-1', mockTask('UNKNOWN') as any);
 
-      expect(result.pointsEarned).toBe(20);
+      expect(result.pointsEarned).toBe(10);
     });
 
-    it('should add early bonus (+10) when completed 3+ days before due date', async () => {
+    it('should add lightning bonus (+5) when completed 5+ days before due date', async () => {
       const futureDate = new Date();
-      futureDate.setDate(futureDate.getDate() + 5); // 5 days from now
+      futureDate.setDate(futureDate.getDate() + 6); // 6 days from now to be safe
       const emp = mockEmployee(0);
       employeeModel.findByPk.mockResolvedValue(emp);
       taskModel.count.mockResolvedValue(1);
 
       const result = await service.processTaskCompletion('emp-1', mockTask('MEDIUM', futureDate.toISOString()) as any);
 
-      expect(result.pointsEarned).toBe(30); // 20 base + 10 early
+      expect(result.pointsEarned).toBe(15); // 10 base + 5 lightning
     });
 
-    it('should add on-time bonus (+5) when completed within 0-2 days of due date', async () => {
+    it('should add on-time bonus (+1) when completed within 0-1 days of due date', async () => {
       const soonDate = new Date();
       soonDate.setDate(soonDate.getDate() + 1); // 1 day from now
       const emp = mockEmployee(0);
@@ -116,10 +116,10 @@ describe('GamificationService', () => {
 
       const result = await service.processTaskCompletion('emp-1', mockTask('MEDIUM', soonDate.toISOString()) as any);
 
-      expect(result.pointsEarned).toBe(25); // 20 base + 5 on-time
+      expect(result.pointsEarned).toBe(11); // 10 base + 1 on-time
     });
 
-    it('should not add bonus when completed after due date', async () => {
+    it('should not add bonus when completed up to 3 days after due date', async () => {
       const pastDate = new Date();
       pastDate.setDate(pastDate.getDate() - 2); // 2 days ago
       const emp = mockEmployee(0);
@@ -128,7 +128,7 @@ describe('GamificationService', () => {
 
       const result = await service.processTaskCompletion('emp-1', mockTask('MEDIUM', pastDate.toISOString()) as any);
 
-      expect(result.pointsEarned).toBe(20); // base only
+      expect(result.pointsEarned).toBe(10); // base only
     });
 
     it('should not add bonus when no due date', async () => {
@@ -138,7 +138,7 @@ describe('GamificationService', () => {
 
       const result = await service.processTaskCompletion('emp-1', mockTask('MEDIUM') as any);
 
-      expect(result.pointsEarned).toBe(20); // base only
+      expect(result.pointsEarned).toBe(10); // base only
     });
 
     it('should create badge when milestone is reached', async () => {
@@ -155,7 +155,7 @@ describe('GamificationService', () => {
         badgeNumber: 1,
         title: 'First Steps',
         milestone: 5,
-      });
+      }, expect.any(Object));
       expect(result.newBadge).toEqual({
         badgeNumber: 1,
         title: 'First Steps',

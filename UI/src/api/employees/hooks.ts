@@ -1,0 +1,121 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { employeesApi } from './api';
+import type { CreateEmployeeDto, UpdateEmployeeDto } from './types';
+import { toast } from 'sonner';
+import i18n from '../../i18n/config';
+
+export const employeeKeys = {
+    all: ['employees'] as const,
+    detail: (id: string) => ['employees', id] as const,
+};
+
+export const useLeaderboard = (limit?: number) =>
+    useQuery({
+        queryKey: ['leaderboard', limit],
+        queryFn: () => employeesApi.getLeaderboard(limit),
+    });
+
+export const useEmployees = (departmentId?: string) =>
+    useQuery({
+        queryKey: departmentId ? [...employeeKeys.all, departmentId] : employeeKeys.all,
+        queryFn: () => employeesApi.getAll(departmentId),
+    });
+
+export const useEmployee = (id: string) =>
+    useQuery({
+        queryKey: employeeKeys.detail(id),
+        queryFn: () => employeesApi.getById(id),
+        enabled: !!id,
+    });
+
+export const useCreateEmployee = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (dto: CreateEmployeeDto) => employeesApi.create(dto),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.employeeCreated'));
+            qc.invalidateQueries({ queryKey: employeeKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useUpdateEmployee = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, dto }: { id: string; dto: UpdateEmployeeDto }) =>
+            employeesApi.update(id, dto),
+        onSuccess: (_, { id }) => {
+            toast.success(i18n.t('toast.employeeUpdated'));
+            qc.invalidateQueries({ queryKey: employeeKeys.all });
+            qc.invalidateQueries({ queryKey: employeeKeys.detail(id) });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useDeleteEmployee = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => employeesApi.delete(id),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.employeeDeleted'));
+            qc.invalidateQueries({ queryKey: employeeKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useDismissEmployee = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => employeesApi.dismiss(id),
+        onSuccess: (_, id) => {
+            toast.success(i18n.t('toast.employeeDismissed'));
+            qc.invalidateQueries({ queryKey: employeeKeys.all });
+            qc.invalidateQueries({ queryKey: employeeKeys.detail(id) });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useReinstateEmployee = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => employeesApi.reinstate(id),
+        onSuccess: (_, id) => {
+            toast.success(i18n.t('toast.employeeReinstated'));
+            qc.invalidateQueries({ queryKey: employeeKeys.all });
+            qc.invalidateQueries({ queryKey: employeeKeys.detail(id) });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useChangeEmployeePassword = () =>
+    useMutation({
+        mutationFn: ({ id, password }: { id: string; password: string }) =>
+            employeesApi.changePassword(id, password),
+        onSuccess: () => toast.success(i18n.t('toast.passwordChanged')),
+        onError: () => toast.error(i18n.t('toast.passwordChangeFailed')),
+    });
+
+export const useEmployeeStats = (id: string | number) =>
+    useQuery({
+        queryKey: ['employee-stats', id],
+        queryFn: () => employeesApi.getStats(String(id)),
+        enabled: !!id,
+    });
+
+export const useEmployeeBadges = (id: string) =>
+    useQuery({
+        queryKey: ['employee-badges', id],
+        queryFn: () => employeesApi.getBadges(id),
+        enabled: !!id,
+    });
+
+export const useTodayBirthdays = () =>
+    useQuery({
+        queryKey: ['employees', 'birthdays', 'today'],
+        queryFn: employeesApi.getTodayBirthdays,
+    });

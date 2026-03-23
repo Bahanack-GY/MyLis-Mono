@@ -1,0 +1,69 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-mylisapp_db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  server:
+    build:
+      context: ./server
+      target: development
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_DATABASE: ${POSTGRES_DB:-mylisapp_db}
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      PORT: 3025
+    volumes:
+      - ./uploads:/app/uploads
+      - ./server/src:/app/src
+    ports:
+      - "${SERVER_PORT:-3025}:3025"
+    develop:
+      watch:
+        - action: sync
+          path: ./server/src
+          target: /app/src
+        - action: rebuild
+          path: ./server/package.json
+
+  ui:
+    build:
+      context: ./UI
+      target: development
+    restart: unless-stopped
+    depends_on:
+      - server
+    environment:
+      - UI_PORT=${UI_PORT:-8080}
+    volumes:
+      - ./UI/src:/app/src
+      - ./UI/index.html:/app/index.html
+    ports:
+      - "${UI_PORT:-8080}:5173"
+    develop:
+      watch:
+        - action: sync
+          path: ./UI/src
+          target: /app/src
+        - action: rebuild
+          path: ./UI/package.json
+
+volumes:
+  pgdata:

@@ -1,8 +1,10 @@
 
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
 import { Employee } from './employee.model';
 import { Team } from './team.model';
 import { Project } from './project.model';
+import { TaskNature } from './task-nature.model';
+import { Subtask } from './subtask.model';
 
 @Table({
     indexes: [
@@ -85,6 +87,13 @@ export class Task extends Model {
     @Column({ type: DataType.UUID, allowNull: true })
     declare ticketId: string;
 
+    @ForeignKey(() => TaskNature)
+    @Column({ type: DataType.UUID, allowNull: true })
+    declare natureId: string;
+
+    @BelongsTo(() => TaskNature)
+    declare nature: TaskNature;
+
     @Column({ type: DataType.BOOLEAN, defaultValue: false })
     declare selfAssigned: boolean;
 
@@ -96,4 +105,7 @@ export class Task extends Model {
 
     @Column({ type: DataType.DATE, allowNull: true })
     declare completedAt: Date | null;
+
+    @HasMany(() => Subtask)
+    declare subtasks: Subtask[];
 }

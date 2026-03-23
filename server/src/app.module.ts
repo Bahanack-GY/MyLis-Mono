@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { EmployeesModule } from './employees/employees.module';
 import { TasksModule } from './tasks/tasks.module';
+import { TaskNaturesModule } from './task-natures/task-natures.module';
 import { HrModule } from './hr/hr.module';
 import { OrganizationModule } from './organization/organization.module';
 import { LogsModule } from './logs/logs.module';
@@ -52,6 +53,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     UsersModule,
     EmployeesModule,
     TasksModule,
+    TaskNaturesModule,
     HrModule,
     OrganizationModule,
     LogsModule,

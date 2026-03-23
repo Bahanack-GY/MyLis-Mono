@@ -1,0 +1,1958 @@
+{
+  "login": {
+    "title": "Connexion",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "noAccount": "Vous n'avez pas de compte ?",
+    "signUp": "S'inscrire",
+    "emailPlaceholder": "Entrez votre e-mail",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "error": "E-mail ou mot de passe invalide",
+    "accessDenied": "Acc\u00e8s r\u00e9serv\u00e9 au personnel autoris\u00e9"
+  },
+  "employees": {
+    "title": "Equipe",
+    "searchPlaceholder": "Rechercher...",
+    "grade": "Grade",
+    "stats": {
+      "projects": "Projets",
+      "done": "Termin\u00e9s",
+      "progress": "En cours"
+    },
+    "productivity": "Productivit\u00e9",
+    "bestEmployee": "Employ\u00e9 du mois",
+    "leaderboard": "Meilleurs Employ\u00e9s",
+    "addEmployee": "Ajouter un employ\u00e9",
+    "addManager": "Ajouter un manager",
+    "addAccountant": "Ajouter un comptable",
+    "createAccountant": {
+      "title": "Cr\u00e9er un compte comptable",
+      "submit": "Cr\u00e9er le comptable"
+    },
+    "createManager": {
+      "title": "Cr\u00e9er un compte manager",
+      "description": "Cr\u00e9er un nouveau compte manager avec acc\u00e8s administrateur complet.",
+      "email": "Email",
+      "emailPlaceholder": "manager@entreprise.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Entrez un mot de passe s\u00e9curis\u00e9",
+      "cancel": "Annuler",
+      "submit": "Cr\u00e9er le manager"
+    },
+    "allDepartments": "Tous les d\u00e9partements",
+    "clearFilter": "Effacer le filtre",
+    "dismiss": "Licencier",
+    "reinstate": "R\u00e9int\u00e9grer",
+    "dismissedBanner": "Cet employ\u00e9 a \u00e9t\u00e9 licenci\u00e9 et ne peut plus acc\u00e9der au syst\u00e8me.",
+    "dismissConfirmTitle": "Licencier l'employ\u00e9",
+    "dismissConfirmMessage": "Cela r\u00e9voquera l'acc\u00e8s de {{name}}. Il/elle ne pourra plus se connecter.",
+    "reinstateConfirmTitle": "R\u00e9int\u00e9grer l'employ\u00e9",
+    "reinstateConfirmMessage": "Cela restaurera l'acc\u00e8s de {{name}}. Il/elle pourra se reconnecter.",
+    "create": {
+      "title": "Nouvel Employ\u00e9",
+      "firstName": "Pr\u00e9nom",
+      "firstNamePlaceholder": "Entrez le pr\u00e9nom...",
+      "lastName": "Nom",
+      "lastNamePlaceholder": "Entrez le nom...",
+      "email": "Adresse e-mail",
+      "emailPlaceholder": "employe@entreprise.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "D\u00e9finir un mot de passe",
+      "address": "Adresse",
+      "addressPlaceholder": "Entrez l'adresse...",
+      "salary": "Salaire",
+      "phone": "T\u00e9l\u00e9phone",
+      "phonePlaceholder": "+237 6XX XXX XXX",
+      "role": "Poste",
+      "rolePlaceholder": "S\u00e9lectionner le poste...",
+      "department": "D\u00e9partement",
+      "departmentPlaceholder": "S\u00e9lectionner le d\u00e9partement...",
+      "startDate": "Date de d\u00e9but",
+      "workDays": "Jours de travail / Mois",
+      "workDaysPlaceholder": "ex. 23",
+      "customersGoal": "Objectif clients / Mois",
+      "customersGoalPlaceholder": "ex. 15",
+      "dateOfBirth": "Date de naissance",
+      "gender": "Genre",
+      "genderPlaceholder": "S\u00e9lectionner le genre...",
+      "genderMale": "Homme",
+      "genderFemale": "Femme",
+      "skills": "Comp\u00e9tences",
+      "skillsHint": "S\u00e9lectionnez ou saisissez les comp\u00e9tences",
+      "skillsPlaceholder": "Saisissez une comp\u00e9tence et appuyez Entr\u00e9e...",
+      "educationDocs": "Documents scolaires",
+      "educationDocsHint": "Dipl\u00f4mes, certificats, relev\u00e9s de notes",
+      "addDocument": "Ajouter un document",
+      "documentName": "Nom du document",
+      "documentNamePlaceholder": "ex. Licence en informatique...",
+      "documentType": "Type",
+      "educationTypes": {
+        "diploma": "Dipl\u00f4me",
+        "certificate": "Certificat",
+        "transcript": "Relev\u00e9 de notes",
+        "other": "Autre"
+      },
+      "recruitmentDocs": "Documents de recrutement",
+      "recruitmentDocsHint": "CV, lettre de motivation, pi\u00e8ce d'identit\u00e9",
+      "recruitmentTypes": {
+        "cv": "CV",
+        "coverLetter": "Lettre de motivation",
+        "id": "Pi\u00e8ce d'identit\u00e9",
+        "references": "R\u00e9f\u00e9rences",
+        "other": "Autre"
+      },
+      "chooseFile": "Choisir un fichier...",
+      "uploading": "T\u00e9l\u00e9versement...",
+      "cancel": "Annuler",
+      "submit": "Ajouter l'employ\u00e9"
+    },
+    "edit": {
+      "title": "Modifier l'employ\u00e9",
+      "profilePicture": "Photo de profil",
+      "changePhoto": "Changer la photo",
+      "removePhoto": "Supprimer",
+      "dragOrClick": "Cliquez ou glissez pour t\u00e9l\u00e9verser",
+      "maxSize": "Max 2 Mo, JPG/PNG",
+      "save": "Enregistrer",
+      "saving": "Enregistrement...",
+      "changePassword": "Changer le mot de passe",
+      "newPasswordPlaceholder": "Nouveau mot de passe (min. 6 caract\u00e8res)",
+      "setPassword": "D\u00e9finir le mot de passe",
+      "passwordUpdated": "Mot de passe mis \u00e0 jour"
+    }
+  },
+  "employeeSidebar": {
+    "back": "Retour aux employ\u00e9s",
+    "infos": "Infos",
+    "tasks": "T\u00e2ches",
+    "prospects": "Prospects",
+    "documents": "Documents",
+    "sanctions": "Sanctions",
+    "recrutements": "Recrutement",
+    "education": "Formation",
+    "formations": "Formations"
+  },
+  "employeeDetail": {
+    "backToList": "Retour aux employ\u00e9s",
+    "notFound": "Employ\u00e9 introuvable",
+    "showAll": "Voir tout",
+    "emptyState": "Aucun \u00e9l\u00e9ment",
+    "noFile": "Aucun fichier",
+    "addDocument": "Ajouter un document",
+    "docName": "Nom du document",
+    "clickToUpload": "Cliquer pour s\u00e9lectionner un fichier",
+    "upload": "T\u00e9l\u00e9verser",
+    "viewDocument": "Voir le document",
+    "downloadDocument": "T\u00e9l\u00e9charger le document",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "days": {
+      "mon": "Lu",
+      "tue": "Ma",
+      "wed": "Me",
+      "thu": "Je",
+      "fri": "Ve",
+      "sat": "Sa",
+      "sun": "Di"
+    },
+    "profile": {
+      "addHobbies": "Ajoutez vos loisirs pour compl\u00e9ter votre profil !"
+    },
+    "stats": {
+      "projectsDone": "Projets termin\u00e9s",
+      "tasksActive": "T\u00e2ches en cours"
+    },
+    "progress": {
+      "title": "Progression",
+      "week": "Une semaine",
+      "avgActivity": "Activit\u00e9 moyenne",
+      "hours": "Heures"
+    },
+    "productivity": {
+      "title": "Productivit\u00e9",
+      "yearly": "Cette ann\u00e9e",
+      "vsLastMonth": "vs mois dernier",
+      "months": {
+        "jan": "Jan",
+        "feb": "F\u00e9v",
+        "mar": "Mar",
+        "apr": "Avr",
+        "may": "Mai",
+        "jun": "Juin",
+        "jul": "Juil",
+        "aug": "Ao\u00fbt",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "D\u00e9c"
+      }
+    },
+    "team": {
+      "title": "Votre \u00e9quipe",
+      "lead": "Chef d'\u00e9quipe",
+      "director": "Directeur artistique"
+    },
+    "documents": {
+      "title": "Documents",
+      "add": "Ajouter un document",
+      "items": {
+        "contract": "Contrat de travail",
+        "brandGuide": "Guide de style de marque",
+        "newProject": "Nouveau projet"
+      }
+    },
+    "tasks": {
+      "title": "T\u00e2ches en cours",
+      "add": "Ajouter une t\u00e2che",
+      "createTitle": "Cr\u00e9er des t\u00e2ches",
+      "createTasks": "Cr\u00e9er les t\u00e2ches",
+      "addAnother": "Ajouter une autre t\u00e2che",
+      "taskNumber": "T\u00e2che",
+      "tasksReady": "t\u00e2che(s) pr\u00eate(s)",
+      "titlePlaceholder": "Titre de la t\u00e2che...",
+      "descriptionPlaceholder": "Description de la t\u00e2che...",
+      "assigneePlaceholder": "Responsable",
+      "date": "Date",
+      "time": "Heure",
+      "startDate": "Date de d\u00e9but",
+      "endDate": "Date de fin",
+      "duration": "Dur\u00e9e",
+      "oneHour": "1 Heure",
+      "twoHours": "2 Heures",
+      "customTime": "Personnalis\u00e9",
+      "startTime": "Heure de d\u00e9but",
+      "endTime": "Heure de fin",
+      "difficulty": "Difficult\u00e9",
+      "difficultyEasy": "Facile",
+      "difficultyMedium": "Moyen",
+      "difficultyHard": "Difficile",
+      "priority": "Priorit\u00e9",
+      "priorityLow": "Basse",
+      "priorityMedium": "Moyenne",
+      "priorityHigh": "Haute",
+      "priorityUrgent": "Urgente",
+      "project": "Projet",
+      "projectNone": "Aucun projet",
+      "repeat": "R\u00e9p\u00e9tition",
+      "repeatNone": "Aucune",
+      "repeatDaily": "Quotidien",
+      "repeatWeekly": "Hebdomadaire",
+      "repeatMonthly": "Mensuel",
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain",
+      "february": "F\u00e9vrier",
+      "doFirst": "Prioritaire",
+      "inProgress": "En cours",
+      "pending": "En attente",
+      "done": "Termin\u00e9",
+      "calendarDay": "Jour",
+      "calendarWeek": "Semaine",
+      "calendarMonth": "Mois",
+      "calendarYear": "Ann\u00e9e",
+      "taskDetail": "D\u00e9tails de la t\u00e2che",
+      "noDescription": "Aucune description",
+      "status": "Statut",
+      "startedAt": "D\u00e9marr\u00e9 le",
+      "completedAt": "Termin\u00e9 le",
+      "items": {
+        "meetTeam": "Rencontrer votre \u00e9quipe",
+        "accessCredentials": "Obtenir les identifiants du chef de projet",
+        "reviewDesign": "Lire le brand book et le kit UI",
+        "reviewProject": "Examiner le projet en cours sur Figma",
+        "reviewHandbook": "Lire le manuel de l'employ\u00e9"
+      },
+      "editTask": "Modifier",
+      "deleteTask": "Supprimer",
+      "viewHistory": "Historique",
+      "confirmDelete": "\u00cates-vous s\u00fbr de vouloir supprimer cette t\u00e2che ?",
+      "historyTitle": "Historique des modifications",
+      "historyEmpty": "Aucune modification enregistr\u00e9e."
+    },
+    "goals": {
+      "title": "Suivi des objectifs",
+      "subtitle": "Objectifs con\u00e7us pour accompagner l'int\u00e9gration pendant les 2 premi\u00e8res semaines",
+      "items": {
+        "knowTeam": "Faire connaissance avec votre \u00e9quipe",
+        "setupTools": "Configurer vos outils et comptes de travail",
+        "completeProfile": "Compl\u00e9ter votre profil"
+      }
+    },
+    "salary": {
+      "title": "Salaire",
+      "monthly": "Mensuel",
+      "gross": "Salaire brut",
+      "net": "Salaire net"
+    },
+    "personalInfo": {
+      "birthDate": "Date de naissance",
+      "hireDate": "Date d'embauche",
+      "yearsInCompany": "Ann\u00e9es dans l'entreprise",
+      "years": "ans"
+    },
+    "contact": {
+      "title": "Contact",
+      "phone": "T\u00e9l\u00e9phone",
+      "email": "E-mail",
+      "address": "Adresse"
+    },
+    "daysWorked": {
+      "title": "Jours travaill\u00e9s",
+      "thisMonth": "Ce mois-ci",
+      "days": "jours",
+      "of": "sur"
+    },
+    "trophies": {
+      "title": "Troph\u00e9es",
+      "items": {
+        "topPerformer": "Meilleur performeur",
+        "projectChampion": "Champion de projet",
+        "innovator": "Innovateur du mois",
+        "clientFavorite": "Favori du client",
+        "mentorAward": "Prix du mentorat"
+      }
+    },
+    "skills": {
+      "title": "Comp\u00e9tences"
+    },
+    "prospects": {
+      "title": "Prospects",
+      "add": "Ajouter un prospect",
+      "goal": "Objectif mensuel",
+      "reached": "Atteints",
+      "remaining": "Restants",
+      "conversionRate": "Taux de conversion",
+      "status": {
+        "new": "Nouveau",
+        "contacted": "Contact\u00e9",
+        "negotiation": "N\u00e9gociation",
+        "won": "Gagn\u00e9",
+        "lost": "Perdu"
+      },
+      "company": "Entreprise",
+      "contact": "Contact",
+      "value": "Valeur",
+      "noProspects": "Aucun prospect"
+    },
+    "badges": {
+      "title": "Badges",
+      "more": "de plus",
+      "items": {
+        "earlyBird": "L\u00e8ve-t\u00f4t",
+        "teamPlayer": "Esprit d'\u00e9quipe",
+        "fastLearner": "Apprentissage rapide",
+        "perfectAttendance": "Assiduit\u00e9 parfaite",
+        "creativeMind": "Esprit cr\u00e9atif",
+        "problemSolver": "R\u00e9solveur de probl\u00e8mes"
+      }
+    },
+    "points": {
+      "title": "Points",
+      "accumulated": "Points totaux accumul\u00e9s"
+    },
+    "sanctions": {
+      "add": "Ajouter une sanction",
+      "selectType": "S\u00e9lectionner le type de sanction",
+      "selectSeverity": "S\u00e9lectionner la gravit\u00e9",
+      "reasonPlaceholder": "D\u00e9crire la raison...",
+      "types": {
+        "warning": "Avertissement verbal",
+        "written": "Bl\u00e2me",
+        "suspension": "Mise \u00e0 pied",
+        "termination": "Licenciement"
+      },
+      "severity": {
+        "light": "L\u00e9ger",
+        "medium": "Moyen",
+        "severe": "Grave"
+      },
+      "reasons": {
+        "lateness": "Retards r\u00e9p\u00e9t\u00e9s",
+        "absence": "Absence injustifi\u00e9e"
+      }
+    },
+    "recrutements": {
+      "submittedOn": "Soumis le",
+      "verified": "V\u00e9rifi\u00e9",
+      "pending": "En attente",
+      "items": {
+        "cv": "Curriculum Vitae (CV)",
+        "coverLetter": "Lettre de motivation",
+        "idCard": "Copie de la carte d'identit\u00e9",
+        "references": "R\u00e9f\u00e9rences professionnelles"
+      }
+    },
+    "education": {
+      "items": {
+        "masters": "Master",
+        "bachelors": "Licence",
+        "bac": "Baccalaur\u00e9at"
+      }
+    },
+    "formations": {
+      "add": "Ajouter une formation",
+      "titlePlaceholder": "Titre de la formation...",
+      "durationPlaceholder": "Dur\u00e9e (ex: 3 jours)",
+      "completed": "Termin\u00e9e",
+      "upcoming": "\u00c0 venir",
+      "markComplete": "Marquer comme termin\u00e9e",
+      "items": {
+        "uiux": "Atelier avanc\u00e9 UI/UX Design",
+        "agile": "Formation m\u00e9thodologie Agile",
+        "figma": "Masterclass Figma"
+      }
+    }
+  },
+  "sidebar": {
+    "dashboard": "Tableau de bord",
+    "employees": "Employ\u00e9s",
+    "projects": "Projets",
+    "departments": "D\u00e9partements",
+    "tasks": "T\u00e2ches",
+    "planning": "Planning",
+    "documents": "Documents",
+    "tickets": "Tickets",
+    "activity": "Activit\u00e9",
+    "meetings": "R\u00e9unions",
+    "invoices": "Factures",
+    "expenses": "D\u00e9penses",
+    "clients": "Clients",
+    "settings": "Param\u00e8tres",
+    "messages": "Messages",
+    "demands": "Demandes",
+    "salaries": "Salaires",
+    "formations": "Formations",
+    "sanctions": "Sanctions",
+    "notifications": "Notifications",
+    "profile": "Profil",
+    "more": "Plus",
+    "logout": "D\u00e9connexion",
+    "sections": {
+      "work": "Travail",
+      "people": "\u00c9quipe",
+      "finance": "Finance",
+      "requests": "Demandes",
+      "comms": "Comms"
+    }
+  },
+  "planning": {
+    "title": "Planning Hebdomadaire",
+    "subtitle": "Planifiez et organisez vos t\u00e2ches pour la semaine",
+    "addTask": "Ajouter une t\u00e2che",
+    "noTasks": "Aucune t\u00e2che pour ce jour",
+    "today": "Aujourd'hui",
+    "allEmployees": "Tous les employ\u00e9s",
+    "weekProgress": "Progression de la semaine",
+    "tasksCompleted": "t\u00e2ches compl\u00e9t\u00e9es"
+  },
+  "salaries": {
+    "pageSubtitle": "{{count}} employ\u00e9s \u00b7 {{withSalary}} avec salaire d\u00e9fini",
+    "payAll": "Payer tous les salaires",
+    "totalMonthly": "Total mensuel",
+    "employees": "Employ\u00e9s",
+    "averageSalary": "Salaire moyen",
+    "employeeSalaries": "Salaires des employ\u00e9s",
+    "search": "Rechercher...",
+    "loading": "Chargement\u2026",
+    "noEmployees": "Aucun employ\u00e9 trouv\u00e9",
+    "notSet": "Non d\u00e9fini",
+    "columns": {
+      "employee": "Employ\u00e9",
+      "department": "D\u00e9partement",
+      "role": "R\u00f4le",
+      "monthlySalary": "Salaire mensuel",
+      "actions": "Actions"
+    },
+    "roles": {
+      "EMPLOYEE": "Employ\u00e9",
+      "MANAGER": "Manager",
+      "HEAD_OF_DEPARTMENT": "Chef de dept.",
+      "ACCOUNTANT": "Comptable"
+    },
+    "months": {
+      "1": "Janvier",
+      "2": "F\u00e9vrier",
+      "3": "Mars",
+      "4": "Avril",
+      "5": "Mai",
+      "6": "Juin",
+      "7": "Juillet",
+      "8": "Ao\u00fbt",
+      "9": "Septembre",
+      "10": "Octobre",
+      "11": "Novembre",
+      "12": "D\u00e9cembre"
+    },
+    "payOne": {
+      "title": "Payer le salaire",
+      "month": "Mois",
+      "year": "Ann\u00e9e",
+      "cancel": "Annuler",
+      "pay": "Payer",
+      "processing": "Traitement\u2026"
+    },
+    "advance": {
+      "title": "Avance sur salaire",
+      "amount": "Montant (FCFA)",
+      "note": "Note (optionnelle)",
+      "notePlaceholder": "Motif de l'avance\u2026",
+      "monthlySalary": "Salaire mensuel : {{amount}} FCFA",
+      "cancel": "Annuler",
+      "payAdvance": "Payer l'avance",
+      "processing": "Traitement\u2026"
+    },
+    "bulkPay": {
+      "title": "Payer tous les salaires",
+      "subtitle": "{{count}} employ\u00e9s \u00b7 {{total}} FCFA au total",
+      "month": "Mois",
+      "year": "Ann\u00e9e",
+      "warning": "Cela cr\u00e9era une d\u00e9pense pour chaque employ\u00e9 et sera comptabilis\u00e9 dans les d\u00e9penses de {{month}} {{year}}.",
+      "cancel": "Annuler",
+      "confirm": "Confirmer le paiement",
+      "processing": "Traitement\u2026"
+    },
+    "row": {
+      "pay": "Payer",
+      "advance": "Avance"
+    }
+  },
+  "header": {
+    "searchPlaceholder": "Rechercher ici...",
+    "greeting": "Salut {{name}}"
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "subtitle": "Aper\u00e7u des performances de votre organisation",
+    "sortBy": "Trier par : R\u00e9cent",
+    "stats": {
+      "totalEmployees": "Total Employ\u00e9s",
+      "activeProjects": "Projets Actifs",
+      "tasksCompleted": "T\u00e2ches Termin\u00e9es",
+      "efficiency": "Efficacit\u00e9",
+      "revenue": "Chiffre d'Affaires",
+      "expenses": "D\u00e9penses",
+      "profit": "B\u00e9n\u00e9fice Net",
+      "pending": "Paiements En Attente",
+      "myTasks": "Mes t\u00e2ches",
+      "myTickets": "Mes tickets",
+      "upcomingMeetings": "R\u00e9unions \u00e0 venir",
+      "myFormations": "Mes formations"
+    },
+    "charts": {
+      "productivity": "Analytique de Productivit\u00e9",
+      "distribution": "Distribution",
+      "total": "Total",
+      "days": {
+        "Mon": "Lun",
+        "Tue": "Mar",
+        "Wed": "Mer",
+        "Thu": "Jeu",
+        "Fri": "Ven",
+        "Sat": "Sam",
+        "Sun": "Dim"
+      },
+      "departments": {
+        "Dev": "Dev",
+        "HR": "RH",
+        "Sales": "Ventes",
+        "Marketing": "Marketing"
+      }
+    },
+    "dateFilter": {
+      "today": "Aujourd'hui",
+      "thisWeek": "Cette semaine",
+      "thisMonth": "Ce mois-ci",
+      "thisYear": "Cette ann\u00e9e",
+      "custom": "Personnalis\u00e9",
+      "from": "Du",
+      "to": "Au",
+      "apply": "Appliquer"
+    },
+    "recentActivities": {
+      "title": "Activit\u00e9s R\u00e9centes",
+      "viewAll": "Voir tout",
+      "columns": {
+        "activity": "Activit\u00e9",
+        "date": "Date",
+        "user": "Utilisateur",
+        "status": "Statut",
+        "amountRef": "Montant/R\u00e9f"
+      },
+      "items": {
+        "contractSigned": "Nouveau Contrat Sign\u00e9",
+        "department": "D\u00e9partement : Ing\u00e9nierie",
+        "completed": "Termin\u00e9"
+      }
+    },
+    "recentTasks": {
+      "title": "T\u00e2ches r\u00e9centes",
+      "noData": "Aucune t\u00e2che r\u00e9cente \u00e0 afficher.",
+      "viewAll": "Voir toutes les t\u00e2ches"
+    },
+    "upcomingMeetings": {
+      "title": "R\u00e9unions \u00e0 venir",
+      "noData": "Aucune r\u00e9union pr\u00e9vue prochainement."
+    },
+    "topEmployee": {
+      "title": "Meilleur employ\u00e9",
+      "noData": "Aucune donn\u00e9e disponible."
+    },
+    "taskStatus": {
+      "todo": "\u00c0 faire",
+      "created": "Cr\u00e9\u00e9e",
+      "assigned": "Assign\u00e9e",
+      "in_progress": "En cours",
+      "blocked": "Bloqu\u00e9e",
+      "reviewed": "Revue",
+      "done": "Termin\u00e9e",
+      "completed": "Termin\u00e9e"
+    }
+  },
+  "projects": {
+    "title": "Projets",
+    "subtitle": "G\u00e9rez et suivez tous vos projets",
+    "newProject": "Nouveau Projet",
+    "searchPlaceholder": "Rechercher des projets...",
+    "filterAll": "Tous",
+    "statusActive": "Actif",
+    "statusCompleted": "Termin\u00e9",
+    "statusOnHold": "En pause",
+    "statusOverdue": "En retard",
+    "stats": {
+      "total": "Total Projets",
+      "active": "Actifs",
+      "completed": "Termin\u00e9s",
+      "overdue": "En retard"
+    },
+    "chartTitle": "Activit\u00e9 des projets",
+    "distribution": "R\u00e9partition par statut",
+    "progress": "Progression",
+    "tasks": "T\u00e2ches",
+    "description": "Description",
+    "budget": "Budget",
+    "department": "D\u00e9partement",
+    "startDate": "Date de d\u00e9but",
+    "endDate": "Date de fin",
+    "noResults": "Aucun projet trouv\u00e9",
+    "noResultsHint": "Essayez d'ajuster votre recherche ou vos filtres",
+    "close": "Fermer",
+    "viewDetails": "Voir les d\u00e9tails",
+    "createTitle": "Cr\u00e9er un projet",
+    "formName": "Nom du projet",
+    "formNamePlaceholder": "Entrez le nom du projet...",
+    "formDescriptionPlaceholder": "D\u00e9crivez le projet...",
+    "formDepartment": "D\u00e9partement",
+    "formDepartmentPlaceholder": "S\u00e9lectionner un d\u00e9partement",
+    "formClient": "Client",
+    "formClientPlaceholder": "S\u00e9lectionner un client",
+    "formCost": "Co\u00fbt",
+    "formRevenue": "Chiffre d'affaires",
+    "formDueDate": "Date d'\u00e9ch\u00e9ance",
+    "formDocuments": "Documents",
+    "formContract": "Contrat",
+    "formSRS": "SRS (Cahier des charges)",
+    "formOtherDocs": "Autres documents",
+    "formUpload": "Cliquez pour t\u00e9l\u00e9verser",
+    "formCancel": "Annuler",
+    "formCreate": "Cr\u00e9er le projet",
+    "editTitle": "Modifier le projet",
+    "formSave": "Enregistrer"
+  },
+  "tasksPage": {
+    "title": "T\u00e2ches",
+    "subtitle": "Planning & affectations de l'\u00e9quipe",
+    "searchPlaceholder": "Rechercher un employ\u00e9...",
+    "employees": "Employ\u00e9s",
+    "today": "Aujourd'hui",
+    "view_day": "Jour",
+    "view_week": "Semaine",
+    "view_month": "Mois",
+    "view_year": "Ann\u00e9e",
+    "week": "Semaine",
+    "month": "Mois",
+    "year": "Ann\u00e9e",
+    "showAll": "Tout afficher",
+    "startDate": "Date de d\u00e9but",
+    "endDate": "Date de fin",
+    "duration": "Dur\u00e9e",
+    "day": "jour",
+    "days": "jours",
+    "status": "Statut",
+    "todo": "\u00c0 faire",
+    "inProgress": "En cours",
+    "done": "Termin\u00e9",
+    "description": "Description",
+    "noResults": "Aucun r\u00e9sultat",
+    "addTask": "Nouvelle t\u00e2che",
+    "titlePlaceholder": "Titre de la t\u00e2che",
+    "descriptionPlaceholder": "Description",
+    "project": "Projet",
+    "projectNone": "Aucun projet",
+    "time": "Heure",
+    "difficulty": "Difficult\u00e9",
+    "difficultyEasy": "Facile",
+    "difficultyMedium": "Moyen",
+    "difficultyHard": "Difficile",
+    "priority": "Priorit\u00e9",
+    "priorityLow": "Basse",
+    "priorityMedium": "Moyenne",
+    "priorityHigh": "Haute",
+    "priorityUrgent": "Urgente",
+    "repeat": "R\u00e9p\u00e9tition",
+    "repeatNone": "Aucune",
+    "repeatDaily": "Quotidien",
+    "repeatWeekly": "Hebdomadaire",
+    "repeatMonthly": "Mensuel",
+    "assignee": "Responsable",
+    "addAnother": "Ajouter une autre t\u00e2che",
+    "taskNumber": "T\u00e2che",
+    "tasksReady": "t\u00e2che(s) pr\u00eate(s)",
+    "cancel": "Annuler",
+    "createTask": "Cr\u00e9er la t\u00e2che",
+    "editTask": "Modifier",
+    "deleteTask": "Supprimer",
+    "viewHistory": "Historique",
+    "confirmDelete": "\u00cates-vous s\u00fbr de vouloir supprimer cette t\u00e2che ?",
+    "historyTitle": "Historique des modifications",
+    "historyEmpty": "Aucune modification enregistr\u00e9e.",
+    "save": "Enregistrer",
+    "calendarView": "Calendrier",
+    "boardView": "Tableau",
+    "allEmployees": "Tous les employ\u00e9s",
+    "allDepartments": "Tous les d\u00e9partements",
+    "nature": "Nature de la tâche",
+    "natureNone": "Aucune nature",
+    "startedAt": "Démarré le",
+    "completedAt": "Terminé le",
+    "totalTime": "Temps total",
+    "dayShort": "j",
+    "hourShort": "h",
+    "minShort": "m"
+  },
+  "tasks": {
+    "title": "T\u00e2ches",
+    "subtitle": "Suivez et g\u00e9rez vos t\u00e2ches assign\u00e9es",
+    "searchPlaceholder": "Rechercher une t\u00e2che...",
+    "filterAll": "Toutes",
+    "noResults": "Aucune t\u00e2che trouv\u00e9e.",
+    "stats": {
+      "total": "Total",
+      "inProgress": "En cours",
+      "completed": "Termin\u00e9es",
+      "overdue": "En retard"
+    },
+    "status": {
+      "todo": "\u00c0 faire",
+      "in_progress": "En cours",
+      "done": "Termin\u00e9e"
+    },
+    "priority": {
+      "low": "Basse",
+      "medium": "Moyenne",
+      "high": "Haute",
+      "urgent": "Urgente"
+    },
+    "table": {
+      "title": "Titre",
+      "project": "Projet",
+      "status": "Statut",
+      "priority": "Priorit\u00e9",
+      "dueDate": "\u00c9ch\u00e9ance",
+      "actions": "Actions"
+    },
+    "detail": {
+      "startDate": "Date de d\u00e9but",
+      "endDate": "Date de fin",
+      "duration": "Dur\u00e9e",
+      "description": "Description",
+      "project": "Projet",
+      "assignee": "Assign\u00e9e \u00e0",
+      "close": "Fermer",
+      "day": "jour",
+      "days": "jours",
+      "startedAt": "Démarré le",
+      "completedAt": "Terminé le",
+      "totalTime": "Temps total",
+      "dayShort": "j",
+      "hourShort": "h",
+      "minShort": "m"
+    },
+    "actions": {
+      "startProgress": "D\u00e9marrer",
+      "markCompleted": "Marquer comme termin\u00e9e",
+      "markBlocked": "Marquer comme bloqu\u00e9e",
+      "resumeProgress": "Reprendre",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "history": "Historique"
+    },
+    "block": {
+      "title": "Bloquer la t\u00e2che",
+      "reasonLabel": "Raison du blocage",
+      "reasonPlaceholder": "Expliquez pourquoi cette t\u00e2che est bloqu\u00e9e...",
+      "cancel": "Annuler",
+      "confirm": "Confirmer le blocage",
+      "reasonRequired": "Une raison est requise",
+      "blockedReason": "Raison du blocage"
+    },
+    "kanban": {
+      "emptyColumn": "Aucune t\u00e2che"
+    },
+    "selfAssign": {
+      "badge": "Auto-assign\u00e9e",
+      "createButton": "Nouvelle t\u00e2che",
+      "modalTitle": "Cr\u00e9er une t\u00e2che",
+      "titleLabel": "Titre",
+      "titlePlaceholder": "Que faut-il faire ?",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "D\u00e9crivez la t\u00e2che...",
+      "difficultyLabel": "Difficult\u00e9",
+      "projectLabel": "Projet",
+      "projectNone": "Aucun projet",
+      "natureLabel": "Nature",
+      "natureNone": "Aucune nature",
+      "startDateLabel": "Date de d\u00e9but",
+      "endDateLabel": "Date de fin",
+      "dueDateLabel": "Date d'\u00e9ch\u00e9ance",
+      "timeLabel": "Heure",
+      "cancel": "Annuler",
+      "submit": "Cr\u00e9er la t\u00e2che",
+      "assignedBy": "Assign\u00e9e par le manager"
+    },
+    "dateFilter": {
+      "all": "Toutes",
+      "today": "Aujourd'hui",
+      "thisWeek": "Cette semaine",
+      "thisMonth": "Ce mois",
+      "custom": "Personnalis\u00e9"
+    },
+    "edit": {
+      "modalTitle": "Modifier la t\u00e2che",
+      "save": "Enregistrer"
+    },
+    "delete": {
+      "confirmTitle": "Supprimer la t\u00e2che",
+      "confirmBody": "\u00cates-vous s\u00fbr de vouloir supprimer cette t\u00e2che ? Cette action est irr\u00e9versible.",
+      "confirm": "Supprimer"
+    },
+    "history": {
+      "title": "Historique des modifications",
+      "empty": "Aucune modification enregistr\u00e9e."
+    },
+    "weeklyCompliance": {
+      "title": "Mise \u00e0 jour requise",
+      "message": "Veuillez mettre \u00e0 jour le statut de ces t\u00e2ches de la semaine derni\u00e8re avant d'en cr\u00e9er de nouvelles. Chaque t\u00e2che doit passer de son \u00e9tat initial (Cr\u00e9\u00e9e/Assign\u00e9e) \u00e0 au moins En cours, Bloqu\u00e9e, Termin\u00e9e ou \u00c9valu\u00e9e.",
+      "hint": "Glissez les t\u00e2ches sur le tableau Kanban ou utilisez les boutons d'action pour mettre \u00e0 jour leur statut.",
+      "understood": "Compris",
+      "checking": "V\u00e9rification...",
+      "adminWarningTitle": "Probl\u00e8me de conformit\u00e9 hebdomadaire",
+      "adminWarningMessage": "{{name}} a des t\u00e2ches en attente de la semaine derni\u00e8re qui n\u00e9cessitent une mise \u00e0 jour de statut. La cr\u00e9ation de t\u00e2ches est bloqu\u00e9e jusqu'\u00e0 r\u00e9solution."
+    },
+    "subtasks": {
+      "title": "Sous-tâches",
+      "complete": "terminé",
+      "addPlaceholder": "Ajouter une sous-tâche..."
+    }
+  },
+  "projectSidebar": {
+    "back": "Retour aux projets",
+    "overview": "Vue d'ensemble",
+    "tasks": "T\u00e2ches",
+    "budget": "Budget",
+    "documents": "Documents",
+    "timeline": "Chronologie"
+  },
+  "projectDetail": {
+    "overview": {
+      "progress": "Progression",
+      "tasksDone": "T\u00e2ches termin\u00e9es",
+      "revenue": "Chiffre d'affaires",
+      "daysLeft": "Jours restants",
+      "weeklyActivity": "Activit\u00e9 hebdomadaire",
+      "taskBreakdown": "R\u00e9partition des t\u00e2ches",
+      "total": "Total",
+      "todo": "\u00c0 faire",
+      "inProgress": "En cours",
+      "done": "Termin\u00e9"
+    },
+    "tasks": {
+      "title": "T\u00e2ches du projet",
+      "todo": "\u00c0 faire",
+      "inProgress": "En cours",
+      "done": "Termin\u00e9",
+      "noTasks": "Aucune t\u00e2che",
+      "unassigned": "Non assign\u00e9",
+      "priorityLow": "Basse",
+      "priorityMedium": "Moyenne",
+      "priorityHigh": "Haute",
+      "priorityUrgent": "Urgente"
+    },
+    "budget": {
+      "title": "Aper\u00e7u du budget",
+      "totalBudget": "Budget total",
+      "expenses": "D\u00e9penses",
+      "revenue": "Chiffre d'affaires",
+      "profit": "B\u00e9n\u00e9fice net",
+      "expenseBreakdown": "Utilisation du budget",
+      "monthlySpend": "Co\u00fbt par difficult\u00e9",
+      "remaining": "Restant",
+      "utilization": "Utilisation",
+      "addExpense": "Ajouter une d\u00e9pense"
+    },
+    "documents": {
+      "title": "Documents du projet",
+      "upload": "T\u00e9l\u00e9verser un fichier",
+      "empty": "Aucun document"
+    },
+    "timeline": {
+      "title": "Chronologie du projet",
+      "completed": "Termin\u00e9",
+      "inProgress": "En cours",
+      "upcoming": "\u00c0 venir",
+      "empty": "Aucun jalon"
+    }
+  },
+  "departments": {
+    "title": "D\u00e9partements",
+    "subtitle": "Structure organisationnelle & aper\u00e7u des \u00e9quipes",
+    "addDepartment": "Ajouter un d\u00e9partement",
+    "manageRoles": "G\u00e9rer les r\u00f4les",
+    "stats": {
+      "total": "Total D\u00e9partements",
+      "employees": "Total Employ\u00e9s",
+      "projects": "Projets Actifs",
+      "avgSize": "Taille Moyenne"
+    },
+    "charts": {
+      "employeeDistribution": "R\u00e9partition des employ\u00e9s",
+      "budgetAllocation": "Allocation du budget",
+      "revenueByDepartment": "Revenus par d\u00e9partement",
+      "revenue": "Revenus"
+    },
+    "card": {
+      "head": "Responsable",
+      "employees": "Employ\u00e9s",
+      "projects": "Projets",
+      "budget": "Budget"
+    },
+    "modal": {
+      "employees": "Membres de l'\u00e9quipe",
+      "activeProjects": "Projets actifs",
+      "close": "Fermer"
+    },
+    "create": {
+      "title": "Cr\u00e9er un d\u00e9partement",
+      "name": "Nom du d\u00e9partement",
+      "namePlaceholder": "Entrez le nom du d\u00e9partement...",
+      "description": "Description",
+      "descriptionPlaceholder": "D\u00e9crivez le d\u00e9partement...",
+      "head": "Responsable du d\u00e9partement",
+      "headPlaceholder": "S\u00e9lectionner le responsable...",
+      "budget": "Budget",
+      "icon": "Ic\u00f4ne",
+      "color": "Couleur",
+      "members": "Membres",
+      "searchEmployee": "Rechercher un employ\u00e9...",
+      "noResults": "Aucun employ\u00e9 trouv\u00e9",
+      "preview": "Aper\u00e7u",
+      "cancel": "Annuler",
+      "submit": "Cr\u00e9er le d\u00e9partement"
+    },
+    "edit": {
+      "title": "Modifier le d\u00e9partement",
+      "submit": "Enregistrer"
+    },
+    "empty": "Aucun d\u00e9partement trouv\u00e9"
+  },
+  "departmentSidebar": {
+    "back": "Retour aux d\u00e9partements",
+    "overview": "Vue d'ensemble",
+    "members": "Membres",
+    "projects": "Projets",
+    "budget": "Budget",
+    "settings": "Param\u00e8tres"
+  },
+  "departmentDetail": {
+    "overview": {
+      "subtitle": "Aper\u00e7u et statistiques du d\u00e9partement",
+      "totalMembers": "Total Membres",
+      "activeProjects": "Projets Actifs",
+      "budget": "Chiffre d'affaire",
+      "avgProgress": "Progression Moy.",
+      "monthlyActivity": "Activit\u00e9 Mensuelle",
+      "roleDistribution": "R\u00e9partition des R\u00f4les",
+      "total": "Total",
+      "head": "Responsable",
+      "budgetLabel": "Budget Total",
+      "projectsLabel": "Projets Actifs",
+      "teamSize": "Taille de l'\u00e9quipe"
+    },
+    "members": {
+      "title": "Membres de l'\u00e9quipe",
+      "head": "Responsable du d\u00e9partement",
+      "empty": "Aucun membre pour le moment",
+      "addMember": "Ajouter un membre",
+      "addMemberTitle": "Ajouter un membre",
+      "searchEmployee": "Rechercher un employ\u00e9...",
+      "noAvailable": "Aucun employ\u00e9 disponible",
+      "add": "Ajouter"
+    },
+    "projects": {
+      "title": "Projets du D\u00e9partement",
+      "total": "Total",
+      "active": "Actifs",
+      "avgProgress": "Progression Moy.",
+      "empty": "Aucun projet assign\u00e9",
+      "emptyHint": "Les projets appara\u00eetront ici une fois assign\u00e9s \u00e0 ce d\u00e9partement",
+      "addProject": "Ajouter un projet",
+      "addProjectTitle": "Ajouter un nouveau projet",
+      "projectName": "Nom du projet",
+      "projectNamePlaceholder": "Entrez le nom du projet...",
+      "status": "Statut",
+      "create": "Cr\u00e9er le projet",
+      "cancel": "Annuler"
+    },
+    "budget": {
+      "title": "Aper\u00e7u du Budget",
+      "totalBudget": "Budget Total",
+      "totalExpenses": "D\u00e9penses Totales",
+      "remaining": "Revenus",
+      "perEmployee": "Par Employ\u00e9",
+      "expenseBreakdown": "R\u00e9partition des D\u00e9penses",
+      "monthlySpend": "Chiffre d'affaire Mensuelles"
+    },
+    "settings": {
+      "title": "Param\u00e8tres du D\u00e9partement",
+      "general": "Informations G\u00e9n\u00e9rales",
+      "generalDesc": "Nom, description et d\u00e9tails de base du d\u00e9partement",
+      "appearance": "Apparence",
+      "appearanceDesc": "Couleur, ic\u00f4ne et pr\u00e9f\u00e9rences d'affichage",
+      "notifications": "Notifications",
+      "notificationsDesc": "Configurer les pr\u00e9f\u00e9rences de notification",
+      "permissions": "Permissions",
+      "permissionsDesc": "G\u00e9rer le contr\u00f4le d'acc\u00e8s et les r\u00f4les"
+    }
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "G\u00e9rez et organisez tous les documents de l'entreprise",
+    "uploadDocument": "T\u00e9l\u00e9verser un document",
+    "searchPlaceholder": "Rechercher des documents...",
+    "filterAll": "Tous",
+    "noResults": "Aucun document trouv\u00e9",
+    "stats": {
+      "total": "Total Documents",
+      "storage": "Espace Utilis\u00e9",
+      "recent": "T\u00e9l\u00e9versements R\u00e9cents",
+      "categories": "Cat\u00e9gories"
+    },
+    "categories": {
+      "contract": "Contrat",
+      "srs": "SRS",
+      "design": "Design",
+      "technical": "Technique",
+      "notes": "Notes",
+      "brief": "Brief",
+      "planning": "Planification",
+      "education": "Formation",
+      "recruitment": "Recrutement"
+    },
+    "charts": {
+      "byCategory": "Documents par Cat\u00e9gorie",
+      "uploadActivity": "Activit\u00e9 de T\u00e9l\u00e9versement"
+    },
+    "table": {
+      "name": "Nom",
+      "type": "Type",
+      "size": "Taille",
+      "department": "D\u00e9partement",
+      "uploader": "Auteur",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "upload": {
+      "title": "T\u00e9l\u00e9verser un Document",
+      "dropzone": "Glissez-d\u00e9posez votre fichier ici",
+      "dropzoneSub": "ou cliquez pour parcourir",
+      "formats": "PDF, DOC, DOCX, XLS, XLSX, PPT, FIG, AI, YAML",
+      "fileName": "Nom du fichier",
+      "fileNamePlaceholder": "Entrez le nom du fichier...",
+      "category": "Cat\u00e9gorie",
+      "categoryPlaceholder": "S\u00e9lectionner une cat\u00e9gorie",
+      "department": "D\u00e9partement",
+      "departmentPlaceholder": "S\u00e9lectionner un d\u00e9partement",
+      "cancel": "Annuler",
+      "submit": "T\u00e9l\u00e9verser le document",
+      "fileSelected": "Fichier s\u00e9lectionn\u00e9",
+      "removeFile": "Supprimer"
+    }
+  },
+  "tickets": {
+    "title": "Tickets",
+    "subtitle": "G\u00e9rez les demandes de support et le suivi des probl\u00e8mes",
+    "newTicket": "Nouveau Ticket",
+    "searchPlaceholder": "Rechercher des tickets...",
+    "filterAll": "Tous",
+    "noResults": "Aucun ticket trouv\u00e9",
+    "stats": {
+      "total": "Total Tickets",
+      "open": "Tickets Ouverts",
+      "inProgress": "En Cours",
+      "resolved": "R\u00e9solus Cette Semaine",
+      "accepted": "Accept\u00e9s"
+    },
+    "priority": {
+      "low": "Basse",
+      "medium": "Moyenne",
+      "high": "Haute",
+      "critical": "Critique"
+    },
+    "status": {
+      "open": "Ouvert",
+      "accepted": "Accept\u00e9",
+      "in_progress": "En Cours",
+      "completed": "Termin\u00e9",
+      "resolved": "R\u00e9solu",
+      "closed": "Ferm\u00e9"
+    },
+    "category": {
+      "bug": "Bug",
+      "feature": "Fonctionnalit\u00e9",
+      "support": "Support",
+      "question": "Question"
+    },
+    "charts": {
+      "byPriority": "Tickets par Priorit\u00e9",
+      "activity": "Activit\u00e9 des Tickets"
+    },
+    "table": {
+      "title": "Titre",
+      "priority": "Priorit\u00e9",
+      "status": "Statut",
+      "department": "D\u00e9partement",
+      "category": "Cat\u00e9gorie",
+      "assignee": "Responsable",
+      "created": "Cr\u00e9\u00e9 le",
+      "dueDate": "Date limite",
+      "actions": "Actions"
+    },
+    "takeTicket": "Prendre",
+    "closeTicket": "Fermer",
+    "selectEmployee": "Assigner \u00e0...",
+    "overdue": "En retard",
+    "noDueDate": "Pas de deadline",
+    "unassigned": "Non assign\u00e9",
+    "noDepartment": "Aucun d\u00e9partement",
+    "accept": "Accepter",
+    "departmentEmpty": "Aucun ticket ouvert pour votre d\u00e9partement",
+    "tabs": {
+      "myTickets": "Mes tickets",
+      "departmentTickets": "Tickets du d\u00e9partement"
+    },
+    "create": {
+      "title": "Cr\u00e9er un Ticket",
+      "ticketTitle": "Titre",
+      "titlePlaceholder": "Entrez le titre du ticket...",
+      "description": "Description",
+      "descriptionPlaceholder": "D\u00e9crivez le probl\u00e8me ou la demande...",
+      "priority": "Priorit\u00e9",
+      "category": "Cat\u00e9gorie",
+      "department": "D\u00e9partement",
+      "departmentPlaceholder": "S\u00e9lectionner le d\u00e9partement cible",
+      "dueDate": "Date limite",
+      "assignee": "Responsable",
+      "assigneePlaceholder": "S\u00e9lectionner un responsable",
+      "cancel": "Annuler",
+      "submit": "Cr\u00e9er le Ticket"
+    },
+    "detail": {
+      "description": "Description",
+      "department": "D\u00e9partement",
+      "reporter": "Cr\u00e9\u00e9 par",
+      "assignedTo": "Assign\u00e9 \u00e0",
+      "createdAt": "Cr\u00e9\u00e9 le",
+      "dueDate": "Date d'\u00e9ch\u00e9ance",
+      "closedAt": "Ferm\u00e9 le"
+    }
+  },
+  "activity": {
+    "title": "Activit\u00e9",
+    "subtitle": "Suivez toutes les actions et modifications sur la plateforme",
+    "searchPlaceholder": "Rechercher des activit\u00e9s...",
+    "noResults": "Aucune activit\u00e9 trouv\u00e9e",
+    "stats": {
+      "total": "Total Activit\u00e9s",
+      "today": "Activit\u00e9s du Jour",
+      "activeUsers": "Utilisateurs Actifs",
+      "topAction": "Action Principale"
+    },
+    "chart": {
+      "title": "Activit\u00e9 dans le Temps"
+    },
+    "filters": {
+      "allActions": "Toutes les Actions",
+      "allUsers": "Tous les Utilisateurs",
+      "allRoles": "Tous les R\u00f4les"
+    },
+    "actions": {
+      "login": "Connexion",
+      "create": "Cr\u00e9ation",
+      "update": "Modification",
+      "delete": "Suppression",
+      "view": "Consultation",
+      "export": "Export",
+      "upload": "T\u00e9l\u00e9versement",
+      "comment": "Commentaire"
+    },
+    "roles": {
+      "Admin": "Admin",
+      "Manager": "Manager",
+      "Developer": "D\u00e9veloppeur",
+      "Designer": "Designer",
+      "HR": "RH",
+      "Analyst": "Analyste",
+      "MANAGER": "Manager",
+      "EMPLOYEE": "Employ\u00e9",
+      "HEAD_OF_DEPARTMENT": "Chef de d\u00e9partement"
+    },
+    "log": {
+      "login": "s'est connect\u00e9 \u00e0 la plateforme",
+      "create": "a cr\u00e9\u00e9",
+      "update": "a modifi\u00e9",
+      "delete": "a supprim\u00e9",
+      "view": "a consult\u00e9",
+      "export": "a export\u00e9",
+      "upload": "a t\u00e9l\u00e9vers\u00e9",
+      "comment": "a comment\u00e9"
+    }
+  },
+  "meetings": {
+    "title": "R\u00e9unions",
+    "subtitle": "Planifiez, g\u00e9rez et consultez les comptes rendus de r\u00e9union",
+    "scheduleMeeting": "Planifier une r\u00e9union",
+    "searchPlaceholder": "Rechercher des r\u00e9unions...",
+    "filterAll": "Toutes",
+    "noResults": "Aucune r\u00e9union trouv\u00e9e",
+    "stats": {
+      "total": "Total R\u00e9unions",
+      "scheduled": "Planifi\u00e9es",
+      "completed": "Termin\u00e9es",
+      "reports": "Comptes Rendus"
+    },
+    "chart": {
+      "title": "R\u00e9unions dans le Temps"
+    },
+    "status": {
+      "scheduled": "Planifi\u00e9e",
+      "in_progress": "En Cours",
+      "completed": "Termin\u00e9e",
+      "cancelled": "Annul\u00e9e"
+    },
+    "types": {
+      "standup": "Standup",
+      "review": "Revue",
+      "planning": "Planification",
+      "retrospective": "R\u00e9trospective",
+      "client": "Client",
+      "onboarding": "Onboarding"
+    },
+    "table": {
+      "title": "Titre",
+      "type": "Type",
+      "status": "Statut",
+      "date": "Date",
+      "location": "Lieu",
+      "organizer": "Organisateur",
+      "actions": "Actions"
+    },
+    "detail": {
+      "organizer": "Organisateur",
+      "participants": "Participants",
+      "location": "Lieu",
+      "dateTime": "Date & Heure",
+      "report": "Compte Rendu",
+      "reportPending": "Le compte rendu sera disponible apr\u00e8s la r\u00e9union",
+      "summary": "R\u00e9sum\u00e9",
+      "decisions": "D\u00e9cisions Cl\u00e9s",
+      "actionItems": "Actions \u00e0 Suivre",
+      "close": "Fermer"
+    },
+    "schedule": {
+      "title": "Planifier une R\u00e9union",
+      "meetingTitle": "Titre de la r\u00e9union",
+      "titlePlaceholder": "Entrez le titre de la r\u00e9union...",
+      "type": "Type de r\u00e9union",
+      "date": "Date",
+      "startTime": "Heure de d\u00e9but",
+      "endTime": "Heure de fin",
+      "location": "Lieu",
+      "locationPlaceholder": "ex. Salle 3A, Google Meet...",
+      "participants": "Participants",
+      "participantsHint": "S\u00e9lectionnez les participants",
+      "allEmployees": "Tous les employ\u00e9s",
+      "selectDepartment": "S\u00e9lectionner un d\u00e9partement",
+      "selectIndividual": "S\u00e9lection individuelle",
+      "selectedCount": "{{count}} s\u00e9lectionn\u00e9s",
+      "noEmployeesInDept": "Aucun employ\u00e9 dans ce d\u00e9partement",
+      "description": "Description",
+      "descriptionPlaceholder": "Description de la r\u00e9union (optionnel)...",
+      "cancel": "Annuler",
+      "submit": "Planifier la r\u00e9union"
+    },
+    "deleteMeeting": "Supprimer",
+    "confirmDelete": "\u00cates-vous s\u00fbr de vouloir supprimer cette r\u00e9union ?"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Consultez et g\u00e9rez toutes vos notifications",
+    "markAllRead": "Tout marquer comme lu",
+    "allRead": "Vous \u00eates \u00e0 jour !",
+    "searchPlaceholder": "Rechercher des notifications...",
+    "filterAll": "Toutes",
+    "filterRead": "Lues",
+    "filterUnread": "Non lues",
+    "noResults": "Aucune notification trouv\u00e9e",
+    "stats": {
+      "total": "Total Notifications",
+      "unread": "Non lues",
+      "today": "Aujourd'hui",
+      "thisWeek": "Cette Semaine"
+    },
+    "types": {
+      "system": "Syst\u00e8me",
+      "task": "T\u00e2che",
+      "project": "Projet",
+      "meeting": "R\u00e9union",
+      "document": "Document",
+      "ticket": "Ticket",
+      "message": "Message",
+      "chat": "Mention",
+      "sanction": "Sanction"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Messagerie et communications internes",
+    "compose": "R\u00e9diger",
+    "searchPlaceholder": "Rechercher des messages...",
+    "noResults": "Aucun message trouv\u00e9",
+    "stats": {
+      "total": "Bo\u00eete de r\u00e9ception",
+      "unread": "Non lus",
+      "sent": "Envoy\u00e9s",
+      "starred": "Favoris"
+    },
+    "folders": {
+      "inbox": "Bo\u00eete de r\u00e9ception",
+      "sent": "Envoy\u00e9s",
+      "starred": "Favoris",
+      "trash": "Corbeille"
+    },
+    "detail": {
+      "from": "De",
+      "to": "\u00c0",
+      "date": "Date",
+      "subject": "Objet",
+      "reply": "R\u00e9pondre",
+      "close": "Fermer"
+    },
+    "compose_modal": {
+      "title": "R\u00e9diger un message",
+      "to": "Destinataire",
+      "toPlaceholder": "S\u00e9lectionner le destinataire",
+      "subject": "Objet",
+      "subjectPlaceholder": "Entrez l'objet...",
+      "body": "Message",
+      "bodyPlaceholder": "\u00c9crivez votre message...",
+      "cancel": "Annuler",
+      "send": "Envoyer le message"
+    }
+  },
+  "chat": {
+    "title": "Messages",
+    "channels": "Canaux",
+    "general": "G\u00e9n\u00e9ral",
+    "managers": "Managers",
+    "departments": "D\u00e9partements",
+    "directMessages": "Messages directs",
+    "typePlaceholder": "Tapez un message...",
+    "typing": "est en train d'\u00e9crire...",
+    "members": "Membres",
+    "online": "En ligne",
+    "offline": "Hors ligne",
+    "newMessage": "Nouveau message",
+    "searchUsers": "Rechercher...",
+    "noMessages": "Aucun message",
+    "loadMore": "Charger plus",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "readBy": "Vu par",
+    "reply": "R\u00e9pondre",
+    "replyingTo": "En r\u00e9ponse \u00e0 {{name}}",
+    "replyingToYou": "En r\u00e9ponse \u00e0 vous-m\u00eame"
+  },
+  "profile": {
+    "title": "Mon Profil",
+    "subtitle": "G\u00e9rez vos informations personnelles et pr\u00e9f\u00e9rences",
+    "editProfile": "Modifier le profil",
+    "saveChanges": "Enregistrer",
+    "cancel": "Annuler",
+    "personalInfo": {
+      "title": "Informations Personnelles",
+      "firstName": "Pr\u00e9nom",
+      "lastName": "Nom",
+      "email": "Adresse e-mail",
+      "phone": "T\u00e9l\u00e9phone",
+      "dateOfBirth": "Date de naissance",
+      "gender": "Genre",
+      "male": "Homme",
+      "female": "Femme"
+    },
+    "jobInfo": {
+      "title": "Informations Professionnelles",
+      "role": "Poste",
+      "department": "D\u00e9partement",
+      "employeeId": "Matricule",
+      "joinDate": "Date d'embauche",
+      "manager": "Responsable",
+      "location": "Lieu de travail"
+    },
+    "stats": {
+      "projects": "Projets Actifs",
+      "tasks": "T\u00e2ches Compl\u00e9t\u00e9es",
+      "meetings": "R\u00e9unions ce mois",
+      "teamMembers": "Membres d'\u00e9quipe"
+    },
+    "recentActivity": {
+      "title": "Activit\u00e9 R\u00e9cente",
+      "noActivity": "Aucune activit\u00e9 r\u00e9cente",
+      "empty": "Aucune activit\u00e9 r\u00e9cente \u00e0 afficher."
+    },
+    "skills": {
+      "title": "Comp\u00e9tences & Expertise"
+    },
+    "contact": {
+      "title": "Coordonn\u00e9es",
+      "email": "E-mail",
+      "phone": "T\u00e9l\u00e9phone",
+      "office": "Bureau",
+      "timezone": "Fuseau horaire"
+    },
+    "leaderboard": {
+      "title": "Top 5 Employ\u00e9s",
+      "empty": "Aucune donn\u00e9e de classement."
+    },
+    "badges": {
+      "title": "Collection de badges",
+      "subtitle": "{{count}} sur {{total}} badges obtenus",
+      "tasksCompleted": "{{count}} t\u00e2ches compl\u00e9t\u00e9es",
+      "nextBadge": "Prochain badge",
+      "allEarned": "Tous les badges obtenus !",
+      "tasks": "t\u00e2ches"
+    },
+    "education": {
+      "title": "Formation",
+      "add": "Ajouter",
+      "save": "Enregistrer",
+      "empty": "Aucune formation ajout\u00e9e.",
+      "namePlaceholder": "Nom du dipl\u00f4me ou certificat",
+      "file": "Document",
+      "uploadPlaceholder": "T\u00e9l\u00e9verser un PDF ou une image",
+      "types": {
+        "diploma": "Dipl\u00f4me",
+        "certificate": "Certificat",
+        "transcript": "Relev\u00e9 de notes",
+        "other": "Autre"
+      }
+    },
+    "changePassword": "Changer le mot de passe",
+    "password": {
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "confirm": "Confirmer le mot de passe",
+      "change": "Changer le mot de passe",
+      "changing": "Changement en cours...",
+      "currentRequired": "Le mot de passe actuel est requis",
+      "newRequired": "Le nouveau mot de passe est requis",
+      "noMatch": "Les mots de passe ne correspondent pas",
+      "sameAsCurrent": "Le nouveau mot de passe doit être différent de l'actuel",
+      "min8chars": "Au moins 8 caractères",
+      "uppercase": "Une lettre majuscule",
+      "lowercase": "Une lettre minuscule",
+      "number": "Un chiffre",
+      "weak": "Faible",
+      "fair": "Moyen",
+      "good": "Bon",
+      "strong": "Fort"
+    },
+    "oldChangePassword": {
+      "title": "Changer le mot de passe",
+      "currentPlaceholder": "Mot de passe actuel",
+      "newPlaceholder": "Nouveau mot de passe (min. 6 caract\u00e8res)",
+      "confirmPlaceholder": "Confirmer le nouveau mot de passe",
+      "submit": "Mettre \u00e0 jour le mot de passe",
+      "success": "Mot de passe mis \u00e0 jour avec succ\u00e8s.",
+      "mismatch": "Les mots de passe ne correspondent pas.",
+      "error": "Le mot de passe actuel est incorrect."
+    }
+  },
+  "invoices": {
+    "title": "Factures",
+    "subtitle": "G\u00e9rez les factures, paiements et suivi des revenus",
+    "newInvoice": "Nouvelle Facture",
+    "searchPlaceholder": "Rechercher des factures...",
+    "filterAll": "Toutes",
+    "noResults": "Aucune facture trouv\u00e9e",
+    "stats": {
+      "total": "Total Factures",
+      "revenue": "Revenus",
+      "pending": "En Attente",
+      "overdue": "En Retard"
+    },
+    "status": {
+      "created": "Cr\u00e9\u00e9e",
+      "sent": "Envoy\u00e9e",
+      "paid": "Pay\u00e9e",
+      "rejected": "Rejet\u00e9e"
+    },
+    "table": {
+      "invoiceNumber": "N\u00b0 Facture",
+      "client": "Client",
+      "project": "Projet",
+      "amount": "Montant",
+      "status": "Statut",
+      "dueDate": "Date d'\u00e9ch\u00e9ance",
+      "issued": "\u00c9mise le",
+      "actions": "Actions"
+    },
+    "charts": {
+      "monthlyRevenue": "Revenus Mensuels",
+      "statusDistribution": "R\u00e9partition par Statut"
+    },
+    "create": {
+      "title": "Cr\u00e9er une Facture",
+      "project": "Projet",
+      "projectPlaceholder": "S\u00e9lectionner un projet...",
+      "client": "Client",
+      "department": "D\u00e9partement",
+      "items": "Lignes de facturation",
+      "description": "Description",
+      "descriptionPlaceholder": "Description de l'article...",
+      "quantity": "Qt\u00e9",
+      "unitPrice": "Prix unitaire",
+      "amount": "Montant",
+      "addItem": "Ajouter une ligne",
+      "removeItem": "Supprimer",
+      "issueDate": "Date d'\u00e9mission",
+      "dueDate": "Date d'\u00e9ch\u00e9ance",
+      "taxRate": "Taux de TVA (%)",
+      "subtotal": "Sous-total",
+      "tax": "TVA",
+      "total": "Total",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes suppl\u00e9mentaires...",
+      "cancel": "Annuler",
+      "submit": "Cr\u00e9er la Facture"
+    },
+    "detail": {
+      "title": "D\u00e9tails de la Facture",
+      "send": "Envoyer",
+      "pay": "Marquer pay\u00e9e",
+      "reject": "Rejeter",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "exportPdf": "Exporter en PDF",
+      "exportReceipt": "Exporter le re\u00e7u",
+      "invoiceNumber": "Num\u00e9ro de facture",
+      "issuedOn": "\u00c9mise le",
+      "dueOn": "\u00c9ch\u00e9ance",
+      "paidOn": "Pay\u00e9e le",
+      "sentOn": "Envoy\u00e9e le",
+      "from": "De",
+      "to": "Facturer \u00e0",
+      "items": "Articles",
+      "subtotal": "Sous-total",
+      "tax": "TVA",
+      "total": "Total",
+      "notes": "Notes",
+      "confirmDelete": "\u00cates-vous s\u00fbr de vouloir supprimer cette facture ?",
+      "confirmSend": "Envoyer cette facture au client ?",
+      "confirmPay": "Marquer cette facture comme pay\u00e9e ?",
+      "confirmReject": "Rejeter cette facture ?",
+      "letterhead": "En-t\u00eate",
+      "letterheadNone": "Aucun"
+    },
+    "template": {
+      "title": "Mod\u00e8le de Facture",
+      "subtitle": "Personnalisez le mod\u00e8le de facture de votre d\u00e9partement",
+      "companyName": "Nom de l'entreprise",
+      "companyNamePlaceholder": "Entrez le nom de l'entreprise...",
+      "logo": "URL du logo",
+      "logoPlaceholder": "https://exemple.com/logo.png",
+      "address": "Adresse",
+      "addressPlaceholder": "Adresse de l'entreprise...",
+      "phone": "T\u00e9l\u00e9phone",
+      "phonePlaceholder": "+237 6XX XXX XXX",
+      "email": "E-mail",
+      "emailPlaceholder": "facturation@entreprise.com",
+      "paymentTerms": "Conditions de paiement",
+      "paymentTermsPlaceholder": "ex. Net 30 jours",
+      "bankInfo": "Informations bancaires",
+      "bankInfoPlaceholder": "IBAN, RIB, coordonn\u00e9es bancaires...",
+      "footer": "Texte de pied de page",
+      "footerPlaceholder": "Merci pour votre confiance !",
+      "save": "Enregistrer le mod\u00e8le",
+      "preview": "Aper\u00e7u"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "G\u00e9rez vos clients et relations commerciales",
+    "createTitle": "Nouveau client",
+    "editTitle": "Modifier le client",
+    "name": "Nom du client",
+    "namePlaceholder": "Entrer le nom du client...",
+    "type": "Type",
+    "typeOneTime": "Ponctuel",
+    "typeSubscription": "Abonnement",
+    "department": "D\u00e9partement",
+    "departmentPlaceholder": "S\u00e9lectionner un d\u00e9partement",
+    "allDepartments": "Tous les d\u00e9partements",
+    "price": "Prix",
+    "projectDescription": "Description du projet",
+    "projectDescriptionPlaceholder": "D\u00e9crivez le projet...",
+    "cancel": "Annuler",
+    "create": "Cr\u00e9er le client",
+    "save": "Enregistrer",
+    "newClient": "Nouveau client",
+    "searchPlaceholder": "Rechercher des clients...",
+    "filterAll": "Tous",
+    "confirmDelete": "\u00cates-vous s\u00fbr de vouloir supprimer ce client ?",
+    "noResults": "Aucun client trouv\u00e9",
+    "stats": {
+      "total": "Total clients",
+      "subscription": "Abonnement",
+      "oneTime": "Ponctuel",
+      "revenue": "Chiffre d'affaires"
+    },
+    "charts": {
+      "byType": "Clients par type",
+      "revenueActivity": "Activit\u00e9 des revenus"
+    },
+    "table": {
+      "name": "Nom",
+      "type": "Type",
+      "department": "D\u00e9partement",
+      "price": "Prix",
+      "revenue": "Revenus",
+      "actions": "Actions"
+    }
+  },
+  "clientSidebar": {
+    "back": "Retour aux clients",
+    "overview": "Aper\u00e7u",
+    "invoices": "Factures",
+    "projects": "Projets",
+    "settings": "Param\u00e8tres"
+  },
+  "clientDetail": {
+    "overview": {
+      "title": "Aper\u00e7u du client",
+      "totalPaid": "Total pay\u00e9",
+      "pendingPayments": "Paiements en attente",
+      "overdue": "En retard",
+      "totalInvoices": "Total factures",
+      "revenueOverTime": "Revenus dans le temps",
+      "clientInfo": "Informations du client",
+      "department": "D\u00e9partement",
+      "price": "Prix",
+      "type": "Type",
+      "projectDescription": "Description du projet",
+      "contract": "Contrat"
+    },
+    "invoices": {
+      "title": "Factures du client",
+      "empty": "Aucune facture",
+      "issued": "\u00c9mise",
+      "due": "\u00c9ch\u00e9ance",
+      "paidOn": "Pay\u00e9e",
+      "overdue": "En retard",
+      "send": "Envoyer",
+      "markPaid": "Marquer comme pay\u00e9e",
+      "reject": "Rejeter",
+      "status": {
+        "created": "Cr\u00e9\u00e9e",
+        "sent": "Envoy\u00e9e",
+        "paid": "Pay\u00e9e",
+        "rejected": "Rejet\u00e9e"
+      }
+    },
+    "projects": {
+      "title": "Projets du client",
+      "empty": "Aucun projet",
+      "progress": "Progression",
+      "tasks": "t\u00e2ches"
+    },
+    "settings": {
+      "title": "Param\u00e8tres du client",
+      "save": "Enregistrer les modifications"
+    }
+  },
+  "formations": {
+    "title": "Formations",
+    "subtitle": "G\u00e9rez vos formations et certifications",
+    "addFormation": "Ajouter une formation",
+    "searchPlaceholder": "Rechercher une formation...",
+    "filterAll": "Toutes",
+    "noResults": "Aucune formation trouv\u00e9e.",
+    "stats": {
+      "total": "Total",
+      "ongoing": "En cours",
+      "completed": "Termin\u00e9es",
+      "certificates": "Certificats"
+    },
+    "status": {
+      "ongoing": "En cours",
+      "completed": "Termin\u00e9e",
+      "upcoming": "\u00c0 venir"
+    },
+    "create": {
+      "title": "Ajouter une formation",
+      "formationTitle": "Titre de la formation",
+      "titlePlaceholder": "Entrez le titre de la formation",
+      "organization": "Organisme",
+      "organizationPlaceholder": "Entrez le nom de l'organisme",
+      "startDate": "Date de d\u00e9but",
+      "endDate": "Date de fin",
+      "certificate": "Certificat",
+      "certificatePlaceholder": "Nom du certificat obtenu (le cas \u00e9ch\u00e9ant)",
+      "cancel": "Annuler",
+      "submit": "Ajouter"
+    },
+    "detail": {
+      "organization": "Organisme",
+      "period": "P\u00e9riode",
+      "certificate": "Certificat",
+      "close": "Fermer"
+    }
+  },
+  "sanctions": {
+    "title": "Sanctions",
+    "subtitle": "Consultez vos dossiers disciplinaires",
+    "searchPlaceholder": "Rechercher une sanction...",
+    "filterAll": "Toutes",
+    "noResults": "Aucune sanction trouv\u00e9e.",
+    "stats": {
+      "total": "Total",
+      "light": "L\u00e9g\u00e8res",
+      "medium": "Moyennes",
+      "severe": "Graves"
+    },
+    "types": {
+      "avertissement": "Avertissement",
+      "blame": "Bl\u00e2me",
+      "mise_a_pied": "Mise \u00e0 pied",
+      "licenciement": "Licenciement"
+    },
+    "severity": {
+      "leger": "L\u00e9g\u00e8re",
+      "moyen": "Moyenne",
+      "grave": "Grave"
+    },
+    "detail": {
+      "reason": "Motif",
+      "date": "Date",
+      "issuedBy": "\u00c9mise par",
+      "close": "Fermer"
+    }
+  },
+  "gamification": {
+    "pointsEarned": {
+      "title": "Points gagn\u00e9s !",
+      "total": "Total",
+      "continue": "Continuer"
+    },
+    "badgeEarned": {
+      "title": "Nouveau badge d\u00e9bloqu\u00e9 !",
+      "milestone": "{{count}} t\u00e2ches compl\u00e9t\u00e9es",
+      "awesome": "G\u00e9nial !"
+    }
+  },
+  "browserNotifications": {
+    "task": "Nouvelle tache",
+    "project": "Nouveau projet",
+    "system": "Notification systeme",
+    "document": "Nouveau document",
+    "sanction": "Nouvelle sanction",
+    "demand": "Nouvelle demande",
+    "message": "Nouveau message",
+    "ticket": "Mise a jour de ticket",
+    "meeting": "Nouvelle reunion",
+    "chat": "Nouveau message",
+    "permissionTitle": "Activer les notifications",
+    "permissionBody": "Recevez des alertes en temps reel pour les demandes, taches et messages"
+  },
+  "demands": {
+    "title": "Demandes",
+    "subtitle": "G\u00e9rez et suivez les demandes de ressources des employ\u00e9s",
+    "searchPlaceholder": "Rechercher des demandes...",
+    "filterAll": "Toutes",
+    "noResults": "Aucune demande trouv\u00e9e",
+    "totalPrice": "Montant total",
+    "items": "articles",
+    "itemsList": "Articles",
+    "itemName": "Article",
+    "quantity": "Qt\u00e9",
+    "unitPrice": "Prix unitaire",
+    "subtotal": "Sous-total",
+    "proforma": "Proforma",
+    "viewProforma": "Voir le proforma",
+    "image": "Image",
+    "importance": {
+      "barely": "Peu important",
+      "important": "Important",
+      "very_important": "Tr\u00e8s important",
+      "urgent": "Urgent"
+    },
+    "requestedBy": "Demand\u00e9 par",
+    "rejectionReason": "Motif de rejet",
+    "rejectionReasonPlaceholder": "Saisissez le motif de rejet...",
+    "validatedOn": "Valid\u00e9 le",
+    "validate": "Valider",
+    "reject": "Rejeter",
+    "confirmReject": "Confirmer le rejet",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "startChat": "Discuter",
+    "chatIntroMessage": "Conversation d\u00e9marr\u00e9e pour votre demande de : {{items}}",
+    "status": {
+      "pending": "En attente",
+      "validated": "Valid\u00e9e",
+      "rejected": "Rejet\u00e9e"
+    },
+    "stats": {
+      "total": "Total Demandes",
+      "pending": "En attente",
+      "validated": "Valid\u00e9es",
+      "rejected": "Rejet\u00e9es",
+      "totalExpense": "D\u00e9penses Totales"
+    },
+    "table": {
+      "items": "Articles",
+      "employee": "Employ\u00e9",
+      "department": "D\u00e9partement",
+      "totalPrice": "Total",
+      "status": "Statut",
+      "date": "Date"
+    },
+    "newDemand": "Nouvelle demande",
+    "empty": "Aucune demande pour le moment",
+    "emptyHint": "Cr\u00e9ez votre premi\u00e8re demande pour commencer",
+    "allImportance": "Toute importance",
+    "clearFilters": "Effacer tous les filtres",
+    "tryDifferentFilter": "Essayez de modifier votre recherche ou vos filtres",
+    "moreItems": "de plus",
+    "total": "Total",
+    "create": {
+      "title": "Nouvelle demande",
+      "items": "Articles",
+      "addItem": "Ajouter un article",
+      "itemName": "Article",
+      "itemNamePlaceholder": "Nom de l'article...",
+      "quantity": "Qt\u00e9",
+      "unitPrice": "Prix (FCFA)",
+      "total": "Total",
+      "proforma": "Proforma (justificatif)",
+      "uploadProforma": "T\u00e9l\u00e9verser un proforma (PDF ou image)",
+      "proformaFormats": "PDF, PNG, JPG",
+      "importance": "Priorit\u00e9",
+      "addImage": "Ajouter une image",
+      "cancel": "Annuler",
+      "submit": "Soumettre la demande"
+    }
+  },
+  "common": {
+    "previous": "Pr\u00e9c\u00e9dent",
+    "next": "Suivant"
+  },
+  "toast": {
+    "success": "Succ\u00e8s",
+    "error": "Une erreur est survenue",
+    "employeeCreated": "Employ\u00e9 cr\u00e9\u00e9",
+    "employeeUpdated": "Employ\u00e9 mis \u00e0 jour",
+    "employeeDeleted": "Employ\u00e9 supprim\u00e9",
+    "employeeDismissed": "Employ\u00e9 licenci\u00e9",
+    "employeeReinstated": "Employ\u00e9 r\u00e9int\u00e9gr\u00e9",
+    "passwordChanged": "Mot de passe modifi\u00e9",
+    "passwordChangeFailed": "\u00c9chec du changement de mot de passe",
+    "taskCreated": "T\u00e2che cr\u00e9\u00e9e",
+    "taskUpdated": "T\u00e2che mise \u00e0 jour",
+    "taskDeleted": "T\u00e2che supprim\u00e9e",
+    "taskAssigned": "T\u00e2che assign\u00e9e",
+    "taskEdited": "T\u00e2che modifi\u00e9e",
+    "projectCreated": "Projet cr\u00e9\u00e9",
+    "projectUpdated": "Projet mis \u00e0 jour",
+    "projectDeleted": "Projet supprim\u00e9",
+    "departmentCreated": "D\u00e9partement cr\u00e9\u00e9",
+    "departmentUpdated": "D\u00e9partement mis \u00e0 jour",
+    "goalAdded": "Objectif ajout\u00e9",
+    "goalUpdated": "Objectif mis \u00e0 jour",
+    "goalDeleted": "Objectif supprim\u00e9",
+    "clientCreated": "Client cr\u00e9\u00e9",
+    "clientUpdated": "Client mis \u00e0 jour",
+    "clientDeleted": "Client supprim\u00e9",
+    "meetingScheduled": "R\u00e9union planifi\u00e9e",
+    "meetingUpdated": "R\u00e9union mise \u00e0 jour",
+    "meetingDeleted": "R\u00e9union supprim\u00e9e",
+    "invoiceCreated": "Facture cr\u00e9\u00e9e",
+    "invoiceUpdated": "Facture mise \u00e0 jour",
+    "invoiceSent": "Facture envoy\u00e9e",
+    "invoicePaid": "Facture marqu\u00e9e comme pay\u00e9e",
+    "invoiceRejected": "Facture rejet\u00e9e",
+    "invoiceDeleted": "Facture supprim\u00e9e",
+    "templateSaved": "Mod\u00e8le enregistr\u00e9",
+    "expenseRecorded": "D\u00e9pense enregistr\u00e9e",
+    "expenseUpdated": "D\u00e9pense mise \u00e0 jour",
+    "expenseDeleted": "D\u00e9pense supprim\u00e9e",
+    "documentUploaded": "Document upload\u00e9",
+    "documentDeleted": "Document supprim\u00e9",
+    "ticketCreated": "Ticket cr\u00e9\u00e9",
+    "ticketAccepted": "Ticket accept\u00e9",
+    "ticketClosed": "Ticket ferm\u00e9",
+    "demandApproved": "Demande approuv\u00e9e",
+    "demandRejected": "Demande rejet\u00e9e",
+    "demandSubmitted": "Demande soumise avec succ\u00e8s",
+    "proformaUploaded": "Proforma upload\u00e9",
+    "proformaFailed": "\u00c9chec de l'upload",
+    "sanctionCreated": "Sanction cr\u00e9\u00e9e",
+    "sanctionDeleted": "Sanction supprim\u00e9e",
+    "formationCreated": "Formation cr\u00e9\u00e9e",
+    "positionCreated": "Poste cr\u00e9\u00e9",
+    "positionUpdated": "Poste mis \u00e0 jour",
+    "positionDeleted": "Poste supprim\u00e9",
+    "teamCreated": "\u00c9quipe cr\u00e9\u00e9e",
+    "interviewScheduled": "Entretien planifi\u00e9",
+    "allNotificationsRead": "Toutes les notifications marqu\u00e9es comme lues",
+    "loginFailed": "Identifiants incorrects.",
+    "accessDenied": "Acc\u00e8s refus\u00e9 : permissions insuffisantes",
+    "accountCreated": "Compte cr\u00e9\u00e9",
+    "profileUpdated": "Profil mis \u00e0 jour",
+    "taskNatureCreated": "Nature de t\u00e2che cr\u00e9\u00e9e",
+    "taskNatureUpdated": "Nature de t\u00e2che mise \u00e0 jour",
+    "taskNatureDeleted": "Nature de t\u00e2che supprim\u00e9e"
+  },
+  "taskNatures": {
+    "manageTitle": "G\u00e9rer les natures de t\u00e2ches",
+    "name": "Nom",
+    "color": "Couleur",
+    "namePlaceholder": "ex. D\u00e9veloppement, Design, R\u00e9union...",
+    "add": "Ajouter",
+    "noNatures": "Aucune nature de t\u00e2che."
+  },
+  "httpErrors": {
+    "network": "Erreur de connexion \u2014 v\u00e9rifiez votre internet et r\u00e9essayez",
+    "serverError": "Erreur serveur \u2014 veuillez r\u00e9essayer dans un instant",
+    "rateLimit": "Trop de requ\u00eates \u2014 veuillez ralentir",
+    "forbidden": "Vous n'avez pas la permission de faire cela"
+  }
+}

@@ -5,7 +5,8 @@ import { Employee } from '../models/employee.model';
 import { EmployeeBadge } from '../models/employee-badge.model';
 import { Task } from '../models/task.model';
 import { UsersService } from '../users/users.service';
-
+import { Sequelize } from 'sequelize-typescript';
+import { NotificationsService } from '../notifications/notifications.service';
 describe('EmployeesService', () => {
   let service: EmployeesService;
   let employeeModel: Record<string, jest.Mock>;
@@ -38,6 +39,8 @@ describe('EmployeesService', () => {
         { provide: getModelToken(EmployeeBadge), useValue: employeeBadgeModel },
         { provide: getModelToken(Task), useValue: taskModel },
         { provide: UsersService, useValue: usersService },
+        { provide: Sequelize, useValue: { transaction: jest.fn((cb) => cb({})) } },
+        { provide: NotificationsService, useValue: {} },
       ],
     }).compile();
 
@@ -106,8 +109,12 @@ describe('EmployeesService', () => {
 
       expect(usersService.create).toHaveBeenCalledWith(
         expect.objectContaining({ email: 'john@test.com', password: 'pass123', role: 'EMPLOYEE' }),
+        expect.any(Object)
       );
-      expect(employeeModel.create).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user-1' }));
+      expect(employeeModel.create).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'user-1' }),
+        expect.any(Object)
+      );
       expect(result).toHaveProperty('id', 'emp-1');
     });
 
@@ -119,7 +126,10 @@ describe('EmployeesService', () => {
       const result = await service.create(dto);
 
       expect(usersService.create).not.toHaveBeenCalled();
-      expect(employeeModel.create).toHaveBeenCalledWith(expect.objectContaining({ userId: 'user-existing' }));
+      expect(employeeModel.create).toHaveBeenCalledWith(
+        expect.objectContaining({ userId: 'user-existing' }),
+        expect.any(Object)
+      );
       expect(result).toHaveProperty('id', 'emp-2');
     });
 
@@ -131,6 +141,7 @@ describe('EmployeesService', () => {
       await service.create({ email: 'a@b.com', firstName: 'Test' });
       expect(usersService.create).toHaveBeenCalledWith(
         expect.objectContaining({ password: 'ChangeMe123!' }),
+        expect.any(Object)
       );
     });
   });

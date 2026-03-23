@@ -107,7 +107,7 @@ describe('EmployeesController', () => {
     it('create should delegate to service.create', async () => {
       const dto = { email: 'test@test.com', firstName: 'Test' };
       service.create.mockResolvedValue({ id: '1', ...dto });
-      const result = await controller.create(dto);
+      const result = await controller.create(dto, { user: { role: 'MANAGER' } });
       expect(service.create).toHaveBeenCalledWith(dto);
       expect(result).toHaveProperty('id', '1');
     });

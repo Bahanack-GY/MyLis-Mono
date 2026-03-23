@@ -3,11 +3,13 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectModel, InjectConnection } from '@nestjs/sequelize';
 import { Task } from '../models/task.model';
 import { TaskHistory } from '../models/task-history.model';
+import { Subtask } from '../models/subtask.model';
 import { Employee } from '../models/employee.model';
 import { Ticket } from '../models/ticket.model';
 import { Department } from '../models/department.model';
 import { Team } from '../models/team.model';
 import { Project } from '../models/project.model';
+import { TaskNature } from '../models/task-nature.model';
 import { NotificationsService } from '../notifications/notifications.service';
 import { GamificationService, type GamificationResult } from '../gamification/gamification.service';
 import { Op } from 'sequelize';
@@ -25,6 +27,8 @@ export class TasksService {
         private taskModel: typeof Task,
         @InjectModel(TaskHistory)
         private taskHistoryModel: typeof TaskHistory,
+        @InjectModel(Subtask)
+        private subtaskModel: typeof Subtask,
         @InjectModel(Employee)
         private employeeModel: typeof Employee,
         @InjectModel(Ticket)
@@ -38,6 +42,15 @@ export class TasksService {
     ) { }
 
     async create(createTaskDto: any, createdByUserId?: string): Promise<Task> {
+        if (createTaskDto.assignedToId) {
+            const compliance = await this.checkWeeklyCompliance(createTaskDto.assignedToId);
+            if (!compliance.canCreate) {
+                throw new ForbiddenException(
+                    `Cannot create task: the assigned employee has ${compliance.pendingTasks.length} task(s) from last week that need status updates.`,
+                );
+            }
+        }
+
         const task = await this.taskModel.create({ ...createTaskDto, createdByUserId: createdByUserId || null });
 
         // Notify assigned employee about new task
@@ -66,8 +79,8 @@ export class TasksService {
             if (to) where.createdAt[Op.lte] = new Date(to);
         }
         const include: any[] = departmentId
-            ? [{ model: Employee, as: 'assignedTo', where: { departmentId }, required: true }, { model: Team, as: 'assignedToTeam' }, Project]
-            : [{ model: Employee, as: 'assignedTo' }, { model: Team, as: 'assignedToTeam' }, Project];
+            ? [{ model: Employee, as: 'assignedTo', where: { departmentId }, required: true }, { model: Team, as: 'assignedToTeam' }, Project, TaskNature, { model: Subtask, as: 'subtasks' }]
+            : [{ model: Employee, as: 'assignedTo' }, { model: Team, as: 'assignedToTeam' }, Project, TaskNature, { model: Subtask, as: 'subtasks' }];
         return this.taskModel.findAll({ where, include });
     }
 
@@ -77,6 +90,8 @@ export class TasksService {
                 { model: Employee, as: 'assignedTo' },
                 { model: Team, as: 'assignedToTeam' },
                 Project,
+                TaskNature,
+                { model: Subtask, as: 'subtasks' },
             ],
         });
     }
@@ -118,7 +133,7 @@ export class TasksService {
             }
         }
 
-        const editableFields = ['title', 'description', 'difficulty', 'startDate', 'endDate', 'dueDate', 'startTime'];
+        const editableFields = ['title', 'description', 'difficulty', 'startDate', 'endDate', 'dueDate', 'startTime', 'natureId'];
         const changes: Record<string, { from: any; to: any }> = {};
         for (const field of editableFields) {
             if (dto[field] !== undefined && dto[field] !== task.getDataValue(field)) {
@@ -190,7 +205,7 @@ export class TasksService {
 
         if (notificationData) await this.notificationsService.create(notificationData);
 
-        return task.reload({ include: [{ model: Employee, as: 'assignedTo' }, Project] });
+        return task.reload({ include: [{ model: Employee, as: 'assignedTo' }, Project, TaskNature] });
     }
 
     async removeByUser(id: string, userId: string, role: string): Promise<void> {
@@ -270,6 +285,8 @@ export class TasksService {
                 { model: Employee, as: 'assignedTo' },
                 { model: Team, as: 'assignedToTeam' },
                 { model: Project },
+                TaskNature,
+                { model: Subtask, as: 'subtasks' },
             ],
         });
     }
@@ -406,6 +423,7 @@ export class TasksService {
                 { model: Employee, as: 'assignedTo' },
                 { model: Team, as: 'assignedToTeam' },
                 { model: Project },
+                TaskNature,
             ],
         });
 
@@ -415,6 +433,13 @@ export class TasksService {
     async selfAssign(userId: string, dto: any): Promise<Task> {
         const employee = await this.employeeModel.findOne({ where: { userId } });
         if (!employee) throw new NotFoundException('Employee not found');
+
+        const compliance = await this.checkWeeklyCompliance(employee.id);
+        if (!compliance.canCreate) {
+            throw new ForbiddenException(
+                `Cannot self-assign task: you have ${compliance.pendingTasks.length} task(s) from last week that need status updates.`,
+            );
+        }
 
         const task = await this.taskModel.create({
             ...dto,
@@ -427,8 +452,55 @@ export class TasksService {
             include: [
                 { model: Employee, as: 'assignedTo' },
                 { model: Project },
+                TaskNature,
             ],
         });
+    }
+
+    // ── Weekly compliance ─────────────────────────────────────────────
+
+    async checkWeeklyCompliance(employeeId: string): Promise<{ canCreate: boolean; pendingTasks: Task[] }> {
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const dow = today.getDay(); // 0=Sun
+        const currentMonday = new Date(today);
+        currentMonday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+
+        const prevMonday = new Date(currentMonday);
+        prevMonday.setDate(currentMonday.getDate() - 7);
+        const prevSunday = new Date(currentMonday.getTime() - 1); // last ms of previous Sunday
+
+        const staleTasks = await this.taskModel.findAll({
+            where: {
+                assignedToId: employeeId,
+                state: { [Op.in]: ['CREATED', 'ASSIGNED'] },
+            },
+            include: [Project, TaskNature],
+        });
+
+        const pendingTasks = staleTasks.filter(task => {
+            const startDate = task.getDataValue('startDate');
+            const endDate = task.getDataValue('endDate');
+            const createdAt = task.getDataValue('createdAt');
+
+            const ref = startDate ? new Date(startDate) : new Date(createdAt);
+            if (ref < prevMonday || ref > prevSunday) return false;
+
+            // Exempt long-running tasks (> 7 days)
+            if (startDate && endDate) {
+                const days = (new Date(endDate).getTime() - new Date(startDate).getTime()) / 86_400_000;
+                if (days > 7) return false;
+            }
+            return true;
+        });
+
+        return { canCreate: pendingTasks.length === 0, pendingTasks };
+    }
+
+    async weeklyCheckForUser(userId: string): Promise<{ canCreate: boolean; pendingTasks: Task[] }> {
+        const employee = await this.employeeModel.findOne({ where: { userId } });
+        if (!employee) return { canCreate: true, pendingTasks: [] };
+        return this.checkWeeklyCompliance(employee.id);
     }
 
     async findByEmployee(employeeId: string): Promise<Task[]> {
@@ -438,7 +510,132 @@ export class TasksService {
                 { model: Employee, as: 'assignedTo' },
                 { model: Team, as: 'assignedToTeam' },
                 { model: Project },
+                TaskNature,
+                { model: Subtask, as: 'subtasks' },
             ],
+        });
+    }
+
+    // ── Weekly planning ──────────────────────────────────────────────
+
+    async findByWeek(employeeId: string, weekStartDate: Date): Promise<Task[]> {
+        const weekEnd = new Date(weekStartDate);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+
+        return this.taskModel.findAll({
+            where: {
+                assignedToId: employeeId,
+                startDate: { [Op.between]: [weekStartDate, weekEnd] },
+            },
+            include: [
+                { model: Employee, as: 'assignedTo' },
+                { model: Project },
+                TaskNature,
+                { model: Subtask, as: 'subtasks' },
+            ],
+            order: [['startDate', 'ASC']],
+        });
+    }
+
+    async findMyWeek(userId: string, weekStartDate: Date): Promise<Task[]> {
+        const employee = await this.employeeModel.findOne({ where: { userId } });
+        if (!employee) return [];
+        return this.findByWeek(employee.id, weekStartDate);
+    }
+
+    async findWeekForAllEmployees(departmentId: string | undefined, weekStartDate: Date): Promise<Task[]> {
+        const weekEnd = new Date(weekStartDate);
+        weekEnd.setDate(weekEnd.getDate() + 6);
+        weekEnd.setHours(23, 59, 59, 999);
+
+        const where: any = { startDate: { [Op.between]: [weekStartDate, weekEnd] } };
+        const include: any[] = [
+            { model: Employee, as: 'assignedTo' },
+            { model: Project },
+            TaskNature,
+            { model: Subtask, as: 'subtasks' },
+        ];
+
+        if (departmentId) {
+            include[0].where = { departmentId };
+            include[0].required = true;
+        }
+
+        return this.taskModel.findAll({ where, include, order: [['startDate', 'ASC']] });
+    }
+
+    /* ─── Subtask Methods ────────────────────────────────────── */
+
+    async createSubtask(taskId: string, title: string): Promise<Subtask> {
+        const task = await this.taskModel.findByPk(taskId);
+        if (!task) {
+            throw new NotFoundException('Task not found');
+        }
+
+        const maxOrder = await this.subtaskModel.max('order', { where: { taskId } }) as number;
+        const subtask = await this.subtaskModel.create({
+            taskId,
+            title,
+            order: (maxOrder || 0) + 1,
+            completed: false,
+        });
+
+        return subtask;
+    }
+
+    async getSubtasks(taskId: string): Promise<Subtask[]> {
+        return this.subtaskModel.findAll({
+            where: { taskId },
+            order: [['order', 'ASC']],
+        });
+    }
+
+    async updateSubtask(id: string, dto: { title?: string; completed?: boolean; order?: number }): Promise<Subtask> {
+        const subtask = await this.subtaskModel.findByPk(id);
+        if (!subtask) {
+            throw new NotFoundException('Subtask not found');
+        }
+
+        if (dto.title !== undefined) subtask.title = dto.title;
+        if (dto.completed !== undefined) {
+            subtask.completed = dto.completed;
+            subtask.completedAt = dto.completed ? new Date() : null;
+        }
+        if (dto.order !== undefined) subtask.order = dto.order;
+
+        await subtask.save();
+        return subtask;
+    }
+
+    async deleteSubtask(id: string): Promise<void> {
+        const subtask = await this.subtaskModel.findByPk(id);
+        if (!subtask) {
+            throw new NotFoundException('Subtask not found');
+        }
+        await subtask.destroy();
+    }
+
+    async toggleSubtask(id: string): Promise<Subtask> {
+        const subtask = await this.subtaskModel.findByPk(id);
+        if (!subtask) {
+            throw new NotFoundException('Subtask not found');
+        }
+
+        subtask.completed = !subtask.completed;
+        subtask.completedAt = subtask.completed ? new Date() : null;
+        await subtask.save();
+        return subtask;
+    }
+
+    async reorderSubtasks(taskId: string, subtaskIds: string[]): Promise<void> {
+        await this.sequelize.transaction(async (transaction) => {
+            for (let i = 0; i < subtaskIds.length; i++) {
+                await this.subtaskModel.update(
+                    { order: i + 1 },
+                    { where: { id: subtaskIds[i], taskId }, transaction }
+                );
+            }
         });
     }
 }

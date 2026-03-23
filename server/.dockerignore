@@ -3,3 +3,8 @@ dist
 .env
 *.md
 .git
+uploads
+test
+coverage
+.eslintrc*
+.prettierrc*

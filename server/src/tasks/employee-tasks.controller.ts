@@ -1,4 +1,4 @@
-import { Controller, Post, Patch, Param, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UseGuards, Request, Query } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
@@ -9,6 +9,16 @@ import { RolesGuard } from '../auth/roles.guard';
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class EmployeeTasksController {
     constructor(private readonly tasksService: TasksService) {}
+
+    @Get('weekly-check')
+    weeklyCheck(@Request() req) {
+        return this.tasksService.weeklyCheckForUser(req.user.userId);
+    }
+
+    @Get('my-week')
+    findMyWeek(@Query('start') start: string, @Request() req) {
+        return this.tasksService.findMyWeek(req.user.userId, new Date(start));
+    }
 
     @Post('self-assign')
     selfAssign(@Body() dto: any, @Request() req) {

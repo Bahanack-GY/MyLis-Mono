@@ -178,6 +178,7 @@ describe('AuthService', () => {
         role: 'EMPLOYEE',
         departmentId: 'dept-1',
         employeeId: 'emp-1',
+        firstLogin: false,
         firstName: 'John',
         lastName: 'Doe',
         phoneNumber: '555-1234',
