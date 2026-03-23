@@ -1,0 +1,38 @@
+import {
+  Compass,
+  Contact,
+  CheckSquare,
+  Rocket,
+  Landmark,
+  Library,
+  LifeBuoy,
+  CreditCard,
+  Inbox,
+  Coins,
+  Users,
+  Orbit,
+  CalendarClock,
+  Megaphone,
+  Mail,
+  CircleUser,
+} from 'lucide-react';
+import type { AppDefinition } from './types';
+
+export const appRegistry: AppDefinition[] = [
+  { id: 'dashboard', label: 'Dashboard', icon: Compass, gradient: 'linear-gradient(135deg, #007AFF 0%, #0056D4 100%)', route: '/embed/dashboard', defaultWidth: 1000, defaultHeight: 700 },
+  { id: 'employees', label: 'Employees', icon: Contact, gradient: 'linear-gradient(135deg, #FF9500 0%, #E07300 100%)', route: '/embed/employees', defaultWidth: 960, defaultHeight: 650 },
+  { id: 'tasks', label: 'Tasks', icon: CheckSquare, gradient: 'linear-gradient(135deg, #34C759 0%, #24A247 100%)', route: '/embed/tasks', defaultWidth: 900, defaultHeight: 620 },
+  { id: 'projects', label: 'Projects', icon: Rocket, gradient: 'linear-gradient(135deg, #AF52DE 0%, #8D32B8 100%)', route: '/embed/projects', defaultWidth: 960, defaultHeight: 650 },
+  { id: 'departments', label: 'Departments', icon: Landmark, gradient: 'linear-gradient(135deg, #1C1C1E 0%, #0A0A0C 100%)', route: '/embed/departments', defaultWidth: 900, defaultHeight: 600 },
+  { id: 'documents', label: 'Documents', icon: Library, gradient: 'linear-gradient(135deg, #FFCC00 0%, #E0A800 100%)', route: '/embed/documents', defaultWidth: 900, defaultHeight: 620 },
+  { id: 'tickets', label: 'Tickets', icon: LifeBuoy, gradient: 'linear-gradient(135deg, #FF3B30 0%, #D82117 100%)', route: '/embed/tickets', defaultWidth: 900, defaultHeight: 620 },
+  { id: 'invoices', label: 'Invoices', icon: CreditCard, gradient: 'linear-gradient(135deg, #30CBD8 0%, #22A0AA 100%)', route: '/embed/invoices', defaultWidth: 960, defaultHeight: 650 },
+  { id: 'demands', label: 'Demands', icon: Inbox, gradient: 'linear-gradient(135deg, #FF2D55 0%, #D41A40 100%)', route: '/embed/demands', defaultWidth: 900, defaultHeight: 620 },
+  { id: 'expenses', label: 'Expenses', icon: Coins, gradient: 'linear-gradient(135deg, #34C759 0%, #24A247 100%)', route: '/embed/expenses', defaultWidth: 900, defaultHeight: 620 },
+  { id: 'clients', label: 'Clients', icon: Users, gradient: 'linear-gradient(135deg, #5856D6 0%, #4644B3 100%)', route: '/embed/clients', defaultWidth: 960, defaultHeight: 650 },
+  { id: 'activity', label: 'Activity', icon: Orbit, gradient: 'linear-gradient(135deg, #FF9500 0%, #FF3B30 100%)', route: '/embed/activity', defaultWidth: 900, defaultHeight: 600 },
+  { id: 'meetings', label: 'Meetings', icon: CalendarClock, gradient: 'linear-gradient(135deg, #30CBD8 0%, #007AFF 100%)', route: '/embed/meetings', defaultWidth: 960, defaultHeight: 650 },
+  { id: 'notifications', label: 'Notifications', icon: Megaphone, gradient: 'linear-gradient(135deg, #FFCC00 0%, #FF9500 100%)', route: '/embed/notifications', defaultWidth: 800, defaultHeight: 560 },
+  { id: 'messages', label: 'Messages', icon: Mail, gradient: 'linear-gradient(135deg, #34C759 0%, #30CBD8 100%)', route: '/embed/messages', defaultWidth: 960, defaultHeight: 700 },
+  { id: 'profile', label: 'Profile', icon: CircleUser, gradient: 'linear-gradient(135deg, #8E8E93 0%, #6D6D72 100%)', route: '/embed/profile', defaultWidth: 900, defaultHeight: 650 },
+];

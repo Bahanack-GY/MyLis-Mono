@@ -1,0 +1,691 @@
+{
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "projects": "Projects",
+    "tickets": "Tickets",
+    "meetings": "Meetings",
+    "documents": "Documents",
+    "formations": "Trainings",
+    "sanctions": "Sanctions",
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "demands": "Demands",
+    "profile": "Profile",
+    "logout": "Logout",
+    "sections": {
+      "work": "My Work",
+      "requests": "Requests",
+      "comms": "More"
+    }
+  },
+  "header": {
+    "searchPlaceholder": "Search...",
+    "greeting": "Hello"
+  },
+  "login": {
+    "title": "Sign in to your account",
+    "email": "Email address",
+    "emailPlaceholder": "Enter your email address",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "submit": "Sign in",
+    "error": "Invalid email address or password.",
+    "accessDenied": "Access denied. You do not have the required permissions."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome to your personal workspace",
+    "stats": {
+      "myTasks": "My Tasks",
+      "myTickets": "My Tickets",
+      "upcomingMeetings": "Upcoming Meetings",
+      "myFormations": "My Trainings"
+    },
+    "recentTasks": {
+      "title": "Recent Tasks",
+      "noData": "No recent tasks to display.",
+      "viewAll": "View all tasks"
+    },
+    "upcomingMeetings": {
+      "title": "Upcoming Meetings",
+      "noData": "No upcoming meetings scheduled."
+    },
+    "topEmployee": {
+      "title": "Top Employee",
+      "noData": "No data available yet."
+    },
+    "taskStatus": {
+      "todo": "To Do",
+      "created": "Created",
+      "assigned": "Assigned",
+      "in_progress": "In Progress",
+      "blocked": "Blocked",
+      "reviewed": "Reviewed",
+      "done": "Done",
+      "completed": "Completed"
+    }
+  },
+  "profile": {
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "personalInfo": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone",
+      "dateOfBirth": "Date of Birth"
+    },
+    "jobInfo": {
+      "title": "Job Information",
+      "role": "Role",
+      "department": "Department",
+      "employeeId": "Employee ID",
+      "joinDate": "Join Date",
+      "manager": "Manager",
+      "location": "Location"
+    },
+    "contact": {
+      "title": "Contact Details",
+      "email": "Work Email",
+      "phone": "Work Phone",
+      "office": "Office",
+      "timezone": "Timezone"
+    },
+    "skills": {
+      "title": "Skills"
+    },
+    "leaderboard": {
+      "title": "Top 5 Employees",
+      "empty": "No leaderboard data yet."
+    },
+    "badges": {
+      "title": "Badge Collection",
+      "subtitle": "{{count}} of {{total}} badges earned",
+      "tasksCompleted": "{{count}} tasks completed",
+      "nextBadge": "Next badge",
+      "allEarned": "All badges earned!",
+      "tasks": "tasks"
+    },
+    "education": {
+      "title": "Education",
+      "add": "Add",
+      "save": "Save",
+      "empty": "No education records added yet.",
+      "namePlaceholder": "Degree or certificate name",
+      "file": "Document",
+      "uploadPlaceholder": "Upload PDF or image",
+      "types": {
+        "diploma": "Diploma",
+        "certificate": "Certificate",
+        "transcript": "Transcript",
+        "other": "Other"
+      }
+    },
+    "stats": {
+      "projects": "Projects",
+      "tasks": "Tasks",
+      "meetings": "Meetings",
+      "teamMembers": "Team Members"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "empty": "No recent activity to display."
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "currentPlaceholder": "Current password",
+      "newPlaceholder": "New password (min. 6 characters)",
+      "confirmPlaceholder": "Confirm new password",
+      "submit": "Update Password",
+      "success": "Password updated successfully.",
+      "mismatch": "Passwords do not match.",
+      "error": "Current password is incorrect."
+    }
+  },
+  "tickets": {
+    "title": "Tickets",
+    "subtitle": "Manage your requests and incidents",
+    "newTicket": "New Ticket",
+    "searchPlaceholder": "Search tickets...",
+    "filterAll": "All",
+    "noResults": "No tickets found.",
+    "unassigned": "Unassigned",
+    "overdue": "Overdue",
+    "stats": {
+      "total": "Total",
+      "open": "Open",
+      "accepted": "Accepted",
+      "inProgress": "In Progress",
+      "resolved": "Resolved"
+    },
+    "status": {
+      "open": "Open",
+      "accepted": "Accepted",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "category": {
+      "bug": "Bug",
+      "feature": "Feature",
+      "support": "Support",
+      "question": "Question"
+    },
+    "create": {
+      "title": "Create a Ticket",
+      "ticketTitle": "Title",
+      "titlePlaceholder": "Enter the ticket title",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe your request in detail...",
+      "priority": "Priority",
+      "category": "Category",
+      "department": "Department",
+      "departmentPlaceholder": "Select a department",
+      "dueDate": "Due Date",
+      "cancel": "Cancel",
+      "submit": "Create Ticket"
+    },
+    "table": {
+      "title": "Title",
+      "priority": "Priority",
+      "status": "Status",
+      "created": "Created"
+    },
+    "tabs": {
+      "myTickets": "My Tickets",
+      "departmentTickets": "Department Tickets"
+    },
+    "accept": "Accept",
+    "departmentEmpty": "No open tickets for your department",
+    "detail": {
+      "description": "Description",
+      "department": "Department",
+      "reporter": "Reporter",
+      "assignedTo": "Assigned To",
+      "createdAt": "Created",
+      "dueDate": "Due Date",
+      "closedAt": "Closed"
+    }
+  },
+  "meetings": {
+    "title": "Meetings",
+    "subtitle": "View your scheduled meetings",
+    "searchPlaceholder": "Search meetings...",
+    "filterAll": "All",
+    "noResults": "No meetings found.",
+    "stats": {
+      "total": "Total",
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "reports": "Reports"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "types": {
+      "standup": "Stand-up",
+      "review": "Review",
+      "planning": "Planning",
+      "retrospective": "Retrospective",
+      "client": "Client",
+      "onboarding": "Onboarding"
+    },
+    "detail": {
+      "dateTime": "Date & Time",
+      "location": "Location",
+      "organizer": "Organizer",
+      "participants": "Participants",
+      "report": "Meeting Report",
+      "summary": "Summary",
+      "decisions": "Decisions",
+      "actionItems": "Action Items",
+      "reportPending": "The meeting report is not yet available.",
+      "close": "Close"
+    }
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Manage and share your documents",
+    "uploadDocument": "Upload Document",
+    "searchPlaceholder": "Search documents...",
+    "filterAll": "All",
+    "noResults": "No documents found.",
+    "stats": {
+      "total": "Total",
+      "storage": "Storage Used",
+      "recent": "Recent",
+      "categories": "Categories"
+    },
+    "categories": {
+      "contract": "Contract",
+      "srs": "Requirements",
+      "design": "Design",
+      "technical": "Technical",
+      "notes": "Notes",
+      "brief": "Brief",
+      "planning": "Planning",
+      "education": "Training",
+      "recruitment": "Recruitment"
+    },
+    "upload": {
+      "title": "Upload a Document",
+      "dropzone": "Drag and drop your file here",
+      "dropzoneSub": "or click to browse your files",
+      "formats": "Accepted formats: PDF, DOC, DOCX, XLS, XLSX, PNG, JPG",
+      "fileSelected": "File selected",
+      "removeFile": "Remove file",
+      "fileName": "Document Name",
+      "fileNamePlaceholder": "Enter the document name",
+      "category": "Category",
+      "categoryPlaceholder": "Select a category",
+      "cancel": "Cancel",
+      "submit": "Upload"
+    },
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "size": "Size",
+      "uploader": "Uploaded by",
+      "date": "Date",
+      "actions": "Actions"
+    }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Track and manage your assigned tasks",
+    "searchPlaceholder": "Search tasks...",
+    "filterAll": "All",
+    "noResults": "No tasks found.",
+    "stats": {
+      "total": "Total",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    },
+    "status": {
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "done": "Done"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "table": {
+      "title": "Title",
+      "project": "Project",
+      "status": "Status",
+      "priority": "Priority",
+      "dueDate": "Due Date",
+      "actions": "Actions"
+    },
+    "detail": {
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "duration": "Duration",
+      "description": "Description",
+      "project": "Project",
+      "assignee": "Assigned to",
+      "close": "Close",
+      "day": "day",
+      "days": "days",
+      "startedAt": "Started At",
+      "completedAt": "Completed At"
+    },
+    "actions": {
+      "startProgress": "Start Progress",
+      "markCompleted": "Mark as Completed",
+      "markBlocked": "Mark as Blocked",
+      "resumeProgress": "Resume Progress",
+      "edit": "Edit",
+      "delete": "Delete",
+      "history": "History"
+    },
+    "block": {
+      "title": "Block Task",
+      "reasonLabel": "Reason for blocking",
+      "reasonPlaceholder": "Explain why this task is blocked...",
+      "cancel": "Cancel",
+      "confirm": "Confirm Block",
+      "reasonRequired": "A reason is required",
+      "blockedReason": "Block reason"
+    },
+    "kanban": {
+      "emptyColumn": "No tasks"
+    },
+    "selfAssign": {
+      "badge": "Self-assigned",
+      "createButton": "New Task",
+      "modalTitle": "Create a Task",
+      "titleLabel": "Title",
+      "titlePlaceholder": "What needs to be done?",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Describe the task...",
+      "difficultyLabel": "Difficulty",
+      "projectLabel": "Project",
+      "projectNone": "No project",
+      "startDateLabel": "Start Date",
+      "endDateLabel": "End Date",
+      "dueDateLabel": "Due Date",
+      "timeLabel": "Time",
+      "cancel": "Cancel",
+      "submit": "Create Task",
+      "assignedBy": "Assigned by manager"
+    },
+    "dateFilter": {
+      "all": "All",
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "custom": "Custom"
+    },
+    "edit": {
+      "modalTitle": "Edit Task",
+      "save": "Save Changes"
+    },
+    "delete": {
+      "confirmTitle": "Delete Task",
+      "confirmBody": "Are you sure you want to delete this task? This action cannot be undone.",
+      "confirm": "Delete"
+    },
+    "history": {
+      "title": "Edit History",
+      "empty": "No edit history yet."
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "View your ongoing projects",
+    "searchPlaceholder": "Search projects...",
+    "filterAll": "All",
+    "noResults": "No projects found.",
+    "progress": "Progress",
+    "tasks": "Tasks",
+    "budget": "Budget",
+    "department": "Department",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "description": "Description",
+    "close": "Close",
+    "viewDetails": "View Details",
+    "stats": {
+      "total": "Total",
+      "active": "Active",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    },
+    "statusActive": "Active",
+    "statusCompleted": "Completed",
+    "statusOnHold": "On Hold",
+    "statusOverdue": "Overdue",
+    "noResultsHint": "Try adjusting your search or filters"
+  },
+  "formations": {
+    "title": "Trainings",
+    "subtitle": "Manage your trainings and certifications",
+    "addFormation": "Add Training",
+    "searchPlaceholder": "Search trainings...",
+    "filterAll": "All",
+    "noResults": "No trainings found.",
+    "stats": {
+      "total": "Total",
+      "ongoing": "Ongoing",
+      "completed": "Completed",
+      "certificates": "Certificates"
+    },
+    "status": {
+      "ongoing": "Ongoing",
+      "completed": "Completed",
+      "upcoming": "Upcoming"
+    },
+    "create": {
+      "title": "Add a Training",
+      "formationTitle": "Training Title",
+      "titlePlaceholder": "Enter the training title",
+      "organization": "Organization",
+      "organizationPlaceholder": "Enter the organization name",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "certificate": "Certificate",
+      "certificatePlaceholder": "Certificate name (if applicable)",
+      "cancel": "Cancel",
+      "submit": "Add"
+    },
+    "detail": {
+      "organization": "Organization",
+      "period": "Period",
+      "certificate": "Certificate",
+      "close": "Close"
+    }
+  },
+  "sanctions": {
+    "title": "Sanctions",
+    "subtitle": "View your disciplinary records",
+    "searchPlaceholder": "Search sanctions...",
+    "filterAll": "All",
+    "noResults": "No sanctions found.",
+    "stats": {
+      "total": "Total",
+      "light": "Light",
+      "medium": "Medium",
+      "severe": "Severe"
+    },
+    "types": {
+      "avertissement": "Warning",
+      "blame": "Written Warning",
+      "mise_a_pied": "Suspension",
+      "licenciement": "Termination"
+    },
+    "severity": {
+      "leger": "Light",
+      "moyen": "Medium",
+      "grave": "Severe"
+    },
+    "detail": {
+      "reason": "Reason",
+      "date": "Date",
+      "issuedBy": "Issued by",
+      "close": "Close"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "Stay informed about your latest activities",
+    "markAllRead": "Mark all as read",
+    "searchPlaceholder": "Search notifications...",
+    "filterAll": "All",
+    "filterUnread": "Unread",
+    "filterRead": "Read",
+    "noResults": "No notifications found.",
+    "allRead": "You're all caught up! No unread notifications.",
+    "stats": {
+      "total": "Total",
+      "unread": "Unread",
+      "today": "Today",
+      "thisWeek": "This Week"
+    },
+    "types": {
+      "system": "System",
+      "task": "Task",
+      "project": "Project",
+      "meeting": "Meeting",
+      "document": "Document",
+      "ticket": "Ticket",
+      "sanction": "Sanction",
+      "message": "Message",
+      "chat": "Mention"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Manage your communications",
+    "compose": "New Message",
+    "searchPlaceholder": "Search messages...",
+    "noResults": "No messages found.",
+    "stats": {
+      "total": "Total",
+      "unread": "Unread",
+      "sent": "Sent",
+      "starred": "Starred"
+    },
+    "folders": {
+      "inbox": "Inbox",
+      "sent": "Sent",
+      "starred": "Starred",
+      "trash": "Trash"
+    },
+    "detail": {
+      "from": "From",
+      "to": "To",
+      "date": "Date",
+      "close": "Close",
+      "reply": "Reply"
+    },
+    "compose_modal": {
+      "title": "New Message",
+      "to": "Recipient",
+      "toPlaceholder": "Select a recipient",
+      "subject": "Subject",
+      "subjectPlaceholder": "Enter the message subject",
+      "body": "Message",
+      "bodyPlaceholder": "Write your message...",
+      "cancel": "Cancel",
+      "send": "Send"
+    }
+  },
+  "chat": {
+    "title": "Messages",
+    "channels": "Channels",
+    "general": "General",
+    "managers": "Managers",
+    "departments": "Departments",
+    "directMessages": "Direct Messages",
+    "typePlaceholder": "Type a message...",
+    "typing": "is typing...",
+    "members": "Members",
+    "online": "Online",
+    "offline": "Offline",
+    "newMessage": "New Message",
+    "searchUsers": "Search users...",
+    "noMessages": "No messages yet",
+    "loadMore": "Load more",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "readBy": "Seen by",
+    "reply": "Reply",
+    "replyingTo": "Replying to {{name}}",
+    "replyingToYou": "Replying to yourself"
+  },
+  "gamification": {
+    "pointsEarned": {
+      "title": "Points Earned!",
+      "total": "Total",
+      "continue": "Continue"
+    },
+    "badgeEarned": {
+      "title": "New Badge Unlocked!",
+      "milestone": "{{count}} tasks completed",
+      "awesome": "Awesome!"
+    }
+  },
+  "browserNotifications": {
+    "task": "New Task",
+    "project": "New Project",
+    "system": "System Notification",
+    "document": "New Document",
+    "sanction": "New Sanction",
+    "demand": "Demand Update",
+    "message": "New Message",
+    "ticket": "Ticket Update",
+    "meeting": "New Meeting",
+    "chat": "New Message",
+    "permissionTitle": "Enable Notifications",
+    "permissionBody": "Get real-time alerts for tasks, projects and messages"
+  },
+  "demands": {
+    "title": "Demands",
+    "subtitle": "Submit and track your resource requests",
+    "chatIntroMessage": "Conversation started for your demand: {{items}}",
+    "newDemand": "New Demand",
+    "empty": "No demands yet",
+    "emptyHint": "Create your first demand to get started",
+    "searchPlaceholder": "Search demands...",
+    "allImportance": "All importance",
+    "filterAll": "All",
+    "clearFilters": "Clear all filters",
+    "noResults": "No demands match your filters",
+    "tryDifferentFilter": "Try adjusting your search or filters",
+    "items": "items",
+    "moreItems": "more",
+    "total": "Total",
+    "proforma": "Proforma",
+    "importance": {
+      "barely": "Low priority",
+      "important": "Important",
+      "very_important": "Very important",
+      "urgent": "Urgent"
+    },
+    "status": {
+      "pending": "Pending",
+      "validated": "Validated",
+      "rejected": "Rejected"
+    },
+    "create": {
+      "title": "New Demand",
+      "items": "Items",
+      "addItem": "Add item",
+      "itemName": "Item",
+      "itemNamePlaceholder": "Item name...",
+      "quantity": "Qty",
+      "unitPrice": "Price (FCFA)",
+      "total": "Total",
+      "proforma": "Proforma (justification)",
+      "uploadProforma": "Upload proforma (PDF or image)",
+      "proformaFormats": "PDF, PNG, JPG",
+      "importance": "Priority",
+      "addImage": "Add image",
+      "cancel": "Cancel",
+      "submit": "Submit Demand"
+    }
+  },
+  "toast": {
+    "error": "Something went wrong",
+    "taskUpdated": "Task updated",
+    "taskAssigned": "Task assigned",
+    "taskEdited": "Task updated",
+    "taskDeleted": "Task deleted",
+    "demandSubmitted": "Demand submitted",
+    "proformaUploaded": "Proforma uploaded",
+    "proformaFailed": "Upload failed",
+    "ticketCreated": "Ticket created",
+    "ticketAccepted": "Ticket accepted",
+    "documentUploaded": "Document uploaded",
+    "formationCreated": "Registration saved",
+    "allNotificationsRead": "All notifications marked as read",
+    "profileUpdated": "Profile updated",
+    "passwordChanged": "Password changed",
+    "passwordChangeFailed": "Failed to change password",
+    "loginFailed": "Invalid credentials",
+    "accountCreated": "Account created"
+  },
+  "httpErrors": {
+    "network": "Connection error — check your internet and try again",
+    "serverError": "Server error — please try again in a moment",
+    "rateLimit": "Too many requests — please slow down",
+    "forbidden": "You don't have permission to do that"
+  }
+}

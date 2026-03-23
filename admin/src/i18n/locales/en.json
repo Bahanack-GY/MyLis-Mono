@@ -1,0 +1,1582 @@
+{
+  "login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Login",
+    "noAccount": "Don't have any account?",
+    "signUp": "Sign Up",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "error": "Invalid email or password",
+    "accessDenied": "Access restricted to authorized personnel only"
+  },
+  "employees": {
+    "title": "Team",
+    "searchPlaceholder": "Search...",
+    "grade": "Grade",
+    "stats": {
+      "projects": "Projects",
+      "done": "Done",
+      "progress": "Progress"
+    },
+    "productivity": "Productivity",
+    "bestEmployee": "Employee of the Month",
+    "leaderboard": "Top Employees",
+    "addEmployee": "Add Employee",
+    "addManager": "Add Manager",
+    "addAccountant": "Add Accountant",
+    "createAccountant": {
+      "title": "Create Accountant Account",
+      "submit": "Create Accountant"
+    },
+    "createManager": {
+      "title": "Create Manager Account",
+      "description": "Create a new manager account with full admin access.",
+      "email": "Email",
+      "emailPlaceholder": "manager@company.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter a secure password",
+      "cancel": "Cancel",
+      "submit": "Create Manager"
+    },
+    "allDepartments": "All Departments",
+    "clearFilter": "Clear filter",
+    "dismiss": "Dismiss",
+    "reinstate": "Reinstate",
+    "dismissedBanner": "This employee has been dismissed and can no longer access the system.",
+    "dismissConfirmTitle": "Dismiss Employee",
+    "dismissConfirmMessage": "This will revoke access for {{name}}. They will no longer be able to log in.",
+    "reinstateConfirmTitle": "Reinstate Employee",
+    "reinstateConfirmMessage": "This will restore access for {{name}}. They will be able to log in again.",
+    "create": {
+      "title": "Add New Employee",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter first name...",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter last name...",
+      "email": "Email Address",
+      "emailPlaceholder": "employee@company.com",
+      "password": "Password",
+      "passwordPlaceholder": "Set a password",
+      "address": "Address",
+      "addressPlaceholder": "Enter address...",
+      "salary": "Salary",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+1 (555) 000-0000",
+      "role": "Role",
+      "rolePlaceholder": "Select role...",
+      "department": "Department",
+      "departmentPlaceholder": "Select department...",
+      "startDate": "Start Date",
+      "workDays": "Work Days / Month",
+      "workDaysPlaceholder": "e.g. 23",
+      "customersGoal": "Customers Goal / Month",
+      "customersGoalPlaceholder": "e.g. 15",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "genderPlaceholder": "Select gender...",
+      "genderMale": "Male",
+      "genderFemale": "Female",
+      "skills": "Skills",
+      "skillsHint": "Select or type employee skills",
+      "skillsPlaceholder": "Type a skill and press Enter...",
+      "educationDocs": "Education Documents",
+      "educationDocsHint": "Diplomas, certificates, transcripts",
+      "addDocument": "Add Document",
+      "documentName": "Document Name",
+      "documentNamePlaceholder": "e.g. Bachelor's Degree...",
+      "documentType": "Type",
+      "educationTypes": {
+        "diploma": "Diploma",
+        "certificate": "Certificate",
+        "transcript": "Transcript",
+        "other": "Other"
+      },
+      "recruitmentDocs": "Recruitment Documents",
+      "recruitmentDocsHint": "CV, cover letter, ID, references",
+      "recruitmentTypes": {
+        "cv": "CV / Resume",
+        "coverLetter": "Cover Letter",
+        "id": "ID Document",
+        "references": "References",
+        "other": "Other"
+      },
+      "chooseFile": "Choose file...",
+      "uploading": "Uploading...",
+      "cancel": "Cancel",
+      "submit": "Add Employee"
+    },
+    "edit": {
+      "title": "Edit Employee",
+      "profilePicture": "Profile Picture",
+      "changePhoto": "Change Photo",
+      "removePhoto": "Remove",
+      "dragOrClick": "Click or drag to upload",
+      "maxSize": "Max 2MB, JPG/PNG",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "changePassword": "Change Password",
+      "newPasswordPlaceholder": "New password (min. 6 characters)",
+      "setPassword": "Set Password",
+      "passwordUpdated": "Password updated"
+    }
+  },
+  "employeeSidebar": {
+    "back": "Back to employees",
+    "infos": "Infos",
+    "tasks": "Tasks",
+    "prospects": "Prospects",
+    "documents": "Documents",
+    "sanctions": "Sanctions",
+    "recrutements": "Recruitment",
+    "education": "Education",
+    "formations": "Formations"
+  },
+  "employeeDetail": {
+    "backToList": "Back to employees",
+    "notFound": "Employee not found",
+    "showAll": "Show all",
+    "emptyState": "No items yet",
+    "noFile": "No file",
+    "addDocument": "Add document",
+    "docName": "Document name",
+    "clickToUpload": "Click to select file",
+    "upload": "Upload",
+    "viewDocument": "View document",
+    "downloadDocument": "Download document",
+    "cancel": "Cancel",
+    "save": "Save",
+    "days": {
+      "mon": "Mo",
+      "tue": "Tu",
+      "wed": "We",
+      "thu": "Th",
+      "fri": "Fr",
+      "sat": "Sa",
+      "sun": "Su"
+    },
+    "profile": {
+      "addHobbies": "Add your hobbies to complete your profile!"
+    },
+    "stats": {
+      "projectsDone": "Projects completed",
+      "tasksActive": "Tasks in progress"
+    },
+    "progress": {
+      "title": "Progress",
+      "week": "A week",
+      "avgActivity": "Average Activity",
+      "hours": "Hours"
+    },
+    "productivity": {
+      "title": "Productivity",
+      "yearly": "This year",
+      "vsLastMonth": "vs last month",
+      "months": {
+        "jan": "Jan",
+        "feb": "Feb",
+        "mar": "Mar",
+        "apr": "Apr",
+        "may": "May",
+        "jun": "Jun",
+        "jul": "Jul",
+        "aug": "Aug",
+        "sep": "Sep",
+        "oct": "Oct",
+        "nov": "Nov",
+        "dec": "Dec"
+      }
+    },
+    "team": {
+      "title": "Your team",
+      "lead": "Team-lead",
+      "director": "Art director"
+    },
+    "documents": {
+      "title": "Documents",
+      "add": "Add document",
+      "items": {
+        "contract": "Employment Contract",
+        "brandGuide": "Brand Style Document",
+        "newProject": "New project"
+      }
+    },
+    "tasks": {
+      "title": "Current Tasks",
+      "add": "Add task",
+      "createTitle": "Create Tasks",
+      "createTasks": "Create tasks",
+      "addAnother": "Add another task",
+      "taskNumber": "Task",
+      "tasksReady": "task(s) ready",
+      "titlePlaceholder": "Task title...",
+      "descriptionPlaceholder": "Task description...",
+      "assigneePlaceholder": "Assignee",
+      "date": "Date",
+      "time": "Time",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "duration": "Duration",
+      "oneHour": "1 Hour",
+      "twoHours": "2 Hours",
+      "customTime": "Custom",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "difficulty": "Difficulty",
+      "difficultyEasy": "Easy",
+      "difficultyMedium": "Medium",
+      "difficultyHard": "Hard",
+      "priority": "Priority",
+      "priorityLow": "Low",
+      "priorityMedium": "Medium",
+      "priorityHigh": "High",
+      "priorityUrgent": "Urgent",
+      "project": "Project",
+      "projectNone": "No project",
+      "repeat": "Repeat",
+      "repeatNone": "No repeat",
+      "repeatDaily": "Daily",
+      "repeatWeekly": "Weekly",
+      "repeatMonthly": "Monthly",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "february": "February",
+      "doFirst": "Do this first",
+      "inProgress": "In progress",
+      "pending": "Pending",
+      "done": "Done",
+      "calendarDay": "Day",
+      "calendarWeek": "Week",
+      "calendarMonth": "Month",
+      "calendarYear": "Year",
+      "taskDetail": "Task Details",
+      "noDescription": "No description",
+      "status": "Status",
+      "startedAt": "Started At",
+      "completedAt": "Completed At",
+      "items": {
+        "meetTeam": "Meet your team",
+        "accessCredentials": "Get access credentials from the project manager",
+        "reviewDesign": "Read the brand book and UI kit",
+        "reviewProject": "Review the current project in Figma",
+        "reviewHandbook": "Review the employee handbook"
+      },
+      "editTask": "Edit Task",
+      "deleteTask": "Delete Task",
+      "viewHistory": "History",
+      "confirmDelete": "Are you sure you want to delete this task?",
+      "historyTitle": "Edit History",
+      "historyEmpty": "No edit history yet."
+    },
+    "goals": {
+      "title": "Goals tracker",
+      "subtitle": "Goals designed to support onboarding during the first 2 weeks",
+      "items": {
+        "knowTeam": "Get to know your team",
+        "setupTools": "Set up your work tools and accounts",
+        "completeProfile": "Complete your profile"
+      }
+    },
+    "salary": {
+      "title": "Salary",
+      "monthly": "Monthly",
+      "gross": "Gross salary",
+      "net": "Net salary"
+    },
+    "personalInfo": {
+      "birthDate": "Date of birth",
+      "hireDate": "Date of hire",
+      "yearsInCompany": "Years in company",
+      "years": "years"
+    },
+    "contact": {
+      "title": "Contact",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address"
+    },
+    "daysWorked": {
+      "title": "Days Worked",
+      "thisMonth": "This month",
+      "days": "days",
+      "of": "of"
+    },
+    "trophies": {
+      "title": "Trophies",
+      "items": {
+        "topPerformer": "Top Performer",
+        "projectChampion": "Project Champion",
+        "innovator": "Innovator of the Month",
+        "clientFavorite": "Client Favorite",
+        "mentorAward": "Mentor Award"
+      }
+    },
+    "skills": {
+      "title": "Skills"
+    },
+    "prospects": {
+      "title": "Prospects",
+      "add": "Add prospect",
+      "goal": "Monthly Goal",
+      "reached": "Reached",
+      "remaining": "Remaining",
+      "conversionRate": "Conversion Rate",
+      "status": {
+        "new": "New",
+        "contacted": "Contacted",
+        "negotiation": "Negotiation",
+        "won": "Won",
+        "lost": "Lost"
+      },
+      "company": "Company",
+      "contact": "Contact",
+      "value": "Value",
+      "noProspects": "No prospects yet"
+    },
+    "badges": {
+      "title": "Badges",
+      "more": "more",
+      "items": {
+        "earlyBird": "Early Bird",
+        "teamPlayer": "Team Player",
+        "fastLearner": "Fast Learner",
+        "perfectAttendance": "Perfect Attendance",
+        "creativeMind": "Creative Mind",
+        "problemSolver": "Problem Solver"
+      }
+    },
+    "points": {
+      "title": "Points",
+      "accumulated": "Total accumulated points"
+    },
+    "sanctions": {
+      "add": "Add sanction",
+      "selectType": "Select sanction type",
+      "selectSeverity": "Select severity",
+      "reasonPlaceholder": "Describe the reason...",
+      "types": {
+        "warning": "Verbal Warning",
+        "written": "Written Warning",
+        "suspension": "Suspension",
+        "termination": "Termination"
+      },
+      "severity": {
+        "light": "Light",
+        "medium": "Medium",
+        "severe": "Severe"
+      },
+      "reasons": {
+        "lateness": "Repeated lateness",
+        "absence": "Unexcused absence"
+      }
+    },
+    "recrutements": {
+      "submittedOn": "Submitted on",
+      "verified": "Verified",
+      "pending": "Pending",
+      "items": {
+        "cv": "Curriculum Vitae (CV)",
+        "coverLetter": "Cover Letter",
+        "idCard": "ID Card Copy",
+        "references": "Professional References"
+      }
+    },
+    "education": {
+      "items": {
+        "masters": "Master's Degree",
+        "bachelors": "Bachelor's Degree",
+        "bac": "Baccalaureate"
+      }
+    },
+    "formations": {
+      "add": "Add formation",
+      "titlePlaceholder": "Formation title...",
+      "durationPlaceholder": "Duration (e.g. 3 days)",
+      "completed": "Completed",
+      "upcoming": "Upcoming",
+      "markComplete": "Mark as completed",
+      "items": {
+        "uiux": "Advanced UI/UX Design Workshop",
+        "agile": "Agile Methodology Training",
+        "figma": "Figma Masterclass"
+      }
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "employees": "Employees",
+    "projects": "Projects",
+    "departments": "Departments",
+    "tasks": "Tasks",
+    "documents": "Documents",
+    "tickets": "Tickets",
+    "activity": "Activity",
+    "meetings": "Meetings",
+    "invoices": "Invoices",
+    "expenses": "Expenses",
+    "clients": "Clients",
+    "settings": "Settings",
+    "messages": "Messages",
+    "demands": "Demands",
+    "salaries": "Salaries",
+    "logout": "Logout",
+    "sections": {
+      "work": "Work",
+      "people": "People",
+      "finance": "Finance",
+      "comms": "Comms"
+    }
+  },
+  "salaries": {
+    "pageSubtitle": "{{count}} employees · {{withSalary}} with salary set",
+    "payAll": "Pay All Salaries",
+    "totalMonthly": "Total Monthly",
+    "employees": "Employees",
+    "averageSalary": "Average Salary",
+    "employeeSalaries": "Employee Salaries",
+    "search": "Search...",
+    "loading": "Loading…",
+    "noEmployees": "No employees found",
+    "notSet": "Not set",
+    "columns": {
+      "employee": "Employee",
+      "department": "Department",
+      "role": "Role",
+      "monthlySalary": "Monthly Salary",
+      "actions": "Actions"
+    },
+    "roles": {
+      "EMPLOYEE": "Employee",
+      "MANAGER": "Manager",
+      "HEAD_OF_DEPARTMENT": "Head of Dept.",
+      "ACCOUNTANT": "Accountant"
+    },
+    "months": {
+      "1": "January",
+      "2": "February",
+      "3": "March",
+      "4": "April",
+      "5": "May",
+      "6": "June",
+      "7": "July",
+      "8": "August",
+      "9": "September",
+      "10": "October",
+      "11": "November",
+      "12": "December"
+    },
+    "payOne": {
+      "title": "Pay Salary",
+      "month": "Month",
+      "year": "Year",
+      "cancel": "Cancel",
+      "pay": "Pay",
+      "processing": "Processing…"
+    },
+    "advance": {
+      "title": "Salary Advance",
+      "amount": "Amount (FCFA)",
+      "note": "Note (optional)",
+      "notePlaceholder": "Reason for advance…",
+      "monthlySalary": "Monthly salary: {{amount}} FCFA",
+      "cancel": "Cancel",
+      "payAdvance": "Pay Advance",
+      "processing": "Processing…"
+    },
+    "bulkPay": {
+      "title": "Pay All Salaries",
+      "subtitle": "{{count}} employees · {{total}} FCFA total",
+      "month": "Month",
+      "year": "Year",
+      "warning": "This will create an expense record for each employee and count toward the {{month}} {{year}} expenses.",
+      "cancel": "Cancel",
+      "confirm": "Confirm Payment",
+      "processing": "Processing…"
+    },
+    "row": {
+      "pay": "Pay",
+      "advance": "Advance"
+    }
+  },
+  "header": {
+    "searchPlaceholder": "Search Here...",
+    "greeting": "Hi {{name}}"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Overview of your organization's performance",
+    "sortBy": "Sort by: Latest",
+    "stats": {
+      "totalEmployees": "Total Employees",
+      "activeProjects": "Active Projects",
+      "tasksCompleted": "Tasks Completed",
+      "efficiency": "Efficiency",
+      "revenue": "Total Revenue",
+      "expenses": "Expenses",
+      "profit": "Net Profit",
+      "pending": "Pending Payments"
+    },
+    "charts": {
+      "productivity": "Productivity Analytics",
+      "distribution": "Distribution",
+      "total": "Total",
+      "days": {
+        "Mon": "Mon",
+        "Tue": "Tue",
+        "Wed": "Wed",
+        "Thu": "Thu",
+        "Fri": "Fri",
+        "Sat": "Sat",
+        "Sun": "Sun"
+      },
+      "departments": {
+        "Dev": "Dev",
+        "HR": "HR",
+        "Sales": "Sales",
+        "Marketing": "Marketing"
+      }
+    },
+    "dateFilter": {
+      "today": "Today",
+      "thisWeek": "This Week",
+      "thisMonth": "This Month",
+      "thisYear": "This Year",
+      "custom": "Custom",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply"
+    },
+    "recentActivities": {
+      "title": "Recent Activities",
+      "viewAll": "View all",
+      "columns": {
+        "activity": "Activity",
+        "date": "Date",
+        "user": "User",
+        "status": "Status",
+        "amountRef": "Amount/Ref"
+      },
+      "items": {
+        "contractSigned": "New Contract Signed",
+        "department": "Department: Engineering",
+        "completed": "Completed"
+      }
+    }
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Manage and track all your projects",
+    "newProject": "New Project",
+    "searchPlaceholder": "Search projects...",
+    "filterAll": "All",
+    "statusActive": "Active",
+    "statusCompleted": "Completed",
+    "statusOnHold": "On Hold",
+    "statusOverdue": "Overdue",
+    "stats": {
+      "total": "Total Projects",
+      "active": "Active",
+      "completed": "Completed",
+      "overdue": "Overdue"
+    },
+    "chartTitle": "Project Activity",
+    "distribution": "Status Distribution",
+    "progress": "Progress",
+    "tasks": "Tasks",
+    "description": "Description",
+    "budget": "Budget",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "noResults": "No projects found",
+    "close": "Close",
+    "viewDetails": "View Details",
+    "createTitle": "Create Project",
+    "formName": "Project Name",
+    "formNamePlaceholder": "Enter project name...",
+    "formDescriptionPlaceholder": "Describe the project...",
+    "formDepartment": "Department",
+    "formDepartmentPlaceholder": "Select a department",
+    "formClient": "Client",
+    "formClientPlaceholder": "Select a client",
+    "formCost": "Cost",
+    "formRevenue": "Revenue",
+    "formDueDate": "Due Date",
+    "formDocuments": "Documents",
+    "formContract": "Contract",
+    "formSRS": "SRS (Software Requirements Specification)",
+    "formOtherDocs": "Other Documents",
+    "formUpload": "Click to upload",
+    "formCancel": "Cancel",
+    "formCreate": "Create Project",
+    "editTitle": "Edit Project",
+    "formSave": "Save Changes"
+  },
+  "tasksPage": {
+    "title": "Tasks",
+    "subtitle": "Team schedule & assignments",
+    "searchPlaceholder": "Search employee...",
+    "employees": "Employees",
+    "today": "Today",
+    "view_day": "Day",
+    "view_week": "Week",
+    "view_month": "Month",
+    "view_year": "Year",
+    "week": "Week",
+    "month": "Month",
+    "year": "Year",
+    "showAll": "Show all",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "duration": "Duration",
+    "day": "day",
+    "days": "days",
+    "status": "Status",
+    "todo": "To Do",
+    "inProgress": "In Progress",
+    "done": "Done",
+    "description": "Description",
+    "noResults": "No results",
+    "addTask": "New Task",
+    "titlePlaceholder": "Task title",
+    "descriptionPlaceholder": "Description",
+    "project": "Project",
+    "projectNone": "No project",
+    "time": "Time",
+    "difficulty": "Difficulty",
+    "difficultyEasy": "Easy",
+    "difficultyMedium": "Medium",
+    "difficultyHard": "Hard",
+    "priority": "Priority",
+    "priorityLow": "Low",
+    "priorityMedium": "Medium",
+    "priorityHigh": "High",
+    "priorityUrgent": "Urgent",
+    "repeat": "Repeat",
+    "repeatNone": "No repeat",
+    "repeatDaily": "Daily",
+    "repeatWeekly": "Weekly",
+    "repeatMonthly": "Monthly",
+    "assignee": "Assignee",
+    "addAnother": "Add another task",
+    "taskNumber": "Task",
+    "tasksReady": "task(s) ready",
+    "cancel": "Cancel",
+    "createTask": "Create Task",
+    "editTask": "Edit Task",
+    "deleteTask": "Delete Task",
+    "viewHistory": "History",
+    "confirmDelete": "Are you sure you want to delete this task?",
+    "historyTitle": "Edit History",
+    "historyEmpty": "No edit history yet.",
+    "save": "Save Changes",
+    "calendarView": "Calendar",
+    "boardView": "Board",
+    "allEmployees": "All Employees",
+    "allDepartments": "All Departments"
+  },
+  "projectSidebar": {
+    "back": "Back to projects",
+    "overview": "Overview",
+    "tasks": "Tasks",
+    "budget": "Budget",
+    "documents": "Documents",
+    "timeline": "Timeline"
+  },
+  "projectDetail": {
+    "overview": {
+      "progress": "Progress",
+      "tasksDone": "Tasks Done",
+      "revenue": "Revenue",
+      "daysLeft": "Days Left",
+      "weeklyActivity": "Weekly Task Activity",
+      "taskBreakdown": "Task Breakdown",
+      "total": "Total",
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "done": "Done"
+    },
+    "tasks": {
+      "title": "Project Tasks",
+      "todo": "To Do",
+      "inProgress": "In Progress",
+      "done": "Done",
+      "noTasks": "No tasks yet",
+      "unassigned": "Unassigned",
+      "priorityLow": "Low",
+      "priorityMedium": "Medium",
+      "priorityHigh": "High",
+      "priorityUrgent": "Urgent"
+    },
+    "budget": {
+      "title": "Budget Overview",
+      "totalBudget": "Total Budget",
+      "expenses": "Expenses",
+      "revenue": "Revenue",
+      "profit": "Net Profit",
+      "expenseBreakdown": "Budget Utilization",
+      "monthlySpend": "Cost by Difficulty",
+      "remaining": "Remaining",
+      "utilization": "Utilization",
+      "addExpense": "Add Expense"
+    },
+    "documents": {
+      "title": "Project Documents",
+      "upload": "Upload File",
+      "empty": "No documents yet"
+    },
+    "timeline": {
+      "title": "Project Timeline",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "upcoming": "Upcoming",
+      "empty": "No milestones yet"
+    }
+  },
+  "departments": {
+    "title": "Departments",
+    "subtitle": "Organizational structure & team overview",
+    "addDepartment": "Add Department",
+    "manageRoles": "Manage Roles",
+    "stats": {
+      "total": "Total Departments",
+      "employees": "Total Employees",
+      "projects": "Active Projects",
+      "avgSize": "Avg Team Size"
+    },
+    "charts": {
+      "employeeDistribution": "Employee Distribution",
+      "budgetAllocation": "Budget Allocation",
+      "revenueByDepartment": "Revenue by Department",
+      "revenue": "Revenue"
+    },
+    "card": {
+      "head": "Head",
+      "employees": "Employees",
+      "projects": "Projects",
+      "budget": "Budget"
+    },
+    "modal": {
+      "employees": "Team Members",
+      "activeProjects": "Active Projects",
+      "close": "Close"
+    },
+    "create": {
+      "title": "Create Department",
+      "name": "Department Name",
+      "namePlaceholder": "Enter department name...",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the department...",
+      "head": "Head of Department",
+      "headPlaceholder": "Select head of department...",
+      "budget": "Budget",
+      "icon": "Icon",
+      "color": "Color",
+      "members": "Members",
+      "searchEmployee": "Search employees...",
+      "noResults": "No employees found",
+      "preview": "Preview",
+      "cancel": "Cancel",
+      "submit": "Create Department"
+    },
+    "edit": {
+      "title": "Edit Department",
+      "submit": "Save Changes"
+    },
+    "empty": "No departments found"
+  },
+  "departmentSidebar": {
+    "back": "Back to departments",
+    "overview": "Overview",
+    "members": "Members",
+    "projects": "Projects",
+    "budget": "Budget",
+    "settings": "Settings"
+  },
+  "departmentDetail": {
+    "overview": {
+      "subtitle": "Department overview & statistics",
+      "totalMembers": "Total Members",
+      "activeProjects": "Active Projects",
+      "budget": "Turnover",
+      "avgProgress": "Avg Progress",
+      "monthlyActivity": "Monthly Activity",
+      "roleDistribution": "Role Distribution",
+      "total": "Total",
+      "head": "Head of Department",
+      "budgetLabel": "Total Budget",
+      "projectsLabel": "Active Projects",
+      "teamSize": "Team Size"
+    },
+    "members": {
+      "title": "Team Members",
+      "head": "Head of Department",
+      "empty": "No team members yet",
+      "addMember": "Add Member",
+      "addMemberTitle": "Add Team Member",
+      "searchEmployee": "Search employees...",
+      "noAvailable": "No available employees found",
+      "add": "Add"
+    },
+    "projects": {
+      "title": "Department Projects",
+      "total": "Total",
+      "active": "Active",
+      "avgProgress": "Avg Progress",
+      "empty": "No projects assigned",
+      "emptyHint": "Projects will appear here once assigned to this department",
+      "addProject": "Add Project",
+      "addProjectTitle": "Add New Project",
+      "projectName": "Project Name",
+      "projectNamePlaceholder": "Enter project name...",
+      "status": "Status",
+      "create": "Create Project",
+      "cancel": "Cancel"
+    },
+    "budget": {
+      "title": "Budget Overview",
+      "totalBudget": "Total Budget",
+      "totalExpenses": "Total Expenses",
+      "remaining": "Revenues",
+      "perEmployee": "Per Employee",
+      "expenseBreakdown": "Expense Breakdown",
+      "monthlySpend": "Monthly turnover"
+    },
+    "settings": {
+      "title": "Department Settings",
+      "general": "General Information",
+      "generalDesc": "Department name, description, and basic details",
+      "appearance": "Appearance",
+      "appearanceDesc": "Department color, icon, and display preferences",
+      "notifications": "Notifications",
+      "notificationsDesc": "Configure department-level notification preferences",
+      "permissions": "Permissions",
+      "permissionsDesc": "Manage access control and member roles"
+    }
+  },
+  "documents": {
+    "title": "Documents",
+    "subtitle": "Manage and organize all company documents",
+    "uploadDocument": "Upload Document",
+    "searchPlaceholder": "Search documents...",
+    "filterAll": "All",
+    "noResults": "No documents found",
+    "stats": {
+      "total": "Total Documents",
+      "storage": "Storage Used",
+      "recent": "Recent Uploads",
+      "categories": "Categories"
+    },
+    "categories": {
+      "contract": "Contract",
+      "srs": "SRS",
+      "design": "Design",
+      "technical": "Technical",
+      "notes": "Notes",
+      "brief": "Brief",
+      "planning": "Planning",
+      "education": "Education",
+      "recruitment": "Recruitment"
+    },
+    "charts": {
+      "byCategory": "Documents by Category",
+      "uploadActivity": "Upload Activity"
+    },
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "size": "Size",
+      "department": "Department",
+      "uploader": "Uploader",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "upload": {
+      "title": "Upload Document",
+      "dropzone": "Drag & drop your file here",
+      "dropzoneSub": "or click to browse",
+      "formats": "PDF, DOC, DOCX, XLS, XLSX, PPT, FIG, AI, YAML",
+      "fileName": "File Name",
+      "fileNamePlaceholder": "Enter file name...",
+      "category": "Category",
+      "categoryPlaceholder": "Select a category",
+      "department": "Department",
+      "departmentPlaceholder": "Select a department",
+      "cancel": "Cancel",
+      "submit": "Upload Document",
+      "fileSelected": "File selected",
+      "removeFile": "Remove"
+    }
+  },
+  "tickets": {
+    "title": "Tickets",
+    "subtitle": "Manage support requests and issue tracking",
+    "newTicket": "New Ticket",
+    "searchPlaceholder": "Search tickets...",
+    "filterAll": "All",
+    "noResults": "No tickets found",
+    "stats": {
+      "total": "Total Tickets",
+      "open": "Open Tickets",
+      "inProgress": "In Progress",
+      "resolved": "Resolved This Week"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "status": {
+      "open": "Open",
+      "accepted": "Accepted",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "category": {
+      "bug": "Bug",
+      "feature": "Feature",
+      "support": "Support",
+      "question": "Question"
+    },
+    "charts": {
+      "byPriority": "Tickets by Priority",
+      "activity": "Ticket Activity"
+    },
+    "table": {
+      "title": "Title",
+      "priority": "Priority",
+      "status": "Status",
+      "department": "Department",
+      "category": "Category",
+      "assignee": "Assignee",
+      "created": "Created",
+      "dueDate": "Due Date",
+      "actions": "Actions"
+    },
+    "takeTicket": "Take",
+    "closeTicket": "Close",
+    "selectEmployee": "Assign to...",
+    "overdue": "Overdue",
+    "noDueDate": "No deadline",
+    "unassigned": "Unassigned",
+    "noDepartment": "No department",
+    "create": {
+      "title": "Create Ticket",
+      "ticketTitle": "Title",
+      "titlePlaceholder": "Enter ticket title...",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the issue or request...",
+      "priority": "Priority",
+      "category": "Category",
+      "department": "Department",
+      "departmentPlaceholder": "Select target department",
+      "dueDate": "Due Date",
+      "assignee": "Assignee",
+      "assigneePlaceholder": "Select assignee",
+      "cancel": "Cancel",
+      "submit": "Create Ticket"
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "subtitle": "Track all actions and changes across the platform",
+    "searchPlaceholder": "Search activities...",
+    "noResults": "No activities found",
+    "stats": {
+      "total": "Total Activities",
+      "today": "Today's Activities",
+      "activeUsers": "Active Users",
+      "topAction": "Top Action"
+    },
+    "chart": {
+      "title": "Activity Over Time"
+    },
+    "filters": {
+      "allActions": "All Actions",
+      "allUsers": "All Users",
+      "allRoles": "All Roles"
+    },
+    "actions": {
+      "login": "Login",
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "view": "View",
+      "export": "Export",
+      "upload": "Upload",
+      "comment": "Comment"
+    },
+    "roles": {
+      "Admin": "Admin",
+      "Manager": "Manager",
+      "Developer": "Developer",
+      "Designer": "Designer",
+      "HR": "HR",
+      "Analyst": "Analyst",
+      "MANAGER": "Manager",
+      "EMPLOYEE": "Employee",
+      "HEAD_OF_DEPARTMENT": "Head of Department"
+    },
+    "log": {
+      "login": "logged in to the platform",
+      "create": "created",
+      "update": "updated",
+      "delete": "deleted",
+      "view": "viewed",
+      "export": "exported",
+      "upload": "uploaded",
+      "comment": "commented on"
+    }
+  },
+  "meetings": {
+    "title": "Meetings",
+    "subtitle": "Schedule, manage, and review meeting reports",
+    "scheduleMeeting": "Schedule Meeting",
+    "searchPlaceholder": "Search meetings...",
+    "filterAll": "All",
+    "noResults": "No meetings found",
+    "stats": {
+      "total": "Total Meetings",
+      "scheduled": "Scheduled",
+      "completed": "Completed",
+      "reports": "Reports Available"
+    },
+    "chart": {
+      "title": "Meetings Over Time"
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "types": {
+      "standup": "Standup",
+      "review": "Review",
+      "planning": "Planning",
+      "retrospective": "Retrospective",
+      "client": "Client",
+      "onboarding": "Onboarding"
+    },
+    "table": {
+      "title": "Title",
+      "type": "Type",
+      "status": "Status",
+      "date": "Date",
+      "location": "Location",
+      "organizer": "Organizer",
+      "actions": "Actions"
+    },
+    "detail": {
+      "organizer": "Organizer",
+      "participants": "Participants",
+      "location": "Location",
+      "dateTime": "Date & Time",
+      "report": "Meeting Report",
+      "reportPending": "Report will be available after the meeting",
+      "summary": "Summary",
+      "decisions": "Key Decisions",
+      "actionItems": "Action Items",
+      "close": "Close"
+    },
+    "schedule": {
+      "title": "Schedule Meeting",
+      "meetingTitle": "Meeting Title",
+      "titlePlaceholder": "Enter meeting title...",
+      "type": "Meeting Type",
+      "date": "Date",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "location": "Location",
+      "locationPlaceholder": "e.g. Room 3A, Google Meet...",
+      "participants": "Participants",
+      "participantsHint": "Select meeting participants",
+      "allEmployees": "All Employees",
+      "selectDepartment": "Select Department",
+      "selectIndividual": "Select Individual",
+      "selectedCount": "{{count}} selected",
+      "noEmployeesInDept": "No employees in this department",
+      "description": "Description",
+      "descriptionPlaceholder": "Meeting description (optional)...",
+      "cancel": "Cancel",
+      "submit": "Schedule Meeting"
+    },
+    "deleteMeeting": "Delete",
+    "confirmDelete": "Are you sure you want to delete this meeting?"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "subtitle": "View and manage all your notifications",
+    "markAllRead": "Mark all as read",
+    "allRead": "All caught up!",
+    "searchPlaceholder": "Search notifications...",
+    "filterAll": "All",
+    "filterRead": "Read",
+    "filterUnread": "Unread",
+    "noResults": "No notifications found",
+    "stats": {
+      "total": "Total Notifications",
+      "unread": "Unread",
+      "today": "Today",
+      "thisWeek": "This Week"
+    },
+    "types": {
+      "system": "System",
+      "task": "Task",
+      "project": "Project",
+      "meeting": "Meeting",
+      "document": "Document",
+      "ticket": "Ticket",
+      "message": "Message",
+      "chat": "Mention"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "subtitle": "Internal messaging and communications",
+    "compose": "Compose",
+    "searchPlaceholder": "Search messages...",
+    "noResults": "No messages found",
+    "stats": {
+      "total": "Inbox",
+      "unread": "Unread",
+      "sent": "Sent",
+      "starred": "Starred"
+    },
+    "folders": {
+      "inbox": "Inbox",
+      "sent": "Sent",
+      "starred": "Starred",
+      "trash": "Trash"
+    },
+    "detail": {
+      "from": "From",
+      "to": "To",
+      "date": "Date",
+      "subject": "Subject",
+      "reply": "Reply",
+      "close": "Close"
+    },
+    "compose_modal": {
+      "title": "Compose Message",
+      "to": "To",
+      "toPlaceholder": "Select recipient",
+      "subject": "Subject",
+      "subjectPlaceholder": "Enter subject...",
+      "body": "Message",
+      "bodyPlaceholder": "Write your message...",
+      "cancel": "Cancel",
+      "send": "Send Message"
+    }
+  },
+  "chat": {
+    "title": "Messages",
+    "channels": "Channels",
+    "general": "General",
+    "managers": "Managers",
+    "departments": "Departments",
+    "directMessages": "Direct Messages",
+    "typePlaceholder": "Type a message...",
+    "typing": "is typing...",
+    "members": "Members",
+    "online": "Online",
+    "offline": "Offline",
+    "newMessage": "New Message",
+    "searchUsers": "Search users...",
+    "noMessages": "No messages yet",
+    "loadMore": "Load more",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "readBy": "Seen by",
+    "reply": "Reply",
+    "replyingTo": "Replying to {{name}}",
+    "replyingToYou": "Replying to yourself"
+  },
+  "profile": {
+    "title": "My Profile",
+    "subtitle": "Manage your personal information and preferences",
+    "editProfile": "Edit Profile",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "personalInfo": {
+      "title": "Personal Information",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "male": "Male",
+      "female": "Female"
+    },
+    "jobInfo": {
+      "title": "Job Information",
+      "role": "Role",
+      "department": "Department",
+      "employeeId": "Employee ID",
+      "joinDate": "Join Date",
+      "manager": "Reports To",
+      "location": "Office Location"
+    },
+    "stats": {
+      "projects": "Active Projects",
+      "tasks": "Tasks Completed",
+      "meetings": "Meetings This Month",
+      "teamMembers": "Team Members"
+    },
+    "recentActivity": {
+      "title": "Recent Activity",
+      "noActivity": "No recent activity"
+    },
+    "skills": {
+      "title": "Skills & Expertise"
+    },
+    "contact": {
+      "title": "Contact Information",
+      "email": "Email",
+      "phone": "Phone",
+      "office": "Office",
+      "timezone": "Timezone"
+    }
+  },
+  "invoices": {
+    "title": "Invoices",
+    "subtitle": "Manage invoices, payments and revenue tracking",
+    "newInvoice": "New Invoice",
+    "searchPlaceholder": "Search invoices...",
+    "filterAll": "All",
+    "noResults": "No invoices found",
+    "stats": {
+      "total": "Total Invoices",
+      "revenue": "Revenue",
+      "pending": "Pending",
+      "overdue": "Overdue"
+    },
+    "status": {
+      "created": "Created",
+      "sent": "Sent",
+      "paid": "Paid",
+      "rejected": "Rejected"
+    },
+    "table": {
+      "invoiceNumber": "Invoice #",
+      "client": "Client",
+      "project": "Project",
+      "amount": "Amount",
+      "status": "Status",
+      "dueDate": "Due Date",
+      "issued": "Issued",
+      "actions": "Actions"
+    },
+    "charts": {
+      "monthlyRevenue": "Monthly Revenue",
+      "statusDistribution": "Status Distribution"
+    },
+    "create": {
+      "title": "Create Invoice",
+      "project": "Project",
+      "projectPlaceholder": "Select project...",
+      "client": "Client",
+      "department": "Department",
+      "items": "Line Items",
+      "description": "Description",
+      "descriptionPlaceholder": "Item description...",
+      "quantity": "Qty",
+      "unitPrice": "Unit Price",
+      "amount": "Amount",
+      "addItem": "Add Item",
+      "removeItem": "Remove",
+      "issueDate": "Issue Date",
+      "dueDate": "Due Date",
+      "taxRate": "Tax Rate (%)",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "total": "Total",
+      "notes": "Notes",
+      "notesPlaceholder": "Additional notes...",
+      "cancel": "Cancel",
+      "submit": "Create Invoice"
+    },
+    "detail": {
+      "title": "Invoice Details",
+      "send": "Send",
+      "pay": "Mark Paid",
+      "reject": "Reject",
+      "edit": "Edit",
+      "delete": "Delete",
+      "exportPdf": "Export PDF",
+      "exportReceipt": "Export Receipt",
+      "invoiceNumber": "Invoice Number",
+      "issuedOn": "Issued On",
+      "dueOn": "Due On",
+      "paidOn": "Paid On",
+      "sentOn": "Sent On",
+      "from": "From",
+      "to": "Bill To",
+      "items": "Items",
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "total": "Total",
+      "notes": "Notes",
+      "confirmDelete": "Are you sure you want to delete this invoice?",
+      "confirmSend": "Send this invoice to the client?",
+      "confirmPay": "Mark this invoice as paid?",
+      "confirmReject": "Reject this invoice?",
+      "letterhead": "Letterhead",
+      "letterheadNone": "None"
+    },
+    "template": {
+      "title": "Invoice Template",
+      "subtitle": "Customize your department's invoice template",
+      "companyName": "Company Name",
+      "companyNamePlaceholder": "Enter company name...",
+      "logo": "Logo URL",
+      "logoPlaceholder": "https://example.com/logo.png",
+      "address": "Address",
+      "addressPlaceholder": "Company address...",
+      "phone": "Phone",
+      "phonePlaceholder": "+1 (555) 000-0000",
+      "email": "Email",
+      "emailPlaceholder": "billing@company.com",
+      "paymentTerms": "Payment Terms",
+      "paymentTermsPlaceholder": "e.g. Net 30 days",
+      "bankInfo": "Bank Information",
+      "bankInfoPlaceholder": "IBAN, RIB, account details...",
+      "footer": "Footer Text",
+      "footerPlaceholder": "Thank you for your business!",
+      "save": "Save Template",
+      "preview": "Preview"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "Manage your clients and customer relationships",
+    "createTitle": "New Client",
+    "editTitle": "Edit Client",
+    "name": "Client Name",
+    "namePlaceholder": "Enter client name...",
+    "type": "Type",
+    "typeOneTime": "One-time",
+    "typeSubscription": "Subscription",
+    "department": "Department",
+    "departmentPlaceholder": "Select a department",
+    "allDepartments": "All Departments",
+    "price": "Price",
+    "projectDescription": "Project Description",
+    "projectDescriptionPlaceholder": "Describe the project...",
+    "cancel": "Cancel",
+    "create": "Create Client",
+    "save": "Save",
+    "newClient": "New Client",
+    "searchPlaceholder": "Search clients...",
+    "filterAll": "All",
+    "confirmDelete": "Are you sure you want to delete this client?",
+    "noResults": "No clients found",
+    "stats": {
+      "total": "Total Clients",
+      "subscription": "Subscription",
+      "oneTime": "One-time",
+      "revenue": "Total Revenue"
+    },
+    "charts": {
+      "byType": "Clients by Type",
+      "revenueActivity": "Revenue Activity"
+    },
+    "table": {
+      "name": "Name",
+      "type": "Type",
+      "department": "Department",
+      "price": "Price",
+      "revenue": "Revenue",
+      "actions": "Actions"
+    }
+  },
+  "clientSidebar": {
+    "back": "Back to clients",
+    "overview": "Overview",
+    "invoices": "Invoices",
+    "projects": "Projects",
+    "settings": "Settings"
+  },
+  "clientDetail": {
+    "overview": {
+      "title": "Client Overview",
+      "totalPaid": "Total Paid",
+      "pendingPayments": "Pending Payments",
+      "overdue": "Overdue",
+      "totalInvoices": "Total Invoices",
+      "revenueOverTime": "Revenue Over Time",
+      "clientInfo": "Client Information",
+      "department": "Department",
+      "price": "Price",
+      "type": "Type",
+      "projectDescription": "Project Description",
+      "contract": "Contract"
+    },
+    "invoices": {
+      "title": "Client Invoices",
+      "empty": "No invoices yet",
+      "issued": "Issued",
+      "due": "Due",
+      "paidOn": "Paid",
+      "overdue": "Overdue",
+      "send": "Send",
+      "markPaid": "Mark as paid",
+      "reject": "Reject",
+      "status": {
+        "created": "Created",
+        "sent": "Sent",
+        "paid": "Paid",
+        "rejected": "Rejected"
+      }
+    },
+    "projects": {
+      "title": "Client Projects",
+      "empty": "No projects yet",
+      "progress": "Progress",
+      "tasks": "tasks"
+    },
+    "settings": {
+      "title": "Client Settings",
+      "save": "Save Changes"
+    }
+  },
+  "browserNotifications": {
+    "task": "New Task",
+    "project": "New Project",
+    "system": "System Notification",
+    "document": "New Document",
+    "sanction": "New Sanction",
+    "demand": "New Demand",
+    "message": "New Message",
+    "ticket": "Ticket Update",
+    "meeting": "New Meeting",
+    "chat": "New Message",
+    "permissionTitle": "Enable Notifications",
+    "permissionBody": "Get real-time alerts for demands, tasks and messages"
+  },
+  "demands": {
+    "title": "Demands",
+    "subtitle": "Manage and track employee resource requests",
+    "searchPlaceholder": "Search demands...",
+    "filterAll": "All",
+    "noResults": "No demands found",
+    "totalPrice": "Total Amount",
+    "items": "items",
+    "itemsList": "Items",
+    "itemName": "Item",
+    "quantity": "Qty",
+    "unitPrice": "Unit Price",
+    "subtotal": "Subtotal",
+    "proforma": "Proforma",
+    "viewProforma": "View proforma",
+    "image": "Image",
+    "importance": {
+      "barely": "Low priority",
+      "important": "Important",
+      "very_important": "Very important",
+      "urgent": "Urgent"
+    },
+    "requestedBy": "Requested by",
+    "rejectionReason": "Rejection reason",
+    "rejectionReasonPlaceholder": "Enter the rejection reason...",
+    "validatedOn": "Validated on",
+    "validate": "Validate",
+    "reject": "Reject",
+    "confirmReject": "Confirm Reject",
+    "cancel": "Cancel",
+    "close": "Close",
+    "startChat": "Start Chat",
+    "chatIntroMessage": "Conversation started for your demand: {{items}}",
+    "status": {
+      "pending": "Pending",
+      "validated": "Validated",
+      "rejected": "Rejected"
+    },
+    "stats": {
+      "total": "Total Demands",
+      "pending": "Pending",
+      "validated": "Validated",
+      "rejected": "Rejected",
+      "totalExpense": "Total Expense"
+    },
+    "table": {
+      "items": "Items",
+      "employee": "Employee",
+      "department": "Department",
+      "totalPrice": "Total",
+      "status": "Status",
+      "date": "Date"
+    }
+  },
+  "common": {
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "toast": {
+    "success": "Success",
+    "error": "Something went wrong",
+    "employeeCreated": "Employee created",
+    "employeeUpdated": "Employee updated",
+    "employeeDeleted": "Employee deleted",
+    "employeeDismissed": "Employee dismissed",
+    "employeeReinstated": "Employee reinstated",
+    "passwordChanged": "Password changed",
+    "passwordChangeFailed": "Failed to change password",
+    "taskCreated": "Task created",
+    "taskUpdated": "Task updated",
+    "taskDeleted": "Task deleted",
+    "projectCreated": "Project created",
+    "projectUpdated": "Project updated",
+    "projectDeleted": "Project deleted",
+    "departmentCreated": "Department created",
+    "departmentUpdated": "Department updated",
+    "goalAdded": "Goal added",
+    "goalUpdated": "Goal updated",
+    "goalDeleted": "Goal deleted",
+    "clientCreated": "Client created",
+    "clientUpdated": "Client updated",
+    "clientDeleted": "Client deleted",
+    "meetingScheduled": "Meeting scheduled",
+    "meetingUpdated": "Meeting updated",
+    "meetingDeleted": "Meeting deleted",
+    "invoiceCreated": "Invoice created",
+    "invoiceUpdated": "Invoice updated",
+    "invoiceSent": "Invoice sent",
+    "invoicePaid": "Invoice marked as paid",
+    "invoiceRejected": "Invoice rejected",
+    "invoiceDeleted": "Invoice deleted",
+    "templateSaved": "Template saved",
+    "expenseRecorded": "Expense recorded",
+    "expenseUpdated": "Expense updated",
+    "expenseDeleted": "Expense deleted",
+    "documentUploaded": "Document uploaded",
+    "documentDeleted": "Document deleted",
+    "ticketCreated": "Ticket created",
+    "ticketAccepted": "Ticket accepted",
+    "ticketClosed": "Ticket closed",
+    "demandApproved": "Demand approved",
+    "demandRejected": "Demand rejected",
+    "sanctionCreated": "Sanction created",
+    "sanctionDeleted": "Sanction deleted",
+    "formationCreated": "Training created",
+    "positionCreated": "Position created",
+    "positionUpdated": "Position updated",
+    "positionDeleted": "Position deleted",
+    "teamCreated": "Team created",
+    "interviewScheduled": "Interview scheduled",
+    "allNotificationsRead": "All notifications marked as read",
+    "loginFailed": "Login failed. Check your credentials.",
+    "accessDenied": "Access denied: insufficient permissions",
+    "accountCreated": "Account created"
+  },
+  "httpErrors": {
+    "network": "Connection error — check your internet and try again",
+    "serverError": "Server error — please try again in a moment",
+    "rateLimit": "Too many requests — please slow down",
+    "forbidden": "You don't have permission to do that"
+  }
+}
