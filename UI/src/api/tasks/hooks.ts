@@ -3,6 +3,7 @@ import { tasksApi } from './api';
 import type { CreateTaskDto, UpdateTaskDto, SelfAssignTaskDto, Task, TaskState } from './types';
 import { toast } from 'sonner';
 import i18n from '../../i18n/config';
+import { useSSE } from '../../hooks/useSSE';
 
 export type { SelfAssignTaskDto };
 
@@ -18,11 +19,13 @@ export const taskKeys = {
     allWeek: (start: string) => ['tasks', 'all-week', start] as const,
 };
 
-export const useTasks = (departmentId?: string, from?: string, to?: string) =>
-    useQuery({
+export const useTasks = (departmentId?: string, from?: string, to?: string) => {
+    useSSE('/tasks/sse', [taskKeys.all, taskKeys.myTasks]);
+    return useQuery({
         queryKey: [...taskKeys.all, departmentId, from, to].filter(Boolean),
         queryFn: () => tasksApi.getAll(departmentId, from, to),
     });
+};
 
 export const useTask = (id: string) =>
     useQuery({
@@ -31,11 +34,13 @@ export const useTask = (id: string) =>
         enabled: !!id,
     });
 
-export const useMyTasks = () =>
-    useQuery({
+export const useMyTasks = () => {
+    useSSE('/tasks/sse', [taskKeys.all, taskKeys.myTasks]);
+    return useQuery({
         queryKey: taskKeys.myTasks,
         queryFn: tasksApi.getMyTasks,
     });
+};
 
 export const useCreateTask = () => {
     const qc = useQueryClient();
@@ -75,6 +80,13 @@ export const useTasksByProject = (projectId: string) =>
         queryKey: taskKeys.byProject(projectId),
         queryFn: () => tasksApi.getByProject(projectId),
         enabled: !!projectId,
+    });
+
+export const useTasksByLead = (leadId: string) =>
+    useQuery({
+        queryKey: ['tasks', 'lead', leadId] as const,
+        queryFn: () => tasksApi.getByLead(leadId),
+        enabled: !!leadId,
     });
 
 export const useDeleteTask = () => {
@@ -236,5 +248,59 @@ export const useReorderSubtasks = () => {
             qc.invalidateQueries({ queryKey: taskKeys.myTasks });
         },
         onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+// Attachment hooks
+export const useUploadTaskAttachment = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ taskId, file }: { taskId: string; file: File }) =>
+            tasksApi.uploadAttachment(taskId, file),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.attachmentUploaded'));
+            qc.invalidateQueries({ queryKey: taskKeys.all });
+            qc.invalidateQueries({ queryKey: taskKeys.myTasks });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useDeleteTaskAttachment = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ taskId, attachmentId }: { taskId: string; attachmentId: string }) =>
+            tasksApi.deleteAttachment(taskId, attachmentId),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.attachmentDeleted'));
+            qc.invalidateQueries({ queryKey: taskKeys.all });
+            qc.invalidateQueries({ queryKey: taskKeys.myTasks });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useTimeDistribution = (employeeId: string) =>
+    useQuery({
+        queryKey: ['tasks', 'time-distribution', employeeId] as const,
+        queryFn: () => tasksApi.getTimeDistribution(employeeId),
+        enabled: !!employeeId,
+    });
+
+export const useTransferTask = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ taskId, targetWeekStart }: { taskId: string; targetWeekStart: string }) =>
+            tasksApi.transferTask(taskId, targetWeekStart),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: taskKeys.all });
+            qc.invalidateQueries({ queryKey: taskKeys.myTasks });
+            qc.invalidateQueries({ queryKey: taskKeys.myWeek });
+            qc.invalidateQueries({ queryKey: taskKeys.weeklyCheck });
+            toast.success(i18n.t('toast.taskTransferred'));
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || i18n.t('toast.error'));
+        },
     });
 };

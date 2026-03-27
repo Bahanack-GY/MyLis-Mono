@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+import { format } from 'date-fns';
 import { useProjectsByDepartment } from '../api/projects';
 import { useCreateTask, useTasksByEmployee, useUpdateTask, useDeleteTask, useTaskHistory, type Task, type TaskHistoryEntry } from '../api/tasks';
+import { useTimeDistribution } from '../api/tasks/hooks';
 import {
     FileText,
     Clock,
@@ -55,8 +57,16 @@ import {
     KeyRound,
     EyeOff,
     History,
+    Star,
+    ArrowRight,
 } from 'lucide-react';
-import { useEmployee, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword } from '../api/employees/hooks';
+import { useEmployee, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword, useEmployeeTransferHistory, useEmployeeReports } from '../api/employees/hooks';
+import RichTextEditor from '../components/RichTextEditor';
+import RichTextDisplay from '../components/RichTextDisplay';
+import TransferEmployeeModal from '../components/modals/TransferEmployeeModal';
+import TransferHistoryModal from '../components/modals/TransferHistoryModal';
+import { useEmployeeBusinessExpenses } from '../api/business-expenses/hooks';
+import type { BusinessExpense } from '../api/business-expenses/types';
 import { DetailPageSkeleton } from '../components/Skeleton';
 import badge1 from '../assets/badges/1.jpg';
 import badge2 from '../assets/badges/2.jpg';
@@ -88,6 +98,8 @@ import { useSanctionsByEmployee, useCreateSanction, useDeleteSanction } from '..
 import { useEntretiens } from '../api/entretiens/hooks';
 import { useDocuments } from '../api/documents/hooks';
 import { documentsApi } from '../api/documents/api';
+import { useLeads, useCommercialKpis, useEmployeeGoal, useSetGoal } from '../api/commercial/hooks';
+import type { Lead } from '../api/commercial/types';
 import {
     BarChart,
     Bar,
@@ -98,7 +110,9 @@ import {
     Cell,
     AreaChart,
     Area,
-    CartesianGrid
+    CartesianGrid,
+    PieChart,
+    Pie
 } from 'recharts';
 import type { EmployeeTab } from '../components/EmployeeDetailSidebar';
 import type { Employee } from '../api/employees/types';
@@ -599,6 +613,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
     const { data: employeeTasks = [] } = useTasksByEmployee(employee.id);
     const { data: departmentProjects = [] } = useProjectsByDepartment(employee.departmentId);
     const { data: employeeBadges = [] } = useEmployeeBadges(String(employee.id));
+    const { data: timeDistribution = [] } = useTimeDistribution(employee.id);
 
     const trophies: { id: number; title: string; date: string; icon: string }[] = [];
     const badges = employeeBadges.map(b => ({
@@ -960,6 +975,55 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                     </div>
                 </motion.div>
 
+                {/* Time Distribution Donut Chart */}
+                {timeDistribution.length > 0 && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="bg-white rounded-2xl p-5 border border-gray-100">
+                        <h3 className="font-semibold text-gray-800 text-sm mb-0.5">{t('employeeDetail.tasks.timeDistribution')}</h3>
+                        <p className="text-[11px] text-gray-400 mb-4">{t('employeeDetail.tasks.timeDistributionDesc')}</p>
+                        <div className="relative w-full h-[180px] mb-4">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={timeDistribution}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={50}
+                                        outerRadius={72}
+                                        paddingAngle={3}
+                                        dataKey="hours"
+                                        nameKey="name"
+                                    >
+                                        {timeDistribution.map((item, index) => (
+                                            <Cell key={index} fill={item.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: '12px' }}
+                                        formatter={(value: number, name: string) => [`${value}h (${timeDistribution.find(d => d.name === name)?.percentage ?? 0}%)`, name === '__uncategorized__' ? t('employeeDetail.tasks.uncategorized') : name]}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="text-center">
+                                    <p className="text-lg font-bold text-gray-800">{Math.round(timeDistribution.reduce((s, d) => s + d.hours, 0))}h</p>
+                                    <p className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">{t('employeeDetail.tasks.total')}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="space-y-1.5">
+                            {timeDistribution.map((item, index) => (
+                                <div key={index} className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                                        <span className="text-xs text-gray-600 truncate">{item.name === '__uncategorized__' ? t('employeeDetail.tasks.uncategorized') : item.name}</span>
+                                    </div>
+                                    <span className="text-xs font-semibold text-gray-700 shrink-0">{item.percentage}%</span>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+
                 {/* Trophies Card */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} onClick={() => setShowTrophiesModal(true)} className="bg-white rounded-2xl p-5 border border-gray-100 cursor-pointer hover:border-[#33cbcc]/30 transition-colors">
                     <div className="flex items-center justify-between mb-4">
@@ -1100,6 +1164,8 @@ interface TaskDraft {
     endDate: string;
     startTime: string;
     endTime: string;
+    urgent: boolean;
+    important: boolean;
 }
 
 const emptyDraft = (): TaskDraft => ({
@@ -1116,6 +1182,8 @@ const emptyDraft = (): TaskDraft => ({
     endDate: '',
     startTime: '',
     endTime: '',
+    urgent: false,
+    important: false,
 });
 
 const formatDateStr = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -1154,6 +1222,8 @@ const EditTaskModal = ({
         startDate: task.startDate ? task.startDate.split('T')[0] : '',
         endDate: task.endDate ? task.endDate.split('T')[0] : '',
         startTime: task.startTime || '',
+        urgent: task.urgent || false,
+        important: task.important || false,
     });
 
     const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
@@ -1193,7 +1263,7 @@ const EditTaskModal = ({
                     </div>
                     <div>
                         <label className={labelCls}>{t('employeeDetail.tasks.descriptionPlaceholder')}</label>
-                        <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className={`${inputCls} resize-none`} />
+                        <RichTextEditor value={form.description} onChange={html => setForm(f => ({ ...f, description: html }))} />
                     </div>
                     <div>
                         <label className={labelCls}>{t('employeeDetail.tasks.difficulty')}</label>
@@ -1217,11 +1287,23 @@ const EditTaskModal = ({
                         <label className={labelCls}>{t('employeeDetail.tasks.startTime')}</label>
                         <input type="time" value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} className={inputCls} />
                     </div>
+                    <div className="flex gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                            <AlertTriangle size={14} className="text-red-400" />
+                            <span className="text-sm text-gray-600">{t('tasksPage.urgent')}</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
+                            <Star size={14} className="text-amber-500" />
+                            <span className="text-sm text-gray-600">{t('tasksPage.important')}</span>
+                        </label>
+                    </div>
                 </div>
                 <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
                     <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('employeeDetail.cancel')}</button>
                     <button
-                        onClick={() => onSave({ title: form.title, description: form.description, difficulty: form.difficulty as any, dueDate: form.dueDate || undefined, startDate: form.startDate || undefined, endDate: form.endDate || undefined, startTime: form.startTime || undefined })}
+                        onClick={() => onSave({ title: form.title, description: form.description, difficulty: form.difficulty as any, dueDate: form.dueDate || undefined, startDate: form.startDate || undefined, endDate: form.endDate || undefined, startTime: form.startTime || undefined, urgent: form.urgent, important: form.important })}
                         disabled={!form.title.trim() || isSaving}
                         className="px-5 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb5b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                     >
@@ -1321,6 +1403,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
     // Fetch department projects and employee tasks
     const { data: departmentProjects } = useProjectsByDepartment(employee.departmentId);
     const { data: apiTasks = [] } = useTasksByEmployee(employee.id);
+    const { data: timeDistribution = [] } = useTimeDistribution(employee.id);
     const createTaskMutation = useCreateTask();
     const updateTaskMutation = useUpdateTask();
     const deleteTaskMutation = useDeleteTask();
@@ -1330,7 +1413,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
     console.log('Department projects:', departmentProjects);
     console.log('API Tasks:', apiTasks);
 
-    const updateDraft = (index: number, field: string, value: string) => {
+    const updateDraft = (index: number, field: string, value: string | boolean) => {
         setDrafts(prev => prev.map((d, i) => i === index ? { ...d, [field]: value } : d));
     };
     const addDraftRow = () => setDrafts(prev => [...prev, emptyDraft()]);
@@ -1353,6 +1436,8 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                 endTime: draft.endTime || undefined,
                 priority: draft.priority,
                 difficulty: draft.difficulty?.toUpperCase(), // Convert to uppercase for database enum
+                urgent: draft.urgent || false,
+                important: draft.important || false,
             });
         }
         
@@ -1437,6 +1522,60 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                 </div>
             </div>
 
+            {/* Time Distribution Donut Chart */}
+            {timeDistribution.length > 0 && (
+                <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                    <h3 className="text-base font-bold text-gray-800 mb-1">{t('employeeDetail.tasks.timeDistribution')}</h3>
+                    <p className="text-xs text-gray-400 mb-4">{t('employeeDetail.tasks.timeDistributionDesc')}</p>
+                    <div className="flex flex-col md:flex-row items-center gap-6">
+                        <div className="relative w-[200px] h-[200px] shrink-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={timeDistribution}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={55}
+                                        outerRadius={80}
+                                        paddingAngle={3}
+                                        dataKey="hours"
+                                        nameKey="name"
+                                    >
+                                        {timeDistribution.map((item, index) => (
+                                            <Cell key={index} fill={item.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: '13px' }}
+                                        formatter={(value: number, name: string) => [`${value}h (${timeDistribution.find(d => d.name === name)?.percentage ?? 0}%)`, name === '__uncategorized__' ? t('employeeDetail.tasks.uncategorized') : name]}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="text-center">
+                                    <p className="text-lg font-bold text-gray-800">{Math.round(timeDistribution.reduce((s, d) => s + d.hours, 0))}h</p>
+                                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{t('employeeDetail.tasks.total')}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex-1 w-full space-y-2">
+                            {timeDistribution.map((item, index) => (
+                                <div key={index} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors">
+                                    <div className="flex items-center gap-2.5 min-w-0">
+                                        <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                                        <span className="text-sm text-gray-700 truncate">{item.name === '__uncategorized__' ? t('employeeDetail.tasks.uncategorized') : item.name}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 shrink-0">
+                                        <span className="text-xs text-gray-400">{item.hours}h</span>
+                                        <span className="text-sm font-semibold text-gray-800 w-12 text-right">{item.percentage}%</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Calendar sub-header */}
             {viewMode === 'calendar' && (
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
@@ -1474,10 +1613,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                             </div>
                                         )}
                                         <input value={draft.title} onChange={e => updateDraft(idx, 'title', e.target.value)} placeholder={t('employeeDetail.tasks.titlePlaceholder')} className={inputClass} />
-                                        <div className="relative">
-                                            <AlignLeft size={14} className="absolute left-4 top-3.5 text-gray-400" />
-                                            <textarea value={draft.description} onChange={e => updateDraft(idx, 'description', e.target.value)} placeholder={t('employeeDetail.tasks.descriptionPlaceholder')} rows={2} className={`${inputClass} pl-10 resize-none`} />
-                                        </div>
+                                        <RichTextEditor value={draft.description} onChange={html => updateDraft(idx, 'description', html)} placeholder={t('employeeDetail.tasks.descriptionPlaceholder')} />
                                         <div>
                                             <label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><FolderOpen size={10} /> {t('employeeDetail.tasks.project')}</label>
                                             <select value={draft.project} onChange={e => updateDraft(idx, 'project', e.target.value)} className={`${selectClass} w-full`}>
@@ -1558,6 +1694,18 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                             <div><label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><Flag size={10} /> {t('employeeDetail.tasks.priority')}</label><select value={draft.priority} onChange={e => updateDraft(idx, 'priority', e.target.value)} className={`${selectClass} w-full`}><option value="low">{t('employeeDetail.tasks.priorityLow')}</option><option value="medium">{t('employeeDetail.tasks.priorityMedium')}</option><option value="high">{t('employeeDetail.tasks.priorityHigh')}</option><option value="urgent">{t('employeeDetail.tasks.priorityUrgent')}</option></select></div>
                                             <div><label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><Repeat size={10} /> {t('employeeDetail.tasks.repeat')}</label><select value={draft.repeat} onChange={e => updateDraft(idx, 'repeat', e.target.value)} className={`${selectClass} w-full`}><option value="none">{t('employeeDetail.tasks.repeatNone')}</option><option value="daily">{t('employeeDetail.tasks.repeatDaily')}</option><option value="weekly">{t('employeeDetail.tasks.repeatWeekly')}</option><option value="monthly">{t('employeeDetail.tasks.repeatMonthly')}</option></select></div>
                                         </div>
+                                        <div className="flex gap-4">
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" checked={draft.urgent} onChange={e => updateDraft(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                                                <AlertTriangle size={14} className="text-red-400" />
+                                                <span className="text-sm text-gray-600">{t('tasksPage.urgent')}</span>
+                                            </label>
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input type="checkbox" checked={draft.important} onChange={e => updateDraft(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
+                                                <Star size={14} className="text-amber-500" />
+                                                <span className="text-sm text-gray-600">{t('tasksPage.important')}</span>
+                                            </label>
+                                        </div>
                                     </motion.div>
                                 ))}
                                 <button onClick={addDraftRow} className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-[#33cbcc]/40 hover:text-[#33cbcc] transition-colors flex items-center justify-center gap-2"><Plus size={16} /> {t('employeeDetail.tasks.addAnother')}</button>
@@ -1587,7 +1735,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                             <div className="space-y-4">
                                 <div>
                                     <h3 className="text-base font-semibold text-gray-800">{selectedTask.title}</h3>
-                                    <p className="text-sm text-gray-500 mt-1">{selectedTask.description || t('employeeDetail.tasks.noDescription')}</p>
+                                    {selectedTask.description ? <RichTextDisplay content={selectedTask.description} className="text-sm text-gray-500 mt-1" /> : <p className="text-sm text-gray-500 mt-1">{t('employeeDetail.tasks.noDescription')}</p>}
                                 </div>
                                 {selectedTask.projectId && (() => {
                                     const proj = (departmentProjects || []).find(p => p.id === selectedTask.projectId);
@@ -1669,7 +1817,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className={`text-sm font-medium ${task.state === 'COMPLETED' ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.title}</p>
-                                    {task.description && <p className="text-[11px] text-gray-400 mt-0.5 line-clamp-1">{task.description}</p>}
+                                    {task.description && <RichTextDisplay content={task.description} truncate maxLines={1} className="text-[11px] text-gray-400 mt-0.5" />}
                                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                                         <span className="text-[11px] text-gray-400 flex items-center gap-1"><Clock size={11} /> {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}</span>
                                         {task.assignedTo && <span className="text-[11px] text-gray-500 font-medium">{task.assignedTo.firstName} {task.assignedTo.lastName}</span>}
@@ -1682,6 +1830,8 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                             <div className="flex items-center gap-2 ml-10 sm:ml-0">
                                 <span className="text-[10px] font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: `${difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color}15`, color: difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color }}>{difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].label}</span>
                                 <span className="text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-0.5" style={{ backgroundColor: `${priorityConfig[task.priority || 'medium'].color}15`, color: priorityConfig[task.priority || 'medium'].color }}><Flag size={9} /> {priorityConfig[task.priority || 'medium'].label}</span>
+                                {task.urgent && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-500"><AlertTriangle size={10} />{t('tasksPage.urgent')}</span>}
+                                {task.important && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600"><Star size={10} />{t('tasksPage.important')}</span>}
                                 <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${task.state === 'COMPLETED' ? 'bg-green-50 text-green-500' : task.state === 'IN_PROGRESS' ? 'bg-[#33cbcc]/10 text-[#33cbcc]' : 'bg-gray-100 text-gray-400'}`}>
                                     {task.state === 'COMPLETED' ? t('employeeDetail.tasks.done') : task.state === 'IN_PROGRESS' ? t('employeeDetail.tasks.inProgress') : t('employeeDetail.tasks.pending')}
                                 </span>
@@ -1785,7 +1935,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                                                 <div 
                                                                     key={task.id} 
                                                                     onClick={e => { e.stopPropagation(); setSelectedTask(task); }} 
-                                                                    className="mb-1 text-[10px] leading-snug p-2 rounded-lg cursor-pointer font-medium border hover:shadow-md transition-shadow"
+                                                                    className="mb-1 text-[10px] leading-snug p-2 rounded-lg cursor-pointer font-medium border  transition-shadow"
                                                                     style={{ 
                                                                         backgroundColor: c.bg, 
                                                                         color: c.text, 
@@ -1810,7 +1960,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                                             <div 
                                                                 key={task.id} 
                                                                 onClick={e => { e.stopPropagation(); setSelectedTask(task); }} 
-                                                                className="absolute top-1 left-1 text-[10px] leading-snug p-2 rounded-lg cursor-pointer font-medium border hover:shadow-md transition-shadow z-10"
+                                                                className="absolute top-1 left-1 text-[10px] leading-snug p-2 rounded-lg cursor-pointer font-medium border  transition-shadow z-10"
                                                                 style={{ 
                                                                     backgroundColor: c.bg, 
                                                                     color: c.text, 
@@ -1858,7 +2008,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                             ? task.startTime 
                                             : '';
                                         return (
-                                            <div key={task.id} onClick={e => { e.stopPropagation(); setSelectedTask(task); }} className="text-sm p-3 rounded-xl cursor-pointer font-medium border flex-1 min-w-[140px] hover:shadow-sm transition-shadow" style={{ backgroundColor: c.bg, color: c.text, borderColor: c.border }}>
+                                            <div key={task.id} onClick={e => { e.stopPropagation(); setSelectedTask(task); }} className="text-sm p-3 rounded-xl cursor-pointer font-medium border flex-1 min-w-[140px]  transition-shadow" style={{ backgroundColor: c.bg, color: c.text, borderColor: c.border }}>
                                                 <div className="flex items-start justify-between gap-2">
                                                     <p className="font-semibold flex-1">{task.title}</p>
                                                     {timeDisplay && (
@@ -1950,7 +2100,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                         const { daysInMonth, offset } = getMonthDays(selectedDate.getFullYear(), mIdx);
                         const isCurrent = new Date().getMonth() === mIdx && new Date().getFullYear() === selectedDate.getFullYear();
                         return (
-                            <div key={mIdx} onClick={() => { const d = new Date(selectedDate); d.setMonth(mIdx); setSelectedDate(d); setCalendarMode('month'); }} className={`bg-white rounded-2xl p-5 border cursor-pointer hover:border-[#33cbcc]/30 hover:shadow-sm transition-all ${isCurrent ? 'border-[#33cbcc]/20 shadow-sm' : 'border-gray-100'}`}>
+                            <div key={mIdx} onClick={() => { const d = new Date(selectedDate); d.setMonth(mIdx); setSelectedDate(d); setCalendarMode('month'); }} className={`bg-white rounded-2xl p-5 border cursor-pointer hover:border-[#33cbcc]/30  transition-all ${isCurrent ? 'border-[#33cbcc]/20 shadow-sm' : 'border-gray-100'}`}>
                                 <div className="flex items-center justify-between mb-4">
                                     <h4 className={`text-sm font-bold capitalize ${isCurrent ? 'text-[#33cbcc]' : 'text-gray-800'}`}>{monthName}</h4>
                                     {monthTasks.length > 0 && <span className="text-[10px] font-bold bg-[#33cbcc]/10 text-[#33cbcc] px-2 py-0.5 rounded-full">{monthTasks.length}</span>}
@@ -2026,6 +2176,87 @@ const SEVERITY_COLORS: Record<string, string> = {
     LEGER: 'bg-yellow-50 text-yellow-600',
     MOYEN: 'bg-orange-50 text-orange-600',
     GRAVE: 'bg-red-50 text-red-600',
+};
+
+/* ─── Frais de Vie View ──────────────────────────────── */
+
+const STATUS_STYLES: Record<string, string> = {
+    PENDING: 'bg-amber-50 text-amber-600',
+    VALIDATED: 'bg-green-50 text-green-600',
+    REJECTED: 'bg-red-50 text-red-600',
+};
+
+const FraisDeVieView = ({ employee }: { employee: Employee }) => {
+    const { t } = useTranslation();
+    const { data: expenses = [], isLoading } = useEmployeeBusinessExpenses(String(employee.id));
+
+    const totalValidated = expenses.filter(e => e.status === 'VALIDATED').reduce((s, e) => s + Number(e.amount), 0);
+    const pending = expenses.filter(e => e.status === 'PENDING').length;
+    const validated = expenses.filter(e => e.status === 'VALIDATED').length;
+    const rejected = expenses.filter(e => e.status === 'REJECTED').length;
+
+    if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={28} className="animate-spin text-[#33cbcc]" /></div>;
+
+    return (
+        <div className="space-y-6">
+            {/* Stats row */}
+            <div className="grid grid-cols-4 gap-4">
+                <div className="bg-white rounded-2xl border border-gray-100 p-4">
+                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('businessExpenses.stats.total')}</p>
+                    <p className="text-2xl font-bold text-gray-800 mt-1">{expenses.length}</p>
+                </div>
+                <div className="bg-amber-50 rounded-2xl border border-amber-100 p-4">
+                    <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider">{t('businessExpenses.stats.pending')}</p>
+                    <p className="text-2xl font-bold text-amber-600 mt-1">{pending}</p>
+                </div>
+                <div className="bg-green-50 rounded-2xl border border-green-100 p-4">
+                    <p className="text-[10px] font-semibold text-green-500 uppercase tracking-wider">{t('businessExpenses.stats.validated')}</p>
+                    <p className="text-2xl font-bold text-green-600 mt-1">{validated}</p>
+                </div>
+                <div className="bg-[#33cbcc]/5 rounded-2xl border border-[#33cbcc]/15 p-4">
+                    <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider">{t('businessExpenses.stats.totalAmount')}</p>
+                    <p className="text-2xl font-bold text-gray-800 mt-1">{new Intl.NumberFormat('fr-FR').format(totalValidated)} <span className="text-sm font-normal text-gray-400">FCFA</span></p>
+                </div>
+            </div>
+
+            {/* Expense list */}
+            {expenses.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
+                    <Wallet size={40} className="mx-auto text-gray-300 mb-3" />
+                    <p className="text-sm text-gray-400">{t('businessExpenses.empty')}</p>
+                </div>
+            ) : (
+                <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+                    {expenses.map((exp: BusinessExpense) => (
+                        <div key={exp.id} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors">
+                            {/* Type badge */}
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: exp.expenseType?.color || '#33cbcc' }} />
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium text-gray-800">{exp.expenseType?.name || '—'}</p>
+                                    {exp.description && <p className="text-xs text-gray-400 truncate mt-0.5">{exp.description}</p>}
+                                </div>
+                            </div>
+                            {/* Amount */}
+                            <p className="text-sm font-bold text-gray-800 shrink-0">{new Intl.NumberFormat('fr-FR').format(Number(exp.amount))} FCFA</p>
+                            {/* Date */}
+                            <p className="text-xs text-gray-400 shrink-0 w-24 text-right">{new Date(exp.date).toLocaleDateString('fr-FR')}</p>
+                            {/* Status */}
+                            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full shrink-0 ${STATUS_STYLES[exp.status] || ''}`}>
+                                {t(`businessExpenses.status.${exp.status.toLowerCase()}`)}
+                            </span>
+                            {/* Receipt */}
+                            {exp.receiptPath && (
+                                <a href={exp.receiptPath} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0">
+                                    <Eye size={14} />
+                                </a>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 };
 
 const SanctionsView = ({ employee }: { employee: Employee }) => {
@@ -2398,54 +2629,217 @@ const FormationsView = ({ employee: _employee }: { employee: Employee }) => {
 // ============================================================
 // PROSPECTS VIEW (Commercial role)
 // ============================================================
-type ProspectStatus = 'new' | 'contacted' | 'negotiation' | 'won' | 'lost';
-interface Prospect { id: number; company: string; contact: string; value: number; status: ProspectStatus; date: string; }
+const stageConfig: Record<string, { color: string; bg: string }> = {
+    PROSPECTION: { color: '#6366f1', bg: '#eef2ff' },
+    QUALIFICATION: { color: '#8b5cf6', bg: '#f5f3ff' },
+    PROPOSITION: { color: '#f59e0b', bg: '#fffbeb' },
+    NEGOCIATION: { color: '#3b82f6', bg: '#eff6ff' },
+    CLOSING: { color: '#10b981', bg: '#ecfdf5' },
+    GAGNE: { color: '#22c55e', bg: '#f0fdf4' },
+    PERDU: { color: '#ef4444', bg: '#fef2f2' },
+};
 
-const ProspectsView = ({ employee: _employee }: { employee: Employee }) => {
+const priorityConfig: Record<string, { color: string; bg: string }> = {
+    HOT: { color: '#ef4444', bg: '#fef2f2' },
+    WARM: { color: '#f59e0b', bg: '#fffbeb' },
+    COLD: { color: '#3b82f6', bg: '#eff6ff' },
+};
+
+const ProspectsView = ({ employee }: { employee: Employee }) => {
     const { t } = useTranslation();
-    const monthlyGoal = 0;
+    const { data: leadsData, isLoading: leadsLoading } = useLeads({ assignedToId: String(employee.id) });
+    const { data: kpis, isLoading: kpisLoading } = useCommercialKpis({ employeeId: String(employee.id) });
 
-    const [prospects, setProspects] = useState<Prospect[]>([]);
+    const now = new Date();
+    const [goalYear, setGoalYear] = useState(now.getFullYear());
+    const [goalMonth, setGoalMonth] = useState(now.getMonth() + 1);
+    const isCurrentMonth = goalYear === now.getFullYear() && goalMonth === now.getMonth() + 1;
 
-    const [filterStatus, setFilterStatus] = useState<ProspectStatus | 'all'>('all');
+    const { data: employeeGoal, isLoading: goalLoading } = useEmployeeGoal({
+        employeeId: String(employee.id),
+        year: goalYear,
+        month: goalMonth,
+    });
+    const setGoalMutation = useSetGoal();
+    const [editingGoal, setEditingGoal] = useState(false);
+    const [goalInput, setGoalInput] = useState('');
 
-    const statusConfig: Record<ProspectStatus, { color: string; bg: string; label: string }> = {
-        new: { color: '#3b82f6', bg: '#eff6ff', label: t('employeeDetail.prospects.status.new') },
-        contacted: { color: '#f59e0b', bg: '#fffbeb', label: t('employeeDetail.prospects.status.contacted') },
-        negotiation: { color: '#8b5cf6', bg: '#f5f3ff', label: t('employeeDetail.prospects.status.negotiation') },
-        won: { color: '#22c55e', bg: '#f0fdf4', label: t('employeeDetail.prospects.status.won') },
-        lost: { color: '#ef4444', bg: '#fef2f2', label: t('employeeDetail.prospects.status.lost') },
+    const saveGoal = () => {
+        const amount = parseFloat(goalInput.replace(/\s/g, '').replace(',', '.'));
+        if (isNaN(amount) || amount < 0) return;
+        setGoalMutation.mutate(
+            { employeeId: String(employee.id), year: goalYear, month: goalMonth, targetAmount: amount },
+            { onSuccess: () => setEditingGoal(false) },
+        );
     };
 
-    const wonCount = prospects.filter(p => p.status === 'won').length;
-    const remaining = Math.max(0, monthlyGoal - wonCount);
-    const goalPercent = Math.round((wonCount / monthlyGoal) * 100);
-    const totalValue = prospects.filter(p => p.status === 'won').reduce((s, p) => s + p.value, 0);
-    const conversionRate = prospects.length > 0 ? Math.round((wonCount / prospects.length) * 100) : 0;
-    const formatValue = (v: number) => new Intl.NumberFormat('fr-FR').format(v) + ' XAF';
-
-    const filtered = filterStatus === 'all' ? prospects : prospects.filter(p => p.status === filterStatus);
-
-    const cycleStatus = (id: number) => {
-        const order: ProspectStatus[] = ['new', 'contacted', 'negotiation', 'won', 'lost'];
-        setProspects(prev => prev.map(p => {
-            if (p.id !== id) return p;
-            const idx = order.indexOf(p.status);
-            return { ...p, status: order[(idx + 1) % order.length] };
-        }));
+    const prevMonth = () => {
+        if (goalMonth === 1) { setGoalYear(y => y - 1); setGoalMonth(12); }
+        else setGoalMonth(m => m - 1);
     };
+    const nextMonth = () => {
+        if (isCurrentMonth) return;
+        if (goalMonth === 12) { setGoalYear(y => y + 1); setGoalMonth(1); }
+        else setGoalMonth(m => m + 1);
+    };
+
+    const MONTH_LABELS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+        'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
+
+    const progressColor = (pct: number | null) => {
+        if (pct === null) return '#9CA3AF';
+        if (pct >= 100) return '#33cbcc';
+        if (pct >= 80) return '#22c55e';
+        if (pct >= 50) return '#f59e0b';
+        return '#ef4444';
+    };
+    const formatFCFA = (n: number) => new Intl.NumberFormat('fr-FR').format(Math.round(n)) + ' FCFA';
+
+    const leads: Lead[] = leadsData?.data ?? [];
+    const formatValue = (v: number) => new Intl.NumberFormat('fr-FR').format(v) + ' FCFA';
+
+    const totalLeads = leads.length;
+    const wonCount = leads.filter(l => l.saleStage === 'GAGNE').length;
+    const pipelineValue = leads.filter(l => !['GAGNE', 'PERDU'].includes(l.saleStage)).reduce((s, l) => s + (l.potentialRevenue || 0), 0);
+    const winRate = kpis?.winRate ?? (totalLeads > 0 ? Math.round((wonCount / totalLeads) * 100) : 0);
+
+    const isLoading = leadsLoading || kpisLoading;
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-20">
+                <Loader2 className="animate-spin text-[#33cbcc]" size={32} />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-5">
-            <h2 className="text-xl font-bold text-gray-800">{t('employeeDetail.prospects.title')}</h2>
+            <h2 className="text-xl font-bold text-gray-800">{t('employeeDetail.prospects.title', 'Prospects & Leads')}</h2>
 
-            {/* Stat Cards */}
+            {/* CA Goal Progress Bar */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-100 p-5">
+                {/* Header row: title + month navigator */}
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <Flag size={15} className="text-[#33cbcc]" />
+                        <span className="text-sm font-semibold text-gray-700">
+                            {t('employeeDetail.prospects.caGoal', 'Objectif CA mensuel')}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                            <ChevronLeft size={14} />
+                        </button>
+                        <span className="text-xs font-semibold text-gray-600 min-w-[110px] text-center">
+                            {MONTH_LABELS[goalMonth - 1]} {goalYear}
+                        </span>
+                        <button onClick={nextMonth} disabled={isCurrentMonth} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30">
+                            <ChevronRight size={14} />
+                        </button>
+                    </div>
+                </div>
+
+                {goalLoading ? (
+                    <div className="h-12 flex items-center justify-center">
+                        <div className="w-5 h-5 border-2 border-[#33cbcc] border-t-transparent rounded-full animate-spin" />
+                    </div>
+                ) : (
+                    <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+                        {/* Numbers */}
+                        <div className="flex-1 space-y-0.5">
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                {t('commercial.goal.realized', 'CA réalisé')}
+                            </p>
+                            <p className="text-2xl font-bold text-gray-800">{formatFCFA(employeeGoal?.actualCA || 0)}</p>
+                            {employeeGoal?.targetAmount ? (
+                                <p className="text-xs text-gray-500">
+                                    {t('commercial.goal.target', 'Objectif')} :{' '}
+                                    <span className="font-semibold text-gray-700">{formatFCFA(employeeGoal.targetAmount)}</span>
+                                </p>
+                            ) : (
+                                <p className="text-xs text-gray-400 italic">
+                                    {t('commercial.goal.noTarget', 'Aucun objectif défini pour ce mois')}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Progress bar */}
+                        {employeeGoal?.targetAmount ? (
+                            <div className="w-full sm:w-64 space-y-1.5">
+                                <div className="flex justify-between text-xs font-medium">
+                                    <span className="text-gray-500">{t('commercial.goal.progress', 'Progression')}</span>
+                                    <span style={{ color: progressColor(employeeGoal.progress) }} className="font-bold">
+                                        {employeeGoal.progress ?? 0}%
+                                        {(employeeGoal.progress ?? 0) >= 100 && ' 🎉'}
+                                    </span>
+                                </div>
+                                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${Math.min(employeeGoal.progress ?? 0, 100)}%` }}
+                                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                                        className="h-full rounded-full"
+                                        style={{ backgroundColor: progressColor(employeeGoal.progress) }}
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-400 text-right">
+                                    {formatFCFA(Math.max(0, (employeeGoal.targetAmount || 0) - (employeeGoal.actualCA || 0)))}
+                                    {' '}{t('commercial.goal.remaining', 'restants')}
+                                </p>
+                            </div>
+                        ) : null}
+
+                        {/* Set / edit goal button */}
+                        <div className="shrink-0">
+                            {editingGoal ? (
+                                <div className="flex items-center gap-1.5">
+                                    <input
+                                        type="number"
+                                        value={goalInput}
+                                        onChange={e => setGoalInput(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Enter') saveGoal(); if (e.key === 'Escape') setEditingGoal(false); }}
+                                        autoFocus
+                                        placeholder="0"
+                                        className="w-28 text-right text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                    />
+                                    <button
+                                        onClick={saveGoal}
+                                        disabled={setGoalMutation.isPending}
+                                        className="p-1.5 rounded-lg bg-[#33cbcc] text-white hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors"
+                                    >
+                                        <Check size={13} />
+                                    </button>
+                                    <button
+                                        onClick={() => setEditingGoal(false)}
+                                        className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+                                    >
+                                        <X size={13} />
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => { setEditingGoal(true); setGoalInput(employeeGoal?.targetAmount ? String(employeeGoal.targetAmount) : ''); }}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-gray-500 hover:border-[#33cbcc]/40 hover:text-[#33cbcc] transition-colors"
+                                >
+                                    <Pencil size={12} />
+                                    {employeeGoal?.targetAmount
+                                        ? t('commercial.goal.editGoal', 'Modifier')
+                                        : t('commercial.goal.setGoal', 'Définir objectif')}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </motion.div>
+
+            {/* KPI Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: t('employeeDetail.prospects.goal'), value: monthlyGoal, icon: Target, color: '#33cbcc' },
-                    { label: t('employeeDetail.prospects.reached'), value: wonCount, icon: CheckCircle2, color: '#22c55e' },
-                    { label: t('employeeDetail.prospects.remaining'), value: remaining, icon: Clock, color: '#f59e0b' },
-                    { label: t('employeeDetail.prospects.conversionRate'), value: `${conversionRate}%`, icon: TrendingUp, color: '#8b5cf6' },
+                    { label: t('employeeDetail.prospects.totalLeads', 'Total Leads'), value: totalLeads, icon: Target, color: '#33cbcc' },
+                    { label: t('employeeDetail.prospects.won', 'Won'), value: wonCount, icon: CheckCircle2, color: '#22c55e' },
+                    { label: t('employeeDetail.prospects.pipelineValue', 'Pipeline'), value: formatValue(pipelineValue), icon: TrendingUp, color: '#8b5cf6' },
+                    { label: t('employeeDetail.prospects.winRate', 'Win Rate'), value: `${winRate}%`, icon: Target, color: '#f59e0b' },
                 ].map((stat, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-white rounded-2xl p-5 border border-gray-100 relative overflow-hidden">
                         <stat.icon size={48} className="absolute -right-2 -bottom-2 opacity-5" style={{ color: stat.color }} />
@@ -2455,67 +2849,196 @@ const ProspectsView = ({ employee: _employee }: { employee: Employee }) => {
                 ))}
             </div>
 
-            {/* Goal Progress */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-2xl p-5 border border-gray-100">
-                <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-gray-700">{t('employeeDetail.prospects.goal')}</span>
-                    <span className="text-sm font-bold" style={{ color: goalPercent >= 100 ? '#22c55e' : goalPercent >= 60 ? '#f59e0b' : '#ef4444' }}>{wonCount}/{monthlyGoal}</span>
-                </div>
-                <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <motion.div initial={{ width: 0 }} animate={{ width: `${Math.min(100, goalPercent)}%` }} transition={{ delay: 0.3, duration: 0.8 }} className="h-full rounded-full" style={{ backgroundColor: goalPercent >= 100 ? '#22c55e' : goalPercent >= 60 ? '#f59e0b' : '#ef4444' }} />
-                </div>
-                <p className="text-xs text-gray-400 mt-2">{formatValue(totalValue)} {t('employeeDetail.prospects.reached').toLowerCase()}</p>
-            </motion.div>
-
-            {/* Filter pills */}
-            <div className="flex flex-wrap gap-2">
-                {(['all', 'new', 'contacted', 'negotiation', 'won', 'lost'] as const).map(s => {
-                    const isActive = filterStatus === s;
-                    const count = s === 'all' ? prospects.length : prospects.filter(p => p.status === s).length;
-                    return (
-                        <button
-                            key={s}
-                            onClick={() => setFilterStatus(s)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
-                                isActive ? 'bg-[#33cbcc] text-white shadow-sm' : 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300'
-                            }`}
-                        >
-                            {s !== 'all' && <span className="w-2 h-2 rounded-full" style={{ backgroundColor: isActive ? '#fff' : statusConfig[s].color }} />}
-                            {s === 'all' ? 'All' : statusConfig[s].label}
-                            <span className={`text-[10px] ${isActive ? 'text-white/70' : 'text-gray-400'}`}>({count})</span>
-                        </button>
-                    );
-                })}
-            </div>
-
-            {/* Prospects List */}
+            {/* Leads List */}
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
-                {filtered.map((prospect, i) => {
-                    const cfg = statusConfig[prospect.status];
+                {leads.map((lead, i) => {
+                    const stageCfg = stageConfig[lead.saleStage] ?? { color: '#6b7280', bg: '#f3f4f6' };
+                    const prioCfg = priorityConfig[lead.priority] ?? { color: '#6b7280', bg: '#f3f4f6' };
                     return (
-                        <motion.div key={prospect.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors group">
-                            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: cfg.bg }}>
-                                <Building2 size={18} style={{ color: cfg.color }} />
+                        <motion.div key={lead.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors">
+                            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: stageCfg.bg }}>
+                                <Building2 size={18} style={{ color: stageCfg.color }} />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 truncate">{prospect.company}</p>
+                                <p className="text-sm font-semibold text-gray-800 truncate">{lead.company}</p>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <Users size={12} className="text-gray-400" />
-                                    <span className="text-xs text-gray-400">{prospect.contact}</span>
+                                    <span className="text-xs text-gray-400 truncate">{lead.contact1Name || lead.activitySector || '-'}</span>
                                 </div>
                             </div>
                             <div className="text-right shrink-0">
-                                <p className="text-sm font-bold text-gray-800">{formatValue(prospect.value)}</p>
-                                <p className="text-[10px] text-gray-400 mt-0.5">{new Date(prospect.date).toLocaleDateString()}</p>
+                                <p className="text-sm font-bold text-gray-800">{formatValue(lead.potentialRevenue || 0)}</p>
                             </div>
-                            <button onClick={() => cycleStatus(prospect.id)} className="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors" style={{ backgroundColor: cfg.bg, color: cfg.color }}>
-                                {cfg.label}
-                            </button>
+                            <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold shrink-0" style={{ backgroundColor: stageCfg.bg, color: stageCfg.color }}>
+                                {lead.saleStage}
+                            </span>
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold shrink-0" style={{ backgroundColor: prioCfg.bg, color: prioCfg.color }}>
+                                {lead.priority}
+                            </span>
                         </motion.div>
                     );
                 })}
-                {filtered.length === 0 && <p className="p-8 text-center text-gray-400 text-sm">{t('employeeDetail.prospects.noProspects')}</p>}
+                {leads.length === 0 && <p className="p-8 text-center text-gray-400 text-sm">{t('employeeDetail.prospects.noProspects', 'No leads assigned to this employee')}</p>}
             </div>
+        </div>
+    );
+};
+
+/* ─── Transfer History View ─────────────────────────── */
+const TransferHistoryView = ({ employee }: { employee: Employee }) => {
+    const { t } = useTranslation();
+    const { data: history = [], isLoading } = useEmployeeTransferHistory(employee.id);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+            </div>
+        );
+    }
+
+    if (history.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-16">
+                <Building2 className="w-16 h-16 text-gray-300 mb-4" />
+                <p className="text-gray-500 text-sm">{t('employees.transfer.noHistory')}</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            {history.map((entry, index) => (
+                <motion.div
+                    key={entry.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="relative"
+                >
+                    {/* Timeline connector */}
+                    {index < history.length - 1 && (
+                        <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-gray-200" />
+                    )}
+
+                    <div className="flex gap-4">
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <Repeat className="w-5 h-5 text-blue-600" />
+                        </div>
+
+                        <div className="flex-1 bg-white rounded-lg p-4 shadow-sm">
+                            {/* Transfer info */}
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-sm text-gray-600">
+                                    {entry.fromDepartment?.name || t('employees.transfer.noDepartment')}
+                                </span>
+                                <ArrowRight className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm font-semibold text-gray-900">
+                                    {entry.toDepartment.name}
+                                </span>
+                            </div>
+
+                            {/* Metadata */}
+                            <div className="space-y-1 text-sm text-gray-600">
+                                <div className="flex items-center gap-2">
+                                    <User className="w-4 h-4" />
+                                    <span>{t('employees.transfer.transferredBy')} {entry.transferredByName}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-4 h-4" />
+                                    <span>{format(new Date(entry.createdAt), 'PPp')}</span>
+                                </div>
+                                {entry.reason && (
+                                    <div className="flex items-start gap-2 mt-2">
+                                        <FileText className="w-4 h-4 mt-0.5" />
+                                        <span className="text-gray-700">{entry.reason}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
+            ))}
+        </div>
+    );
+};
+
+// ============================================================
+// REPORTS VIEW
+// ============================================================
+const ReportsView = ({ employee }: { employee: Employee }) => {
+    const { t } = useTranslation();
+    const { data: reports = [], isLoading } = useEmployeeReports(employee.id);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+            </div>
+        );
+    }
+
+    if (reports.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center py-16">
+                <FileText className="w-16 h-16 text-gray-300 mb-4" />
+                <p className="text-gray-500 text-sm">{t('employeeDetail.reports.noReports')}</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">{t('employeeSidebar.reports')}</h2>
+            {reports.map((report, index) => (
+                <motion.div
+                    key={report.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                >
+                    <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                                <h3 className="font-semibold text-gray-900">{report.title}</h3>
+                                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                                    report.status === 'COMPLETED' ? 'bg-green-50 text-green-600' :
+                                    report.status === 'GENERATING' ? 'bg-blue-50 text-blue-600' :
+                                    'bg-red-50 text-red-600'
+                                }`}>
+                                    {report.status === 'COMPLETED' ? t('employeeDetail.reports.completed') :
+                                     report.status === 'GENERATING' ? t('employeeDetail.reports.generating') :
+                                     t('employeeDetail.reports.failed')}
+                                </span>
+                            </div>
+                            <div className="space-y-1 text-sm text-gray-600">
+                                <div className="flex items-center gap-2">
+                                    <Calendar className="w-4 h-4" />
+                                    <span>{t('employeeDetail.reports.period')}: {format(new Date(report.startDate), 'PP')} - {format(new Date(report.endDate), 'PP')}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <User className="w-4 h-4" />
+                                    <span>{t('employeeDetail.reports.generatedBy')}: {report.generatedBy?.email || 'N/A'}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-4 h-4" />
+                                    <span>{t('employeeDetail.reports.created')}: {format(new Date(report.createdAt), 'PPp')}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {report.status === 'COMPLETED' && (
+                            <a
+                                href={`/reports/${report.id}`}
+                                className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-lg hover:bg-[#2bb5b6] transition-colors text-sm font-medium"
+                            >
+                                <Eye size={16} />
+                                {t('employeeDetail.reports.view')}
+                            </a>
+                        )}
+                    </div>
+                </motion.div>
+            ))}
         </div>
     );
 };
@@ -2527,6 +3050,8 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
     const { t } = useTranslation();
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDismissConfirm, setShowDismissConfirm] = useState(false);
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [showTransferHistory, setShowTransferHistory] = useState(false);
 
     const dismissEmployee = useDismissEmployee();
     const reinstateEmployee = useReinstateEmployee();
@@ -2553,16 +3078,20 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
         }
     };
 
-    const isCommercial = (employee.role || '').toLowerCase().includes('commercial');
+    const isCommercial = employee.user?.role === 'COMMERCIAL' || (employee.role || '').toLowerCase().includes('commercial');
 
     const views: Record<EmployeeTab, React.ReactNode> = {
         infos: <InfosView employee={employee} teamMembers={teamMembers} />,
-        tasks: isCommercial ? <ProspectsView employee={employee} /> : <TasksView employee={employee} />,
+        tasks: <TasksView employee={employee} />,
+        commercial: isCommercial ? <ProspectsView employee={employee} /> : null,
+        fraisDeVie: <FraisDeVieView employee={employee} />,
         documents: <DocumentsView employee={employee} />,
+        reports: <ReportsView employee={employee} />,
         sanctions: <SanctionsView employee={employee} />,
         recrutements: <RecrutementsView employee={employee} />,
         education: <EducationView employee={employee} />,
         formations: <FormationsView employee={employee} />,
+        transfers: <TransferHistoryView employee={employee} />,
     };
 
     return (
@@ -2601,6 +3130,24 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                         {isDismissed ? <UserCheck size={15} /> : <UserX size={15} />}
                         {isDismissed ? t('employees.reinstate', 'Reinstate') : t('employees.dismiss', 'Dismiss')}
                     </button>
+                    {!isDismissed && (
+                        <>
+                            <button
+                                onClick={() => setShowTransferModal(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            >
+                                <Repeat className="w-4 h-4" />
+                                {t('employees.transfer.button')}
+                            </button>
+                            <button
+                                onClick={() => setShowTransferHistory(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                            >
+                                <History className="w-4 h-4" />
+                                {t('employees.transfer.viewHistory')}
+                            </button>
+                        </>
+                    )}
                     <button
                         onClick={() => setShowEditModal(true)}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#33cbcc] hover:bg-[#2bb5b6] text-white text-sm font-semibold transition-colors shadow-lg shadow-[#33cbcc]/20"
@@ -2679,6 +3226,20 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Transfer Modals */}
+            <TransferEmployeeModal
+                open={showTransferModal}
+                onClose={() => setShowTransferModal(false)}
+                employee={employee}
+            />
+
+            {showTransferHistory && (
+                <TransferHistoryModal
+                    employeeId={employee.id}
+                    onClose={() => setShowTransferHistory(false)}
+                />
+            )}
         </>
     );
 };

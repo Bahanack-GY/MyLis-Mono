@@ -6,10 +6,12 @@ import { User } from '../models/user.model';
 import { MailService } from './mail.service';
 
 type PushCallback = (userId: string, payload: { title: string; body: string; type: string }) => void;
+type DirectEmitCallback = (userId: string, event: string, payload: object) => void;
 
 @Injectable()
 export class NotificationsService {
     private pushCallback: PushCallback | null = null;
+    private directEmitCallback: DirectEmitCallback | null = null;
 
     constructor(
         @InjectModel(Notification)
@@ -22,6 +24,16 @@ export class NotificationsService {
     /** Called by ChatGateway to register socket push */
     setPushCallback(cb: PushCallback) {
         this.pushCallback = cb;
+    }
+
+    /** Called by ChatGateway to register direct socket emit (not persisted) */
+    setDirectEmitCallback(cb: DirectEmitCallback) {
+        this.directEmitCallback = cb;
+    }
+
+    /** Emit a socket event directly to a user without persisting a notification */
+    emitToUser(userId: string, event: string, payload: object) {
+        this.directEmitCallback?.(userId, event, payload);
     }
 
     async create(data: { title: string; body: string; titleFr?: string; bodyFr?: string; type: string; userId: string; meta?: Record<string, unknown> }) {

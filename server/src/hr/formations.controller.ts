@@ -6,7 +6,7 @@ import { Roles } from '../auth/roles.decorator';
 
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
 @Controller('hr/formations')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class FormationsController {
@@ -17,10 +17,10 @@ export class FormationsController {
         return this.formationsService.create(createFormationDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL', 'ACCOUNTANT')
     @Get()
     findAll(@Request() req) {
-        if (req.user.role === 'EMPLOYEE') {
+        if (req.user.role === 'EMPLOYEE' || req.user.role === 'COMMERCIAL' || req.user.role === 'ACCOUNTANT') {
             return this.formationsService.findByUserId(req.user.userId);
         }
         return this.formationsService.findAll();

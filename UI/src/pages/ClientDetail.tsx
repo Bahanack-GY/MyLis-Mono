@@ -107,7 +107,7 @@ const OverviewView = ({ client }: { client: ClientData }) => {
                             <h2 className="text-2xl font-bold text-gray-800 mt-2">{stat.value}</h2>
                         </div>
                         <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
+                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
                             style={{ color: stat.color }}
                         >
                             <stat.icon size={80} strokeWidth={1.5} />

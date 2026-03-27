@@ -10,18 +10,22 @@ import {
     BookOpen,
     ChevronLeft,
     ChevronRight,
-    Target
+    Target,
+    Banknote,
+    Repeat,
+    FileBarChart
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-export type EmployeeTab = 'infos' | 'tasks' | 'documents' | 'sanctions' | 'recrutements' | 'education' | 'formations';
+export type EmployeeTab = 'infos' | 'tasks' | 'commercial' | 'fraisDeVie' | 'documents' | 'sanctions' | 'recrutements' | 'education' | 'formations' | 'transfers' | 'reports';
 
 interface Employee {
     id: number | string;
     name?: string;
     role?: string;
     avatar?: string;
+    user?: { id: string; email: string; role: string };
 }
 
 interface EmployeeDetailSidebarProps {
@@ -36,16 +40,20 @@ const EmployeeDetailSidebar = ({ employee, activeTab, onTabChange, isOpen, setIs
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const isCommercial = (employee.role || '').toLowerCase().includes('commercial');
+    const isCommercial = employee.user?.role === 'COMMERCIAL' || (employee.role || '').toLowerCase().includes('commercial');
 
     const tabs: { id: EmployeeTab; icon: typeof User; label: string }[] = [
         { id: 'infos', icon: User, label: t('employeeSidebar.infos') },
-        { id: 'tasks', icon: isCommercial ? Target : ListTodo, label: isCommercial ? t('employeeSidebar.prospects') : t('employeeSidebar.tasks') },
+        { id: 'tasks', icon: ListTodo, label: t('employeeSidebar.tasks') },
+        ...(isCommercial ? [{ id: 'commercial' as EmployeeTab, icon: Target, label: t('employeeSidebar.prospects') }] : []),
+        { id: 'fraisDeVie', icon: Banknote, label: t('employeeSidebar.fraisDeVie') },
         { id: 'documents', icon: FileText, label: t('employeeSidebar.documents') },
+        { id: 'reports', icon: FileBarChart, label: t('employeeSidebar.reports') },
         { id: 'sanctions', icon: AlertTriangle, label: t('employeeSidebar.sanctions') },
         { id: 'recrutements', icon: FolderOpen, label: t('employeeSidebar.recrutements') },
         { id: 'education', icon: GraduationCap, label: t('employeeSidebar.education') },
         { id: 'formations', icon: BookOpen, label: t('employeeSidebar.formations') },
+        { id: 'transfers', icon: Repeat, label: t('employeeSidebar.transfers') },
     ];
 
     return (

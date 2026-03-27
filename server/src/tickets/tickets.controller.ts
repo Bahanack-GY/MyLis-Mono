@@ -7,7 +7,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
 @Controller('tickets')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class TicketsController {
@@ -17,7 +17,7 @@ export class TicketsController {
         private readonly employeeModel: typeof Employee,
     ) { }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
     @Post()
     create(@Body() createTicketDto: any, @Request() req) {
         return this.ticketsService.create(createTicketDto, req.user.userId);
@@ -29,13 +29,13 @@ export class TicketsController {
         return deptId ? this.ticketsService.findByDepartment(deptId) : this.ticketsService.findAll();
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
     @Get('my-tickets')
     findMyTickets(@Request() req) {
         return this.ticketsService.findByCreator(req.user.userId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
     @Get('department')
     async findDepartmentTickets(@Request() req) {
         const employee = await this.employeeModel.findOne({ where: { userId: req.user.userId } });
@@ -54,7 +54,7 @@ export class TicketsController {
         return this.ticketsService.assign(id, req.body.employeeId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
     @Patch(':id/accept')
     acceptTicket(@Param('id') id: string, @Request() req) {
         return this.ticketsService.acceptForUser(id, req.user.userId);

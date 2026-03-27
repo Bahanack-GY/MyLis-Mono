@@ -16,11 +16,13 @@ export class PositionsController {
         return this.positionsService.create(createPositionDto);
     }
 
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL')
     @Get()
     findAll() {
         return this.positionsService.findAll();
     }
 
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL')
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.positionsService.findOne(id);

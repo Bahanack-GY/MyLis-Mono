@@ -5,6 +5,8 @@ import { Team } from './team.model';
 import { Project } from './project.model';
 import { TaskNature } from './task-nature.model';
 import { Subtask } from './subtask.model';
+import { Lead } from './lead.model';
+import { TaskAttachment } from './task-attachment.model';
 
 @Table({
     indexes: [
@@ -13,6 +15,7 @@ import { Subtask } from './subtask.model';
         { fields: ['assignedToId', 'state', 'completedAt'] },
         { fields: ['projectId'] },
         { fields: ['ticketId'] },
+        { fields: ['leadId'] },
         { fields: ['state'] },
     ],
 })
@@ -94,8 +97,24 @@ export class Task extends Model {
     @BelongsTo(() => TaskNature)
     declare nature: TaskNature;
 
+    @ForeignKey(() => Lead)
+    @Column({ type: DataType.UUID, allowNull: true })
+    declare leadId: string | null;
+
+    @BelongsTo(() => Lead)
+    declare lead: Lead;
+
     @Column({ type: DataType.BOOLEAN, defaultValue: false })
     declare selfAssigned: boolean;
+
+    @Column({ type: DataType.BOOLEAN, defaultValue: false })
+    declare urgent: boolean;
+
+    @Column({ type: DataType.BOOLEAN, defaultValue: false })
+    declare important: boolean;
+
+    @Column({ type: DataType.DATE, allowNull: true })
+    declare transferredFromWeek: Date | null;
 
     @Column({ type: DataType.UUID, allowNull: true })
     declare createdByUserId: string | null;
@@ -108,4 +127,7 @@ export class Task extends Model {
 
     @HasMany(() => Subtask)
     declare subtasks: Subtask[];
+
+    @HasMany(() => TaskAttachment)
+    declare attachments: TaskAttachment[];
 }

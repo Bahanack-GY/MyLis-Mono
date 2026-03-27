@@ -16,13 +16,16 @@ import {
     LayoutGrid,
     List,
     Building,
-    Loader2
+    Loader2,
+    ChartBar
 } from 'lucide-react';
 import { useDocuments, useCreateDocument, useStorageInfo, useDeleteDocument } from '../../api/documents/hooks';
 import { DocumentsAdminSkeleton } from '../../components/Skeleton';
 import { documentsApi } from '../../api/documents/api';
 import { useEmployees } from '../../api/employees/hooks';
-import { useDepartmentScope } from '../../contexts/AuthContext';
+import { useDepartments } from '../../api/departments/hooks';
+import { useDepartmentScope, useAuth } from '../../contexts/AuthContext';
+import Folder from '../../components/Folder';
 import {
     BarChart,
     Bar,
@@ -60,14 +63,14 @@ interface DocItem {
 
 const DOC_COLORS: Record<string, string> = {
     Contract: '#33cbcc',
-    SRS: '#3b82f6',
-    Design: '#8b5cf6',
-    Technical: '#f59e0b',
+    SRS: '#33cbcc',
+    Design: '#3b82f6',
+    Technical: '#3b82f6',
     Notes: '#6b7280',
-    Brief: '#ec4899',
-    Planning: '#22c55e',
-    Education: '#14b8a6',
-    Recruitment: '#f97316',
+    Brief: '#6b7280',
+    Planning: '#8b5cf6',
+    Education: '#8b5cf6',
+    Recruitment: '#33cbcc',
 };
 
 const CATEGORIES: DocCategory[] = ['Contract', 'SRS', 'Design', 'Technical', 'Notes', 'Brief', 'Planning', 'Education', 'Recruitment'];
@@ -85,8 +88,13 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
         file: null as File | null,
         name: '',
         category: '' as DocCategory | '',
-        department: '',
+        visibilityType: 'EVERYONE' as 'EVERYONE' | 'DEPARTMENTS' | 'EMPLOYEES' | 'MANAGERS_ONLY',
+        allowedDepartmentIds: [] as string[],
+        allowedEmployeeIds: [] as string[],
     });
+
+    const { data: departments = [] } = useDepartments();
+    const { data: employees = [] } = useEmployees();
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -116,7 +124,7 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
     };
 
     const [isUploading, setIsUploading] = useState(false);
-    const isValid = form.file !== null && form.name.trim().length > 0 && form.category !== '' && form.department !== '';
+    const isValid = form.file !== null && form.name.trim().length > 0 && form.category !== '';
 
     const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
     const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
@@ -226,22 +234,91 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                         </select>
                     </div>
 
-                    {/* Department */}
-                    <div>
-                        <label className={labelCls}>
-                            <Building size={12} />
-                            {t('documents.upload.department')}
+                    {/* Visibility Settings */}
+                    <div className="bg-blue-50 rounded-xl p-4 space-y-4">
+                        <label className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                            {t('documents.visibility.title')}
                         </label>
+
                         <select
-                            value={form.department}
-                            onChange={e => setForm(prev => ({ ...prev, department: e.target.value }))}
+                            value={form.visibilityType}
+                            onChange={e => setForm(prev => ({
+                                ...prev,
+                                visibilityType: e.target.value as any,
+                                allowedDepartmentIds: [],
+                                allowedEmployeeIds: []
+                            }))}
                             className={selectCls}
                         >
-                            <option value="">{t('documents.upload.departmentPlaceholder')}</option>
-                            {DEPT_NAMES.map(d => (
-                                <option key={d} value={d}>{d}</option>
-                            ))}
+                            <option value="EVERYONE">{t('documents.visibility.everyone')}</option>
+                            <option value="DEPARTMENTS">{t('documents.visibility.departments')}</option>
+                            <option value="EMPLOYEES">{t('documents.visibility.employees')}</option>
+                            <option value="MANAGERS_ONLY">{t('documents.visibility.managersOnly')}</option>
                         </select>
+
+                        {form.visibilityType === 'DEPARTMENTS' && (
+                            <div>
+                                <label className="text-[10px] font-semibold text-gray-600 mb-1.5 block">
+                                    {t('documents.visibility.selectDepartments')}
+                                </label>
+                                <div className="space-y-2 max-h-40 overflow-y-auto">
+                                    {departments.map(dept => (
+                                        <label key={dept.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={form.allowedDepartmentIds.includes(dept.id)}
+                                                onChange={e => {
+                                                    const checked = e.target.checked;
+                                                    setForm(prev => ({
+                                                        ...prev,
+                                                        allowedDepartmentIds: checked
+                                                            ? [...prev.allowedDepartmentIds, dept.id]
+                                                            : prev.allowedDepartmentIds.filter(id => id !== dept.id)
+                                                    }));
+                                                }}
+                                                className="rounded"
+                                            />
+                                            <span className="text-gray-700">{dept.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {form.visibilityType === 'EMPLOYEES' && (
+                            <div>
+                                <label className="text-[10px] font-semibold text-gray-600 mb-1.5 block">
+                                    {t('documents.visibility.selectEmployees')}
+                                </label>
+                                <div className="space-y-2 max-h-40 overflow-y-auto">
+                                    {employees.map(emp => (
+                                        <label key={emp.id} className="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={form.allowedEmployeeIds.includes(emp.id)}
+                                                onChange={e => {
+                                                    const checked = e.target.checked;
+                                                    setForm(prev => ({
+                                                        ...prev,
+                                                        allowedEmployeeIds: checked
+                                                            ? [...prev.allowedEmployeeIds, emp.id]
+                                                            : prev.allowedEmployeeIds.filter(id => id !== emp.id)
+                                                    }));
+                                                }}
+                                                className="rounded"
+                                            />
+                                            <span className="text-gray-700">{emp.firstName} {emp.lastName}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {form.visibilityType === 'MANAGERS_ONLY' && (
+                            <p className="text-xs text-gray-600 italic">
+                                {t('documents.visibility.managersOnlyDesc')}
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -274,6 +351,9 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                                     filePath: uploadResult.filePath,
                                     fileType: uploadResult.fileType,
                                     category: form.category ? CATEGORY_MAP[form.category] || 'OTHER' : 'OTHER',
+                                    visibilityType: form.visibilityType,
+                                    allowedDepartmentIds: form.allowedDepartmentIds,
+                                    allowedEmployeeIds: form.allowedEmployeeIds,
                                 }, {
                                     onSuccess: () => onClose(),
                                     onSettled: () => setIsUploading(false),
@@ -302,10 +382,12 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
 
 const Documents = () => {
     const { t } = useTranslation();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterCategory, setFilterCategory] = useState<DocCategory | 'all'>('all');
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const { role } = useAuth();
     const [showUploadModal, setShowUploadModal] = useState(false);
+    const [showStats, setShowStats] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<DocCategory | null>(null);
+    const [categorySearchQuery, setCategorySearchQuery] = useState('');
+    const [clickedFolder, setClickedFolder] = useState<DocCategory | null>(null);
 
     // API data
     const { data: apiDocuments, isLoading: isLoadingDocs } = useDocuments();
@@ -399,15 +481,6 @@ const Documents = () => {
         return <DocumentsAdminSkeleton />;
     }
 
-    /* Filtered documents */
-    const filteredDocs = documents.filter(doc => {
-        const matchesSearch =
-            doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            doc.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            doc.uploader.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = filterCategory === 'all' || doc.type === filterCategory;
-        return matchesSearch && matchesCategory;
-    });
 
     /* Stats */
     const totalStorageBytes = storageInfo?.totalBytes ?? 0;
@@ -451,41 +524,59 @@ const Documents = () => {
                     <h1 className="text-3xl font-bold text-gray-800">{t('documents.title')}</h1>
                     <p className="text-gray-500 mt-1">{t('documents.subtitle')}</p>
                 </div>
-                <button
-                    onClick={() => setShowUploadModal(true)}
-                    className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
-                >
-                    <Upload size={16} />
-                    {t('documents.uploadDocument')}
-                </button>
+                <div className="flex items-center gap-3">
+                    {role !== 'EMPLOYEE' && role !== 'COMMERCIAL' && (
+                        <button
+                            onClick={() => setShowStats(!showStats)}
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                                showStats
+                                    ? 'bg-gray-800 text-white hover:bg-gray-700'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                        >
+                            <ChartBar size={16} />
+                            {showStats ? 'Hide Stats' : 'Show Stats'}
+                        </button>
+                    )}
+                    <button
+                        onClick={() => setShowUploadModal(true)}
+                        className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
+                    >
+                        <Upload size={16} />
+                        {t('documents.uploadDocument')}
+                    </button>
+                </div>
             </div>
 
             {/* ── Stat Cards ── */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
-                    >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
-                        </div>
-                        <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
-                            style={{ color: stat.color }}
+            {showStats && (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                    {stats.map((stat, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
                         >
-                            <stat.icon size={100} strokeWidth={1.5} />
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+                            <div className="relative z-10">
+                                <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
+                                <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                            </div>
+                            <div
+                                className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
+                                style={{ color: stat.color }}
+                            >
+                                <stat.icon size={100} strokeWidth={1.5} />
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
 
             {/* ── Charts ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {showStats && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Documents by Category — BarChart */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -538,246 +629,217 @@ const Documents = () => {
                     </div>
                 </motion.div>
             </div>
+            )}
 
-            {/* ── Search + View Toggle ── */}
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
-                    <input
-                        type="text"
-                        placeholder={t('documents.searchPlaceholder')}
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
-                    />
-                </div>
+            {/* ── Category Folders Grid ── */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                {CATEGORIES.map((category, i) => {
+                    const categoryDocs = documents.filter(d => d.type === category);
+                    const isOpen = clickedFolder === category;
 
-                <div className="flex bg-white rounded-xl border border-gray-100 p-1">
-                    <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <LayoutGrid size={18} />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <List size={18} />
-                    </button>
-                </div>
-            </div>
+                    const handleFolderClick = () => {
+                        setClickedFolder(category);
+                        // Small delay to show the folder opening animation before modal appears
+                        setTimeout(() => {
+                            setSelectedCategory(category);
+                        }, 300);
+                    };
 
-            {/* ── Category Filters ── */}
-            <div className="flex gap-2 flex-wrap">
-                {categoryFilters.map(cf => (
-                    <button
-                        key={cf.key}
-                        onClick={() => setFilterCategory(cf.key)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-                            filterCategory === cf.key
-                                ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
-                                : 'bg-white text-gray-600 border border-gray-100 hover:border-[#33cbcc]/30'
-                        }`}
-                    >
-                        {cf.key !== 'all' && (
-                            <span
-                                className="w-2 h-2 rounded-full"
-                                style={{ backgroundColor: filterCategory === cf.key ? '#fff' : DOC_COLORS[cf.key] }}
-                            />
-                        )}
-                        {cf.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* ── Grid View ── */}
-            {viewMode === 'grid' && filteredDocs.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredDocs.map((doc, i) => (
+                    return (
                         <motion.div
-                            key={doc.id}
+                            key={category}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 + i * 0.05 }}
-                            className="bg-white rounded-3xl p-6 border border-gray-100 group hover:border-[#33cbcc]/30 transition-all"
+                            className="flex flex-col items-center cursor-pointer"
+                            onClick={handleFolderClick}
                         >
-                            {/* Icon + Actions */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div
-                                    className="w-12 h-12 rounded-xl flex items-center justify-center"
-                                    style={{ backgroundColor: `${DOC_COLORS[doc.type]}15` }}
-                                >
-                                    <FileText size={22} style={{ color: DOC_COLORS[doc.type] }} />
-                                </div>
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {doc.filePath ? (
-                                        <>
-                                            <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                                <Eye size={16} />
-                                            </a>
-                                            <a href={getFileUrl(doc.filePath)} download className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                                <Download size={16} />
-                                            </a>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-300 cursor-not-allowed transition-colors" disabled>
-                                                <Eye size={16} />
-                                            </button>
-                                            <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-300 cursor-not-allowed transition-colors" disabled>
-                                                <Download size={16} />
-                                            </button>
-                                        </>
-                                    )}
-                                    {doc.dbId && (
-                                        <button
-                                            onClick={() => { if (window.confirm('Delete this document?')) deleteDocument.mutate(doc.dbId!); }}
-                                            className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Name */}
-                            <h3 className="font-medium text-gray-800 text-sm truncate mb-2">{doc.name}</h3>
-
-                            {/* Type + Size + Date */}
-                            <div className="flex items-center gap-2 flex-wrap mb-4">
-                                <span
-                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                                    style={{ backgroundColor: `${DOC_COLORS[doc.type]}15`, color: DOC_COLORS[doc.type] }}
-                                >
-                                    {t(`documents.categories.${doc.type.toLowerCase()}`)}
-                                </span>
-                                <span className="text-xs text-gray-400">{doc.size}</span>
-                                <span className="text-xs text-gray-300">|</span>
-                                <span className="text-xs text-gray-400">{doc.date}</span>
-                            </div>
-
-                            {/* Department + Uploader */}
-                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                                    <Building size={12} />
-                                    <span>{doc.department}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    {doc.uploader.avatar ? (
-                                        <img src={doc.uploader.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
-                                    ) : (
-                                        <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100" />
-                                    )}
-                                    <span className="text-xs text-gray-500">{doc.uploader.name ? doc.uploader.name.split(' ')[0] : ''}</span>
-                                </div>
+                            <Folder color="#33cbcc" size={1.2} onClick={handleFolderClick} isOpen={isOpen} />
+                            <div className="w-full mt-4 space-y-2">
+                                <h3 className="font-semibold text-gray-800 text-sm text-center">
+                                    {t(`documents.categories.${category.toLowerCase()}`)}
+                                </h3>
+                                <p className="text-xs text-gray-500 text-center">
+                                    {categoryDocs.length} {categoryDocs.length === 1 ? t('documents.document') : t('documents.documents')}
+                                </p>
                             </div>
                         </motion.div>
-                    ))}
-                </div>
-            )}
+                    );
+                })}
+            </div>
 
-            {/* ── List View ── */}
-            {viewMode === 'list' && filteredDocs.length > 0 && (
-                <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
-                    {/* Table header */}
-                    <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                        <div className="col-span-4">{t('documents.table.name')}</div>
-                        <div className="col-span-1">{t('documents.table.type')}</div>
-                        <div className="col-span-1">{t('documents.table.size')}</div>
-                        <div className="col-span-2">{t('documents.table.department')}</div>
-                        <div className="col-span-2">{t('documents.table.uploader')}</div>
-                        <div className="col-span-1">{t('documents.table.date')}</div>
-                        <div className="col-span-1">{t('documents.table.actions')}</div>
-                    </div>
-                    {/* Rows */}
-                    {filteredDocs.map((doc, i) => (
+            {/* ── Category Documents Modal ── */}
+            <AnimatePresence>
+                {selectedCategory && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => {
+                            setSelectedCategory(null);
+                            setTimeout(() => setClickedFolder(null), 300);
+                        }}
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    >
                         <motion.div
-                            key={doc.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.03 }}
-                            className="grid grid-cols-12 gap-4 px-6 py-4 border-t border-gray-100 items-center group hover:bg-gray-50/50 transition-colors"
+                            initial={{ opacity: 0, scale: 0.3, y: 100 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.3, y: 100 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl h-[80vh] flex flex-col overflow-hidden"
                         >
-                            {/* Name with icon */}
-                            <div className="col-span-4 flex items-center gap-3 min-w-0">
-                                <div
-                                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                                    style={{ backgroundColor: `${DOC_COLORS[doc.type]}15` }}
-                                >
-                                    <FileText size={16} style={{ color: DOC_COLORS[doc.type] }} />
+                            {/* Modal Header */}
+                            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
+                                        <FolderOpen size={20} className="text-[#33cbcc]" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-800">
+                                            {t(`documents.categories.${selectedCategory.toLowerCase()}`)}
+                                        </h2>
+                                        <p className="text-xs text-gray-500">
+                                            {documents.filter(d => d.type === selectedCategory).length} {t('documents.documents')}
+                                        </p>
+                                    </div>
                                 </div>
-                                <span className="text-sm font-medium text-gray-800 truncate">{doc.name}</span>
-                            </div>
-                            {/* Type badge */}
-                            <div className="col-span-1">
-                                <span
-                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                                    style={{ backgroundColor: `${DOC_COLORS[doc.type]}15`, color: DOC_COLORS[doc.type] }}
+                                <button
+                                    onClick={() => {
+                                        setSelectedCategory(null);
+                                        setTimeout(() => setClickedFolder(null), 300);
+                                    }}
+                                    className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
                                 >
-                                    {t(`documents.categories.${doc.type.toLowerCase()}`)}
-                                </span>
+                                    <X size={18} />
+                                </button>
                             </div>
-                            {/* Size */}
-                            <div className="col-span-1 text-xs text-gray-500">{doc.size}</div>
-                            {/* Department */}
-                            <div className="col-span-2 flex items-center gap-1.5 text-xs text-gray-500">
-                                <Building size={12} />
-                                <span>{doc.department}</span>
+
+                            {/* Search Bar */}
+                            <div className="px-6 py-4 border-b border-gray-100 shrink-0">
+                                <div className="relative">
+                                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder={t('documents.searchPlaceholder')}
+                                        value={categorySearchQuery}
+                                        onChange={e => setCategorySearchQuery(e.target.value)}
+                                        className="w-full bg-gray-50 rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+                                    />
+                                </div>
                             </div>
-                            {/* Uploader */}
-                            <div className="col-span-2 flex items-center gap-2">
-                                {doc.uploader.avatar ? (
-                                    <img src={doc.uploader.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
-                                ) : (
-                                    <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100" />
-                                )}
-                                <span className="text-xs text-gray-500 truncate">{doc.uploader.name}</span>
-                            </div>
-                            {/* Date */}
-                            <div className="col-span-1 text-xs text-gray-400">{doc.date}</div>
-                            {/* Actions */}
-                            <div className="col-span-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                {doc.filePath ? (
-                                    <>
-                                        <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                            <Eye size={14} />
-                                        </a>
-                                        <a href={getFileUrl(doc.filePath)} download className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                            <Download size={14} />
-                                        </a>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button className="p-1.5 rounded-lg text-gray-300 cursor-not-allowed" disabled>
-                                            <Eye size={14} />
-                                        </button>
-                                        <button className="p-1.5 rounded-lg text-gray-300 cursor-not-allowed" disabled>
-                                            <Download size={14} />
-                                        </button>
-                                    </>
-                                )}
-                                {doc.dbId && (
-                                    <button
-                                        onClick={() => { if (window.confirm('Delete this document?')) deleteDocument.mutate(doc.dbId!); }}
-                                        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
-                                )}
+
+                            {/* Documents List */}
+                            <div className="flex-1 overflow-y-auto px-6 py-4">
+                                {(() => {
+                                    const categoryDocs = documents.filter(d =>
+                                        d.type === selectedCategory &&
+                                        (categorySearchQuery === '' || d.name.toLowerCase().includes(categorySearchQuery.toLowerCase()))
+                                    );
+
+                                    if (categoryDocs.length === 0) {
+                                        return (
+                                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                                <FileText size={48} className="text-gray-300 mb-4" />
+                                                <p className="text-gray-400 font-medium">
+                                                    {categorySearchQuery ? t('documents.noResults') : t('documents.noDocuments')}
+                                                </p>
+                                            </div>
+                                        );
+                                    }
+
+                                    return (
+                                        <div className="space-y-2">
+                                            {categoryDocs.map((doc, i) => (
+                                                <motion.div
+                                                    key={doc.id}
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: i * 0.03 }}
+                                                    className="group p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        {/* File Icon */}
+                                                        <div className="w-10 h-10 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
+                                                            <FileText size={18} className="text-[#33cbcc]" />
+                                                        </div>
+
+                                                        {/* Document Info */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-medium text-gray-800 text-sm truncate">{doc.name}</h4>
+                                                            <div className="flex items-center gap-3 mt-1">
+                                                                <span className="text-xs text-gray-500">{doc.size}</span>
+                                                                <span className="text-xs text-gray-400">•</span>
+                                                                <span className="text-xs text-gray-500">{doc.date}</span>
+                                                                <span className="text-xs text-gray-400">•</span>
+                                                                <div className="flex items-center gap-1.5">
+                                                                    {doc.uploader.avatar ? (
+                                                                        <img src={doc.uploader.avatar} alt="" className="w-4 h-4 rounded-full border border-gray-200" />
+                                                                    ) : (
+                                                                        <div className="w-4 h-4 rounded-full border border-gray-200 bg-gray-100" />
+                                                                    )}
+                                                                    <span className="text-xs text-gray-500 truncate max-w-[100px]">{doc.uploader.name}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Actions */}
+                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            {doc.filePath ? (
+                                                                <>
+                                                                    <a
+                                                                        href={getFileUrl(doc.filePath)}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                                                        title={t('documents.actions.preview')}
+                                                                    >
+                                                                        <Eye size={16} />
+                                                                    </a>
+                                                                    <a
+                                                                        href={getFileUrl(doc.filePath)}
+                                                                        download
+                                                                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                                                        title={t('documents.actions.download')}
+                                                                    >
+                                                                        <Download size={16} />
+                                                                    </a>
+                                                                    {doc.dbId && (
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                if (window.confirm(t('documents.confirmDelete'))) {
+                                                                                    deleteDocument.mutate(doc.dbId!);
+                                                                                }
+                                                                            }}
+                                                                            className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                                                                            title="Delete"
+                                                                        >
+                                                                            <Trash2 size={16} />
+                                                                        </button>
+                                                                    )}
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <button className="p-2 rounded-lg text-gray-300 cursor-not-allowed" disabled>
+                                                                        <Eye size={16} />
+                                                                    </button>
+                                                                    <button className="p-2 rounded-lg text-gray-300 cursor-not-allowed" disabled>
+                                                                        <Download size={16} />
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         </motion.div>
-                    ))}
-                </div>
-            )}
-
-            {/* ── Empty State ── */}
-            {filteredDocs.length === 0 && (
-                <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-                    <FileText size={48} className="mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-400 font-medium">{t('documents.noResults')}</p>
-                </div>
-            )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* ── Upload Modal ── */}
             <AnimatePresence>

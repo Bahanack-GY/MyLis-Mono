@@ -1,5 +1,5 @@
 import api from '../config';
-import type { Task, CreateTaskDto, UpdateTaskDto, TaskUpdateResponse, SelfAssignTaskDto, WeeklyComplianceResult, Subtask } from './types';
+import type { Task, CreateTaskDto, UpdateTaskDto, TaskUpdateResponse, SelfAssignTaskDto, WeeklyComplianceResult, Subtask, TaskAttachment, TimeDistributionItem } from './types';
 
 export const tasksApi = {
     getAll: (departmentId?: string, from?: string, to?: string) => {
@@ -31,6 +31,9 @@ export const tasksApi = {
     getByProject: (projectId: string) =>
         api.get<Task[]>(`/tasks/project/${projectId}`).then(r => r.data),
 
+    getByLead: (leadId: string) =>
+        api.get<Task[]>(`/tasks/lead/${leadId}`).then(r => r.data),
+
     updateState: (taskId: string, state: string, blockReason?: string) =>
         api.patch<TaskUpdateResponse>(`/tasks/update-state/${taskId}`, { state, blockReason }).then(r => r.data),
 
@@ -55,6 +58,9 @@ export const tasksApi = {
     getAllWeek: (weekStartDate: string) =>
         api.get<Task[]>(`/tasks/week?start=${weekStartDate}`).then(r => r.data),
 
+    transferTask: (taskId: string, targetWeekStart: string) =>
+        api.post<Task>(`/tasks/transfer/${taskId}`, { targetWeekStart }).then(r => r.data),
+
     // Subtasks
     createSubtask: (taskId: string, title: string) =>
         api.post<Subtask>(`/tasks/${taskId}/subtasks`, { title }).then(r => r.data),
@@ -73,4 +79,19 @@ export const tasksApi = {
 
     reorderSubtasks: (taskId: string, subtaskIds: string[]) =>
         api.patch(`/tasks/${taskId}/subtasks/reorder`, { subtaskIds }).then(r => r.data),
+
+    // Attachments
+    uploadAttachment: (taskId: string, file: File) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        return api.post<TaskAttachment>(`/tasks/${taskId}/attachments`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        }).then(r => r.data);
+    },
+
+    deleteAttachment: (taskId: string, attachmentId: string) =>
+        api.delete(`/tasks/${taskId}/attachments/${attachmentId}`).then(r => r.data),
+
+    getTimeDistribution: (employeeId: string) =>
+        api.get<TimeDistributionItem[]>(`/tasks/employee/${employeeId}/time-distribution`).then(r => r.data),
 };

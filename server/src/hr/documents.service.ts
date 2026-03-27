@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Document } from '../models/document.model';
 import { User } from '../models/user.model';
 import { Employee } from '../models/employee.model';
+import { Department } from '../models/department.model';
 import { join } from 'path';
 import { readdirSync, statSync, unlink } from 'fs';
 import { Op } from 'sequelize';
@@ -51,6 +52,20 @@ export class DocumentsService {
                 createDocumentDto.employeeId = employee.getDataValue('id');
             }
         }
+
+        // Set default visibility type if not provided
+        if (!createDocumentDto.visibilityType) {
+            createDocumentDto.visibilityType = 'EVERYONE';
+        }
+
+        // Ensure arrays are initialized
+        if (!createDocumentDto.allowedDepartmentIds) {
+            createDocumentDto.allowedDepartmentIds = [];
+        }
+        if (!createDocumentDto.allowedEmployeeIds) {
+            createDocumentDto.allowedEmployeeIds = [];
+        }
+
         const doc = await this.documentModel.create(createDocumentDto);
 
         // Notify the employee if a document was uploaded for them (by someone else)
@@ -78,6 +93,51 @@ export class DocumentsService {
                 { model: Employee, as: 'employee', attributes: ['id', 'firstName', 'lastName'] },
             ],
             order: [['createdAt', 'DESC']],
+        });
+    }
+
+    async findAccessibleDocuments(userId: string, userRole: string, employeeId?: string, departmentId?: string) {
+        const allDocuments = await this.documentModel.findAll({
+            include: [
+                { model: User, as: 'uploadedBy', attributes: ['id', 'email'] },
+                { model: Employee, as: 'employee', attributes: ['id', 'firstName', 'lastName'] },
+            ],
+            order: [['createdAt', 'DESC']],
+        });
+
+        // Managers can see all documents
+        if (userRole === 'MANAGER') {
+            return allDocuments;
+        }
+
+        // Filter documents based on visibility settings
+        return allDocuments.filter(doc => {
+            const visibilityType = doc.getDataValue('visibilityType') || 'EVERYONE';
+
+            // Documents visible to everyone
+            if (visibilityType === 'EVERYONE') {
+                return true;
+            }
+
+            // Managers-only documents
+            if (visibilityType === 'MANAGERS_ONLY') {
+                return userRole === 'MANAGER' || userRole === 'HEAD_OF_DEPARTMENT';
+            }
+
+            // Documents visible to specific departments
+            if (visibilityType === 'DEPARTMENTS') {
+                const allowedDepts = doc.getDataValue('allowedDepartmentIds') || [];
+                return departmentId && allowedDepts.includes(departmentId);
+            }
+
+            // Documents visible to specific employees
+            if (visibilityType === 'EMPLOYEES') {
+                const allowedEmps = doc.getDataValue('allowedEmployeeIds') || [];
+                return employeeId && allowedEmps.includes(employeeId);
+            }
+
+            // Default: show documents uploaded by the user
+            return doc.getDataValue('uploadedById') === userId;
         });
     }
 

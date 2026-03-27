@@ -42,6 +42,7 @@ const Header = () => {
                     <input
                         type="text"
                         placeholder={t('header.searchPlaceholder')}
+                        aria-label={t('header.searchPlaceholder')}
                         className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 pl-4 pr-12 text-sm focus:ring-2 focus:ring-[#33cbcc]/20 outline-none"
                     />
                     <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -53,6 +54,7 @@ const Header = () => {
                 {/* Language Toggle (desktop only) */}
                 <button
                     onClick={toggleLanguage}
+                    aria-label={t('header.switchLanguage', { lang: i18n.language === 'en' ? 'Français' : 'English' })}
                     className="hidden md:block text-sm font-semibold text-gray-600 hover:text-[#33cbcc] uppercase transition-colors"
                 >
                     {i18n.language}
@@ -62,22 +64,34 @@ const Header = () => {
                 <div className="flex items-center gap-1 md:gap-4 md:border-r md:border-gray-100 md:pr-6">
                     <button
                         onClick={() => navigate('/notifications')}
+                        aria-label={unreadCount > 0
+                            ? t('header.notificationsWithCount', { count: unreadCount, defaultValue: `Notifications (${unreadCount} unread)` })
+                            : t('header.notifications', 'Notifications')}
                         className="relative p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-500"
                     >
-                        <Bell size={20} />
+                        <Bell size={20} aria-hidden="true" />
                         {unreadCount > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold text-white bg-red-500 rounded-full leading-none">
+                            <span
+                                aria-hidden="true"
+                                className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold text-white bg-red-500 rounded-full leading-none"
+                            >
                                 {unreadCount > 99 ? '99+' : unreadCount}
                             </span>
                         )}
                     </button>
                     <button
                         onClick={() => navigate('/messages')}
+                        aria-label={unreadMessages > 0
+                            ? t('header.messagesWithCount', { count: unreadMessages, defaultValue: `Messages (${unreadMessages} unread)` })
+                            : t('header.messages', 'Messages')}
                         className="hidden md:flex relative p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-500"
                     >
-                        <Mail size={20} />
+                        <Mail size={20} aria-hidden="true" />
                         {unreadMessages > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold text-white bg-[#33cbcc] rounded-full leading-none">
+                            <span
+                                aria-hidden="true"
+                                className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 text-[10px] font-bold text-white bg-[#33cbcc] rounded-full leading-none"
+                            >
                                 {unreadMessages > 99 ? '99+' : unreadMessages}
                             </span>
                         )}
@@ -85,8 +99,9 @@ const Header = () => {
                 </div>
 
                 {/* Profile */}
-                <div
+                <button
                     onClick={() => navigate('/profile')}
+                    aria-label={t('header.viewProfile', 'View profile')}
                     className="flex items-center gap-2 md:gap-3 cursor-pointer hover:bg-gray-50 p-1.5 md:p-2 rounded-xl transition-colors"
                 >
                     <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#283852] overflow-hidden flex items-center justify-center">
@@ -102,8 +117,8 @@ const Header = () => {
                             {profile?.email || ''}
                         </p>
                     </div>
-                    <ChevronDown size={16} className="hidden md:block text-gray-400" />
-                </div>
+                    <ChevronDown size={16} className="hidden md:block text-gray-400" aria-hidden="true" />
+                </button>
             </div>
         </div>
     );

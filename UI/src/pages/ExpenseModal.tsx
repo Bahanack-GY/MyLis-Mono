@@ -232,7 +232,7 @@ export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalP
                                 type="submit"
                                 form="expense-form"
                                 disabled={isPending}
-                                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-[#33cbcc] to-[#2bb5b6] hover:from-[#2bb5b6] hover:to-[#2bb5b6] rounded-xl transition-all shadow-md shadow-[#33cbcc]/20 hover:shadow-lg disabled:opacity-50"
+                                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-[#33cbcc] to-[#2bb5b6] hover:from-[#2bb5b6] hover:to-[#2bb5b6] rounded-xl transition-all shadow-md shadow-[#33cbcc]/20  disabled:opacity-50"
                             >
                                 {isPending ? (
                                     <Loader2 className="w-4 h-4 animate-spin inset-0 m-auto" />

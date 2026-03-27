@@ -82,6 +82,9 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         >
             <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="create-role-modal-title"
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -94,10 +97,10 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
                             <Briefcase size={18} className="text-[#33cbcc]" />
                         </div>
-                        <h3 className="text-base font-bold text-gray-800">{t('positions.create.title', 'Create Role')}</h3>
+                        <h3 id="create-role-modal-title" className="text-base font-bold text-gray-800">{t('positions.create.title', 'Create Role')}</h3>
                     </div>
-                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                    <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                        <X size={18} aria-hidden="true" />
                     </button>
                 </div>
 
@@ -105,8 +108,9 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                 <div className="p-6 space-y-5 overflow-y-auto">
                     {/* Title */}
                     <div>
-                        <label className={labelCls}>{t('positions.create.name', 'Role Name')}</label>
+                        <label htmlFor="cr-title" className={labelCls}>{t('positions.create.name', 'Role Name')}</label>
                         <input
+                            id="cr-title"
                             type="text"
                             value={form.title}
                             onChange={e => update('title', e.target.value)}
@@ -118,8 +122,9 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
 
                     {/* Department */}
                     <div>
-                        <label className={labelCls}>{t('positions.create.department', 'Department')}</label>
+                        <label htmlFor="cr-dept" className={labelCls}>{t('positions.create.department', 'Department')}</label>
                         <select
+                            id="cr-dept"
                             value={form.departmentId}
                             onChange={e => update('departmentId', e.target.value)}
                             className={inputCls}
@@ -133,8 +138,9 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
 
                     {/* Description */}
                     <div>
-                        <label className={labelCls}>{t('positions.create.description', 'Description')}</label>
+                        <label htmlFor="cr-desc" className={labelCls}>{t('positions.create.description', 'Description')}</label>
                         <textarea
+                            id="cr-desc"
                             value={form.description}
                             onChange={e => update('description', e.target.value)}
                             placeholder={t('positions.create.descriptionPlaceholder', 'Brief description of the role...')}
@@ -145,7 +151,7 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
 
                     {/* Missions */}
                     <div>
-                        <label className={labelCls}>{t('positions.create.missions', 'Missions')}</label>
+                        <label htmlFor="cr-mission" className={labelCls}>{t('positions.create.missions', 'Missions')}</label>
                         <div className="space-y-2 mb-2">
                             {form.missions.map((mission, idx) => (
                                 <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border border-gray-100">
@@ -153,15 +159,17 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                                     <span className="flex-1 text-sm text-gray-700">{mission}</span>
                                     <button
                                         onClick={() => handleRemoveMission(idx)}
+                                        aria-label={`${t('common.remove', 'Remove')} ${mission}`}
                                         className="text-gray-400 hover:text-rose-500 transition-colors p-1"
                                     >
-                                        <Trash2 size={14} />
+                                        <Trash2 size={14} aria-hidden="true" />
                                     </button>
                                 </div>
                             ))}
                         </div>
                         <div className="flex gap-2">
                             <input
+                                id="cr-mission"
                                 type="text"
                                 value={newMission}
                                 onChange={e => setNewMission(e.target.value)}
@@ -172,9 +180,10 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                             <button
                                 onClick={handleAddMission}
                                 disabled={!newMission.trim()}
+                                aria-label={t('positions.create.addMission', 'Add mission')}
                                 className="px-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <Plus size={18} />
+                                <Plus size={18} aria-hidden="true" />
                             </button>
                         </div>
                     </div>
@@ -193,7 +202,7 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                         disabled={!isValid || createPosition.isPending}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all shadow-lg shadow-[#33cbcc]/20 ${
                             isValid
-                                ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] hover:-translate-y-px'
+                                ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] '
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >

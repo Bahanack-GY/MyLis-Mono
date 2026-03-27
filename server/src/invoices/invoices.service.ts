@@ -8,6 +8,7 @@ import { Department } from '../models/department.model';
 import { Client } from '../models/client.model';
 import { User } from '../models/user.model';
 import { DepartmentGoalsService } from '../organization/department-goals.service';
+import { JournalEngineService } from '../accounting/journal-engine.service';
 import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
@@ -21,6 +22,7 @@ export class InvoicesService {
         @InjectConnection()
         private sequelize: Sequelize,
         private departmentGoalsService: DepartmentGoalsService,
+        private journalEngine: JournalEngineService,
     ) { }
 
     private async generateInvoiceNumber(): Promise<string> {
@@ -160,7 +162,12 @@ export class InvoicesService {
             throw new BadRequestException('Can only send invoices with CREATED status');
         }
         await invoice.update({ status: 'SENT', sentAt: new Date() });
-        return this.findOne(id);
+        const updated = await this.findOne(id);
+
+        // Auto-generate journal entry for invoice sent
+        await this.journalEngine.onInvoiceSent(updated, updated.createdById || '');
+
+        return updated;
     }
 
     async markPaid(id: string): Promise<Invoice> {
@@ -192,7 +199,12 @@ export class InvoicesService {
             }
         });
 
-        return this.findOne(id);
+        const paid = await this.findOne(id);
+
+        // Auto-generate journal entry for invoice payment
+        await this.journalEngine.onInvoicePaid(paid, paid.createdById || '');
+
+        return paid;
     }
 
     async reject(id: string): Promise<Invoice> {

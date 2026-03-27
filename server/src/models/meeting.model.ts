@@ -53,8 +53,21 @@ export class Meeting extends Model {
     @Column(DataType.UUID)
     declare organizerId: string;
 
-    @BelongsTo(() => User)
+    @BelongsTo(() => User, 'organizerId')
     declare organizer: User;
+
+    @ForeignKey(() => Employee)
+    @Column({ type: DataType.UUID, allowNull: true })
+    declare secretaryId: string | null;
+
+    @BelongsTo(() => Employee, 'secretaryId')
+    declare secretary: Employee;
+
+    @Column({
+        type: DataType.TEXT,
+        allowNull: true,
+    })
+    declare transcript: string | null;
 
     @Column({
         type: DataType.JSON,
@@ -62,8 +75,9 @@ export class Meeting extends Model {
     })
     declare report: {
         summary: string;
+        whatWasSaid: string;
         decisions: string[];
-        actionItems: { task: string; assignee: string }[];
+        actionItems: { task: string; assignee: string; deadline?: string | null }[];
     } | null;
 
     @BelongsToMany(() => Employee, () => MeetingParticipant)

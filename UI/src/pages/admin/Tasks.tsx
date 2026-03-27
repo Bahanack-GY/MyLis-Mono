@@ -1,22 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronLeft, ChevronRight, Flag, Search, X, AlertCircle,
     ArrowLeft, Clock, Plus, CalendarDays,
     AlignLeft, Briefcase, BarChart3, RefreshCw, Loader2, Zap,
     Pencil, Trash2, History, Save, CalendarRange, Columns3, Tag, Settings,
-    ListTodo,
+    ListTodo, Target, Paperclip, Download, FileText, AlertTriangle, Star,
 } from 'lucide-react';
-import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useTaskHistory, useWeeklyCheckForEmployee, useCreateSubtask, useToggleSubtask, useDeleteSubtask } from '../../api/tasks/hooks';
-import type { Subtask } from '../../api/tasks/types';
+import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useTaskHistory, useWeeklyCheckForEmployee, useCreateSubtask, useToggleSubtask, useDeleteSubtask, useUploadTaskAttachment, useDeleteTaskAttachment } from '../../api/tasks/hooks';
+import type { Subtask, TaskAttachment } from '../../api/tasks/types';
 import { TasksAdminSkeleton } from '../../components/Skeleton';
 import { useEmployees } from '../../api/employees/hooks';
 import { useProjects } from '../../api/projects/hooks';
 import { useDepartments } from '../../api/departments/hooks';
 import { useDepartmentScope } from '../../contexts/AuthContext';
 import { useTaskNatures } from '../../api/task-natures/hooks';
+import { leadsApi } from '../../api/commercial/api';
 import TaskNatureManager from '../../components/TaskNatureManager';
+import RichTextEditor from '../../components/RichTextEditor';
+import RichTextDisplay from '../../components/RichTextDisplay';
 
 /* ─── Types ───────────────────────────────────────────────── */
 
@@ -43,6 +47,10 @@ interface GanttTask {
     startedAt?: string | null;
     completedAt?: string | null;
     subtasks?: Subtask[];
+    attachments?: TaskAttachment[];
+    leadId?: string;
+    urgent?: boolean;
+    important?: boolean;
 }
 
 interface EmployeeRow {
@@ -301,23 +309,35 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
                 {/* Accent bar */}
-                <div className="h-1.5" style={{ backgroundColor: c.border }} />
+                <div className="h-1.5 shrink-0" style={{ backgroundColor: c.border }} />
 
-                <div className="p-6 space-y-5">
+                <div className="flex-1 overflow-y-auto p-6 space-y-5">
                     {/* Title */}
                     <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: c.border }} />
-                                <h3 className="text-lg font-bold text-gray-800 truncate">{task.title}</h3>
+                                <h3 className="text-lg font-bold text-gray-800">{task.title}</h3>
                                 {task.hasFlag && <Flag size={14} className="text-amber-500 shrink-0" />}
                                 {task.selfAssigned && (
                                     <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] shrink-0">
                                         <Zap size={10} />
                                         Self-assigned
+                                    </span>
+                                )}
+                                {task.urgent && (
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">
+                                        <AlertTriangle size={10} />
+                                        {t('tasksPage.urgent')}
+                                    </span>
+                                )}
+                                {task.important && (
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 shrink-0">
+                                        <Star size={10} />
+                                        {t('tasksPage.important')}
                                     </span>
                                 )}
                             </div>
@@ -374,6 +394,35 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                     {/* Subtasks section */}
                     <SubtasksSection task={task} />
 
+                    {/* Attachments */}
+                    {task.attachments && task.attachments.length > 0 && (
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <Paperclip size={12} className="text-gray-400" />
+                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.attachments', 'Attachments')}</p>
+                                <span className="text-xs font-medium text-gray-500">{task.attachments.length}</span>
+                            </div>
+                            <div className="space-y-2 max-h-40 overflow-y-auto">
+                                {task.attachments.map(att => (
+                                    <div key={att.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                                        <FileText size={14} className="text-gray-400 shrink-0" />
+                                        <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
+                                        <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
+                                        <a
+                                            href={att.filePath}
+                                            download={att.fileName}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"
+                                        >
+                                            <Download size={14} />
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Timestamps + total time */}
                     {(task.startedAt || task.completedAt) && (
                         <div className="grid grid-cols-2 gap-3">
@@ -403,7 +452,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                     {task.description && (
                         <div>
                             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('tasksPage.description')}</p>
-                            <p className="text-sm text-gray-600 leading-relaxed">{task.description}</p>
+                            <RichTextDisplay content={task.description} className="text-sm text-gray-600 leading-relaxed" />
                         </div>
                     )}
 
@@ -452,11 +501,13 @@ const EditGanttTaskModal = ({
 }: {
     task: GanttTask;
     onClose: () => void;
-    onSave: (dto: { title?: string; description?: string; difficulty?: string; startDate?: string; endDate?: string; natureId?: string }) => void;
+    onSave: (dto: { title?: string; description?: string; difficulty?: string; startDate?: string; endDate?: string; natureId?: string; urgent?: boolean; important?: boolean }) => void;
     isSaving: boolean;
 }) => {
     const { t } = useTranslation();
     const { data: taskNatures } = useTaskNatures();
+    const uploadAttachment = useUploadTaskAttachment();
+    const deleteAttachment = useDeleteTaskAttachment();
     const fmtD = (d: Date) => {
         const y = d.getFullYear();
         const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -470,6 +521,8 @@ const EditGanttTaskModal = ({
         startDate: fmtD(task.startDate),
         endDate: fmtD(task.endDate),
         natureId: task.natureId || '',
+        urgent: task.urgent || false,
+        important: task.important || false,
     });
     const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
     const labelCls = 'text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 block';
@@ -483,9 +536,9 @@ const EditGanttTaskModal = ({
                 initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
                             <Pencil size={18} className="text-[#33cbcc]" />
@@ -494,14 +547,14 @@ const EditGanttTaskModal = ({
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
                 </div>
-                <div className="px-6 py-5 space-y-4">
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
                     <div>
                         <label className={labelCls}>{t('tasksPage.titlePlaceholder')}</label>
                         <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={inputCls} />
                     </div>
                     <div>
                         <label className={labelCls}>{t('tasksPage.descriptionPlaceholder')}</label>
-                        <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className={`${inputCls} resize-none`} />
+                        <RichTextEditor value={form.description} onChange={html => setForm(f => ({ ...f, description: html }))} placeholder={t('tasksPage.descriptionPlaceholder')} />
                     </div>
                     <div>
                         <label className={labelCls}>{t('tasksPage.difficulty')}</label>
@@ -520,6 +573,18 @@ const EditGanttTaskModal = ({
                             ))}
                         </select>
                     </div>
+                    <div className="flex items-center gap-6 mb-4">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                            <AlertTriangle size={14} className="text-red-400" />
+                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
+                            <Star size={14} className="text-amber-400" />
+                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
+                        </label>
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div>
                             <label className={labelCls}>{t('tasksPage.startDate')}</label>
@@ -530,11 +595,50 @@ const EditGanttTaskModal = ({
                             <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={inputCls} />
                         </div>
                     </div>
+
+                    {/* Attachments */}
+                    {task.apiId && (
+                        <div>
+                            <label className={labelCls}>
+                                <span className="flex items-center gap-1.5"><Paperclip size={11} /> {t('tasksPage.attachments', 'Attachments')}</span>
+                            </label>
+                            {(task.attachments || []).length > 0 && (
+                                <div className="space-y-1.5 mb-2">
+                                    {task.attachments!.map(att => (
+                                        <div key={att.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 group">
+                                            <FileText size={14} className="text-gray-400 shrink-0" />
+                                            <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
+                                            <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
+                                            <a href={att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"><Download size={14} /></a>
+                                            <button
+                                                onClick={() => { if (window.confirm(t('tasksPage.deleteAttachmentConfirm', 'Delete this attachment?'))) deleteAttachment.mutate({ taskId: task.apiId!, attachmentId: att.id }); }}
+                                                className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                                            ><Trash2 size={14} /></button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <label className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
+                                <Plus size={14} />
+                                {t('tasksPage.addFiles', 'Add files')}
+                                <input
+                                    type="file"
+                                    multiple
+                                    className="hidden"
+                                    onChange={e => {
+                                        const files = Array.from(e.target.files || []);
+                                        files.forEach(file => uploadAttachment.mutate({ taskId: task.apiId!, file }));
+                                        e.target.value = '';
+                                    }}
+                                />
+                            </label>
+                        </div>
+                    )}
                 </div>
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+                <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
                     <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('tasksPage.cancel')}</button>
                     <button
-                        onClick={() => onSave({ title: form.title, description: form.description, difficulty: form.difficulty, startDate: form.startDate || undefined, endDate: form.endDate || undefined, natureId: form.natureId || undefined })}
+                        onClick={() => onSave({ title: form.title, description: form.description, difficulty: form.difficulty, startDate: form.startDate || undefined, endDate: form.endDate || undefined, natureId: form.natureId || undefined, urgent: form.urgent, important: form.important })}
                         disabled={!form.title.trim() || isSaving}
                         className="px-5 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb5b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                     >
@@ -562,9 +666,9 @@ const GanttHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () =>
                 initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
                             <History size={18} className="text-[#283852]" />
@@ -573,7 +677,7 @@ const GanttHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () =>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
                 </div>
-                <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
+                <div className="flex-1 overflow-y-auto px-6 py-5">
                     {isLoading ? (
                         <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-[#33cbcc]" /></div>
                     ) : (history as any[]).length === 0 ? (
@@ -619,12 +723,15 @@ interface TaskForm {
     description: string;
     project: string;
     nature: string;
+    lead: string;
     startDate: string;
     endDate: string;
     time: string;
     difficulty: string;
     priority: string;
     repeat: string;
+    urgent: boolean;
+    important: boolean;
 }
 
 const AddTaskModal = ({
@@ -638,7 +745,7 @@ const AddTaskModal = ({
     initialEmployee?: EmployeeRow;
     initialDate: Date;
     onClose: () => void;
-    onAdd: (empId: number, task: GanttTask) => void;
+    onAdd: (empId: number, task: GanttTask, files?: File[]) => void;
 }) => {
     const { t } = useTranslation();
     const deptScope = useDepartmentScope();
@@ -648,6 +755,15 @@ const AddTaskModal = ({
     const selectedEmp = employees.find(e => e.id === selectedEmpId) ?? employees[0];
     const { data: compliance, isLoading: complianceLoading } = useWeeklyCheckForEmployee(selectedEmp?.apiId || null);
     const isNonCompliant = compliance && !compliance.canCreate;
+
+    const selectedEmpRole = selectedEmp?.role || '';
+    const isSelectedCommercial = selectedEmpRole.toLowerCase().includes('commercial');
+    const { data: leadsData } = useQuery({
+        queryKey: ['leads', 'for-task', selectedEmp?.apiId],
+        queryFn: () => leadsApi.getAll({ assignedToId: selectedEmp?.apiId }),
+        enabled: isSelectedCommercial && !!selectedEmp?.apiId,
+    });
+    const leads = (leadsData as any)?.data || [];
 
     const fmtDate = (d: Date) => {
         const y = d.getFullYear();
@@ -661,17 +777,21 @@ const AddTaskModal = ({
         description: '',
         project: '',
         nature: '',
+        lead: '',
         startDate: fmtDate(initialDate),
         endDate: fmtDate(addDays(initialDate, 3)),
         time: '',
         difficulty: 'medium',
         priority: 'medium',
         repeat: 'none',
+        urgent: false,
+        important: false,
     });
 
     const [tasks, setTasks] = useState<TaskForm[]>([makeEmpty()]);
+    const [taskFiles, setTaskFiles] = useState<File[][]>([[]]);
 
-    const update = (idx: number, field: keyof TaskForm, value: string) => {
+    const update = (idx: number, field: keyof TaskForm, value: string | boolean) => {
         setTasks(prev => prev.map((tf, i) => i === idx ? { ...tf, [field]: value } : tf));
     };
 
@@ -679,7 +799,7 @@ const AddTaskModal = ({
 
     const handleSubmit = () => {
         if (validCount === 0 || !selectedEmp) return;
-        tasks.forEach(tf => {
+        tasks.forEach((tf, idx) => {
             if (!tf.title.trim()) return;
             const project = tf.project ? (apiProjectsList || []).find(p => p.id === tf.project) : null;
             const natureObj = tf.nature ? (taskNatures || []).find(n => n.id === tf.nature) : null;
@@ -696,8 +816,11 @@ const AddTaskModal = ({
                 difficulty: tf.difficulty.toUpperCase(),
                 natureId: tf.nature || undefined,
                 natureName: natureObj?.name,
+                leadId: tf.lead || undefined,
+                urgent: tf.urgent,
+                important: tf.important,
             };
-            onAdd(selectedEmpId, task);
+            onAdd(selectedEmpId, task, taskFiles[idx]);
         });
         onClose();
     };
@@ -861,6 +984,26 @@ const AddTaskModal = ({
                                 </select>
                             </div>
 
+                            {/* Lead (commercial employees only) */}
+                            {isSelectedCommercial && leads.length > 0 && (
+                                <div>
+                                    <label className={labelCls}>
+                                        <Target size={11} />
+                                        {t('tasksPage.lead', 'Lead')}
+                                    </label>
+                                    <select
+                                        value={task.lead}
+                                        onChange={e => update(idx, 'lead', e.target.value)}
+                                        className={selectCls}
+                                    >
+                                        <option value="">{t('tasksPage.leadNone', 'Aucun lead')}</option>
+                                        {leads.map((lead: any) => (
+                                            <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
                             {/* Start date + End date + Time */}
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
@@ -951,12 +1094,78 @@ const AddTaskModal = ({
                                     </select>
                                 </div>
                             </div>
+
+                            {/* Urgent / Important */}
+                            <div className="flex items-center gap-6">
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="checkbox" checked={task.urgent} onChange={e => update(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                                    <AlertTriangle size={14} className="text-red-400" />
+                                    <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer select-none">
+                                    <input type="checkbox" checked={task.important} onChange={e => update(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
+                                    <Star size={14} className="text-amber-400" />
+                                    <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
+                                </label>
+                            </div>
+
+                            {/* File attachments */}
+                            <div>
+                                <label className={labelCls}>
+                                    <Paperclip size={11} />
+                                    {t('tasksPage.attachments', 'Attachments')}
+                                </label>
+                                <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
+                                    <Plus size={14} />
+                                    {t('tasksPage.addFiles', 'Add files')}
+                                    <input
+                                        type="file"
+                                        multiple
+                                        className="hidden"
+                                        onChange={e => {
+                                            const files = Array.from(e.target.files || []);
+                                            if (files.length > 0) {
+                                                setTaskFiles(prev => {
+                                                    const updated = [...prev];
+                                                    updated[idx] = [...(updated[idx] || []), ...files];
+                                                    return updated;
+                                                });
+                                            }
+                                            e.target.value = '';
+                                        }}
+                                    />
+                                </label>
+                                {(taskFiles[idx] || []).length > 0 && (
+                                    <div className="mt-2 space-y-1.5">
+                                        {taskFiles[idx].map((file, fi) => (
+                                            <div key={fi} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                                                <FileText size={14} className="text-gray-400 shrink-0" />
+                                                <span className="flex-1 text-sm text-gray-700 truncate">{file.name}</span>
+                                                <span className="text-[10px] text-gray-400 shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setTaskFiles(prev => {
+                                                            const updated = [...prev];
+                                                            updated[idx] = updated[idx].filter((_, i) => i !== fi);
+                                                            return updated;
+                                                        });
+                                                    }}
+                                                    className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     ))}
 
                     {/* Add another task */}
                     <button
-                        onClick={() => setTasks(prev => [...prev, makeEmpty()])}
+                        onClick={() => { setTasks(prev => [...prev, makeEmpty()]); setTaskFiles(prev => [...prev, []]); }}
                         className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm font-medium text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors flex items-center justify-center gap-2"
                     >
                         <Plus size={16} />
@@ -1015,6 +1224,7 @@ const Tasks = () => {
     const createTaskMutation = useCreateTask();
     const updateTaskMutation = useUpdateTask();
     const deleteTaskMutation = useDeleteTask();
+    const uploadAttachmentMutation = useUploadTaskAttachment();
 
     // Map API data to display shapes — no mock fallback
     const TASK_COLOR_MAP: Record<string, ColorKey> = {
@@ -1047,6 +1257,9 @@ const Tasks = () => {
                 startedAt: t.startedAt || null,
                 completedAt: t.completedAt || null,
                 subtasks: t.subtasks || [],
+                attachments: t.attachments || [],
+                urgent: t.urgent || false,
+                important: t.important || false,
             };
         });
 
@@ -1323,7 +1536,7 @@ const Tasks = () => {
 
     /* ── Add task handler ── */
 
-    const handleAddTask = (empId: number, task: GanttTask) => {
+    const handleAddTask = async (empId: number, task: GanttTask, files?: File[]) => {
         const emp = employees.find(e => e.id === empId);
         setEmployees(prev => prev.map(em => {
             if (em.id !== empId) return em;
@@ -1333,18 +1546,31 @@ const Tasks = () => {
             return { ...em, tasks: tasksWithLanes, laneCount };
         }));
         // Also call API to persist
-        createTaskMutation.mutate({
-            title: task.title,
-            description: task.description || undefined,
-            difficulty: (task.difficulty as any) || 'MEDIUM',
-            state: 'ASSIGNED',
-            assignedToId: emp?.apiId,
-            projectId: task.projectId || undefined,
-            natureId: task.natureId || undefined,
-            startDate: task.startDate.toISOString(),
-            endDate: task.endDate.toISOString(),
-            dueDate: task.endDate.toISOString(),
-        });
+        try {
+            const created = await createTaskMutation.mutateAsync({
+                title: task.title,
+                description: task.description || undefined,
+                difficulty: (task.difficulty as any) || 'MEDIUM',
+                state: 'ASSIGNED',
+                assignedToId: emp?.apiId,
+                projectId: task.projectId || undefined,
+                natureId: task.natureId || undefined,
+                leadId: task.leadId || undefined,
+                startDate: task.startDate.toISOString(),
+                endDate: task.endDate.toISOString(),
+                dueDate: task.endDate.toISOString(),
+                urgent: task.urgent || false,
+                important: task.important || false,
+            });
+            // Upload attachments if any
+            if (files && files.length > 0 && created?.id) {
+                for (const file of files) {
+                    await uploadAttachmentMutation.mutateAsync({ taskId: created.id, file });
+                }
+            }
+        } catch {
+            // Error handled by mutation onError callback
+        }
     };
 
     const handleRowClick = (e: React.MouseEvent<HTMLDivElement>, emp: EmployeeRow) => {
@@ -1574,20 +1800,22 @@ const Tasks = () => {
                                                         initial={{ opacity: 0, y: 6 }}
                                                         animate={{ opacity: 1, y: 0 }}
                                                         onClick={() => setModalData({ task, employee: task.employee })}
-                                                        className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-[#33cbcc]/30 hover:shadow-sm transition-all"
+                                                        className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-[#33cbcc]/30  transition-all"
                                                         style={{ borderLeft: `3px solid ${c.border}` }}
                                                     >
                                                         {/* Title + flag */}
                                                         <div className="flex items-start justify-between gap-2 mb-3">
                                                             <p className="text-sm font-semibold text-gray-800 leading-snug">{task.title}</p>
                                                             {task.hasFlag && <Flag size={13} className="shrink-0 mt-0.5 text-rose-400" />}
+                                                            {task.urgent && <AlertTriangle size={13} className="shrink-0 mt-0.5 text-red-400" />}
+                                                            {task.important && <Star size={13} className="shrink-0 mt-0.5 text-amber-400" />}
                                                         </div>
 
                                                         {/* Project */}
                                                         {task.subtitle && (
                                                             <div className="flex items-center gap-1.5 mb-2">
                                                                 <Briefcase size={11} className="text-gray-400 shrink-0" />
-                                                                <span className="text-[11px] text-gray-400 truncate">{task.subtitle}</span>
+                                                                <span className="text-[11px] text-gray-400">{task.subtitle}</span>
                                                             </div>
                                                         )}
 
@@ -1595,7 +1823,7 @@ const Tasks = () => {
                                                         {task.natureName && (
                                                             <div className="flex items-center gap-1.5 mb-2">
                                                                 <Tag size={11} className="text-gray-400 shrink-0" />
-                                                                <span className="text-[11px] text-gray-400 truncate">{task.natureName}</span>
+                                                                <span className="text-[11px] text-gray-400">{task.natureName}</span>
                                                             </div>
                                                         )}
 
@@ -1905,7 +2133,7 @@ const Tasks = () => {
                                             <div
                                                 key={task.id}
                                                 className={`absolute rounded-xl group/task z-6 select-none
-                                                    ${isDrag ? 'shadow-lg ring-2 ring-[#33cbcc]/30' : 'hover:shadow-md'}`}
+                                                    ${isDrag ? 'shadow-lg ring-2 ring-[#33cbcc]/30' : ''}`}
                                                 style={{
                                                     left: `${bar.left}px`,
                                                     top: `${top}px`,
@@ -1926,7 +2154,7 @@ const Tasks = () => {
 
                                                 {/* Content area — move drag + click for modal */}
                                                 <div
-                                                    className="flex items-center gap-1.5 px-2.5 h-full cursor-grab active:cursor-grabbing"
+                                                    className="flex items-center gap-1.5 px-2.5 h-full cursor-grab active:cursor-grabbing relative group/bar"
                                                     onPointerDown={ev => { if (ev.button === 0) startDrag(ev, task, emp, 'move'); }}
                                                     onClick={e => { e.stopPropagation(); if (!wasDragging.current) setModalData({ task, employee: emp }); }}
                                                 >
@@ -1941,6 +2169,21 @@ const Tasks = () => {
                                                     )}
                                                     {!narrow && task.selfAssigned && (
                                                         <Zap size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
+                                                    )}
+                                                    {!narrow && task.urgent && (
+                                                        <AlertTriangle size={12} className="shrink-0 opacity-70 text-red-500" />
+                                                    )}
+                                                    {!narrow && task.important && (
+                                                        <Star size={12} className="shrink-0 opacity-70 text-amber-500" />
+                                                    )}
+                                                    {/* Full title tooltip on hover */}
+                                                    {!isDrag && (
+                                                        <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover/bar:block z-30 pointer-events-none">
+                                                            <div className="bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap max-w-xs">
+                                                                <p className="font-bold">{task.title}</p>
+                                                                {task.subtitle && <p className="opacity-70 mt-0.5">{task.subtitle}</p>}
+                                                            </div>
+                                                        </div>
                                                     )}
                                                 </div>
 

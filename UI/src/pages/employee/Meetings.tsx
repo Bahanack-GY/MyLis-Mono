@@ -19,10 +19,12 @@ import {
     ArrowRight,
     CalendarDays,
     User,
+    Mic,
 } from 'lucide-react';
-import { useMeetings } from '../../api/meetings/hooks';
+import { useMeetings, useAttendMeeting } from '../../api/meetings/hooks';
 import type { Meeting } from '../../api/meetings/types';
 import { UserMeetingsSkeleton } from '../../components/Skeleton';
+import { useAuth } from '../../contexts/AuthContext';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -47,9 +49,12 @@ interface MeetingItem {
     startTime: string;
     endTime: string;
     location: string;
+    organizerId: string;
+    secretaryId: string | null;
     organizer: { name: string; avatar: string };
-    participants: { id: string; name: string; avatar: string }[];
+    participants: { id: string; name: string; avatar: string; attended: boolean }[];
     report: MeetingReport | null;
+    transcript: string | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -78,9 +83,23 @@ const STATUSES: MeetingStatus[] = ['scheduled', 'in_progress', 'completed', 'can
 /*  Meeting Detail Modal (view-only)                                   */
 /* ------------------------------------------------------------------ */
 
-const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClose: () => void }) => {
+const MeetingDetailModal = ({
+    meeting,
+    onClose,
+    onAttend,
+    alreadyAttended,
+    isSecretary,
+}: {
+    meeting: MeetingItem;
+    onClose: () => void;
+    onAttend?: () => void;
+    alreadyAttended?: boolean;
+    isSecretary?: boolean;
+}) => {
     const { t } = useTranslation();
     const TypeIcon = TYPE_ICONS[meeting.type];
+    const [showTranscript, setShowTranscript] = useState(false);
+    const attendedCount = meeting.participants.filter(p => p.attended).length;
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -172,14 +191,21 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                         </div>
                     </div>
 
-                    {/* Participants */}
+                    {/* Participants + Attendance */}
                     <div>
-                        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            {t('meetings.detail.participants')} ({meeting.participants.length})
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                {t('meetings.detail.participants')} ({meeting.participants.length})
+                            </div>
+                            {meeting.status === 'in_progress' && (
+                                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                    {attendedCount}/{meeting.participants.length} {t('meetings.detail.attendance')}
+                                </span>
+                            )}
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {meeting.participants.map((p) => (
-                                <div key={p.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5">
+                                <div key={p.id} className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${p.attended ? 'bg-emerald-50' : 'bg-gray-50'}`}>
                                     {p.avatar ? (
                                         <img src={p.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
                                     ) : (
@@ -188,6 +214,7 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                                         </div>
                                     )}
                                     <span className="text-xs text-gray-600">{p.name}</span>
+                                    {p.attended && <CheckCircle size={11} className="text-emerald-500 shrink-0" />}
                                 </div>
                             ))}
                             {meeting.participants.length === 0 && (
@@ -195,6 +222,24 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                             )}
                         </div>
                     </div>
+
+                    {/* Transcript */}
+                    {meeting.transcript && (
+                        <div>
+                            <button
+                                onClick={() => setShowTranscript(v => !v)}
+                                className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 hover:text-gray-600 transition-colors"
+                            >
+                                {t('meetings.detail.transcript')}
+                                <span className="ml-1 text-gray-300">{showTranscript ? '▲' : '▼'}</span>
+                            </button>
+                            {showTranscript && (
+                                <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap">
+                                    {meeting.transcript}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Report */}
                     <div className="border-t border-gray-100 pt-6">
@@ -249,11 +294,37 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                     </div>
                 </div>
 
-                {/* Footer - close only, no edit/delete */}
-                <div className="px-5 py-4 md:px-6 border-t border-gray-100 flex justify-end shrink-0">
-                    <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
-                        {t('meetings.detail.close')}
-                    </button>
+                {/* Footer */}
+                <div className="px-5 py-4 md:px-6 border-t border-gray-100 shrink-0 space-y-2">
+                    {meeting.status === 'in_progress' && isSecretary && (
+                        <button
+                            onClick={() => {
+                                window.dispatchEvent(new CustomEvent('meeting:manual-record', {
+                                    detail: { meetingId: meeting.id, meetingTitle: meeting.title },
+                                }));
+                                onClose();
+                            }}
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+                        >
+                            <Mic size={15} />
+                            {t('meetings.start.record', 'Record Meeting')}
+                        </button>
+                    )}
+                    {meeting.status === 'in_progress' && onAttend && (
+                        <button
+                            disabled={alreadyAttended}
+                            onClick={onAttend}
+                            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${alreadyAttended ? 'bg-emerald-50 text-emerald-600 cursor-default' : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'}`}
+                        >
+                            <CheckCircle size={15} />
+                            {alreadyAttended ? t('meetings.attend.attended') : t('meetings.attend.button')}
+                        </button>
+                    )}
+                    <div className="flex justify-end">
+                        <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                            {t('meetings.detail.close')}
+                        </button>
+                    </div>
                 </div>
             </motion.div>
         </motion.div>
@@ -268,9 +339,11 @@ const Meetings = () => {
     const { t } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<MeetingStatus | 'all'>('all');
-    const [selectedMeeting, setSelectedMeeting] = useState<MeetingItem | null>(null);
+    const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
 
+    const { user } = useAuth();
     const { data: apiMeetings, isLoading } = useMeetings();
+    const attendMeeting = useAttendMeeting();
 
     /* Map API meetings to display shape */
     const meetings: MeetingItem[] = (apiMeetings || []).map((m: Meeting) => ({
@@ -283,6 +356,8 @@ const Meetings = () => {
         startTime: m.startTime || '',
         endTime: m.endTime || '',
         location: m.location || '',
+        organizerId: m.organizerId || '',
+        secretaryId: m.secretaryId ?? null,
         organizer: {
             name: m.organizer?.email || '',
             avatar: '',
@@ -291,9 +366,13 @@ const Meetings = () => {
             id: p.id,
             name: `${p.firstName} ${p.lastName}`,
             avatar: p.avatarUrl || '',
+            attended: p.MeetingParticipant?.attended ?? false,
         })),
         report: m.report || null,
+        transcript: m.transcript ?? null,
     }));
+
+    const selectedMeeting = selectedMeetingId ? (meetings.find(m => m.id === selectedMeetingId) ?? null) : null;
 
     /* Loading */
     if (isLoading) {
@@ -351,7 +430,7 @@ const Meetings = () => {
                             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-1 md:mt-2">{stat.value}</h2>
                         </div>
                         <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
+                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
                             style={{ color: stat.color }}
                         >
                             <stat.icon size={80} strokeWidth={1.5} />
@@ -401,7 +480,7 @@ const Meetings = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 + i * 0.05 }}
                                 className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100 group hover:border-[#33cbcc]/30 transition-all cursor-pointer"
-                                onClick={() => setSelectedMeeting(meeting)}
+                                onClick={() => setSelectedMeetingId(meeting.id)}
                             >
                                 {/* Icon + View action */}
                                 <div className="flex items-start justify-between mb-4">
@@ -410,7 +489,7 @@ const Meetings = () => {
                                     </div>
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
-                                            onClick={e => { e.stopPropagation(); setSelectedMeeting(meeting); }}
+                                            onClick={e => { e.stopPropagation(); setSelectedMeetingId(meeting.id); }}
                                             className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                         >
                                             <Eye size={16} />
@@ -497,7 +576,17 @@ const Meetings = () => {
             {/* Meeting Detail Modal */}
             <AnimatePresence>
                 {selectedMeeting && (
-                    <MeetingDetailModal meeting={selectedMeeting} onClose={() => setSelectedMeeting(null)} />
+                    <MeetingDetailModal
+                        meeting={selectedMeeting}
+                        onClose={() => setSelectedMeetingId(null)}
+                        isSecretary={!!user?.employeeId && selectedMeeting.secretaryId === user.employeeId}
+                        alreadyAttended={selectedMeeting.participants.find(p => p.id === user?.employeeId)?.attended ?? false}
+                        onAttend={() => {
+                            attendMeeting.mutate(selectedMeeting.id, {
+                                onSuccess: () => setSelectedMeetingId(null),
+                            });
+                        }}
+                    />
                 )}
             </AnimatePresence>
         </div>

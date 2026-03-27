@@ -31,6 +31,7 @@ export interface DeptProject {
 export interface Department {
     id: number | string;
     name: string;
+    description?: string;
     head: DeptEmployee;
     employees: DeptEmployee[];
     projects: DeptProject[];
@@ -53,6 +54,7 @@ const DepartmentDetailLayout = () => {
     const DEPARTMENTS: Department[] = (apiDepartments || []).map((d, i) => ({
         id: d.id,
         name: d.name,
+        description: d.description,
         color: DEPT_COLORS[i % DEPT_COLORS.length],
         icon: DEPT_ICONS[i % DEPT_ICONS.length],
         head: d.head

@@ -8,7 +8,7 @@ export const expenseKeys = {
     all: ['expenses'] as const,
     list: (page: number) => ['expenses', 'list', page] as const,
     detail: (id: string) => ['expenses', id] as const,
-    stats: (year?: number) => ['expenses', 'stats', year] as const,
+    stats: (year?: number, departmentId?: string) => ['expenses', 'stats', year, departmentId] as const,
     project: (projectId: string) => ['expenses', 'project', projectId] as const,
 };
 
@@ -33,10 +33,10 @@ export const useExpense = (id: string) =>
         enabled: !!id,
     });
 
-export const useExpenseStats = (year?: number) =>
+export const useExpenseStats = (year?: number, departmentId?: string) =>
     useQuery({
-        queryKey: expenseKeys.stats(year),
-        queryFn: () => expensesApi.getStats(year),
+        queryKey: expenseKeys.stats(year, departmentId),
+        queryFn: () => expensesApi.getStats(year, departmentId),
     });
 
 export const useCreateExpense = () => {

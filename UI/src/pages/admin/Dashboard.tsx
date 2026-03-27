@@ -94,8 +94,13 @@ const Dashboard = () => {
   const { data: apiTasks, isLoading: loadingTasks } = useTasks(deptScope, from, to);
   const { data: apiDepartments, isLoading: loadingDepartments } = useDepartments();
   const { data: invoiceStats } = useInvoiceStats(deptScope, from, to);
-  const { data: expenseStats } = useExpenseStats();
-  const { data: revenueByDept } = useRevenueByDepartment(from, to);
+  const { data: expenseStats } = useExpenseStats(undefined, deptScope);
+  const { data: revenueByDeptRaw } = useRevenueByDepartment(from, to);
+
+  // For HOD, show only their department in the revenue chart
+  const revenueByDept = deptScope
+    ? (revenueByDeptRaw || []).filter(d => d.departmentId === deptScope)
+    : revenueByDeptRaw;
 
   const isLoading = loadingEmployees || loadingProjects || loadingTasks || loadingDepartments;
 
@@ -108,7 +113,7 @@ const Dashboard = () => {
 
   const formatFCFA = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
   const revenue = invoiceStats?.totalRevenue ?? 0;
-  const totalExpenses = (expenseStats?.totalYear ?? 0) + (expenseStats?.totalSalaries ?? 0) + (expenseStats?.totalProjects ?? 0);
+  const totalExpenses = (expenseStats?.totalYear ?? 0) + (expenseStats?.totalProjects ?? 0);
   const profit = revenue - totalExpenses;
   const pending = invoiceStats?.totalPending ?? 0;
 
@@ -146,11 +151,13 @@ const Dashboard = () => {
     return [1, 2, 3, 4, 5, 6, 0].map(i => ({ name: dayNames[i], tasks: counts[i] }));
   })();
 
-  // Derive pie data from departments
-  const pieData = (apiDepartments || []).map(dept => ({
-    name: dept.name,
-    value: dept.employees?.length || 0,
-  }));
+  // Derive pie data from departments (HOD: only their dept)
+  const pieData = (apiDepartments || [])
+    .filter(dept => !deptScope || dept.id === deptScope)
+    .map(dept => ({
+      name: dept.name,
+      value: dept.employees?.length || 0,
+    }));
   const pieTotal = pieData.reduce((s, d) => s + d.value, 0);
 
   const COLORS = ['#283852', '#33cbcc', '#FFBB28', '#FF8042', '#8b5cf6', '#ec4899'];
@@ -260,7 +267,7 @@ const Dashboard = () => {
             onKeyDown={stat.link ? (e) => { if (e.key === 'Enter' || e.key === ' ') navigate(stat.link); } : undefined}
             tabIndex={stat.link ? 0 : undefined}
             role={stat.link ? 'button' : undefined}
-            className={`bg-white p-6 rounded-2xl border border-gray-100 transition-all duration-200 relative overflow-hidden group hover:border-[#33cbcc]/50 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#33cbcc]/40${stat.link ? ' cursor-pointer' : ''}`}
+            className={`bg-white p-6 rounded-2xl border border-gray-100 transition-all duration-200 relative overflow-hidden group hover:border-[#33cbcc]/50  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#33cbcc]/40${stat.link ? ' cursor-pointer' : ''}`}
           >
             <div className="relative z-10">
                 <h3 className="text-gray-500 text-sm font-medium mb-2 truncate">{stat.title}</h3>
@@ -270,7 +277,7 @@ const Dashboard = () => {
             </div>
 
             <div
-                className="absolute -right-6 -bottom-6 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
+                className="absolute -right-6 -bottom-6 opacity-5 transition-transform  duration-500 ease-out"
                 style={{ color: stat.color }}
             >
                 <stat.icon size={120} strokeWidth={1.5} />

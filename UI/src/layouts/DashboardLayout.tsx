@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, PartyPopper, Cake, Sparkles } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import MeetingRecordingPrompt from '../components/MeetingRecordingPrompt';
 import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../api/auth/api';
 import { employeesApi, type BirthdayEmployee } from '../api/employees/api';
@@ -11,79 +12,18 @@ import { useBrowserNotifications } from '../hooks/useBrowserNotifications';
 
 /* -- Welcome Modal ---------------------------------------- */
 
-const WelcomeModal = ({ firstName, onClose }: { firstName: string; onClose: () => void }) => (
-    <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
-        onClick={onClose}
-    >
-        <motion.div
-            initial={{ scale: 0.8, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.8, opacity: 0, y: 20 }}
-            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-            onClick={e => e.stopPropagation()}
-            className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden"
-        >
-            <div className="bg-gradient-to-br from-[#33cbcc] to-[#2196F3] px-8 pt-10 pb-8 text-center relative overflow-hidden">
-                <div className="absolute inset-0 opacity-10">
-                    {[...Array(6)].map((_, i) => (
-                        <Sparkles
-                            key={i}
-                            size={24}
-                            className="absolute text-white animate-pulse"
-                            style={{
-                                top: `${15 + (i * 15) % 70}%`,
-                                left: `${10 + (i * 20) % 80}%`,
-                                animationDelay: `${i * 0.3}s`,
-                            }}
-                        />
-                    ))}
-                </div>
-                <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                    className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4"
-                >
-                    <PartyPopper size={40} className="text-white" />
-                </motion.div>
-                <h2 className="text-2xl font-bold text-white mb-1">
-                    Bienvenue {firstName} !
-                </h2>
-                <p className="text-white/80 text-sm">
-                    Nous sommes ravis de vous avoir dans l'equipe
-                </p>
-            </div>
-
-            <div className="px-8 py-6 text-center">
-                <p className="text-gray-600 leading-relaxed mb-2">
-                    Votre talent et votre energie vont faire toute la difference.
-                    Nous croyons en vous et nous sommes convaincus que de grandes
-                    choses vous attendent ici.
-                </p>
-                <p className="text-gray-500 text-sm mb-6">
-                    N'hesitez pas a explorer l'application et a contacter
-                    vos collegues si vous avez besoin d'aide.
-                    Ensemble, nous allons accomplir de grandes choses !
-                </p>
-                <button
-                    onClick={onClose}
-                    className="w-full py-3 rounded-xl bg-gradient-to-r from-[#33cbcc] to-[#2196F3] text-white font-semibold text-sm hover:shadow-lg transition-shadow"
-                >
-                    C'est parti !
-                </button>
-            </div>
-        </motion.div>
-    </motion.div>
-);
-
-/* -- Birthday Modal --------------------------------------- */
-
-const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClose: () => void }) => {
-    const single = people.length === 1;
+const WelcomeModal = ({ firstName, onClose }: { firstName: string; onClose: () => void }) => {
+    useEffect(() => {
+        const prev = document.activeElement as HTMLElement;
+        document.body.style.overflow = 'hidden';
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('keydown', onKey);
+            document.body.style.overflow = '';
+            prev?.focus();
+        };
+    }, [onClose]);
 
     return (
         <motion.div
@@ -94,6 +34,100 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
             onClick={onClose}
         >
             <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="welcome-modal-title"
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: 20 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden"
+            >
+                <div className="bg-gradient-to-br from-[#33cbcc] to-[#2196F3] px-8 pt-10 pb-8 text-center relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10" aria-hidden="true">
+                        {[...Array(6)].map((_, i) => (
+                            <Sparkles
+                                key={i}
+                                size={24}
+                                className="absolute text-white animate-pulse"
+                                style={{
+                                    top: `${15 + (i * 15) % 70}%`,
+                                    left: `${10 + (i * 20) % 80}%`,
+                                    animationDelay: `${i * 0.3}s`,
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                        className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4"
+                        aria-hidden="true"
+                    >
+                        <PartyPopper size={40} className="text-white" />
+                    </motion.div>
+                    <h2 id="welcome-modal-title" className="text-2xl font-bold text-white mb-1">
+                        Bienvenue {firstName} !
+                    </h2>
+                    <p className="text-white/80 text-sm">
+                        Nous sommes ravis de vous avoir dans l'equipe
+                    </p>
+                </div>
+
+                <div className="px-8 py-6 text-center">
+                    <p className="text-gray-600 leading-relaxed mb-2">
+                        Votre talent et votre energie vont faire toute la difference.
+                        Nous croyons en vous et nous sommes convaincus que de grandes
+                        choses vous attendent ici.
+                    </p>
+                    <p className="text-gray-500 text-sm mb-6">
+                        N'hesitez pas a explorer l'application et a contacter
+                        vos collegues si vous avez besoin d'aide.
+                        Ensemble, nous allons accomplir de grandes choses !
+                    </p>
+                    <button
+                        onClick={onClose}
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-[#33cbcc] to-[#2196F3] text-white font-semibold text-sm transition-shadow"
+                    >
+                        C'est parti !
+                    </button>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+/* -- Birthday Modal --------------------------------------- */
+
+const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClose: () => void }) => {
+    const single = people.length === 1;
+
+    useEffect(() => {
+        const prev = document.activeElement as HTMLElement;
+        document.body.style.overflow = 'hidden';
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', onKey);
+        return () => {
+            document.removeEventListener('keydown', onKey);
+            document.body.style.overflow = '';
+            prev?.focus();
+        };
+    }, [onClose]);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+            onClick={onClose}
+        >
+            <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="birthday-modal-title"
                 initial={{ scale: 0.8, opacity: 0, y: 20 }}
                 animate={{ scale: 1, opacity: 1, y: 0 }}
                 exit={{ scale: 0.8, opacity: 0, y: 20 }}
@@ -104,19 +138,21 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
                 <div className="bg-gradient-to-br from-[#f59e0b] to-[#ec4899] px-8 pt-10 pb-8 text-center relative overflow-hidden">
                     <button
                         onClick={onClose}
+                        aria-label="Fermer"
                         className="absolute top-4 right-4 p-1.5 rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
                     >
-                        <X size={16} />
+                        <X size={16} aria-hidden="true" />
                     </button>
                     <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
                         className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4"
+                        aria-hidden="true"
                     >
                         <Cake size={40} className="text-white" />
                     </motion.div>
-                    <h2 className="text-2xl font-bold text-white mb-1">
+                    <h2 id="birthday-modal-title" className="text-2xl font-bold text-white mb-1">
                         Joyeux Anniversaire !
                     </h2>
                     <p className="text-white/80 text-sm">
@@ -128,7 +164,7 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
                     <div className="space-y-3 mb-6">
                         {people.map(p => (
                             <div key={p.id} className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-pink-400 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-pink-400 flex items-center justify-center text-white font-bold text-sm shrink-0" aria-hidden="true">
                                     {p.avatarUrl ? (
                                         <img src={p.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
                                     ) : (
@@ -151,7 +187,7 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
 
                     <button
                         onClick={onClose}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-[#f59e0b] to-[#ec4899] text-white font-semibold text-sm hover:shadow-lg transition-shadow"
+                        className="w-full py-3 rounded-xl bg-gradient-to-r from-[#f59e0b] to-[#ec4899] text-white font-semibold text-sm transition-shadow"
                     >
                         Super !
                     </button>
@@ -241,6 +277,9 @@ const DashboardLayout = () => {
                     />
                 )}
             </AnimatePresence>
+
+            {/* Meeting Recording Prompt — floats for the designated secretary */}
+            <MeetingRecordingPrompt />
         </div>
     );
 };

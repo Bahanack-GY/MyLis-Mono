@@ -10,10 +10,30 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 
 const ALLOWED_FOLDERS = ['formation', 'recruitment', 'contracts', 'general', 'education'];
-const ALLOWED_EXTENSIONS = ['.pdf', '.png', '.jpg', '.jpeg', '.doc', '.docx', '.webp'];
+// Allow all common file types
+const ALLOWED_EXTENSIONS = [
+    // Documents
+    '.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt', '.pages',
+    // Spreadsheets
+    '.xls', '.xlsx', '.csv', '.ods', '.numbers',
+    // Presentations
+    '.ppt', '.pptx', '.odp', '.key',
+    // Images
+    '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.svg', '.webp', '.ico', '.tiff', '.tif',
+    // Archives
+    '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2',
+    // Videos
+    '.mp4', '.avi', '.mov', '.wmv', '.flv', '.mkv', '.webm',
+    // Audio
+    '.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac',
+    // Code/Text
+    '.html', '.css', '.js', '.json', '.xml', '.yaml', '.yml', '.md',
+    // Others
+    '.psd', '.ai', '.eps', '.indd', '.dwg', '.dxf'
+];
 const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
 @Controller('hr/documents')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class DocumentsController {
@@ -37,10 +57,12 @@ export class DocumentsController {
         }),
         fileFilter: (_req, file, cb) => {
             const ext = extname(file.originalname).toLowerCase();
+            console.log('File filter check - File:', file.originalname, 'Extension:', ext);
             if (ALLOWED_EXTENSIONS.includes(ext)) {
                 cb(null, true);
             } else {
-                cb(new BadRequestException(`File type ${ext} is not allowed`), false);
+                console.error('File type not allowed:', ext, 'Allowed types:', ALLOWED_EXTENSIONS);
+                cb(new BadRequestException(`File type ${ext} is not allowed. Allowed types: ${ALLOWED_EXTENSIONS.join(', ')}`), false);
             }
         },
         limits: { fileSize: MAX_FILE_SIZE },
@@ -49,12 +71,16 @@ export class DocumentsController {
         @UploadedFile() file: Express.Multer.File,
         @Param('folder') folder: string,
     ) {
+        console.log('Upload attempt - File:', file ? file.originalname : 'none', 'Folder:', folder);
         if (!file) {
+            console.error('Upload failed: No file provided');
             throw new BadRequestException('No file provided');
         }
         if (!ALLOWED_FOLDERS.includes(folder)) {
+            console.error('Upload failed: Invalid folder:', folder);
             throw new BadRequestException(`Invalid folder: ${folder}`);
         }
+        console.log('Upload successful:', file.filename);
         return {
             filePath: `uploads/${folder}/${file.filename}`,
             fileName: file.originalname,
@@ -65,21 +91,23 @@ export class DocumentsController {
 
     @Post()
     create(@Body() createDocumentDto: any, @Request() req) {
-        const dto = { ...createDocumentDto, uploadedById: req.user.userId };
+        const { userId, role } = req.user;
+
+        // Employees can only create documents visible to everyone
+        const dto = { ...createDocumentDto, uploadedById: userId };
+        if (role === 'EMPLOYEE' || role === 'COMMERCIAL') {
+            dto.visibilityType = 'EVERYONE';
+            dto.allowedDepartmentIds = [];
+            dto.allowedEmployeeIds = [];
+        }
+
         return this.documentsService.create(dto);
     }
 
     @Get()
-    findAll(@Request() req) {
-        const { role, userId, departmentId } = req.user;
-
-        if (role === 'MANAGER') {
-            return this.documentsService.findAll();
-        }
-        if (role === 'HEAD_OF_DEPARTMENT' && departmentId) {
-            return this.documentsService.findByDepartment(departmentId);
-        }
-        return this.documentsService.findByUser(userId);
+    async findAll(@Request() req) {
+        const { role, userId, employeeId, departmentId } = req.user;
+        return this.documentsService.findAccessibleDocuments(userId, role, employeeId, departmentId);
     }
 
     @Get('storage')

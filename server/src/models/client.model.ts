@@ -1,6 +1,8 @@
 import { Table, Column, Model, DataType, BelongsTo, ForeignKey, HasMany } from 'sequelize-typescript';
 import { Department } from './department.model';
 import { Project } from './project.model';
+import { Lead } from './lead.model';
+import { ClientPayment } from './client-payment.model';
 
 export enum ClientType {
     ONE_TIME = 'one_time',
@@ -50,4 +52,10 @@ export class Client extends Model {
 
     @HasMany(() => Project)
     declare projects: Project[];
+
+    @HasMany(() => Lead)
+    declare leads: Lead[];
+
+    @HasMany(() => ClientPayment)
+    declare payments: ClientPayment[];
 }

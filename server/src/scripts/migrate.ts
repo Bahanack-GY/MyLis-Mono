@@ -23,6 +23,7 @@ import { Task } from '../models/task.model';
 import { Subtask } from '../models/subtask.model';
 import { TaskNature } from '../models/task-nature.model';
 import { TaskHistory } from '../models/task-history.model';
+import { TaskAttachment } from '../models/task-attachment.model';
 import { Ticket } from '../models/ticket.model';
 import { Client } from '../models/client.model';
 import { Project } from '../models/project.model';
@@ -34,6 +35,7 @@ import { Sanction } from '../models/sanction.model';
 import { Document } from '../models/document.model';
 import { DepartmentGoal } from '../models/department-goal.model';
 import { EmployeeBadge } from '../models/employee-badge.model';
+import { EmployeeTransferHistory } from '../models/employee-transfer-history.model';
 import { Invoice } from '../models/invoice.model';
 import { InvoiceItem } from '../models/invoice-item.model';
 import { InvoiceTemplate } from '../models/invoice-template.model';
@@ -46,6 +48,34 @@ import { Notification } from '../models/notification.model';
 import { Demand } from '../models/demand.model';
 import { DemandItem } from '../models/demand-item.model';
 import { Expense } from '../models/expense.model';
+
+// Accounting models
+import { FiscalYear } from '../models/fiscal-year.model';
+import { AccountCategory } from '../models/account-category.model';
+import { Account } from '../models/account.model';
+import { Journal } from '../models/journal.model';
+import { JournalEntry } from '../models/journal-entry.model';
+import { JournalEntryLine } from '../models/journal-entry-line.model';
+import { TaxConfig } from '../models/tax-config.model';
+import { PayrollRun } from '../models/payroll-run.model';
+import { Payslip } from '../models/payslip.model';
+import { TaxDeclaration } from '../models/tax-declaration.model';
+import { CreditNote } from '../models/credit-note.model';
+import { Budget } from '../models/budget.model';
+import { DeductionType } from '../models/deduction-type.model';
+
+// Commercial models
+import { Lead } from '../models/lead.model';
+import { LeadActivity } from '../models/lead-activity.model';
+import { ClientPayment } from '../models/client-payment.model';
+import { CommercialGoal } from '../models/commercial-goal.model';
+
+// Business expenses
+import { BusinessExpenseType } from '../models/business-expense-type.model';
+import { BusinessExpense } from '../models/business-expense.model';
+
+// Reports
+import { Report } from '../models/report.model';
 
 dotenv.config();
 
@@ -66,6 +96,7 @@ async function migrate() {
             TaskNature,
             Task,
             Subtask,
+            TaskAttachment,
             TaskHistory,
             Ticket,
             Client,
@@ -78,6 +109,7 @@ async function migrate() {
             Document,
             DepartmentGoal,
             EmployeeBadge,
+            EmployeeTransferHistory,
             Invoice,
             InvoiceItem,
             InvoiceTemplate,
@@ -90,6 +122,34 @@ async function migrate() {
             Demand,
             DemandItem,
             Expense,
+
+            // Accounting (parent tables first)
+            FiscalYear,
+            AccountCategory,
+            Account,
+            Journal,
+            JournalEntry,
+            JournalEntryLine,
+            TaxConfig,
+            PayrollRun,
+            Payslip,
+            TaxDeclaration,
+            CreditNote,
+            Budget,
+            DeductionType,
+
+            // Commercial (Lead depends on Employee + Client, LeadActivity depends on Lead)
+            Lead,
+            LeadActivity,
+            ClientPayment,
+            CommercialGoal,   // depends on Employee
+
+            // Business expenses (type before expense)
+            BusinessExpenseType,
+            BusinessExpense,
+
+            // Reports (depends on User, Employee, Department)
+            Report,
         ],
         logging: (sql) => console.log(sql),
     });

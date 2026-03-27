@@ -7,11 +7,13 @@ import { InvoicesService } from './invoices.service';
 import { InvoiceTemplatesService } from './invoice-templates.service';
 import { InvoicesController } from './invoices.controller';
 import { OrganizationModule } from '../organization/organization.module';
+import { AccountingModule } from '../accounting/accounting.module';
 
 @Module({
     imports: [
         SequelizeModule.forFeature([Invoice, InvoiceItem, InvoiceTemplate]),
         OrganizationModule,
+        AccountingModule,
     ],
     controllers: [InvoicesController],
     providers: [InvoicesService, InvoiceTemplatesService],

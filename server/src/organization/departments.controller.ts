@@ -18,13 +18,13 @@ export class DepartmentsController {
         return this.departmentsService.create(createDepartmentDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get()
     findAll() {
         return this.departmentsService.findAll();
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.departmentsService.findOne(id);

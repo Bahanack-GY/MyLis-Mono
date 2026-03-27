@@ -24,6 +24,9 @@ import {
     File as FileIcon,
     Image as ImageIcon,
     Eye,
+    Clock,
+    AlertCircle,
+    RotateCcw,
 } from 'lucide-react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -695,12 +698,14 @@ const MessageBubble = ({
     showAvatar,
     showName,
     onReply,
+    onRetry,
 }: {
     message: ChatMessage;
     isOwn: boolean;
     showAvatar: boolean;
     showName: boolean;
     onReply: () => void;
+    onRetry?: () => void;
 }) => {
     const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3025';
     const avatarSrc = message.sender.avatarUrl
@@ -748,7 +753,7 @@ const MessageBubble = ({
 
     if (isOwn) {
         return (
-            <div className={`flex flex-col items-end px-5 py-0.5 group ${showAvatar ? 'mt-3' : ''}`}>
+            <div className={`flex flex-col items-end px-5 py-0.5 group ${showAvatar ? 'mt-3' : ''} ${message.optimistic ? 'opacity-60' : ''}`}>
                 {showName && (
                     <div className="flex items-baseline gap-2 mb-1">
                         <span className="text-[10px] text-gray-400">{formatTime(message.createdAt)}</span>
@@ -756,14 +761,16 @@ const MessageBubble = ({
                     </div>
                 )}
                 <div className="max-w-[70%] relative">
-                    <button
-                        onClick={onReply}
-                        className="absolute -left-8 top-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                    >
-                        <Reply size={14} />
-                    </button>
+                    {!message.optimistic && !message.failed && (
+                        <button
+                            onClick={onReply}
+                            className="absolute -left-8 top-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                        >
+                            <Reply size={14} />
+                        </button>
+                    )}
                     {replyContext}
-                    <div className="bg-[#283852] text-white px-4 py-2 rounded-2xl rounded-tr-sm">
+                    <div className={`text-white px-4 py-2 rounded-2xl rounded-tr-sm ${message.failed ? 'bg-red-500' : 'bg-[#283852]'}`}>
                         {hasContent && (
                             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                                 {renderContent(message.content, true)}
@@ -773,11 +780,31 @@ const MessageBubble = ({
                             <AttachmentRenderer attachments={message.attachments!} isOwn={true} />
                         )}
                     </div>
-                    {!showName && (
-                        <span className="text-[10px] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity block text-right mt-0.5">
-                            {formatTime(message.createdAt)}
-                        </span>
-                    )}
+                    {/* Sending / failed status */}
+                    <div className="flex items-center justify-end gap-1 mt-0.5">
+                        {message.optimistic && (
+                            <span className="flex items-center gap-1 text-[10px] text-gray-400">
+                                <Clock size={10} className="animate-pulse" />
+                                Envoi…
+                            </span>
+                        )}
+                        {message.failed && (
+                            <span className="flex items-center gap-1 text-[10px] text-red-500">
+                                <AlertCircle size={10} />
+                                Échec
+                                {onRetry && (
+                                    <button onClick={onRetry} className="ml-1 hover:text-red-700 transition-colors">
+                                        <RotateCcw size={10} />
+                                    </button>
+                                )}
+                            </span>
+                        )}
+                        {!message.optimistic && !message.failed && !showName && (
+                            <span className="text-[10px] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {formatTime(message.createdAt)}
+                            </span>
+                        )}
+                    </div>
                 </div>
             </div>
         );
@@ -949,7 +976,7 @@ const Messages = () => {
 
     const { data: messages, isLoading: messagesLoading } = useMessages(activeChannelId);
     const loadMore = useLoadMoreMessages(activeChannelId);
-    const sendMessage = useSendMessage();
+    const sendMessage = useSendMessage(user ?? undefined);
     const markAsRead = useMarkAsRead();
     const { startTyping, stopTyping } = useTyping(activeChannelId);
     const createDM = useCreateDM();
@@ -1309,6 +1336,13 @@ const Messages = () => {
                                                                 setReplyingTo(msg);
                                                                 textareaRef.current?.focus();
                                                             }}
+                                                            onRetry={msg.failed && activeChannelId ? () => {
+                                                                queryClient.setQueryData(
+                                                                    ['chat', 'messages', activeChannelId],
+                                                                    (old: ChatMessage[] | undefined) => (old ?? []).filter(m => m.id !== msg.id),
+                                                                );
+                                                                sendMessage(activeChannelId, msg.content, undefined, undefined, msg.attachments ?? undefined);
+                                                            } : undefined}
                                                         />
                                                     </div>
                                                 );

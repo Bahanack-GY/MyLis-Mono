@@ -1,6 +1,17 @@
 export type TaskState = 'CREATED' | 'ASSIGNED' | 'IN_PROGRESS' | 'BLOCKED' | 'COMPLETED' | 'REVIEWED';
 export type TaskDifficulty = 'EASY' | 'MEDIUM' | 'HARD';
 
+export interface TaskAttachment {
+    id: string;
+    taskId: string;
+    fileName: string;
+    filePath: string;
+    fileType: string;
+    size: number;
+    uploadedByUserId?: string;
+    createdAt?: string;
+}
+
 export interface Subtask {
     id: string;
     title: string;
@@ -25,6 +36,9 @@ export interface Task {
     endTime?: string;
     blockReason?: string;
     selfAssigned?: boolean;
+    urgent?: boolean;
+    important?: boolean;
+    transferredFromWeek?: string | null;
     startedAt?: string | null;
     completedAt?: string | null;
     assignedToId: string;
@@ -35,7 +49,10 @@ export interface Task {
     project?: { id: string; name: string };
     natureId?: string;
     nature?: { id: string; name: string; color?: string };
+    leadId?: string;
+    lead?: { id: string; code: string; company: string };
     subtasks?: Subtask[];
+    attachments?: TaskAttachment[];
     createdAt?: string;
     updatedAt?: string;
 }
@@ -54,6 +71,9 @@ export interface CreateTaskDto {
     assignedToTeamId?: string;
     projectId?: string;
     natureId?: string;
+    leadId?: string;
+    urgent?: boolean;
+    important?: boolean;
 }
 
 export type UpdateTaskDto = Partial<CreateTaskDto>;
@@ -68,6 +88,9 @@ export interface SelfAssignTaskDto {
     startTime?: string;
     projectId?: string;
     natureId?: string;
+    leadId?: string;
+    urgent?: boolean;
+    important?: boolean;
 }
 
 export interface GamificationResult {
@@ -88,4 +111,11 @@ export interface TaskUpdateResponse {
 export interface WeeklyComplianceResult {
     canCreate: boolean;
     pendingTasks: Task[];
+}
+
+export interface TimeDistributionItem {
+    name: string;
+    color: string;
+    hours: number;
+    percentage: number;
 }

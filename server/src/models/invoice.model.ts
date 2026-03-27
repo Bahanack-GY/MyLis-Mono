@@ -108,6 +108,12 @@ export class Invoice extends Model {
     @Column(DataType.DATE)
     declare sentAt: Date;
 
+    @Column({
+        type: DataType.DATE,
+        allowNull: true,
+    })
+    declare lastReminderSentAt: Date | null;
+
     @HasMany(() => InvoiceItem)
     declare items: InvoiceItem[];
 }

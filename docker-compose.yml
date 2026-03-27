@@ -19,6 +19,8 @@ services:
       context: ./server
       target: development
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       postgres:
         condition: service_healthy
@@ -30,6 +32,9 @@ services:
       DB_DATABASE: ${POSTGRES_DB:-mylisapp_db}
       JWT_SECRET: ${JWT_SECRET:-change-me}
       PORT: 3025
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      WHISPER_URL: ${WHISPER_URL:-http://whisper:9001}
     volumes:
       - ./uploads:/app/uploads
       - ./server/src:/app/src
@@ -43,6 +48,15 @@ services:
         - action: rebuild
           path: ./server/package.json
 
+  whisper:
+    build:
+      context: ./whisper-service
+    restart: unless-stopped
+    ports:
+      - "9001:9001"
+    environment:
+      WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
+
   ui:
     build:
       context: ./UI
@@ -55,6 +69,7 @@ services:
     volumes:
       - ./UI/src:/app/src
       - ./UI/index.html:/app/index.html
+      - ./UI/vite.config.ts:/app/vite.config.ts
     ports:
       - "${UI_PORT:-8080}:5173"
     develop:

@@ -20,20 +20,20 @@ export class EmployeesController {
         return this.employeesService.create(createEmployeeDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL')
     @Get()
     findAll(@Query('departmentId') departmentId: string, @Request() req) {
         const deptId = req.user.role === 'HEAD_OF_DEPARTMENT' ? req.user.departmentId : departmentId;
         return this.employeesService.findAll(deptId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get('leaderboard')
     getLeaderboard(@Query('limit') limit?: string) {
         return this.employeesService.getLeaderboard(limit ? parseInt(limit, 10) : 5);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get('birthdays/today')
     getTodayBirthdays() {
         return this.employeesService.getTodayBirthdays();
@@ -82,5 +82,30 @@ export class EmployeesController {
     @Delete(':id')
     remove(@Param('id') id: string) {
         return this.employeesService.remove(id);
+    }
+
+    @Patch(':id/transfer')
+    async transferDepartment(
+        @Param('id') id: string,
+        @Body() dto: { toDepartmentId: string; reason?: string },
+        @Request() req
+    ) {
+        return this.employeesService.transferDepartment(
+            id,
+            dto.toDepartmentId,
+            req.user.userId,
+            dto.reason
+        );
+    }
+
+    @Get(':id/transfer-history')
+    getTransferHistory(@Param('id') id: string) {
+        return this.employeesService.getTransferHistory(id);
+    }
+
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+    @Get(':id/reports')
+    getEmployeeReports(@Param('id') id: string, @Request() req) {
+        return this.employeesService.getEmployeeReports(id, req.user.role, req.user.departmentId);
     }
 }

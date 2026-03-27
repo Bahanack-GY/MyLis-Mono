@@ -458,7 +458,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                         type="button"
                                         onClick={() => update('color', opt.value)}
                                         className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all ${
-                                            isActive ? 'border-gray-800 scale-110' : 'border-transparent hover:scale-105'
+                                            isActive ? 'border-gray-800 scale-110' : 'border-transparent '
                                         }`}
                                         style={{ backgroundColor: opt.value }}
                                     >
@@ -882,7 +882,7 @@ const Departments = () => {
                             <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
                         </div>
                         <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
+                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
                             style={{ color: stat.color }}
                         >
                             <stat.icon size={100} strokeWidth={1.5} />
@@ -1003,7 +1003,7 @@ const Departments = () => {
                             {/* Icon + Name */}
                             <div className="flex items-center gap-4 mb-5">
                                 <div
-                                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105 duration-300"
+                                    className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform  duration-300"
                                     style={{ backgroundColor: `${dept.color}15` }}
                                 >
                                     <dept.icon size={24} style={{ color: dept.color }} />

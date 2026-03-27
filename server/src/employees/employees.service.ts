@@ -1,12 +1,14 @@
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/sequelize';
 import { Employee } from '../models/employee.model';
 import { EmployeeBadge } from '../models/employee-badge.model';
+import { EmployeeTransferHistory } from '../models/employee-transfer-history.model';
 import { User } from '../models/user.model';
 import { Department } from '../models/department.model';
 import { Position } from '../models/position.model';
 import { Task } from '../models/task.model';
+import { Report } from '../models/report.model';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { Op, literal } from 'sequelize';
@@ -19,8 +21,16 @@ export class EmployeesService {
         private employeeModel: typeof Employee,
         @InjectModel(EmployeeBadge)
         private employeeBadgeModel: typeof EmployeeBadge,
+        @InjectModel(EmployeeTransferHistory)
+        private employeeTransferHistoryModel: typeof EmployeeTransferHistory,
         @InjectModel(Task)
         private taskModel: typeof Task,
+        @InjectModel(Department)
+        private departmentModel: typeof Department,
+        @InjectModel(User)
+        private userModel: typeof User,
+        @InjectModel(Report)
+        private reportModel: typeof Report,
         @InjectConnection()
         private sequelize: Sequelize,
         private usersService: UsersService,
@@ -273,6 +283,110 @@ export class EmployeesService {
                 avatarUrl: plain.avatarUrl || null,
                 departmentName: plain.department?.name || '',
             };
+        });
+    }
+
+    async transferDepartment(
+        employeeId: string,
+        toDepartmentId: string,
+        transferredByUserId: string,
+        reason?: string
+    ): Promise<Employee> {
+        return this.sequelize.transaction(async (t) => {
+            // 1. Fetch employee with current department
+            const employee = await this.employeeModel.findByPk(employeeId, {
+                include: [Department, User],
+                transaction: t,
+            });
+
+            if (!employee) throw new NotFoundException('Employee not found');
+
+            const fromDepartmentId = employee.getDataValue('departmentId');
+
+            // 2. Validation: prevent transfer to same department
+            if (fromDepartmentId === toDepartmentId) {
+                throw new BadRequestException('Employee is already in this department');
+            }
+
+            // 3. Validate target department exists
+            const toDepartment = await this.departmentModel.findByPk(toDepartmentId, { transaction: t });
+            if (!toDepartment) throw new NotFoundException('Target department not found');
+
+            // 4. Handle HEAD_OF_DEPARTMENT role if employee is current head
+            const currentDept = fromDepartmentId
+                ? await this.departmentModel.findByPk(fromDepartmentId, { transaction: t })
+                : null;
+
+            if (currentDept && currentDept.getDataValue('headId') === employeeId) {
+                // Remove as head of old department
+                await currentDept.update({ headId: null }, { transaction: t });
+
+                // Remove HEAD_OF_DEPARTMENT role from user
+                const user = await this.userModel.findByPk(employee.userId, { transaction: t });
+                if (user && user.role === 'HEAD_OF_DEPARTMENT') {
+                    await user.update({ role: 'EMPLOYEE' }, { transaction: t });
+                }
+            }
+
+            // 5. Get transferrer name
+            const transferrer = await this.userModel.findByPk(transferredByUserId);
+            const transferredByName = transferrer
+                ? `${transferrer.getDataValue('firstName') || ''} ${transferrer.getDataValue('lastName') || ''}`.trim() || transferrer.email
+                : 'System';
+
+            // 6. Update employee's department
+            await employee.update({ departmentId: toDepartmentId }, { transaction: t });
+
+            // 7. Create transfer history record
+            await this.employeeTransferHistoryModel.create({
+                employeeId,
+                fromDepartmentId,
+                toDepartmentId,
+                transferredByUserId,
+                transferredByName,
+                reason,
+            }, { transaction: t });
+
+            return employee.reload({ include: [User, Department, Position], transaction: t });
+        });
+    }
+
+    async getTransferHistory(employeeId: string): Promise<EmployeeTransferHistory[]> {
+        return this.employeeTransferHistoryModel.findAll({
+            where: { employeeId },
+            include: [
+                { model: Department, as: 'fromDepartment', attributes: ['id', 'name'] },
+                { model: Department, as: 'toDepartment', attributes: ['id', 'name'] },
+            ],
+            order: [['createdAt', 'DESC']],
+        });
+    }
+
+    async getEmployeeReports(employeeId: string, userRole: string, userDepartmentId?: string): Promise<Report[]> {
+        // Verify employee exists
+        const employee = await this.employeeModel.findByPk(employeeId, { include: [Department] });
+        if (!employee) {
+            throw new NotFoundException('Employee not found');
+        }
+
+        // Access control: Only MANAGER or HOD (if employee in their dept) can access
+        if (userRole === 'HEAD_OF_DEPARTMENT') {
+            const empDeptId = employee.getDataValue('departmentId');
+            if (empDeptId !== userDepartmentId) {
+                throw new ForbiddenException('You can only view reports for employees in your department');
+            }
+        } else if (userRole !== 'MANAGER') {
+            throw new ForbiddenException('Insufficient permissions');
+        }
+
+        // Fetch all reports where this employee is the target
+        return this.reportModel.findAll({
+            where: { targetEmployeeId: employeeId },
+            include: [
+                { model: User, as: 'generatedBy', attributes: ['id', 'email'] },
+                { model: Employee, as: 'targetEmployee', attributes: ['id', 'firstName', 'lastName'] },
+            ],
+            order: [['createdAt', 'DESC']],
         });
     }
 }

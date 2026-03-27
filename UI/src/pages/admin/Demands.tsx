@@ -449,7 +449,7 @@ const Demands = () => {
                             <h2 className="text-2xl font-bold text-gray-800 mt-1">{stat.value}</h2>
                         </div>
                         <div
-                            className="absolute -right-3 -bottom-3 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
+                            className="absolute -right-3 -bottom-3 opacity-5 transition-transform  duration-500 ease-out"
                             style={{ color: stat.color }}
                         >
                             <stat.icon size={80} strokeWidth={1.5} />
@@ -520,7 +520,7 @@ const Demands = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 + i * 0.05 }}
                             onClick={() => setSelectedDemand(demand)}
-                            className="bg-white rounded-2xl p-6 border border-gray-100 group hover:border-gray-200 hover:shadow-md cursor-pointer transition-all"
+                            className="bg-white rounded-2xl p-6 border border-gray-100 group hover:border-gray-200  cursor-pointer transition-all"
                         >
                             <div className="flex items-start justify-between mb-3">
                                 <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">

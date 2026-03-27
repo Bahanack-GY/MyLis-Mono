@@ -125,7 +125,7 @@ const Dashboard = () => {
                         </div>
 
                         <div
-                            className="absolute -right-6 -bottom-6 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
+                            className="absolute -right-6 -bottom-6 opacity-5 transition-transform  duration-500 ease-out"
                             style={{ color: stat.color }}
                         >
                             <stat.icon size={100} strokeWidth={1.5} />

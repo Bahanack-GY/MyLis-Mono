@@ -20,6 +20,11 @@ import {
     Save,
     Trash2,
     ListTodo,
+    Paperclip,
+    Download,
+    FileText,
+    Target,
+    RotateCcw,
 } from 'lucide-react';
 import {
     useMyWeekTasks,
@@ -30,9 +35,13 @@ import {
     useCreateSubtask,
     useToggleSubtask,
     useDeleteSubtask,
+    useTransferTask,
 } from '../../api/tasks/hooks';
 import { useMyProjects } from '../../api/projects/hooks';
 import { useTaskNatures } from '../../api/task-natures/hooks';
+import { useAuth } from '../../contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { leadsApi } from '../../api/commercial/api';
 import type { Task, TaskDifficulty, TaskState } from '../../api/tasks/types';
 
 /* ─── Helper Functions ───────────────────────────────────── */
@@ -81,10 +90,10 @@ const fmtDuration = (ms: number, t: (k: string) => string) => {
     const hours = Math.floor((totalMins % 1440) / 60);
     const mins = totalMins % 60;
     const parts: string[] = [];
-    if (days > 0) parts.push(`${days}${t('tasks.detail.daysShort')}`);
-    if (hours > 0) parts.push(`${hours}${t('tasks.detail.hoursShort')}`);
-    if (mins > 0) parts.push(`${mins}${t('tasks.detail.minsShort')}`);
-    return parts.join(' ') || `0${t('tasks.detail.minsShort')}`;
+    if (days > 0) parts.push(`${days}${t('tasks.detail.dayShort')}`);
+    if (hours > 0) parts.push(`${hours}${t('tasks.detail.hourShort')}`);
+    if (mins > 0) parts.push(`${mins}${t('tasks.detail.minShort')}`);
+    return parts.join(' ') || `0${t('tasks.detail.minShort')}`;
 };
 
 /* ─── Constants ──────────────────────────────────────────── */
@@ -119,6 +128,7 @@ const TaskDetailModal = ({
     isUpdating,
     onEdit,
     onHistory,
+    onTransfer,
 }: {
     task: Task;
     onClose: () => void;
@@ -127,6 +137,7 @@ const TaskDetailModal = ({
     isUpdating: boolean;
     onEdit?: () => void;
     onHistory?: () => void;
+    onTransfer?: (taskId: string) => void;
 }) => {
     const { t } = useTranslation();
     const nextState = NEXT_STATE[task.state];
@@ -231,9 +242,15 @@ const TaskDetailModal = ({
                 <div className="p-6 space-y-5">
                     <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
                                 <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
                                 <h3 className="text-lg font-bold text-gray-800 truncate">{task.title}</h3>
+                                {task.transferredFromWeek && (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 shrink-0">
+                                        <RotateCcw size={10} />
+                                        {t('tasks.transferred')}
+                                    </span>
+                                )}
                             </div>
                             {task.project && (
                                 <p className="text-sm text-gray-500 pl-5">{task.project.name}</p>
@@ -434,6 +451,35 @@ const TaskDetailModal = ({
                         </div>
                     </div>
 
+                    {/* Attachments */}
+                    {task.attachments && task.attachments.length > 0 && (
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <Paperclip size={12} className="text-gray-400" />
+                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.attachments', 'Attachments')}</p>
+                                <span className="text-xs font-medium text-gray-500">{task.attachments.length}</span>
+                            </div>
+                            <div className="space-y-2 max-h-40 overflow-y-auto">
+                                {task.attachments.map(att => (
+                                    <div key={att.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                                        <FileText size={14} className="text-gray-400 shrink-0" />
+                                        <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
+                                        <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
+                                        <a
+                                            href={att.filePath}
+                                            download={att.fileName}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"
+                                        >
+                                            <Download size={14} />
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Block reason form */}
                     {showBlockForm && (
                         <div className="space-y-3">
@@ -471,6 +517,15 @@ const TaskDetailModal = ({
 
                 {!showBlockForm && (
                     <div className="px-6 py-4 border-t border-gray-100 flex flex-wrap justify-end gap-2">
+                        {(task.state === 'CREATED' || task.state === 'ASSIGNED') && onTransfer && (
+                            <button
+                                onClick={() => { onClose(); onTransfer(task.id); }}
+                                className="px-4 py-2 rounded-xl text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors flex items-center gap-1.5"
+                            >
+                                <RotateCcw size={13} />
+                                {t('tasks.actions.transferToThisWeek')}
+                            </button>
+                        )}
                         {task.selfAssigned && onEdit && (
                             <button
                                 onClick={() => { onClose(); onEdit(); }}
@@ -730,9 +785,17 @@ const SelfAssignModal = ({
     prefilledDate?: string;
 }) => {
     const { t } = useTranslation();
+    const { role } = useAuth();
+    const isCommercial = role === 'COMMERCIAL';
     const selfAssign = useSelfAssignTask();
     const { data: projects } = useMyProjects();
     const { data: taskNatures } = useTaskNatures();
+    const { data: leadsData } = useQuery({
+        queryKey: ['leads', 'list', 'planning-self-assign'],
+        queryFn: () => leadsApi.getAll({}),
+        enabled: isCommercial,
+    });
+    const leads = (leadsData as any)?.data || [];
 
     const [form, setForm] = useState({
         title: '',
@@ -740,6 +803,7 @@ const SelfAssignModal = ({
         difficulty: 'MEDIUM' as TaskDifficulty,
         projectId: '',
         natureId: '',
+        leadId: '',
         startDate: prefilledDate || '',
         endDate: prefilledDate || '',
         startTime: '',
@@ -896,6 +960,26 @@ const SelfAssignModal = ({
                         </select>
                     </div>
 
+                    {/* Lead (COMMERCIAL only) */}
+                    {isCommercial && leads.length > 0 && (
+                        <div>
+                            <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                                <Target size={10} />
+                                {t('tasks.selfAssign.leadLabel', 'Lead')}
+                            </label>
+                            <select
+                                value={form.leadId}
+                                onChange={e => update('leadId', e.target.value)}
+                                className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="">{t('tasks.selfAssign.leadNone', 'Aucun lead')}</option>
+                                {leads.map((lead: any) => (
+                                    <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     {/* Start date + End date + Time */}
                     <div className="grid grid-cols-3 gap-3">
                         <div>
@@ -955,6 +1039,7 @@ const SelfAssignModal = ({
                                     difficulty: form.difficulty,
                                     projectId: form.projectId || undefined,
                                     natureId: form.natureId || undefined,
+                                    leadId: form.leadId || undefined,
                                     startDate: form.startDate || undefined,
                                     endDate: form.endDate || undefined,
                                     dueDate: form.endDate || undefined,
@@ -975,7 +1060,7 @@ const SelfAssignModal = ({
                         ) : (
                             <Plus size={14} className="sm:w-4 sm:h-4" />
                         )}
-                        {t('task.selfAssign.submit')}
+                        {t('tasks.selfAssign.submit')}
                     </button>
                 </div>
             </motion.div>
@@ -1004,7 +1089,7 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             onClick={onClick}
-            className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow cursor-pointer"
+            className="bg-white rounded-lg border border-gray-200 p-3  transition-shadow cursor-pointer"
         >
             <div className="flex items-start justify-between gap-2 mb-2">
                 <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{task.title}</h4>
@@ -1064,6 +1149,14 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                                 style={{ width: `${progressPercentage}%` }}
                             />
                         </div>
+                    </div>
+                )}
+
+                {/* Attachments badge */}
+                {task.attachments && task.attachments.length > 0 && (
+                    <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-1">
+                        <Paperclip size={10} />
+                        <span>{task.attachments.length}</span>
                     </div>
                 )}
             </div>
@@ -1149,6 +1242,7 @@ export default function Planning() {
 
     const updateTaskState = useUpdateTaskState();
     const updateTask = useUpdateTask();
+    const transferTask = useTransferTask();
 
     // Group tasks by day
     const tasksByDay = new Map<string, Task[]>();
@@ -1206,6 +1300,17 @@ export default function Planning() {
     const handleBlockTask = (taskId: string, reason: string) => {
         updateTaskState.mutate(
             { taskId, state: 'BLOCKED', blockReason: reason },
+            {
+                onSuccess: () => {
+                    setSelectedTask(null);
+                },
+            }
+        );
+    };
+
+    const handleTransferTask = (taskId: string) => {
+        transferTask.mutate(
+            { taskId, targetWeekStart: weekStartISO },
             {
                 onSuccess: () => {
                     setSelectedTask(null);
@@ -1399,6 +1504,7 @@ export default function Planning() {
                         isUpdating={updateTaskState.isPending}
                         onEdit={selectedTask.selfAssigned ? handleEditTask : undefined}
                         onHistory={handleViewHistory}
+                        onTransfer={handleTransferTask}
                     />
                 )}
                 {editingTask && (

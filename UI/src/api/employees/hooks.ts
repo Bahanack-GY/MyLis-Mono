@@ -119,3 +119,35 @@ export const useTodayBirthdays = () =>
         queryKey: ['employees', 'birthdays', 'today'],
         queryFn: employeesApi.getTodayBirthdays,
     });
+
+export const useTransferEmployee = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, dto }: { id: string; dto: any }) =>
+            employeesApi.transferDepartment(id, dto),
+        onSuccess: (_, { id }) => {
+            toast.success(i18n.t('toast.employeeTransferred'));
+            qc.invalidateQueries({ queryKey: employeeKeys.all });
+            qc.invalidateQueries({ queryKey: employeeKeys.detail(id) });
+            qc.invalidateQueries({ queryKey: ['employee-transfer-history', id] });
+        },
+        onError: (error: any) => {
+            const message = error.response?.data?.message || i18n.t('toast.error');
+            toast.error(message);
+        },
+    });
+};
+
+export const useEmployeeTransferHistory = (id: string) =>
+    useQuery({
+        queryKey: ['employee-transfer-history', id],
+        queryFn: () => employeesApi.getTransferHistory(id),
+        enabled: !!id,
+    });
+
+export const useEmployeeReports = (id: string) =>
+    useQuery({
+        queryKey: ['employee-reports', id],
+        queryFn: () => employeesApi.getReports(id),
+        enabled: !!id,
+    });

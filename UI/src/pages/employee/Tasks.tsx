@@ -22,6 +22,12 @@ import {
     Tag,
     ListTodo,
     Trash2,
+    Target,
+    Paperclip,
+    Download,
+    FileText,
+    AlertTriangle,
+    Star,
 } from 'lucide-react';
 import {
     DndContext,
@@ -39,12 +45,17 @@ import {
 } from '@dnd-kit/core';
 import { useMyTasks, useUpdateTaskState, useSelfAssignTask, useUpdateTask, useTaskHistory, useCreateSubtask, useToggleSubtask, useDeleteSubtask } from '../../api/tasks/hooks';
 import { tasksApi } from '../../api/tasks/api';
-import type { Task, TaskState, TaskDifficulty, GamificationResult, Subtask } from '../../api/tasks/types';
+import type { Task, TaskState, TaskDifficulty, GamificationResult, Subtask, TaskAttachment } from '../../api/tasks/types';
 import { useMyProjects } from '../../api/projects/hooks';
 import { useTaskNatures } from '../../api/task-natures/hooks';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '../../contexts/AuthContext';
+import { leadsApi } from '../../api/commercial/api';
 import PointsEarnedModal from '../../components/PointsEarnedModal';
 import BadgeEarnedModal from '../../components/BadgeEarnedModal';
 import { UserTasksSkeleton } from '../../components/Skeleton';
+import RichTextEditor from '../../components/RichTextEditor';
+import RichTextDisplay, { stripHtml } from '../../components/RichTextDisplay';
 
 /* ─── Types ─────────────────────────────────────────────── */
 
@@ -71,7 +82,13 @@ interface MappedTask {
     natureId: string;
     natureName: string;
     natureColor: string;
+    leadId: string;
+    leadCode: string;
+    leadCompany: string;
+    urgent?: boolean;
+    important?: boolean;
     subtasks?: Subtask[];
+    attachments?: TaskAttachment[];
 }
 
 /* ─── State mapping ──────────────────────────────────────── */
@@ -244,6 +261,16 @@ const KanbanCard = ({
                                 <Zap size={9} />
                             </span>
                         )}
+                        {task.urgent && (
+                            <span className="flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-red-50 text-red-400">
+                                <AlertTriangle size={9} />
+                            </span>
+                        )}
+                        {task.important && (
+                            <span className="flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-400">
+                                <Star size={9} />
+                            </span>
+                        )}
                         {task.selfAssigned && onEdit && (
                             <button
                                 onPointerDown={e => e.stopPropagation()}
@@ -266,13 +293,17 @@ const KanbanCard = ({
                         {task.natureName}
                     </span>
                 )}
+                {task.leadCode && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-semibold mt-1">
+                        <Target size={9} />
+                        {task.leadCode}
+                    </span>
+                )}
             </div>
 
             {/* Description */}
             {task.description && (
-                <p className="text-xs text-gray-500 line-clamp-2 mb-3 leading-relaxed">
-                    {task.description}
-                </p>
+                <RichTextDisplay content={task.description} truncate maxLines={2} className="text-xs text-gray-500 mb-3 leading-relaxed" />
             )}
 
             {/* Subtasks progress */}
@@ -296,6 +327,14 @@ const KanbanCard = ({
                 </div>
             )}
 
+            {/* Attachments badge */}
+            {task.attachments && task.attachments.length > 0 && (
+                <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-1">
+                    <Paperclip size={10} />
+                    <span>{task.attachments.length}</span>
+                </div>
+            )}
+
             {/* Due date */}
             {(task.dueDate || task.endDate) && (
                 <div className={`flex items-center gap-1 text-[11px] mt-auto pt-2 border-t border-gray-50 ${isOverdue(task) ? 'text-[#283852] font-semibold' : 'text-gray-400'}`}>
@@ -315,7 +354,7 @@ const DragOverlayCard = ({ task }: { task: MappedTask }) => (
             <h3 className="text-sm font-bold text-gray-800 truncate">{task.title}</h3>
             {task.projectName && <p className="text-xs text-gray-400 mt-0.5 truncate">{task.projectName}</p>}
         </div>
-        {task.description && <p className="text-xs text-gray-500 line-clamp-2">{task.description}</p>}
+        {task.description && <RichTextDisplay content={task.description} truncate maxLines={2} className="text-xs text-gray-500" />}
     </div>
 );
 
@@ -610,16 +649,28 @@ const TaskDetailModal = ({
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
-                <div className="h-1.5" style={{ backgroundColor: dotColor }} />
+                <div className="h-1.5 shrink-0" style={{ backgroundColor: dotColor }} />
 
-                <div className="p-6 space-y-5">
+                <div className="flex-1 overflow-y-auto p-6 space-y-5">
                     <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
                                 <h3 className="text-lg font-bold text-gray-800 truncate">{task.title}</h3>
+                                {task.urgent && (
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">
+                                        <AlertTriangle size={10} />
+                                        {t('tasksPage.urgent')}
+                                    </span>
+                                )}
+                                {task.important && (
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 shrink-0">
+                                        <Star size={10} />
+                                        {t('tasksPage.important')}
+                                    </span>
+                                )}
                             </div>
                             {task.projectName && (
                                 <p className="text-sm text-gray-500 pl-5">{task.projectName}</p>
@@ -701,7 +752,7 @@ const TaskDetailModal = ({
                     {task.description && (
                         <div>
                             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('tasks.detail.description')}</p>
-                            <p className="text-sm text-gray-600 leading-relaxed">{task.description}</p>
+                            <RichTextDisplay content={task.description} className="text-sm text-gray-600 leading-relaxed" />
                         </div>
                     )}
 
@@ -728,8 +779,46 @@ const TaskDetailModal = ({
                         </div>
                     )}
 
+                    {task.leadCode && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                            <Target size={14} className="text-indigo-500" />
+                            <span className="font-medium">{task.leadCode}</span>
+                            <span className="text-gray-400">&mdash;</span>
+                            <span>{task.leadCompany}</span>
+                        </div>
+                    )}
+
                     {/* Subtasks section */}
                     <SubtasksSection task={task} />
+
+                    {/* Attachments */}
+                    {task.attachments && task.attachments.length > 0 && (
+                        <div>
+                            <div className="flex items-center gap-2 mb-2">
+                                <Paperclip size={12} className="text-gray-400" />
+                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.attachments', 'Attachments')}</p>
+                                <span className="text-xs font-medium text-gray-500">{task.attachments.length}</span>
+                            </div>
+                            <div className="space-y-2 max-h-40 overflow-y-auto">
+                                {task.attachments.map(att => (
+                                    <div key={att.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                                        <FileText size={14} className="text-gray-400 shrink-0" />
+                                        <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
+                                        <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
+                                        <a
+                                            href={att.filePath}
+                                            download={att.fileName}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"
+                                        >
+                                            <Download size={14} />
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Block reason form */}
                     {showBlockForm && (
@@ -767,7 +856,7 @@ const TaskDetailModal = ({
                 </div>
 
                 {!showBlockForm && (
-                    <div className="px-6 py-4 border-t border-gray-100 flex flex-wrap justify-end gap-2">
+                    <div className="px-6 py-4 border-t border-gray-100 flex flex-wrap justify-end gap-2 shrink-0">
                         {task.selfAssigned && onEdit && (
                             <button
                                 onClick={() => { onClose(); onEdit(); }}
@@ -837,8 +926,16 @@ const EditSelfTaskModal = ({
     isSaving: boolean;
 }) => {
     const { t } = useTranslation();
+    const { role } = useAuth();
+    const isCommercial = role === 'COMMERCIAL';
     const { data: projects } = useMyProjects();
     const { data: taskNatures } = useTaskNatures();
+    const { data: leadsData } = useQuery({
+        queryKey: ['leads', 'list', 'edit-task'],
+        queryFn: () => leadsApi.getAll({}),
+        enabled: isCommercial,
+    });
+    const leads = (leadsData as any)?.data || [];
     const [form, setForm] = useState({
         title: task.title,
         description: task.description,
@@ -848,6 +945,9 @@ const EditSelfTaskModal = ({
         startTime: task.startTime || '',
         projectId: task.projectId || '',
         natureId: task.natureId || '',
+        leadId: task.leadId || '',
+        urgent: task.urgent || false,
+        important: task.important || false,
     });
 
     const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
@@ -874,9 +974,9 @@ const EditSelfTaskModal = ({
                 initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
                             <Pencil size={18} className="text-[#33cbcc]" />
@@ -885,14 +985,14 @@ const EditSelfTaskModal = ({
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
                 </div>
-                <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{t('tasks.selfAssign.titleLabel')}</label>
                         <input type="text" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={inputCls} />
                     </div>
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{t('tasks.selfAssign.descriptionLabel')}</label>
-                        <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} className={`${inputCls} resize-none`} />
+                        <RichTextEditor value={form.description} onChange={html => setForm(f => ({ ...f, description: html }))} />
                     </div>
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('tasks.selfAssign.difficultyLabel')}</label>
@@ -921,6 +1021,28 @@ const EditSelfTaskModal = ({
                             {(taskNatures || []).map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
                         </select>
                     </div>
+                    {isCommercial && leads.length > 0 && (
+                        <div>
+                            <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5"><Target size={10} />{t('tasks.selfAssign.leadLabel', 'Lead')}</label>
+                            <select value={form.leadId} onChange={e => setForm(f => ({ ...f, leadId: e.target.value }))}
+                                className={`${inputCls} appearance-none cursor-pointer`}>
+                                <option value="">{t('tasks.selfAssign.leadNone', 'Aucun lead')}</option>
+                                {leads.map((lead: any) => <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>)}
+                            </select>
+                        </div>
+                    )}
+                    <div className="flex items-center gap-6 mb-4">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                            <AlertTriangle size={14} className="text-red-400" />
+                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
+                            <Star size={14} className="text-amber-400" />
+                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
+                        </label>
+                    </div>
                     <div className="grid grid-cols-3 gap-3">
                         <div>
                             <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5"><Calendar size={10} />{t('tasks.selfAssign.startDateLabel')}</label>
@@ -936,10 +1058,10 @@ const EditSelfTaskModal = ({
                         </div>
                     </div>
                 </div>
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+                <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
                     <button onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">{t('tasks.selfAssign.cancel')}</button>
                     <button
-                        onClick={() => onSave({ title: form.title, description: form.description || undefined, difficulty: form.difficulty, projectId: form.projectId || undefined, natureId: form.natureId || undefined, startDate: form.startDate || undefined, endDate: form.endDate || undefined, startTime: form.startTime || undefined })}
+                        onClick={() => onSave({ title: form.title, description: form.description || undefined, difficulty: form.difficulty, projectId: form.projectId || undefined, natureId: form.natureId || undefined, leadId: form.leadId || undefined, startDate: form.startDate || undefined, endDate: form.endDate || undefined, startTime: form.startTime || undefined, urgent: form.urgent, important: form.important })}
                         disabled={!form.title.trim() || isSaving}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors ${form.title.trim() ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-gray-300 cursor-not-allowed'}`}
                     >
@@ -973,9 +1095,9 @@ const TaskHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () => 
                 initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center">
                             <History size={18} className="text-[#283852]" />
@@ -984,7 +1106,7 @@ const TaskHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () => 
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
                 </div>
-                <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
+                <div className="flex-1 overflow-y-auto px-6 py-5">
                     {isLoading ? (
                         <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-[#33cbcc]" /></div>
                     ) : (history as any[]).length === 0 ? (
@@ -1043,11 +1165,11 @@ const WeeklyComplianceBlockModal = ({ pendingTasks, onClose }: { pendingTasks: T
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
-                <div className="h-1.5 bg-red-500" />
+                <div className="h-1.5 bg-red-500 shrink-0" />
 
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center">
                             <AlertCircle size={18} className="text-red-500" />
@@ -1059,7 +1181,7 @@ const WeeklyComplianceBlockModal = ({ pendingTasks, onClose }: { pendingTasks: T
                     </button>
                 </div>
 
-                <div className="px-6 py-5 space-y-4">
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
                     <p className="text-sm text-gray-600">{t('tasks.weeklyCompliance.message')}</p>
 
                     <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -1084,7 +1206,7 @@ const WeeklyComplianceBlockModal = ({ pendingTasks, onClose }: { pendingTasks: T
                     <p className="text-xs text-gray-400 italic">{t('tasks.weeklyCompliance.hint')}</p>
                 </div>
 
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-end">
+                <div className="px-6 py-4 border-t border-gray-100 flex justify-end shrink-0">
                     <button
                         onClick={onClose}
                         className="px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-[#283852] hover:bg-[#1e2d42] transition-colors"
@@ -1103,9 +1225,17 @@ const DIFFICULTY_OPTIONS: TaskDifficulty[] = ['EASY', 'MEDIUM', 'HARD'];
 
 const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
     const { t } = useTranslation();
+    const { role } = useAuth();
+    const isCommercial = role === 'COMMERCIAL';
     const selfAssign = useSelfAssignTask();
     const { data: projects } = useMyProjects();
     const { data: taskNatures } = useTaskNatures();
+    const { data: leadsData } = useQuery({
+        queryKey: ['leads', 'list', 'self-assign'],
+        queryFn: () => leadsApi.getAll({}),
+        enabled: isCommercial,
+    });
+    const leads = (leadsData as any)?.data || [];
 
     const [form, setForm] = useState({
         title: '',
@@ -1113,9 +1243,12 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
         difficulty: 'MEDIUM' as TaskDifficulty,
         projectId: '',
         natureId: '',
+        leadId: '',
         startDate: '',
         endDate: '',
         startTime: '',
+        urgent: false,
+        important: false,
     });
 
     useEffect(() => {
@@ -1150,13 +1283,13 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
                 {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Zap size={18} className="text-[#33cbcc]" />
+                            <Calendar size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('tasks.selfAssign.modalTitle')}</h3>
                     </div>
@@ -1166,7 +1299,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                 </div>
 
                 {/* Body */}
-                <div className="px-6 py-5 space-y-4">
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
                     {/* Title */}
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
@@ -1187,13 +1320,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
                             {t('tasks.selfAssign.descriptionLabel')}
                         </label>
-                        <textarea
-                            value={form.description}
-                            onChange={e => update('description', e.target.value)}
-                            placeholder={t('tasks.selfAssign.descriptionPlaceholder')}
-                            rows={3}
-                            className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all resize-none"
-                        />
+                        <RichTextEditor value={form.description} onChange={html => update('description', html)} placeholder={t('tasks.selfAssign.descriptionPlaceholder')} />
                     </div>
 
                     {/* Difficulty */}
@@ -1255,6 +1382,40 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                         </select>
                     </div>
 
+                    {/* Lead (COMMERCIAL only) */}
+                    {isCommercial && leads.length > 0 && (
+                        <div>
+                            <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                                <Target size={10} />
+                                {t('tasks.selfAssign.leadLabel', 'Lead')}
+                            </label>
+                            <select
+                                value={form.leadId}
+                                onChange={e => update('leadId', e.target.value)}
+                                className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="">{t('tasks.selfAssign.leadNone', 'Aucun lead')}</option>
+                                {leads.map((lead: any) => (
+                                    <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
+                    {/* Urgent and Important checkboxes */}
+                    <div className="flex items-center gap-6 mb-4">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
+                            <AlertTriangle size={14} className="text-red-400" />
+                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
+                            <Star size={14} className="text-amber-400" />
+                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
+                        </label>
+                    </div>
+
                     {/* Start date + End date + Time */}
                     <div className="grid grid-cols-3 gap-3">
                         <div>
@@ -1298,7 +1459,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+                <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
                     <button
                         onClick={onClose}
                         className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
@@ -1309,15 +1470,18 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                         onClick={() => {
                             if (!isValid) return;
                             selfAssign.mutate({
-                                title: form.title,
-                                description: form.description || undefined,
+                                title: form.title.trim(),
+                                description: form.description.trim() || undefined,
                                 difficulty: form.difficulty,
                                 projectId: form.projectId || undefined,
                                 natureId: form.natureId || undefined,
+                                leadId: form.leadId || undefined,
                                 startDate: form.startDate || undefined,
                                 endDate: form.endDate || undefined,
                                 dueDate: form.endDate || undefined,
                                 startTime: form.startTime || undefined,
+                                urgent: form.urgent,
+                                important: form.important,
                             }, { onSuccess: () => onClose() });
                         }}
                         disabled={!isValid || selfAssign.isPending}
@@ -1393,7 +1557,11 @@ const Tasks = () => {
                 natureId: t.natureId || '',
                 natureName: t.nature?.name || '',
                 natureColor: t.nature?.color || '',
+                leadId: (t as any).lead?.id || '',
+                leadCode: (t as any).lead?.code || '',
+                leadCompany: (t as any).lead?.company || '',
                 subtasks: t.subtasks || [],
+                attachments: t.attachments || [],
             })),
         [apiTasks],
     );
@@ -1406,7 +1574,7 @@ const Tasks = () => {
                 if (
                     !task.title.toLowerCase().includes(q) &&
                     !task.projectName.toLowerCase().includes(q) &&
-                    !task.description.toLowerCase().includes(q)
+                    !stripHtml(task.description).toLowerCase().includes(q)
                 ) return false;
             }
             if (!taskMatchesDateFilter(task, dateFilter, customFrom, customTo)) return false;
@@ -1547,7 +1715,7 @@ const Tasks = () => {
                             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
                         </div>
                         <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
+                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
                             style={{ color: stat.color }}
                         >
                             <stat.icon size={80} strokeWidth={1.5} />

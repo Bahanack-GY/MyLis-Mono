@@ -63,3 +63,22 @@ export interface BirthdayEmployee {
     avatarUrl: string | null;
     departmentName: string;
 }
+
+export interface EmployeeTransferHistory {
+    id: string;
+    employeeId: string;
+    fromDepartmentId: string | null;
+    toDepartmentId: string;
+    fromDepartment?: { id: string; name: string };
+    toDepartment: { id: string; name: string };
+    transferredByUserId: string | null;
+    transferredByName: string;
+    reason: string | null;
+    metadata?: Record<string, any> | null;
+    createdAt: string;
+}
+
+export interface TransferEmployeeDto {
+    toDepartmentId: string;
+    reason?: string;
+}

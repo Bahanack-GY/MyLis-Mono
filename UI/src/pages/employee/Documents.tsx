@@ -9,17 +9,14 @@ import {
     Search,
     Plus,
     X,
-    HardDrive,
-    Clock,
     FolderOpen,
-    LayoutGrid,
-    List,
     Loader2,
 } from 'lucide-react';
-import { useDocuments, useCreateDocument, useStorageInfo } from '../../api/documents/hooks';
+import { useDocuments, useCreateDocument } from '../../api/documents/hooks';
 import { documentsApi } from '../../api/documents/api';
 import type { Document as DocType } from '../../api/documents/types';
 import { UserDocumentsSkeleton } from '../../components/Skeleton';
+import Folder from '../../components/Folder';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -261,14 +258,13 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
 
 const Documents = () => {
     const { t } = useTranslation();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterCategory, setFilterCategory] = useState<DocCategory | 'all'>('all');
-    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [selectedCategory, setSelectedCategory] = useState<DocCategory | null>(null);
+    const [categorySearchQuery, setCategorySearchQuery] = useState('');
+    const [clickedFolder, setClickedFolder] = useState<DocCategory | null>(null);
     const [showUploadModal, setShowUploadModal] = useState(false);
 
     /* API data */
     const { data: apiDocuments, isLoading } = useDocuments();
-    const { data: storageInfo } = useStorageInfo();
 
     const getFileUrl = (filePath: string) => {
         const uploadsIndex = filePath.indexOf('uploads/');
@@ -303,42 +299,6 @@ const Documents = () => {
         return <UserDocumentsSkeleton />;
     }
 
-    /* Filtered documents */
-    const filteredDocs = documents.filter(doc => {
-        const matchesSearch =
-            doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            doc.uploader.name.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = filterCategory === 'all' || doc.type === filterCategory;
-        return matchesSearch && matchesCategory;
-    });
-
-    /* Stats */
-    const totalStorageBytes = storageInfo?.totalBytes ?? 0;
-    const storageUsed = totalStorageBytes > 1024 * 1024 * 1024
-        ? `${(totalStorageBytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
-        : totalStorageBytes > 1024 * 1024
-            ? `${(totalStorageBytes / (1024 * 1024)).toFixed(1)} MB`
-            : `${(totalStorageBytes / 1024).toFixed(1)} KB`;
-    const recentDocs = documents.filter(d => {
-        if (!d.date) return false;
-        const diff = Date.now() - new Date(d.date).getTime();
-        return diff <= 30 * 24 * 60 * 60 * 1000;
-    }).length;
-    const categoriesCount = new Set(documents.map(d => d.type)).size;
-
-    const stats = [
-        { label: t('documents.stats.total'), value: documents.length, icon: FileText, color: '#33cbcc' },
-        { label: t('documents.stats.storage'), value: storageUsed, icon: HardDrive, color: '#283852' },
-        { label: t('documents.stats.recent'), value: recentDocs, icon: Clock, color: '#33cbcc' },
-        { label: t('documents.stats.categories'), value: categoriesCount, icon: FolderOpen, color: '#283852' },
-    ];
-
-    /* Category filters */
-    const categoryFilters: { key: DocCategory | 'all'; label: string }[] = [
-        { key: 'all', label: t('documents.filterAll') },
-        ...CATEGORIES.map(cat => ({ key: cat as DocCategory, label: t(`documents.categories.${cat.toLowerCase()}`) })),
-    ];
-
     return (
         <div className="space-y-6 md:space-y-8">
             {/* Header */}
@@ -356,273 +316,204 @@ const Documents = () => {
                 </button>
             </div>
 
-            {/* Stat Cards - 2-col mobile / 4-col desktop */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {stats.map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100 relative overflow-hidden group"
-                    >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-xs md:text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-1 md:mt-2">{stat.value}</h2>
-                        </div>
-                        <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
-                            style={{ color: stat.color }}
-                        >
-                            <stat.icon size={80} strokeWidth={1.5} />
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+            {/* Category Folders Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+                {CATEGORIES.map((category, i) => {
+                    const categoryDocs = documents.filter(d => d.type === category);
+                    const isOpen = clickedFolder === category;
 
-            {/* Search bar + View toggle */}
-            <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
-                    <input
-                        type="text"
-                        placeholder={t('documents.searchPlaceholder')}
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
-                    />
-                </div>
-                <div className="flex bg-white rounded-xl border border-gray-100 p-1 self-start md:self-auto">
-                    <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <LayoutGrid size={18} />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <List size={18} />
-                    </button>
-                </div>
-            </div>
+                    const handleFolderClick = () => {
+                        setClickedFolder(category);
+                        // Small delay to show the folder opening animation before modal appears
+                        setTimeout(() => {
+                            setSelectedCategory(category);
+                        }, 300);
+                    };
 
-            {/* Category filter pills */}
-            <div className="flex gap-2 flex-wrap">
-                {categoryFilters.map(cf => (
-                    <button
-                        key={cf.key}
-                        onClick={() => setFilterCategory(cf.key)}
-                        className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-colors ${
-                            filterCategory === cf.key
-                                ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
-                                : 'bg-white text-gray-600 border border-gray-100 hover:border-[#33cbcc]/30'
-                        }`}
-                    >
-                        {cf.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* Grid View - 1-col mobile / 2-col tablet / 3-col desktop */}
-            {viewMode === 'grid' && filteredDocs.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {filteredDocs.map((doc, i) => (
+                    return (
                         <motion.div
-                            key={doc.id}
+                            key={category}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 + i * 0.05 }}
-                            className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100 group hover:border-[#33cbcc]/30 transition-all"
+                            className="flex flex-col items-center cursor-pointer"
+                            onClick={handleFolderClick}
                         >
-                            {/* Icon + Actions */}
-                            <div className="flex items-start justify-between mb-4">
-                                <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                                    <FileText size={20} className="text-[#283852]" />
-                                </div>
-                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {doc.filePath ? (
-                                        <>
-                                            <a
-                                                href={getFileUrl(doc.filePath)}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-                                            >
-                                                <Eye size={16} />
-                                            </a>
-                                            <a
-                                                href={getFileUrl(doc.filePath)}
-                                                download
-                                                className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-                                            >
-                                                <Download size={16} />
-                                            </a>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button className="p-2 rounded-lg text-gray-300 cursor-not-allowed" disabled>
-                                                <Eye size={16} />
-                                            </button>
-                                            <button className="p-2 rounded-lg text-gray-300 cursor-not-allowed" disabled>
-                                                <Download size={16} />
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Name */}
-                            <h3 className="font-medium text-gray-800 text-sm truncate mb-2">{doc.name}</h3>
-
-                            {/* Type + Size + Date */}
-                            <div className="flex items-center gap-2 flex-wrap mb-4">
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
-                                    {t(`documents.categories.${doc.type.toLowerCase()}`)}
-                                </span>
-                                {doc.size && (
-                                    <>
-                                        <span className="text-xs text-gray-400">{doc.size}</span>
-                                        <span className="text-xs text-gray-300">|</span>
-                                    </>
-                                )}
-                                {doc.date && (
-                                    <span className="text-xs text-gray-400">{doc.date}</span>
-                                )}
-                            </div>
-
-                            {/* Uploader */}
-                            {doc.uploader.name && (
-                                <div className="flex items-center gap-2 pt-3 border-t border-gray-100">
-                                    {doc.uploader.avatar ? (
-                                        <img src={doc.uploader.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
-                                    ) : (
-                                        <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100" />
-                                    )}
-                                    <span className="text-xs text-gray-500 truncate">{doc.uploader.name.split('@')[0]}</span>
-                                </div>
-                            )}
-                        </motion.div>
-                    ))}
-                </div>
-            )}
-
-            {/* List View */}
-            {viewMode === 'list' && filteredDocs.length > 0 && (
-                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                    {/* Table header - hidden on mobile, shown on md+ */}
-                    <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                        <div className="col-span-5">{t('documents.table.name')}</div>
-                        <div className="col-span-2">{t('documents.table.type')}</div>
-                        <div className="col-span-1">{t('documents.table.size')}</div>
-                        <div className="col-span-2">{t('documents.table.date')}</div>
-                        <div className="col-span-2">{t('documents.table.actions')}</div>
-                    </div>
-
-                    {/* Rows */}
-                    {filteredDocs.map((doc, i) => (
-                        <motion.div
-                            key={doc.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.03 }}
-                            className="border-t border-gray-100 group hover:bg-gray-50/50 transition-colors"
-                        >
-                            {/* Mobile row */}
-                            <div className="flex md:hidden items-center gap-3 px-4 py-3">
-                                <div className="w-9 h-9 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0">
-                                    <FileText size={16} className="text-[#283852]" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-800 truncate">{doc.name}</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
-                                            {t(`documents.categories.${doc.type.toLowerCase()}`)}
-                                        </span>
-                                        {doc.size && <span className="text-[10px] text-gray-400">{doc.size}</span>}
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    {doc.filePath ? (
-                                        <>
-                                            <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                                <Eye size={14} />
-                                            </a>
-                                            <a href={getFileUrl(doc.filePath)} download className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                                <Download size={14} />
-                                            </a>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button className="p-1.5 rounded-lg text-gray-300 cursor-not-allowed" disabled><Eye size={14} /></button>
-                                            <button className="p-1.5 rounded-lg text-gray-300 cursor-not-allowed" disabled><Download size={14} /></button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Desktop row */}
-                            <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 items-center">
-                                {/* Name with icon */}
-                                <div className="col-span-5 flex items-center gap-3 min-w-0">
-                                    <div className="w-9 h-9 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0">
-                                        <FileText size={16} className="text-[#283852]" />
-                                    </div>
-                                    <span className="text-sm font-medium text-gray-800 truncate">{doc.name}</span>
-                                </div>
-                                {/* Type badge */}
-                                <div className="col-span-2">
-                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
-                                        {t(`documents.categories.${doc.type.toLowerCase()}`)}
-                                    </span>
-                                </div>
-                                {/* Size */}
-                                <div className="col-span-1 text-xs text-gray-500">{doc.size || '--'}</div>
-                                {/* Date */}
-                                <div className="col-span-2 text-xs text-gray-400">{doc.date || '--'}</div>
-                                {/* Actions */}
-                                <div className="col-span-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    {doc.filePath ? (
-                                        <>
-                                            <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                                <Eye size={14} />
-                                            </a>
-                                            <a href={getFileUrl(doc.filePath)} download className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                                <Download size={14} />
-                                            </a>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <button className="p-1.5 rounded-lg text-gray-300 cursor-not-allowed" disabled><Eye size={14} /></button>
-                                            <button className="p-1.5 rounded-lg text-gray-300 cursor-not-allowed" disabled><Download size={14} /></button>
-                                        </>
-                                    )}
-                                </div>
+                            <Folder color="#33cbcc" size={1.2} onClick={handleFolderClick} isOpen={isOpen} />
+                            <div className="w-full mt-4 space-y-2">
+                                <h3 className="font-semibold text-gray-800 text-sm text-center">
+                                    {t(`documents.categories.${category.toLowerCase()}`)}
+                                </h3>
+                                <p className="text-xs text-gray-500 text-center">
+                                    {categoryDocs.length} {categoryDocs.length === 1 ? t('documents.document') : t('documents.documents')}
+                                </p>
                             </div>
                         </motion.div>
-                    ))}
-                </div>
-            )}
+                    );
+                })}
+            </div>
 
-            {/* Empty State */}
-            {filteredDocs.length === 0 && (
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl border border-gray-100 p-12 text-center"
-                >
-                    <FileText size={48} className="mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-400 font-medium">{t('documents.noResults')}</p>
-                    <button
-                        onClick={() => setShowUploadModal(true)}
-                        className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
+            {/* Category Documents Modal */}
+            <AnimatePresence>
+                {selectedCategory && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => {
+                            setSelectedCategory(null);
+                            setTimeout(() => setClickedFolder(null), 300);
+                        }}
+                        className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
                     >
-                        <Upload size={16} />
-                        {t('documents.uploadDocument')}
-                    </button>
-                </motion.div>
-            )}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.3, y: 100 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.3, y: 100 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl h-[80vh] flex flex-col overflow-hidden"
+                        >
+                            {/* Modal Header */}
+                            <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
+                                        <FolderOpen size={20} className="text-[#33cbcc]" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-800">
+                                            {t(`documents.categories.${selectedCategory.toLowerCase()}`)}
+                                        </h2>
+                                        <p className="text-xs text-gray-500">
+                                            {documents.filter(d => d.type === selectedCategory).length} {t('documents.documents')}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setSelectedCategory(null);
+                                        setTimeout(() => setClickedFolder(null), 300);
+                                    }}
+                                    className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+                                >
+                                    <X size={18} />
+                                </button>
+                            </div>
+
+                            {/* Search Bar */}
+                            <div className="px-6 py-4 border-b border-gray-100 shrink-0">
+                                <div className="relative">
+                                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder={t('documents.searchPlaceholder')}
+                                        value={categorySearchQuery}
+                                        onChange={e => setCategorySearchQuery(e.target.value)}
+                                        className="w-full bg-gray-50 rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Documents List */}
+                            <div className="flex-1 overflow-y-auto px-6 py-4">
+                                {(() => {
+                                    const categoryDocs = documents.filter(d =>
+                                        d.type === selectedCategory &&
+                                        (categorySearchQuery === '' || d.name.toLowerCase().includes(categorySearchQuery.toLowerCase()))
+                                    );
+
+                                    if (categoryDocs.length === 0) {
+                                        return (
+                                            <div className="flex flex-col items-center justify-center py-12 text-center">
+                                                <FileText size={48} className="text-gray-300 mb-4" />
+                                                <p className="text-gray-400 font-medium">
+                                                    {categorySearchQuery ? t('documents.noResults') : t('documents.noDocuments')}
+                                                </p>
+                                            </div>
+                                        );
+                                    }
+
+                                    return (
+                                        <div className="space-y-2">
+                                            {categoryDocs.map((doc, i) => (
+                                                <motion.div
+                                                    key={doc.id}
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: i * 0.03 }}
+                                                    className="group p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
+                                                >
+                                                    <div className="flex items-center gap-4">
+                                                        {/* File Icon */}
+                                                        <div className="w-10 h-10 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
+                                                            <FileText size={18} className="text-[#33cbcc]" />
+                                                        </div>
+
+                                                        {/* Document Info */}
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-medium text-gray-800 text-sm truncate">{doc.name}</h4>
+                                                            <div className="flex items-center gap-3 mt-1">
+                                                                {doc.size && <span className="text-xs text-gray-500">{doc.size}</span>}
+                                                                {doc.size && doc.date && <span className="text-xs text-gray-400">•</span>}
+                                                                {doc.date && <span className="text-xs text-gray-500">{doc.date}</span>}
+                                                                {(doc.size || doc.date) && doc.uploader.name && <span className="text-xs text-gray-400">•</span>}
+                                                                {doc.uploader.name && (
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        {doc.uploader.avatar ? (
+                                                                            <img src={doc.uploader.avatar} alt="" className="w-4 h-4 rounded-full border border-gray-200" />
+                                                                        ) : (
+                                                                            <div className="w-4 h-4 rounded-full border border-gray-200 bg-gray-100" />
+                                                                        )}
+                                                                        <span className="text-xs text-gray-500 truncate max-w-[100px]">{doc.uploader.name.split('@')[0]}</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Actions */}
+                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            {doc.filePath ? (
+                                                                <>
+                                                                    <a
+                                                                        href={getFileUrl(doc.filePath)}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                                                        title={t('documents.actions.preview')}
+                                                                    >
+                                                                        <Eye size={16} />
+                                                                    </a>
+                                                                    <a
+                                                                        href={getFileUrl(doc.filePath)}
+                                                                        download
+                                                                        className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                                                        title={t('documents.actions.download')}
+                                                                    >
+                                                                        <Download size={16} />
+                                                                    </a>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <button className="p-2 rounded-lg text-gray-300 cursor-not-allowed" disabled>
+                                                                        <Eye size={16} />
+                                                                    </button>
+                                                                    <button className="p-2 rounded-lg text-gray-300 cursor-not-allowed" disabled>
+                                                                        <Download size={16} />
+                                                                    </button>
+                                                                </>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    );
+                                })()}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Upload Modal */}
             <AnimatePresence>

@@ -672,7 +672,7 @@ const Profile = () => {
                             <h3 className="text-gray-500 text-xs md:text-sm font-medium">{stat.label}</h3>
                             <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-1 md:mt-2">{stat.value}</h2>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out text-[#33cbcc]">
+                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out text-[#33cbcc]">
                             <stat.icon size={80} strokeWidth={1.5} className="md:hidden" />
                             <stat.icon size={100} strokeWidth={1.5} className="hidden md:block" />
                         </div>

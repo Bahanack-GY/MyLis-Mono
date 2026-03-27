@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+UI/node_modules/
+server/node_modules/
+
+# Build outputs
+dist/
+build/
+UI/dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Uploads
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude memory
+memory/
+
+# Docker volumes
+pgdata/

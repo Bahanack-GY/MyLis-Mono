@@ -23,13 +23,22 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ChatModule } from './chat/chat.module';
 import { DemandsModule } from './demands/demands.module';
 import { ExpensesModule } from './expenses/expenses.module';
-import { SalaryModule } from './salary/salary.module';
+import { AccountingModule } from './accounting/accounting.module';
+import { PayrollModule } from './payroll/payroll.module';
+import { TaxModule } from './tax/tax.module';
+import { CommercialModule } from './commercial/commercial.module';
+import { BusinessExpensesModule } from './business-expenses/business-expenses.module';
+import { ReportsModule } from './reports/reports.module';
+import { SseModule } from './sse/sse.module';
+import { ScheduleModule } from '@nestjs/schedule';
 import { RolesGuard } from './auth/roles.guard';
 import { ActivityInterceptor } from './logs/activity.interceptor';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    SseModule,
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 30 }]),
     SequelizeModule.forRoot({
       dialect: 'postgres',
@@ -66,7 +75,12 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     ChatModule,
     DemandsModule,
     ExpensesModule,
-    SalaryModule,
+    AccountingModule,
+    PayrollModule,
+    TaxModule,
+    CommercialModule,
+    BusinessExpensesModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

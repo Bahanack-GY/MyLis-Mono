@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL')
 @Controller('invoices')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class InvoicesController {

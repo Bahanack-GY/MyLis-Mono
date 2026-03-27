@@ -125,12 +125,12 @@ export default function Expenses() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Grand Total = direct expenses + annual salaries + project budgets */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#33cbcc]/5 rounded-bl-[100px] transition-transform group-hover:scale-110" />
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#33cbcc]/5 rounded-bl-[100px] transition-transform " />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Total des Charges</p>
                             <h3 className="text-xl font-bold text-gray-800 truncate">
-                                {formatFCFA((stats?.totalYear || 0) + (stats?.totalSalaries || 0) * 12 + (stats?.totalProjects || 0))}
+                                {formatFCFA((stats?.totalYear || 0) + (stats?.totalProjects || 0))}
                             </h3>
                             <p className="text-xs text-gray-400 mt-1">Dépenses + salaires + projets</p>
                         </div>
@@ -142,7 +142,7 @@ export default function Expenses() {
 
                 {/* Direct expenses only */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-amber-50 rounded-bl-[100px] transition-transform group-hover:scale-110" />
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-amber-50 rounded-bl-[100px] transition-transform " />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Dépenses Directes</p>
@@ -160,12 +160,12 @@ export default function Expenses() {
 
                 {/* Monthly payroll */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-[100px] transition-transform group-hover:scale-110" />
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-blue-50 rounded-bl-[100px] transition-transform " />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Masse Salariale</p>
                             <h3 className="text-xl font-bold text-gray-800 truncate">{formatFCFA(stats?.totalSalaries || 0)}</h3>
-                            <p className="text-xs text-gray-400 mt-1">Par mois · {formatFCFA((stats?.totalSalaries || 0) * 12)} / an</p>
+                            <p className="text-xs text-gray-400 mt-1">Total versé en {selectedYear}</p>
                         </div>
                         <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0">
                             <Users size={20} />
@@ -175,7 +175,7 @@ export default function Expenses() {
 
                 {/* Project budgets */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-50 rounded-bl-[100px] transition-transform group-hover:scale-110" />
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-50 rounded-bl-[100px] transition-transform " />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Budget Projets</p>
@@ -190,7 +190,7 @@ export default function Expenses() {
 
                 {/* Top expense category */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-purple-50 rounded-bl-[100px] transition-transform group-hover:scale-110" />
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-purple-50 rounded-bl-[100px] transition-transform " />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Top Catégorie</p>

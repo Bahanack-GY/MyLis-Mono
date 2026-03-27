@@ -44,6 +44,25 @@ export class Document extends Model {
     })
     declare category: string;
 
+    @Column({
+        type: DataType.ENUM('EVERYONE', 'DEPARTMENTS', 'EMPLOYEES', 'MANAGERS_ONLY'),
+        defaultValue: 'EVERYONE',
+        allowNull: false,
+    })
+    declare visibilityType: string;
+
+    @Column({
+        type: DataType.ARRAY(DataType.UUID),
+        defaultValue: [],
+    })
+    declare allowedDepartmentIds: string[];
+
+    @Column({
+        type: DataType.ARRAY(DataType.UUID),
+        defaultValue: [],
+    })
+    declare allowedEmployeeIds: string[];
+
     @ForeignKey(() => User)
     @Column(DataType.UUID)
     declare uploadedById: string;

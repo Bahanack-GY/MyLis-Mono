@@ -1,5 +1,6 @@
 import api from '../config';
-import type { Employee, CreateEmployeeDto, UpdateEmployeeDto, LeaderboardEmployee, BirthdayEmployee } from './types';
+import type { Employee, CreateEmployeeDto, UpdateEmployeeDto, LeaderboardEmployee, BirthdayEmployee, EmployeeTransferHistory, TransferEmployeeDto } from './types';
+import type { Report } from '../reports/types';
 export type { BirthdayEmployee } from './types';
 
 export const employeesApi = {
@@ -38,4 +39,13 @@ export const employeesApi = {
 
     getTodayBirthdays: () =>
         api.get<BirthdayEmployee[]>('/employees/birthdays/today').then(r => r.data),
+
+    transferDepartment: (id: string, dto: TransferEmployeeDto) =>
+        api.patch<Employee>(`/employees/${id}/transfer`, dto).then(r => r.data),
+
+    getTransferHistory: (id: string) =>
+        api.get<EmployeeTransferHistory[]>(`/employees/${id}/transfer-history`).then(r => r.data),
+
+    getReports: (id: string) =>
+        api.get<Report[]>(`/employees/${id}/reports`).then(r => r.data),
 };

@@ -8,6 +8,7 @@ import { Department } from '../models/department.model';
 import { Employee } from '../models/employee.model';
 import { TasksService } from '../tasks/tasks.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { SseService } from '../sse/sse.service';
 import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
@@ -25,14 +26,17 @@ export class TicketsService {
         private sequelize: Sequelize,
         private tasksService: TasksService,
         private notificationsService: NotificationsService,
+        private sseService: SseService,
     ) { }
 
     async create(createTicketDto: any, userId: string) {
-        return this.ticketModel.create({
+        const ticket = await this.ticketModel.create({
             ...createTicketDto,
             createdById: userId,
             status: 'OPEN',
         });
+        this.sseService.emit('tickets', 'ticket_created');
+        return ticket;
     }
 
     async findAll() {

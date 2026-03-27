@@ -19,4 +19,10 @@ export class MeetingParticipant extends Model {
     @ForeignKey(() => Employee)
     @Column(DataType.UUID)
     declare employeeId: string;
+
+    @Column({
+        type: DataType.BOOLEAN,
+        defaultValue: false,
+    })
+    declare attended: boolean;
 }

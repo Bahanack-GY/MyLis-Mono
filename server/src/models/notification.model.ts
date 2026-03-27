@@ -23,11 +23,17 @@ export class Notification extends Model {
     })
     declare title: string;
 
+    @Column(DataType.STRING)
+    declare titleFr: string;
+
     @Column(DataType.TEXT)
     declare body: string;
 
+    @Column(DataType.TEXT)
+    declare bodyFr: string;
+
     @Column({
-        type: DataType.ENUM('system', 'task', 'project', 'meeting', 'document', 'ticket', 'sanction', 'chat', 'demand', 'message'),
+        type: DataType.ENUM('system', 'task', 'project', 'meeting', 'document', 'ticket', 'sanction', 'chat', 'demand', 'message', 'business_expense', 'invoice'),
         defaultValue: 'system',
     })
     declare type: string;

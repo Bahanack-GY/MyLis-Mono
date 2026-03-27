@@ -58,3 +58,53 @@ export const useDeleteMeeting = () => {
         onError: () => toast.error(i18n.t('toast.error')),
     });
 };
+
+export const useStartMeeting = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, secretaryId }: { id: string; secretaryId: string }) =>
+            meetingsApi.startMeeting(id, secretaryId),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.meetingStarted'));
+            qc.invalidateQueries({ queryKey: meetingKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useEndMeeting = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => meetingsApi.endMeeting(id),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.meetingEnded'));
+            qc.invalidateQueries({ queryKey: meetingKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useAttendMeeting = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => meetingsApi.attend(id),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.attendanceMarked'));
+            qc.invalidateQueries({ queryKey: meetingKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useUploadRecording = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, audioBlob }: { id: string; audioBlob: Blob }) =>
+            meetingsApi.uploadRecording(id, audioBlob),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.transcriptionComplete'));
+            qc.invalidateQueries({ queryKey: meetingKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};

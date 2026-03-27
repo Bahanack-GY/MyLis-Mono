@@ -24,16 +24,45 @@
     background: #33cbcc80;
 }
 
-a,
-button,
-select,
-input[type="checkbox"],
-input[type="radio"],
-input[type="submit"],
-input[type="button"],
-[role="button"],
-label[for],
-.cursor-pointer {}
+/* Global focus ring for keyboard navigation (focus-visible only, not mouse) */
+:focus-visible {
+    outline: 2px solid #33cbcc;
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Suppress outline for mouse/touch users */
+:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* Rich text content styles */
+.rich-text-content h1 { font-size: 1.25rem; font-weight: 700; margin: 0.5em 0; }
+.rich-text-content h2 { font-size: 1.1rem; font-weight: 600; margin: 0.4em 0; }
+.rich-text-content h3 { font-size: 1rem; font-weight: 600; margin: 0.3em 0; }
+.rich-text-content p { margin: 0.25em 0; }
+.rich-text-content ul { list-style-type: disc; padding-left: 1.5em; margin: 0.25em 0; }
+.rich-text-content ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.25em 0; }
+.rich-text-content li { margin: 0.1em 0; }
+.rich-text-content a { color: #33cbcc; text-decoration: underline; }
+.rich-text-content a:hover { color: #2ab5b6; }
+.rich-text-content blockquote { border-left: 3px solid #e5e7eb; padding-left: 1em; color: #6b7280; margin: 0.5em 0; }
+
+/* Tiptap editor styles */
+.tiptap-editor .ProseMirror { outline: none; }
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    float: left;
+    height: 0;
+    pointer-events: none;
+}
+.tiptap-editor .ProseMirror ul { list-style-type: disc; padding-left: 1.5em; }
+.tiptap-editor .ProseMirror ol { list-style-type: decimal; padding-left: 1.5em; }
+.tiptap-editor .ProseMirror h1 { font-size: 1.25rem; font-weight: 700; }
+.tiptap-editor .ProseMirror h2 { font-size: 1.1rem; font-weight: 600; }
+.tiptap-editor .ProseMirror blockquote { border-left: 3px solid #e5e7eb; padding-left: 1em; color: #6b7280; }
+.tiptap-editor .ProseMirror a { color: #33cbcc; text-decoration: underline; }
 
 /* Respect user's reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {

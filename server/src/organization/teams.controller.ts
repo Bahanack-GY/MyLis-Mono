@@ -17,11 +17,13 @@ export class TeamsController {
         return this.teamsService.create(createTeamDto);
     }
 
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL')
     @Get()
     findAll() {
         return this.teamsService.findAll();
     }
 
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL')
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.teamsService.findOne(id);

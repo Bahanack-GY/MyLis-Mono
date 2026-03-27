@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Expense } from '../models/expense.model';
 import { Project } from '../models/project.model';
+import { JournalEngineService } from '../accounting/journal-engine.service';
 import { Op } from 'sequelize';
 
 @Injectable()
@@ -11,10 +12,18 @@ export class ExpensesService {
         private expenseModel: typeof Expense,
         @InjectModel(Project)
         private projectModel: typeof Project,
+        private journalEngine: JournalEngineService,
     ) { }
 
     async create(createExpenseDto: any) {
-        return this.expenseModel.create(createExpenseDto);
+        const expense = await this.expenseModel.create(createExpenseDto);
+
+        // Auto-generate journal entry (skip salary expenses — handled by PayrollModule)
+        if (createExpenseDto.category !== 'Salaire') {
+            await this.journalEngine.onExpenseCreated(expense, '');
+        }
+
+        return expense;
     }
 
     async findAll(projectId?: string, page = 1, limit = 10) {
@@ -53,17 +62,26 @@ export class ExpensesService {
         return { success: true };
     }
 
-    async getStats(year?: number) {
+    async getStats(year?: number, departmentId?: string) {
         const currentYear = year || new Date().getFullYear();
         const startDate = `${currentYear}-01-01`;
         const endDate = `${currentYear}-12-31`;
 
+        const expenseWhere: any = { date: { [Op.between]: [startDate, endDate] } };
+        const expenseInclude: any[] = [];
+
+        if (departmentId) {
+            expenseInclude.push({
+                model: this.projectModel,
+                attributes: [],
+                where: { departmentId },
+                required: true,
+            });
+        }
+
         const expenses = await this.expenseModel.findAll({
-            where: {
-                date: {
-                    [Op.between]: [startDate, endDate],
-                },
-            },
+            where: expenseWhere,
+            include: expenseInclude,
         });
 
         // Sum of salary expenses that were actually paid (category = 'Salaire') in this year
@@ -71,12 +89,15 @@ export class ExpensesService {
         const totalSalaries = salaryExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
         // Projects that overlap with the selected year
+        const projectWhere: any = {
+            budget: { [Op.gt]: 0 },
+            startDate: { [Op.lte]: new Date(`${currentYear}-12-31`) },
+            endDate: { [Op.gte]: new Date(`${currentYear}-01-01`) },
+        };
+        if (departmentId) projectWhere.departmentId = departmentId;
+
         const projects = await this.projectModel.findAll({
-            where: {
-                budget: { [Op.gt]: 0 },
-                startDate: { [Op.lte]: new Date(`${currentYear}-12-31`) },
-                endDate: { [Op.gte]: new Date(`${currentYear}-01-01`) },
-            },
+            where: projectWhere,
             attributes: ['budget', 'startDate', 'endDate'],
             raw: true,
         });

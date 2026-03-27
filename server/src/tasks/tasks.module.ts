@@ -10,16 +10,20 @@ import { Ticket } from '../models/ticket.model';
 import { Department } from '../models/department.model';
 import { TaskHistory } from '../models/task-history.model';
 import { TaskNature } from '../models/task-nature.model';
+import { Lead } from '../models/lead.model';
+import { TaskAttachment } from '../models/task-attachment.model';
 import { TasksService } from './tasks.service';
+import { TaskRemindersService } from './task-reminders.service';
 import { TasksController } from './tasks.controller';
+import { TasksSseController } from './tasks-sse.controller';
 import { EmployeeTasksController } from './employee-tasks.controller';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
-    imports: [SequelizeModule.forFeature([Task, Subtask, Employee, Team, Project, Ticket, Department, TaskHistory, TaskNature]), NotificationsModule, GamificationModule],
-    controllers: [EmployeeTasksController, TasksController],
-    providers: [TasksService],
+    imports: [SequelizeModule.forFeature([Task, Subtask, Employee, Team, Project, Ticket, Department, TaskHistory, TaskNature, Lead, TaskAttachment]), NotificationsModule, GamificationModule],
+    controllers: [EmployeeTasksController, TasksController, TasksSseController],
+    providers: [TasksService, TaskRemindersService],
     exports: [TasksService],
 })
 export class TasksModule { }

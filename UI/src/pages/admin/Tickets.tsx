@@ -614,7 +614,7 @@ const Tickets = () => {
                             <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
                         </div>
                         <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out"
+                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
                             style={{ color: stat.color }}
                         >
                             <stat.icon size={100} strokeWidth={1.5} />
@@ -742,7 +742,7 @@ const Tickets = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 + i * 0.05 }}
                                 onClick={() => setSelectedTicket(ticket)}
-                                className="bg-white rounded-3xl p-6 border border-gray-100 group hover:border-gray-200 hover:shadow-md cursor-pointer transition-all"
+                                className="bg-white rounded-3xl p-6 border border-gray-100 group hover:border-gray-200  cursor-pointer transition-all"
                             >
                                 {/* Icon + Actions */}
                                 <div className="flex items-start justify-between mb-4">

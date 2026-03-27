@@ -48,6 +48,15 @@ export class ChatGateway
         }
       }
     });
+
+    this.notificationsService.setDirectEmitCallback((userId, event, payload) => {
+      const sockets = this.onlineUsers.get(userId);
+      if (sockets) {
+        for (const socketId of sockets) {
+          this.server.to(socketId).emit(event, payload);
+        }
+      }
+    });
   }
 
   /* ── Connection lifecycle ────────────────────────────── */

@@ -123,12 +123,64 @@ export const useLoadMoreMessages = (channelId: string | null) => {
     });
 };
 
-export const useSendMessage = () => {
+const SEND_TIMEOUT_MS = 10_000;
+
+export const useSendMessage = (currentUser?: { userId: string; firstName: string; lastName: string; avatarUrl?: string }) => {
     const { socket } = useSocket();
     const queryClient = useQueryClient();
 
     return useCallback((channelId: string, content: string, replyToId?: string, mentions?: string[], attachments?: ChatAttachment[]) => {
         if (!socket) return;
+
+        const tempId = `optimistic-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+        const markFailed = () => {
+            queryClient.setQueryData(
+                ['chat', 'messages', channelId],
+                (old: ChatMessage[] | undefined) => {
+                    if (!old) return old;
+                    return old.map(m => m.id === tempId ? { ...m, optimistic: false, failed: true } : m);
+                },
+            );
+        };
+
+        // Inject optimistic message into cache immediately
+        if (currentUser) {
+            // Look up replyTo from the current cache so the bubble renders correctly
+            const cached = queryClient.getQueryData<ChatMessage[]>(['chat', 'messages', channelId]);
+            const replyTo = replyToId ? (cached?.find(m => m.id === replyToId) ?? null) : undefined;
+
+            const optimisticMsg: ChatMessage = {
+                id: tempId,
+                channelId,
+                content,
+                createdAt: new Date().toISOString(),
+                sender: {
+                    id: currentUser.userId,
+                    firstName: currentUser.firstName,
+                    lastName: currentUser.lastName,
+                    avatarUrl: currentUser.avatarUrl,
+                },
+                replyTo: replyTo ? {
+                    id: replyTo.id,
+                    content: replyTo.content,
+                    sender: replyTo.sender,
+                } : null,
+                mentions: mentions ?? null,
+                attachments: attachments ?? null,
+                optimistic: true,
+                failed: false,
+            };
+
+            queryClient.setQueryData(
+                ['chat', 'messages', channelId],
+                (old: ChatMessage[] | undefined) => [...(old ?? []), optimisticMsg],
+            );
+        }
+
+        // Fail the optimistic message if the server doesn't ACK in time
+        const failTimer = setTimeout(markFailed, SEND_TIMEOUT_MS);
+
         socket.emit('message:send', {
             channelId,
             content,
@@ -136,18 +188,23 @@ export const useSendMessage = () => {
             ...(mentions && mentions.length > 0 && { mentions }),
             ...(attachments && attachments.length > 0 && { attachments }),
         }, (message: ChatMessage) => {
-            // ACK: server confirmed the message -- add it to the cache immediately
-            if (!message) return;
+            clearTimeout(failTimer);
+            if (!message) {
+                markFailed();
+                return;
+            }
+            // Replace optimistic placeholder with the real confirmed message
             queryClient.setQueryData(
                 ['chat', 'messages', channelId],
                 (old: ChatMessage[] | undefined) => {
                     if (!old) return [message];
-                    if (old.some(m => m.id === message.id)) return old;
-                    return [...old, message];
+                    const withoutTemp = old.filter(m => m.id !== tempId);
+                    if (withoutTemp.some(m => m.id === message.id)) return withoutTemp;
+                    return [...withoutTemp, message];
                 },
             );
         });
-    }, [socket, queryClient]);
+    }, [socket, queryClient, currentUser]);
 };
 
 export const useUploadFiles = () => {

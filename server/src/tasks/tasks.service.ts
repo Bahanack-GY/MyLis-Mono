@@ -1,5 +1,5 @@
 
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/sequelize';
 import { Task } from '../models/task.model';
 import { TaskHistory } from '../models/task-history.model';
@@ -10,8 +10,11 @@ import { Department } from '../models/department.model';
 import { Team } from '../models/team.model';
 import { Project } from '../models/project.model';
 import { TaskNature } from '../models/task-nature.model';
+import { Lead } from '../models/lead.model';
+import { TaskAttachment } from '../models/task-attachment.model';
 import { NotificationsService } from '../notifications/notifications.service';
 import { GamificationService, type GamificationResult } from '../gamification/gamification.service';
+import { SseService } from '../sse/sse.service';
 import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
@@ -35,11 +38,53 @@ export class TasksService {
         private ticketModel: typeof Ticket,
         @InjectModel(Department)
         private departmentModel: typeof Department,
+        @InjectModel(TaskAttachment)
+        private taskAttachmentModel: typeof TaskAttachment,
+        @InjectModel(Lead)
+        private leadModel: typeof Lead,
         @InjectConnection()
         private sequelize: Sequelize,
         private notificationsService: NotificationsService,
         private gamificationService: GamificationService,
+        private sseService: SseService,
     ) { }
+
+    /* ─── Sync Lead Actions from Tasks ──────────────────────── */
+
+    private async syncLeadActions(leadId: string): Promise<void> {
+        if (!leadId) return;
+        const lead = await this.leadModel.findByPk(leadId);
+        if (!lead) return;
+
+        // Last action: most recently completed task linked to this lead
+        const lastCompleted = await this.taskModel.findOne({
+            where: { leadId, state: { [Op.in]: ['COMPLETED', 'REVIEWED'] } },
+            order: [['completedAt', 'DESC']],
+        });
+
+        // Next action: earliest upcoming non-completed task
+        const nextPlanned = await this.taskModel.findOne({
+            where: { leadId, state: { [Op.notIn]: ['COMPLETED', 'REVIEWED'] } },
+            order: [['startDate', 'ASC'], ['createdAt', 'ASC']],
+        });
+
+        const updates: any = {};
+
+        if (lastCompleted) {
+            updates.lastAction = lastCompleted.getDataValue('title');
+            updates.lastActionDate = lastCompleted.getDataValue('completedAt')
+                ? new Date(lastCompleted.getDataValue('completedAt')).toISOString().split('T')[0]
+                : new Date().toISOString().split('T')[0];
+            updates.lastActionResult = 'Tâche terminée';
+        }
+
+        updates.nextAction = nextPlanned ? nextPlanned.getDataValue('title') : null;
+        updates.nextActionDeadline = nextPlanned
+            ? (nextPlanned.getDataValue('startDate') || nextPlanned.getDataValue('dueDate') || null)
+            : null;
+
+        await lead.update(updates);
+    }
 
     async create(createTaskDto: any, createdByUserId?: string): Promise<Task> {
         if (createTaskDto.assignedToId) {
@@ -53,6 +98,11 @@ export class TasksService {
 
         const task = await this.taskModel.create({ ...createTaskDto, createdByUserId: createdByUserId || null });
 
+        // Sync lead actions if task is linked to a lead
+        if (createTaskDto.leadId) {
+            await this.syncLeadActions(createTaskDto.leadId);
+        }
+
         // Notify assigned employee about new task
         if (createTaskDto.assignedToId) {
             const employee = await this.employeeModel.findByPk(createTaskDto.assignedToId);
@@ -65,9 +115,25 @@ export class TasksService {
                     type: 'task',
                     userId: employee.userId,
                 });
+
+                // Extra notification if task is urgent and/or important
+                if (createTaskDto.urgent || createTaskDto.important) {
+                    const flags = [createTaskDto.urgent ? 'urgent' : null, createTaskDto.important ? 'important' : null].filter(Boolean).join(' & ');
+                    const flagsFr = [createTaskDto.urgent ? 'urgente' : null, createTaskDto.important ? 'importante' : null].filter(Boolean).join(' & ');
+                    const taskTitle = task.getDataValue('title');
+                    await this.notificationsService.create({
+                        title: `⚠ ${flags.charAt(0).toUpperCase() + flags.slice(1)} task assigned`,
+                        body: `You have been assigned an ${flags} task: "${taskTitle}". Please prioritize this task.`,
+                        titleFr: `⚠ Tâche ${flagsFr} assignée`,
+                        bodyFr: `Une tâche ${flagsFr} vous a été assignée : "${taskTitle}". Veuillez prioriser cette tâche.`,
+                        type: 'task',
+                        userId: employee.userId,
+                    });
+                }
             }
         }
 
+        this.sseService.emit('tasks', 'task_created');
         return task;
     }
 
@@ -79,8 +145,8 @@ export class TasksService {
             if (to) where.createdAt[Op.lte] = new Date(to);
         }
         const include: any[] = departmentId
-            ? [{ model: Employee, as: 'assignedTo', where: { departmentId }, required: true }, { model: Team, as: 'assignedToTeam' }, Project, TaskNature, { model: Subtask, as: 'subtasks' }]
-            : [{ model: Employee, as: 'assignedTo' }, { model: Team, as: 'assignedToTeam' }, Project, TaskNature, { model: Subtask, as: 'subtasks' }];
+            ? [{ model: Employee, as: 'assignedTo', where: { departmentId }, required: true }, { model: Team, as: 'assignedToTeam' }, Project, TaskNature, { model: Lead, attributes: ['id', 'code', 'company'] }, { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' }]
+            : [{ model: Employee, as: 'assignedTo' }, { model: Team, as: 'assignedToTeam' }, Project, TaskNature, { model: Lead, attributes: ['id', 'code', 'company'] }, { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' }];
         return this.taskModel.findAll({ where, include });
     }
 
@@ -91,7 +157,8 @@ export class TasksService {
                 { model: Team, as: 'assignedToTeam' },
                 Project,
                 TaskNature,
-                { model: Subtask, as: 'subtasks' },
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' },
             ],
         });
     }
@@ -106,10 +173,14 @@ export class TasksService {
     async remove(id: string): Promise<void> {
         const task = await this.findOne(id);
         if (task) {
+            const removedLeadId = task.getDataValue('leadId');
             await this.sequelize.transaction(async (t) => {
                 await this.taskHistoryModel.destroy({ where: { taskId: id }, transaction: t });
                 await task.destroy({ transaction: t });
             });
+            if (removedLeadId) {
+                await this.syncLeadActions(removedLeadId);
+            }
         }
     }
 
@@ -133,7 +204,7 @@ export class TasksService {
             }
         }
 
-        const editableFields = ['title', 'description', 'difficulty', 'startDate', 'endDate', 'dueDate', 'startTime', 'natureId'];
+        const editableFields = ['title', 'description', 'difficulty', 'startDate', 'endDate', 'dueDate', 'startTime', 'natureId', 'leadId', 'urgent', 'important'];
         const changes: Record<string, { from: any; to: any }> = {};
         for (const field of editableFields) {
             if (dto[field] !== undefined && dto[field] !== task.getDataValue(field)) {
@@ -205,7 +276,40 @@ export class TasksService {
 
         if (notificationData) await this.notificationsService.create(notificationData);
 
-        return task.reload({ include: [{ model: Employee, as: 'assignedTo' }, Project, TaskNature] });
+        // Extra notification when urgent/important flag is turned ON
+        const urgentTurnedOn = changes.urgent?.to === true;
+        const importantTurnedOn = changes.important?.to === true;
+        if (urgentTurnedOn || importantTurnedOn) {
+            const flags = [urgentTurnedOn ? 'urgent' : null, importantTurnedOn ? 'important' : null].filter(Boolean).join(' & ');
+            const flagsFr = [urgentTurnedOn ? 'urgente' : null, importantTurnedOn ? 'importante' : null].filter(Boolean).join(' & ');
+            const taskTitle = task.getDataValue('title');
+            const assignedTo = task.get('assignedTo') as any;
+            const empUserId = assignedTo?.userId || assignedTo?.getDataValue?.('userId');
+            if (empUserId) {
+                await this.notificationsService.create({
+                    title: `⚠ Task marked as ${flags}`,
+                    body: `Your task "${taskTitle}" has been marked as ${flags}. Please prioritize accordingly.`,
+                    titleFr: `⚠ Tâche marquée ${flagsFr}`,
+                    bodyFr: `Votre tâche "${taskTitle}" a été marquée ${flagsFr}. Veuillez prioriser en conséquence.`,
+                    type: 'task',
+                    userId: empUserId,
+                });
+            }
+        }
+
+        const reloadedTask = await task.reload({ include: [{ model: Employee, as: 'assignedTo' }, Project, TaskNature, { model: Lead, attributes: ['id', 'code', 'company'] }, { model: TaskAttachment, as: 'attachments' }] });
+
+        // Sync lead actions if leadId changed or task dates changed
+        const currentLeadId = task.getDataValue('leadId');
+        if (currentLeadId) {
+            await this.syncLeadActions(currentLeadId);
+        }
+        // If leadId changed, also sync the old lead
+        if (changes.leadId && changes.leadId.from) {
+            await this.syncLeadActions(changes.leadId.from);
+        }
+
+        return reloadedTask;
     }
 
     async removeByUser(id: string, userId: string, role: string): Promise<void> {
@@ -229,6 +333,7 @@ export class TasksService {
         }
 
         const taskTitle = task.getDataValue('title');
+        const deletedTaskLeadId = task.getDataValue('leadId');
 
         if (isManagerOrHod) {
             const assignedTo = task.get('assignedTo') as any;
@@ -269,6 +374,11 @@ export class TasksService {
             await this.taskHistoryModel.destroy({ where: { taskId: id }, transaction: t });
             await task.destroy({ transaction: t });
         });
+
+        // Sync lead actions after deletion
+        if (deletedTaskLeadId) {
+            await this.syncLeadActions(deletedTaskLeadId);
+        }
     }
 
     async getHistory(id: string): Promise<TaskHistory[]> {
@@ -286,8 +396,23 @@ export class TasksService {
                 { model: Team, as: 'assignedToTeam' },
                 { model: Project },
                 TaskNature,
-                { model: Subtask, as: 'subtasks' },
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' },
             ],
+        });
+    }
+
+    async findByLead(leadId: string): Promise<Task[]> {
+        return this.taskModel.findAll({
+            where: { leadId },
+            include: [
+                { model: Employee, as: 'assignedTo' },
+                { model: Project },
+                TaskNature,
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' },
+            ],
+            order: [['createdAt', 'DESC']],
         });
     }
 
@@ -424,8 +549,16 @@ export class TasksService {
                 { model: Team, as: 'assignedToTeam' },
                 { model: Project },
                 TaskNature,
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                { model: TaskAttachment, as: 'attachments' },
             ],
         });
+
+        // Sync lead actions when task state changes
+        const leadId = task.getDataValue('leadId');
+        if (leadId) {
+            await this.syncLeadActions(leadId);
+        }
 
         return { task: updatedTask, gamification };
     }
@@ -441,20 +574,57 @@ export class TasksService {
             );
         }
 
+        const today = new Date().toISOString().split('T')[0];
         const task = await this.taskModel.create({
             ...dto,
+            startDate: dto.startDate || today,
+            endDate: dto.endDate || dto.startDate || today,
             assignedToId: employee.id,
             selfAssigned: true,
             state: 'CREATED',
         });
 
-        return task.reload({
+        const reloaded = await task.reload({
             include: [
                 { model: Employee, as: 'assignedTo' },
                 { model: Project },
                 TaskNature,
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                { model: TaskAttachment, as: 'attachments' },
             ],
         });
+
+        // Sync lead actions if task is linked to a lead
+        if (dto.leadId) {
+            await this.syncLeadActions(dto.leadId);
+        }
+
+        // Notify department head if self-assigned task is urgent/important
+        if (dto.urgent || dto.important) {
+            const deptId = employee.getDataValue('departmentId');
+            if (deptId) {
+                const dept = await this.departmentModel.findByPk(deptId, {
+                    include: [{ model: Employee, as: 'head' }],
+                });
+                const hodUserId = dept?.getDataValue('head')?.getDataValue('userId');
+                if (hodUserId) {
+                    const empName = `${employee.getDataValue('firstName')} ${employee.getDataValue('lastName')}`;
+                    const flags = [dto.urgent ? 'urgent' : null, dto.important ? 'important' : null].filter(Boolean).join(' & ');
+                    const flagsFr = [dto.urgent ? 'urgente' : null, dto.important ? 'importante' : null].filter(Boolean).join(' & ');
+                    const taskTitle = task.getDataValue('title');
+                    await this.notificationsService.create({
+                        title: `⚠ ${flags.charAt(0).toUpperCase() + flags.slice(1)} task self-assigned`,
+                        body: `${empName} self-assigned an ${flags} task: "${taskTitle}".`,
+                        titleFr: `⚠ Tâche ${flagsFr} auto-assignée`,
+                        bodyFr: `${empName} s'est auto-assigné une tâche ${flagsFr} : "${taskTitle}".`,
+                        type: 'task',
+                        userId: hodUserId,
+                    });
+                }
+            }
+        }
+
+        return reloaded;
     }
 
     // ── Weekly compliance ─────────────────────────────────────────────
@@ -511,7 +681,8 @@ export class TasksService {
                 { model: Team, as: 'assignedToTeam' },
                 { model: Project },
                 TaskNature,
-                { model: Subtask, as: 'subtasks' },
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' },
             ],
         });
     }
@@ -532,7 +703,8 @@ export class TasksService {
                 { model: Employee, as: 'assignedTo' },
                 { model: Project },
                 TaskNature,
-                { model: Subtask, as: 'subtasks' },
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' },
             ],
             order: [['startDate', 'ASC']],
         });
@@ -554,7 +726,8 @@ export class TasksService {
             { model: Employee, as: 'assignedTo' },
             { model: Project },
             TaskNature,
-            { model: Subtask, as: 'subtasks' },
+            { model: Lead, attributes: ['id', 'code', 'company'] },
+            { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' },
         ];
 
         if (departmentId) {
@@ -563,6 +736,69 @@ export class TasksService {
         }
 
         return this.taskModel.findAll({ where, include, order: [['startDate', 'ASC']] });
+    }
+
+    /* ─── Task Transfer ──────────────────────────────────────── */
+
+    async transferToWeek(taskId: string, userId: string, targetWeekStart: string): Promise<Task> {
+        const task = await this.taskModel.findByPk(taskId, {
+            include: [{ model: Employee, as: 'assignedTo' }],
+        });
+        if (!task) throw new NotFoundException('Task not found');
+
+        // Verify ownership
+        const employee = await this.employeeModel.findOne({ where: { userId } });
+        if (!employee || task.getDataValue('assignedToId') !== employee.id) {
+            throw new ForbiddenException('Not your task');
+        }
+
+        // Only allow transfer of pending tasks (CREATED, ASSIGNED)
+        const state = task.getDataValue('state');
+        if (state !== 'CREATED' && state !== 'ASSIGNED') {
+            throw new BadRequestException('Can only transfer pending tasks');
+        }
+
+        const originalStartDate = task.getDataValue('startDate');
+        const originalEndDate = task.getDataValue('endDate');
+        const transferredFromWeek = task.getDataValue('transferredFromWeek') || originalStartDate;
+
+        // Calculate new dates (preserve duration)
+        const targetStart = new Date(targetWeekStart);
+        const duration = originalEndDate && originalStartDate
+            ? (new Date(originalEndDate).getTime() - new Date(originalStartDate).getTime()) / (1000 * 60 * 60 * 24)
+            : 6; // default to full week
+        const targetEnd = new Date(targetStart);
+        targetEnd.setDate(targetEnd.getDate() + duration);
+
+        // Update task with transaction + history
+        await this.sequelize.transaction(async (t) => {
+            await this.taskHistoryModel.create({
+                taskId,
+                changedByUserId: userId,
+                changedByName: `${employee.getDataValue('firstName')} ${employee.getDataValue('lastName')}`,
+                changes: {
+                    startDate: { from: originalStartDate, to: targetWeekStart },
+                    endDate: { from: originalEndDate, to: targetEnd.toISOString().split('T')[0] },
+                    transferredFromWeek: { from: task.getDataValue('transferredFromWeek'), to: transferredFromWeek },
+                },
+            }, { transaction: t });
+
+            await task.update({
+                startDate: targetWeekStart,
+                endDate: targetEnd.toISOString().split('T')[0],
+                transferredFromWeek,
+            }, { transaction: t });
+        });
+
+        return task.reload({
+            include: [
+                { model: Employee, as: 'assignedTo' },
+                Project,
+                TaskNature,
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                { model: TaskAttachment, as: 'attachments' },
+            ],
+        });
     }
 
     /* ─── Subtask Methods ────────────────────────────────────── */
@@ -637,5 +873,73 @@ export class TasksService {
                 );
             }
         });
+    }
+
+    /* ─── Attachment Methods ─────────────────────────────────── */
+
+    async addAttachment(taskId: string, file: { fileName: string; filePath: string; fileType: string; size: number }, uploadedByUserId: string): Promise<TaskAttachment> {
+        const task = await this.taskModel.findByPk(taskId);
+        if (!task) throw new NotFoundException('Task not found');
+        return this.taskAttachmentModel.create({ taskId, ...file, uploadedByUserId });
+    }
+
+    async removeAttachment(taskId: string, attachmentId: string): Promise<void> {
+        const attachment = await this.taskAttachmentModel.findOne({ where: { id: attachmentId, taskId } });
+        if (!attachment) throw new NotFoundException('Attachment not found');
+        const { unlinkSync } = require('fs');
+        const { join } = require('path');
+        try { unlinkSync(join(process.cwd(), attachment.filePath)); } catch {}
+        await attachment.destroy();
+    }
+
+    /* ─── Time Distribution ──────────────────────────────────── */
+
+    async getTimeDistribution(employeeId: string) {
+        const tasks = await this.taskModel.findAll({
+            where: { assignedToId: employeeId },
+            include: [TaskNature],
+            attributes: ['id', 'startTime', 'endTime', 'startDate', 'endDate', 'natureId'],
+        });
+
+        const distribution: Record<string, { name: string; color: string; hours: number }> = {};
+        const uncategorizedKey = '__uncategorized__';
+
+        for (const task of tasks) {
+            let hours = 1; // default: 1 unit per task
+
+            if (task.startTime && task.endTime) {
+                const [sh, sm] = task.startTime.split(':').map(Number);
+                const [eh, em] = task.endTime.split(':').map(Number);
+                const dailyHours = (eh * 60 + em - sh * 60 - sm) / 60;
+                if (dailyHours > 0) {
+                    let days = 1;
+                    if (task.startDate && task.endDate) {
+                        const start = new Date(task.startDate);
+                        const end = new Date(task.endDate);
+                        days = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+                    }
+                    hours = dailyHours * days;
+                }
+            }
+
+            const key = task.natureId || uncategorizedKey;
+            if (!distribution[key]) {
+                distribution[key] = {
+                    name: task.nature?.name || '__uncategorized__',
+                    color: task.nature?.color || '#9CA3AF',
+                    hours: 0,
+                };
+            }
+            distribution[key].hours += hours;
+        }
+
+        const totalHours = Object.values(distribution).reduce((sum, d) => sum + d.hours, 0);
+
+        return Object.values(distribution).map(d => ({
+            name: d.name,
+            color: d.color,
+            hours: Math.round(d.hours * 10) / 10,
+            percentage: totalHours > 0 ? Math.round((d.hours / totalHours) * 1000) / 10 : 0,
+        })).sort((a, b) => b.hours - a.hours);
     }
 }

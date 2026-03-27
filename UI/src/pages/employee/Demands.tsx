@@ -533,7 +533,7 @@ const Demands = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.05 }}
-                                className="bg-white rounded-2xl border border-gray-100 hover:shadow-md transition-all overflow-hidden"
+                                className="bg-white rounded-2xl border border-gray-100  transition-all overflow-hidden"
                             >
                                 <div className="p-6">
                                     {/* Status + Importance badges */}

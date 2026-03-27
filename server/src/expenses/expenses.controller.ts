@@ -29,8 +29,8 @@ export class ExpensesController {
     }
 
     @Get('stats')
-    getStats(@Query('year') year?: string) {
-        return this.expensesService.getStats(year ? parseInt(year) : undefined);
+    getStats(@Query('year') year?: string, @Query('departmentId') departmentId?: string) {
+        return this.expensesService.getStats(year ? parseInt(year) : undefined, departmentId);
     }
 
     @Get(':id')

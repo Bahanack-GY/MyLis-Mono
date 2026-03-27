@@ -43,6 +43,10 @@ export interface ChatMessage {
     } | null;
     mentions?: string[] | null;
     attachments?: ChatAttachment[] | null;
+    /** Client-only: message has been sent but not yet confirmed by server */
+    optimistic?: boolean;
+    /** Client-only: server ACK timed out or returned an error */
+    failed?: boolean;
 }
 
 export interface ChannelMember {

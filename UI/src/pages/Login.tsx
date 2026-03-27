@@ -1,11 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLogin } from '../api/auth/hooks';
 import logo from '../assets/Logo.png';
-import loginIllustration from '../assets/login-illustration.png';
+import bg1 from '../assets/images/bg1.png';
+import bg2 from '../assets/images/bg2.png';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+
+const BG_IMAGES = [bg1, bg2];
 
 const Login = () => {
     const { t, i18n } = useTranslation();
@@ -13,7 +16,13 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [bgIndex, setBgIndex] = useState(0);
     const login = useLogin();
+
+    useEffect(() => {
+        const timer = setInterval(() => setBgIndex(i => (i + 1) % BG_IMAGES.length), 5000);
+        return () => clearInterval(timer);
+    }, []);
 
     const isAccessDenied = login.error?.message === 'ACCESS_DENIED' ||
         (location.state as { accessDenied?: boolean })?.accessDenied;
@@ -126,17 +135,28 @@ const Login = () => {
                 </motion.div>
             </div>
 
-            {/* ── DESKTOP layout (new split layout) ─────────────────── */}
-            <div className="hidden md:flex min-h-screen bg-[#283852] overflow-hidden">
+            {/* ── DESKTOP layout ─────────────────────────────────────── */}
+            <div className="hidden md:flex min-h-screen overflow-hidden">
 
-                {/* Left panel — illustration */}
+                {/* Left panel — background image slideshow */}
                 <div className="relative flex-1 flex flex-col items-center justify-center p-12 overflow-hidden">
-                    {/* Background decorations */}
-                    <div className="absolute top-0 left-0 w-full h-full">
-                        <div className="absolute top-[-10%] left-[-10%] w-80 h-80 bg-[#33cbcc]/10 rounded-full blur-3xl" />
-                        <div className="absolute bottom-[-10%] right-[-5%] w-64 h-64 bg-[#33cbcc]/15 rounded-full blur-2xl" />
-                        <div className="absolute top-1/3 right-0 w-1 h-48 bg-white/5" />
-                    </div>
+
+                    {/* Crossfading background images */}
+                    <AnimatePresence initial={false}>
+                        <motion.img
+                            key={bgIndex}
+                            src={BG_IMAGES[bgIndex]}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 1.2 }}
+                            className="absolute inset-0 w-full h-full object-cover"
+                            aria-hidden
+                        />
+                    </AnimatePresence>
+
+                    {/* Dark overlay for legibility */}
+                    <div className="absolute inset-0 bg-black/40" />
 
                     {/* Logo + App Name */}
                     <motion.div
@@ -159,21 +179,7 @@ const Login = () => {
                         </button>
                     </div>
 
-                    {/* Illustration */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="relative z-10 w-full max-w-lg"
-                    >
-                        <img
-                            src={loginIllustration}
-                            alt="ERP Dashboard Illustration"
-                            className="w-full h-auto drop-shadow-2xl"
-                        />
-                    </motion.div>
 
-                    {/* Tagline */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

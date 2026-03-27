@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
 @Controller('tasks')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class EmployeeTasksController {
@@ -28,5 +28,10 @@ export class EmployeeTasksController {
     @Patch('update-state/:id')
     updateState(@Param('id') id: string, @Body('state') state: string, @Body('blockReason') blockReason: string, @Request() req) {
         return this.tasksService.updateStateForUser(id, req.user.userId, state, blockReason);
+    }
+
+    @Post('transfer/:taskId')
+    transferTask(@Param('taskId') taskId: string, @Body() dto: { targetWeekStart: string }, @Request() req) {
+        return this.tasksService.transferToWeek(taskId, req.user.userId, dto.targetWeekStart);
     }
 }

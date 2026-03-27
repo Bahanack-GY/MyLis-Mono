@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
 @Controller('notifications')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class NotificationsController {

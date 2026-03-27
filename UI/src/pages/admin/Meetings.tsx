@@ -27,12 +27,16 @@ import {
     Loader2,
     AlignLeft,
     Check,
+    Download,
+    MessageSquare,
 } from 'lucide-react';
-import { useMeetings, useCreateMeeting, useDeleteMeeting } from '../../api/meetings/hooks';
+import logoSrc from '../../assets/logo-lis.png';
+import { exportMeetingReportPdf, loadMeetingReportLogo } from '../../utils/exportMeetingReportPdf';
+import { useMeetings, useCreateMeeting, useDeleteMeeting, useStartMeeting, useEndMeeting, useAttendMeeting } from '../../api/meetings/hooks';
 import { MeetingsAdminSkeleton } from '../../components/Skeleton';
 import { useDepartments } from '../../api/departments/hooks';
 import { useEmployees } from '../../api/employees/hooks';
-import { useDepartmentScope } from '../../contexts/AuthContext';
+import { useDepartmentScope, useAuth } from '../../contexts/AuthContext';
 import type { Meeting } from '../../api/meetings/types';
 import {
     AreaChart,
@@ -51,8 +55,9 @@ type MeetingType = 'standup' | 'review' | 'planning' | 'retrospective' | 'client
 
 interface MeetingReport {
     summary: string;
+    whatWasSaid?: string;
     decisions: string[];
-    actionItems: { task: string; assignee: string }[];
+    actionItems: { task: string; assignee: string; deadline?: string | null }[];
 }
 
 interface MeetingItem {
@@ -65,8 +70,12 @@ interface MeetingItem {
     startTime: string;
     endTime: string;
     location: string;
+    organizerId: string;
+    secretaryId: string | null;
+    transcript: string | null;
     organizer: { name: string; avatar: string };
-    participants: { id: string; name: string; avatar: string }[];
+    secretary: { name: string } | null;
+    participants: { id: string; name: string; avatar: string; attended: boolean }[];
     report: MeetingReport | null;
 }
 
@@ -103,9 +112,55 @@ const TYPES: MeetingType[] = ['standup', 'review', 'planning', 'retrospective', 
 
 /* ─── Meeting Detail Modal ─────────────────────────────── */
 
-const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClose: () => void }) => {
+const MeetingDetailModal = ({
+    meeting,
+    onClose,
+    currentUserId,
+    onStart,
+    onEnd,
+    onAttend,
+}: {
+    meeting: MeetingItem;
+    onClose: () => void;
+    currentUserId?: string;
+    onStart?: (secretaryId: string) => void;
+    onEnd?: () => void;
+    onAttend?: () => void;
+}) => {
     const { t } = useTranslation();
     const TypeIcon = TYPE_ICONS[meeting.type];
+    const [selectedSecretaryId, setSelectedSecretaryId] = useState('');
+    const [showTranscript, setShowTranscript] = useState(false);
+    const [exportingPdf, setExportingPdf] = useState(false);
+
+    const isOrganizer = currentUserId === meeting.organizerId;
+
+    const handleExportPdf = async () => {
+        setExportingPdf(true);
+        try {
+            const logo = await loadMeetingReportLogo(logoSrc).catch(() => undefined);
+            exportMeetingReportPdf({
+                id: meeting.id,
+                title: meeting.title,
+                type: meeting.type,
+                status: meeting.status,
+                date: meeting.date,
+                startTime: meeting.startTime,
+                endTime: meeting.endTime,
+                location: meeting.location,
+                organizer: { name: meeting.organizer.name },
+                secretary: meeting.secretary,
+                participants: meeting.participants.map(p => ({ name: p.name, attended: p.attended })),
+                transcript: meeting.transcript,
+                report: meeting.report,
+            }, logo);
+        } finally {
+            setExportingPdf(false);
+        }
+    };
+    const myParticipant = meeting.participants.find(p => p.id === currentUserId);
+    const alreadyAttended = myParticipant?.attended ?? false;
+    const attendedCount = meeting.participants.filter(p => p.attended).length;
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -174,27 +229,49 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                         </div>
                     </div>
 
-                    {/* Organizer */}
-                    <div>
-                        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            {t('meetings.detail.organizer')}
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                <User size={14} className="text-gray-400" />
+                    {/* Organizer + Secretary */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                {t('meetings.detail.organizer')}
                             </div>
-                            <span className="text-sm font-medium text-gray-800">{meeting.organizer.name}</span>
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
+                                    <User size={14} className="text-gray-400" />
+                                </div>
+                                <span className="text-sm font-medium text-gray-800">{meeting.organizer.name}</span>
+                            </div>
                         </div>
+                        {meeting.secretary && (
+                            <div>
+                                <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                    {t('meetings.detail.secretary')}
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-full border border-gray-200 bg-[#33cbcc]/10 flex items-center justify-center">
+                                        <ClipboardCheck size={14} className="text-[#33cbcc]" />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-800">{meeting.secretary.name}</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
-                    {/* Participants */}
+                    {/* Participants + Attendance */}
                     <div>
-                        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            {t('meetings.detail.participants')} ({meeting.participants.length})
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                {t('meetings.detail.participants')} ({meeting.participants.length})
+                            </div>
+                            {meeting.status === 'in_progress' && (
+                                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                    {attendedCount}/{meeting.participants.length} {t('meetings.detail.attendance')}
+                                </span>
+                            )}
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {meeting.participants.map((p) => (
-                                <div key={p.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-1.5 min-w-0">
+                                <div key={p.id} className={`flex items-center gap-2 rounded-lg px-3 py-1.5 min-w-0 ${p.attended ? 'bg-emerald-50' : 'bg-gray-50'}`}>
                                     {p.avatar ? (
                                         <img src={p.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200 shrink-0" />
                                     ) : (
@@ -203,6 +280,7 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                                         </div>
                                     )}
                                     <span className="text-xs text-gray-600 truncate">{p.name}</span>
+                                    {p.attended && <Check size={11} className="text-emerald-500 shrink-0" />}
                                 </div>
                             ))}
                             {meeting.participants.length === 0 && (
@@ -211,6 +289,25 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                         </div>
                     </div>
 
+                    {/* Transcript */}
+                    {meeting.transcript && (
+                        <div>
+                            <button
+                                onClick={() => setShowTranscript(v => !v)}
+                                className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 hover:text-gray-600 transition-colors"
+                            >
+                                <AlignLeft size={11} />
+                                {t('meetings.detail.transcript')}
+                                <span className="ml-1 text-gray-300">{showTranscript ? '▲' : '▼'}</span>
+                            </button>
+                            {showTranscript && (
+                                <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap">
+                                    {meeting.transcript}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {/* Report */}
                     <div className="border-t border-gray-100 pt-6">
                         <div className="flex items-center gap-2 mb-4">
@@ -218,6 +315,16 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                             <h3 className="text-base font-bold text-gray-800">{t('meetings.detail.report')}</h3>
                             {meeting.report && (
                                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                            )}
+                            {meeting.report && (
+                                <button
+                                    onClick={handleExportPdf}
+                                    disabled={exportingPdf}
+                                    className="ml-auto flex items-center gap-1.5 px-3 py-1.5 bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 text-[#33cbcc] rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                                >
+                                    {exportingPdf ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                                    {t('meetings.detail.exportPdf')}
+                                </button>
                             )}
                         </div>
 
@@ -229,6 +336,17 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                                         {meeting.report.summary}
                                     </div>
                                 </div>
+                                {meeting.report.whatWasSaid && (
+                                    <div>
+                                        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                                            <MessageSquare size={11} />
+                                            {t('meetings.detail.whatWasSaid')}
+                                        </div>
+                                        <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                                            {meeting.report.whatWasSaid}
+                                        </div>
+                                    </div>
+                                )}
                                 <div>
                                     <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('meetings.detail.decisions')}</div>
                                     <div className="space-y-2">
@@ -248,7 +366,7 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                                                 <ArrowRight size={14} className="text-[#33cbcc] shrink-0 mt-0.5" />
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm text-gray-700">{ai.task}</p>
-                                                    <p className="text-xs text-gray-400 mt-0.5">{ai.assignee}</p>
+                                                    <p className="text-xs text-gray-400 mt-0.5">{ai.assignee}{ai.deadline ? ` — ${ai.deadline}` : ''}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -265,10 +383,59 @@ const MeetingDetailModal = ({ meeting, onClose }: { meeting: MeetingItem; onClos
                 </div>
 
                 {/* Footer */}
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-end shrink-0">
-                    <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
-                        {t('meetings.detail.close')}
-                    </button>
+                <div className="px-6 py-4 border-t border-gray-100 shrink-0 space-y-3">
+                    {/* Secretary picker + Start button */}
+                    {isOrganizer && meeting.status === 'scheduled' && onStart && (
+                        <div className="flex gap-2">
+                            <select
+                                value={selectedSecretaryId}
+                                onChange={e => setSelectedSecretaryId(e.target.value)}
+                                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                            >
+                                <option value="">{t('meetings.start.selectSecretary')}</option>
+                                {meeting.participants.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name}</option>
+                                ))}
+                            </select>
+                            <button
+                                disabled={!selectedSecretaryId}
+                                onClick={() => { if (selectedSecretaryId) onStart(selectedSecretaryId); }}
+                                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-colors ${selectedSecretaryId ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20' : 'bg-gray-300 cursor-not-allowed'}`}
+                            >
+                                <ArrowRight size={14} />
+                                {t('meetings.start.button')}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* End Meeting button */}
+                    {isOrganizer && meeting.status === 'in_progress' && onEnd && (
+                        <button
+                            onClick={onEnd}
+                            className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors"
+                        >
+                            <X size={14} />
+                            {t('meetings.end.button')}
+                        </button>
+                    )}
+
+                    {/* Mark Present button */}
+                    {!isOrganizer && meeting.status === 'in_progress' && onAttend && (
+                        <button
+                            disabled={alreadyAttended}
+                            onClick={onAttend}
+                            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${alreadyAttended ? 'bg-emerald-50 text-emerald-600 cursor-default' : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'}`}
+                        >
+                            <Check size={14} />
+                            {alreadyAttended ? t('meetings.attend.attended') : t('meetings.attend.button')}
+                        </button>
+                    )}
+
+                    <div className="flex justify-end">
+                        <button onClick={onClose} className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+                            {t('meetings.detail.close')}
+                        </button>
+                    </div>
                 </div>
             </motion.div>
         </motion.div>
@@ -674,11 +841,15 @@ const Meetings = () => {
     const [filterStatus, setFilterStatus] = useState<MeetingStatus | 'all'>('all');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showScheduleModal, setShowScheduleModal] = useState(false);
-    const [selectedMeeting, setSelectedMeeting] = useState<MeetingItem | null>(null);
+    const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
 
+    const { user } = useAuth();
     const deptScope = useDepartmentScope();
     const { data: apiMeetings, isLoading } = useMeetings(deptScope);
     const deleteMeeting = useDeleteMeeting();
+    const startMeeting = useStartMeeting();
+    const endMeeting = useEndMeeting();
+    const attendMeeting = useAttendMeeting();
 
     // Map API meetings to display shape
     const meetings: MeetingItem[] = (apiMeetings || []).map((m: Meeting) => ({
@@ -691,17 +862,24 @@ const Meetings = () => {
         startTime: m.startTime || '',
         endTime: m.endTime || '',
         location: m.location || '',
+        organizerId: m.organizerId || '',
+        secretaryId: m.secretaryId ?? null,
+        transcript: m.transcript ?? null,
         organizer: {
             name: m.organizer?.email || '',
             avatar: '',
         },
+        secretary: m.secretary ? { name: `${m.secretary.firstName} ${m.secretary.lastName}` } : null,
         participants: (m.participants || []).map(p => ({
             id: p.id,
             name: `${p.firstName} ${p.lastName}`,
             avatar: p.avatarUrl || '',
+            attended: p.MeetingParticipant?.attended ?? false,
         })),
         report: m.report || null,
     }));
+
+    const selectedMeeting = selectedMeetingId ? (meetings.find(m => m.id === selectedMeetingId) ?? null) : null;
 
     const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const chartData = useMemo(() => {
@@ -789,7 +967,7 @@ const Meetings = () => {
                             <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
                             <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out" style={{ color: stat.color }}>
+                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out" style={{ color: stat.color }}>
                             <stat.icon size={100} strokeWidth={1.5} />
                         </div>
                     </motion.div>
@@ -883,7 +1061,7 @@ const Meetings = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 + i * 0.05 }}
                                 className="bg-white rounded-3xl p-6 border border-gray-100 group hover:border-[#33cbcc]/30 transition-all cursor-pointer"
-                                onClick={() => setSelectedMeeting(meeting)}
+                                onClick={() => setSelectedMeetingId(meeting.id)}
                             >
                                 {/* Icon + Actions */}
                                 <div className="flex items-start justify-between mb-4">
@@ -891,7 +1069,7 @@ const Meetings = () => {
                                         <TypeIcon size={22} style={{ color: TYPE_COLORS[meeting.type] }} />
                                     </div>
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={e => { e.stopPropagation(); setSelectedMeeting(meeting); }} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                                        <button onClick={e => { e.stopPropagation(); setSelectedMeetingId(meeting.id); }} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                                             <Eye size={16} />
                                         </button>
                                         <button onClick={e => handleDelete(e, meeting.id)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors">
@@ -987,7 +1165,7 @@ const Meetings = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.03 }}
                                 className="grid grid-cols-12 gap-4 px-6 py-4 border-t border-gray-100 items-center group hover:bg-gray-50/50 transition-colors cursor-pointer"
-                                onClick={() => setSelectedMeeting(meeting)}
+                                onClick={() => setSelectedMeetingId(meeting.id)}
                             >
                                 {/* Title */}
                                 <div className="col-span-3 flex items-center gap-3 min-w-0">
@@ -1027,7 +1205,7 @@ const Meetings = () => {
                                 </div>
                                 {/* Actions */}
                                 <div className="col-span-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={e => { e.stopPropagation(); setSelectedMeeting(meeting); }} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                                    <button onClick={e => { e.stopPropagation(); setSelectedMeetingId(meeting.id); }} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                                         <Eye size={14} />
                                     </button>
                                     <button onClick={e => handleDelete(e, meeting.id)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors">
@@ -1062,7 +1240,26 @@ const Meetings = () => {
             </AnimatePresence>
             <AnimatePresence>
                 {selectedMeeting && (
-                    <MeetingDetailModal meeting={selectedMeeting} onClose={() => setSelectedMeeting(null)} />
+                    <MeetingDetailModal
+                        meeting={selectedMeeting}
+                        onClose={() => setSelectedMeetingId(null)}
+                        currentUserId={user?.userId}
+                        onStart={(secretaryId) => {
+                            startMeeting.mutate({ id: selectedMeeting.id, secretaryId }, {
+                                onSuccess: () => setSelectedMeetingId(null),
+                            });
+                        }}
+                        onEnd={() => {
+                            endMeeting.mutate(selectedMeeting.id, {
+                                onSuccess: () => setSelectedMeetingId(null),
+                            });
+                        }}
+                        onAttend={() => {
+                            attendMeeting.mutate(selectedMeeting.id, {
+                                onSuccess: () => setSelectedMeetingId(null),
+                            });
+                        }}
+                    />
                 )}
             </AnimatePresence>
         </div>

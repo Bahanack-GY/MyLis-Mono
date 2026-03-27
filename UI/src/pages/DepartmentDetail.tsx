@@ -10,9 +10,6 @@ import {
     Crown,
     Briefcase,
     Building,
-    Palette,
-    Bell,
-    Shield,
     ChevronRight,
     Plus,
     X,
@@ -24,6 +21,8 @@ import {
     Trash2,
     Loader2,
     AlignLeft,
+    Check,
+    UserCog,
 } from 'lucide-react';
 import {
     AreaChart,
@@ -47,6 +46,7 @@ import { useTasks } from '../api/tasks/hooks';
 import { useInvoices, useInvoiceStats } from '../api/invoices/hooks';
 import { useClients, useCreateClient } from '../api/clients/hooks';
 import { useDepartmentScope } from '../contexts/AuthContext';
+import { useUpdateDepartment } from '../api/departments/hooks';
 
 /* ─── Status helpers ────────────────────────────────────── */
 
@@ -642,7 +642,7 @@ const OverviewView = ({ department }: { department: Department }) => {
                             <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
                             <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out" style={{ color: stat.color }}>
+                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out" style={{ color: stat.color }}>
                             <stat.icon size={100} strokeWidth={1.5} />
                         </div>
                     </motion.div>
@@ -794,7 +794,7 @@ const MembersView = ({ department }: { department: Department }) => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => navigate(`/employees/${department.head.id}`)}
-                className="bg-white rounded-3xl p-6 relative overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                className="bg-white rounded-3xl p-6 relative overflow-hidden cursor-pointer  transition-shadow"
                 style={{ border: `2px solid ${department.color}20` }}
             >
                 <div className="absolute top-4 right-4">
@@ -824,7 +824,7 @@ const MembersView = ({ department }: { department: Department }) => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.05 }}
                             onClick={() => navigate(`/employees/${emp.id}`)}
-                            className="bg-white rounded-2xl p-5 border border-gray-100 hover:border-gray-200 hover:shadow-md cursor-pointer transition-all"
+                            className="bg-white rounded-2xl p-5 border border-gray-100 hover:border-gray-200  cursor-pointer transition-all"
                         >
                             <div className="flex items-center gap-4">
                                 <img src={emp.avatar} alt="" className="w-12 h-12 rounded-xl border border-gray-200 object-cover" />
@@ -1058,7 +1058,7 @@ const BudgetView = ({ department }: { department: Department }) => {
                             <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
                             <p className="text-xs text-gray-400 mt-1">FCFA</p>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform group-hover:scale-110 duration-500 ease-out" style={{ color: stat.color }}>
+                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out" style={{ color: stat.color }}>
                             <stat.icon size={100} strokeWidth={1.5} />
                         </div>
                     </motion.div>
@@ -1133,43 +1133,185 @@ const BudgetView = ({ department }: { department: Department }) => {
 
 const SettingsView = ({ department }: { department: Department }) => {
     const { t } = useTranslation();
+    const updateDept = useUpdateDepartment();
 
-    const sections = [
-        { icon: Building, title: t('departmentDetail.settings.general'), description: t('departmentDetail.settings.generalDesc') },
-        { icon: Palette, title: t('departmentDetail.settings.appearance'), description: t('departmentDetail.settings.appearanceDesc') },
-        { icon: Bell, title: t('departmentDetail.settings.notifications'), description: t('departmentDetail.settings.notificationsDesc') },
-        { icon: Shield, title: t('departmentDetail.settings.permissions'), description: t('departmentDetail.settings.permissionsDesc') },
-    ];
+    /* ── Edit department form ── */
+    const [name, setName] = useState(department.name);
+    const [description, setDescription] = useState(department.description || '');
+    const nameChanged = name.trim() !== department.name || description !== (department.description || '');
+
+    const handleSaveDept = () => {
+        if (!name.trim()) return;
+        updateDept.mutate({ id: String(department.id), dto: { name: name.trim(), description: description || undefined } });
+    };
+
+    /* ── HOD picker ── */
+    const [hodSearch, setHodSearch] = useState('');
+    const [pendingHodId, setPendingHodId] = useState<string | null>(null);
+
+    const filteredMembers = useMemo(() =>
+        department.employees.filter(e =>
+            String(e.id) !== String(department.head?.id) &&
+            e.name.toLowerCase().includes(hodSearch.toLowerCase())
+        ),
+        [department.employees, department.head?.id, hodSearch]
+    );
+
+    const handleAppoint = (empId: string) => {
+        setPendingHodId(empId);
+        updateDept.mutate(
+            { id: String(department.id), dto: { headId: empId } },
+            { onSettled: () => setPendingHodId(null) }
+        );
+    };
+
+    const handleRemoveHod = () => {
+        updateDept.mutate({ id: String(department.id), dto: { headId: null } });
+    };
+
+    const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] bg-white';
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-2xl space-y-6">
             <h2 className="text-2xl font-bold text-gray-800">{t('departmentDetail.settings.title')}</h2>
 
-            <div className="space-y-4">
-                {sections.map((section, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.08 }}
-                        className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center justify-between group hover:border-[#33cbcc]/30 transition-colors cursor-pointer"
+            {/* ── Edit Department ── */}
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl border border-gray-100 p-5"
+            >
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${department.color}15` }}>
+                        <Building size={18} style={{ color: department.color }} />
+                    </div>
+                    <div>
+                        <p className="font-semibold text-gray-800 text-sm">{t('departmentDetail.settings.general')}</p>
+                        <p className="text-xs text-gray-400">{t('departmentDetail.settings.generalDesc')}</p>
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1.5 block">{t('departments.name')}</label>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            className={inputCls}
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1.5 block">{t('departments.description')}</label>
+                        <textarea
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                            rows={3}
+                            className={`${inputCls} resize-none`}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex justify-end mt-4">
+                    <button
+                        onClick={handleSaveDept}
+                        disabled={!nameChanged || !name.trim() || updateDept.isPending}
+                        className="flex items-center gap-2 px-4 py-2 bg-[#283852] text-white rounded-xl text-sm font-medium hover:bg-[#1e2d42] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        <div className="flex items-center gap-4">
-                            <div
-                                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                                style={{ backgroundColor: `${department.color}10` }}
-                            >
-                                <section.icon size={20} style={{ color: department.color }} />
-                            </div>
-                            <div>
-                                <p className="font-medium text-gray-800">{section.title}</p>
-                                <p className="text-sm text-gray-400">{section.description}</p>
-                            </div>
+                        {updateDept.isPending && !pendingHodId
+                            ? <Loader2 size={14} className="animate-spin" />
+                            : <Check size={14} />
+                        }
+                        {t('common.save')}
+                    </button>
+                </div>
+            </motion.div>
+
+            {/* ── Head of Department ── */}
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="bg-white rounded-2xl border border-gray-100 p-5"
+            >
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${department.color}15` }}>
+                        <UserCog size={18} style={{ color: department.color }} />
+                    </div>
+                    <div>
+                        <p className="font-semibold text-gray-800 text-sm">{t('departmentDetail.settings.hod')}</p>
+                        <p className="text-xs text-gray-400">{t('departmentDetail.settings.hodDesc')}</p>
+                    </div>
+                </div>
+
+                {/* Current HOD */}
+                {department.head?.id && String(department.head.id) !== '0' ? (
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4">
+                        {department.head.avatar
+                            ? <img src={department.head.avatar} alt="" className="w-10 h-10 rounded-xl object-cover" />
+                            : <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/20 flex items-center justify-center text-[#33cbcc] font-bold text-sm">{department.head.name[0]}</div>
+                        }
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-800 text-sm">{department.head.name}</p>
+                            <p className="text-xs text-gray-400 flex items-center gap-1">
+                                <Crown size={10} className="text-amber-400" />
+                                {t('departmentDetail.members.head')}
+                            </p>
                         </div>
-                        <ChevronRight size={18} className="text-gray-300 group-hover:text-[#33cbcc] transition-colors" />
-                    </motion.div>
-                ))}
-            </div>
+                        <button
+                            onClick={handleRemoveHod}
+                            disabled={updateDept.isPending}
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
+                            title={t('departmentDetail.settings.removeHod')}
+                        >
+                            <X size={15} />
+                        </button>
+                    </div>
+                ) : (
+                    <p className="text-sm text-gray-400 mb-4">{t('departmentDetail.settings.noHod')}</p>
+                )}
+
+                {/* Member picker */}
+                {department.employees.length > 0 && (
+                    <div>
+                        <p className="text-xs font-medium text-gray-500 mb-2">{t('departmentDetail.settings.appointFrom')}</p>
+                        <div className="relative mb-2">
+                            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                type="text"
+                                value={hodSearch}
+                                onChange={e => setHodSearch(e.target.value)}
+                                placeholder={t('employees.searchPlaceholder')}
+                                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc]"
+                            />
+                        </div>
+                        <div className="space-y-1 max-h-52 overflow-y-auto">
+                            {filteredMembers.length === 0 ? (
+                                <p className="text-xs text-gray-400 py-2 text-center">{t('common.noResults')}</p>
+                            ) : filteredMembers.map(emp => (
+                                <div key={emp.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+                                    {emp.avatar
+                                        ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                                        : <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold">{emp.name[0]}</div>
+                                    }
+                                    <span className="flex-1 text-sm text-gray-700">{emp.name}</span>
+                                    <button
+                                        onClick={() => handleAppoint(String(emp.id))}
+                                        disabled={updateDept.isPending}
+                                        className="px-3 py-1 text-xs font-medium bg-[#283852] text-white rounded-lg hover:bg-[#1e2d42] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                                    >
+                                        {pendingHodId === String(emp.id)
+                                            ? <Loader2 size={11} className="animate-spin" />
+                                            : <Crown size={11} />
+                                        }
+                                        {t('departmentDetail.settings.appoint')}
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </motion.div>
         </div>
     );
 };

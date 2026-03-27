@@ -6,6 +6,7 @@ export interface MeetingParticipant {
     firstName: string;
     lastName: string;
     avatarUrl: string;
+    MeetingParticipant?: { attended: boolean };
 }
 
 export interface Meeting {
@@ -19,12 +20,16 @@ export interface Meeting {
     endTime: string;
     location: string;
     organizerId: string;
+    secretaryId?: string | null;
+    transcript?: string | null;
     organizer?: { id: string; email: string };
+    secretary?: { id: string; firstName: string; lastName: string } | null;
     participants?: MeetingParticipant[];
     report: {
         summary: string;
+        whatWasSaid?: string;
         decisions: string[];
-        actionItems: { task: string; assignee: string }[];
+        actionItems: { task: string; assignee: string; deadline?: string | null }[];
     } | null;
     createdAt: string;
     updatedAt: string;

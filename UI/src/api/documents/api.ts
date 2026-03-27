@@ -23,6 +23,11 @@ export const documentsApi = {
         return api.post<UploadFileResponse>(
             `/hr/documents/upload/${folder}`,
             formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
         ).then(r => r.data);
     },
 };

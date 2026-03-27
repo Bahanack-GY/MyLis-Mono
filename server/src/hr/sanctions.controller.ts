@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
 @Controller('hr/sanctions')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class SanctionsController {
@@ -22,7 +22,7 @@ export class SanctionsController {
         return this.sanctionsService.findAll();
     }
 
-    @Roles('EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT')
+    @Roles('EMPLOYEE', 'COMMERCIAL', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
     @Get('my')
     findMy(@Request() req) {
         return this.sanctionsService.findByUserId(req.user.userId);

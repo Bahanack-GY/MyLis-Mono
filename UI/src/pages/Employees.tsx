@@ -52,12 +52,13 @@ const SKILLS = [
 
 /* ─── Create Employee Modal ────────────────────────────── */
 
-type UserType = 'employee' | 'manager' | 'accountant';
+type UserType = 'employee' | 'manager' | 'accountant' | 'commercial';
 
 const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartmentId }: { onClose: () => void; initialUserType?: UserType; hodDepartmentId?: string }) => {
     const [userType, setUserType] = useState<UserType>(initialUserType);
     const managerMode = userType === 'manager';
     const accountantMode = userType === 'accountant';
+    const commercialMode = userType === 'commercial';
     const { t } = useTranslation();
     const createEmployee = useCreateEmployee();
     const { data: apiDepartments } = useDepartments();
@@ -160,7 +161,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
         }));
     };
 
-    const isValid = form.firstName.trim().length > 0 && form.lastName.trim().length > 0 && (managerMode || accountantMode || (form.role !== '' && form.department !== ''));
+    const isValid = form.firstName.trim().length > 0 && form.lastName.trim().length > 0 && (managerMode || accountantMode || commercialMode || (form.role !== '' && form.department !== ''));
 
     const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
     const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
@@ -187,7 +188,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                                {managerMode ? <Shield size={20} className="text-[#33cbcc]" /> : accountantMode ? <Calculator size={20} className="text-[#33cbcc]" /> : <UserPlus size={20} className="text-[#33cbcc]" />}
+                                {managerMode ? <Shield size={20} className="text-[#33cbcc]" /> : accountantMode ? <Calculator size={20} className="text-[#33cbcc]" /> : commercialMode ? <Target size={20} className="text-[#33cbcc]" /> : <UserPlus size={20} className="text-[#33cbcc]" />}
                             </div>
                             <h2 className="text-lg font-bold text-gray-800">{t('employees.create.title')}</h2>
                         </div>
@@ -197,7 +198,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     </div>
                     {/* Role type selector */}
                     <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
-                        {(['employee', 'manager', 'accountant'] as UserType[]).map(type => (
+                        {(['employee', 'manager', 'accountant', 'commercial'] as UserType[]).map(type => (
                             <button
                                 key={type}
                                 type="button"
@@ -211,7 +212,8 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                 {type === 'employee' && <UserPlus size={13} />}
                                 {type === 'manager' && <Shield size={13} />}
                                 {type === 'accountant' && <Calculator size={13} />}
-                                {type === 'employee' ? t('employees.addEmployee') : type === 'manager' ? t('employees.addManager') : t('employees.addAccountant')}
+                                {type === 'commercial' && <Target size={13} />}
+                                {type === 'employee' ? t('employees.addEmployee') : type === 'manager' ? t('employees.addManager') : type === 'accountant' ? t('employees.addAccountant') : t('employees.addCommercial')}
                             </button>
                         ))}
                     </div>
@@ -419,8 +421,8 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         </div>
                     </div>
 
-                    {/* Role + Department (not shown for managers or accountants) */}
-                    {!managerMode && !accountantMode && (
+                    {/* Role + Department (not shown for managers, accountants or commercials) */}
+                    {!managerMode && !accountantMode && !commercialMode && (
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className={labelCls}>
@@ -762,7 +764,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                     avatarUrl: form.avatarUrl || undefined,
                                     educationDocs: uploadedEducationDocs,
                                     recruitmentDocs: uploadedRecruitmentDocs,
-                                    ...(managerMode ? { userRole: 'MANAGER' } : accountantMode ? { userRole: 'ACCOUNTANT' } : {}),
+                                    ...(managerMode ? { userRole: 'MANAGER' } : accountantMode ? { userRole: 'ACCOUNTANT' } : commercialMode ? { userRole: 'COMMERCIAL' } : {}),
                                 }, {
                                     onSuccess: () => onClose(),
                                     onSettled: () => setIsUploading(false),
@@ -779,8 +781,8 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {(createEmployee.isPending || isUploading) ? <Loader2 size={16} className="animate-spin" /> : managerMode ? <Shield size={16} /> : accountantMode ? <Calculator size={16} /> : <Plus size={16} />}
-                        {isUploading ? t('employees.create.uploading') : managerMode ? t('employees.createManager.submit') : accountantMode ? t('employees.createAccountant.submit') : t('employees.create.submit')}
+                        {(createEmployee.isPending || isUploading) ? <Loader2 size={16} className="animate-spin" /> : managerMode ? <Shield size={16} /> : accountantMode ? <Calculator size={16} /> : commercialMode ? <Target size={16} /> : <Plus size={16} />}
+                        {isUploading ? t('employees.create.uploading') : managerMode ? t('employees.createManager.submit') : accountantMode ? t('employees.createAccountant.submit') : commercialMode ? t('employees.createCommercial.submit') : t('employees.create.submit')}
                     </button>
                 </div>
             </motion.div>

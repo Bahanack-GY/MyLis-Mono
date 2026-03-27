@@ -13,16 +13,23 @@ import {
     Loader2,
     AlertCircle,
     User,
+    Paperclip,
+    FileText,
+    Target,
+    RotateCcw,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import {
     useAllWeekTasks,
     useWeekTasksByEmployee,
     useCreateTask,
     useWeeklyCheckForEmployee,
+    useUploadTaskAttachment,
 } from '../../api/tasks/hooks';
 import { useEmployees } from '../../api/employees/hooks';
 import { useProjects } from '../../api/projects/hooks';
 import { useTaskNatures } from '../../api/task-natures/hooks';
+import { leadsApi } from '../../api/commercial/api';
 import type { Task, TaskDifficulty, CreateTaskDto } from '../../api/tasks/types';
 import { useDepartmentScope } from '../../contexts/AuthContext';
 
@@ -71,6 +78,7 @@ const AddTaskModal = ({
 }) => {
     const { t } = useTranslation();
     const createTask = useCreateTask();
+    const uploadAttachment = useUploadTaskAttachment();
     const deptScope = useDepartmentScope();
     const { data: projects } = useProjects(deptScope);
     const { data: taskNatures } = useTaskNatures();
@@ -81,17 +89,28 @@ const AddTaskModal = ({
         difficulty: 'MEDIUM' as TaskDifficulty,
         projectId: '',
         natureId: '',
+        leadId: '',
         assignedToId: prefilledEmployeeId || '',
         startDate: prefilledDate || '',
         endDate: prefilledDate || '',
         startTime: '',
     });
+    const [files, setFiles] = useState<File[]>([]);
 
     const selectedEmp = employees.find(e => e.id === form.assignedToId);
     const { data: compliance, isLoading: complianceLoading } = useWeeklyCheckForEmployee(
         form.assignedToId || null
     );
     const isNonCompliant = compliance && !compliance.canCreate;
+
+    const selectedEmpRole = selectedEmp?.position?.name || selectedEmp?.position?.title || '';
+    const isSelectedCommercial = selectedEmpRole.toLowerCase().includes('commercial');
+    const { data: leadsData } = useQuery({
+        queryKey: ['leads', 'for-planning', form.assignedToId],
+        queryFn: () => leadsApi.getAll({ assignedToId: form.assignedToId }),
+        enabled: isSelectedCommercial && !!form.assignedToId,
+    });
+    const leads = (leadsData as any)?.data || [];
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => {
@@ -313,6 +332,26 @@ const AddTaskModal = ({
                         </select>
                     </div>
 
+                    {/* Lead (commercial employees only) */}
+                    {isSelectedCommercial && leads.length > 0 && (
+                        <div>
+                            <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                                <Target size={10} />
+                                {t('tasksPage.lead', 'Lead')}
+                            </label>
+                            <select
+                                value={form.leadId}
+                                onChange={e => update('leadId', e.target.value)}
+                                className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="">{t('tasksPage.leadNone', 'No lead')}</option>
+                                {leads.map((lead: any) => (
+                                    <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     {/* Start date + End date + Time */}
                     <div className="grid grid-cols-3 gap-3">
                         <div>
@@ -352,6 +391,46 @@ const AddTaskModal = ({
                             />
                         </div>
                     </div>
+
+                    {/* File attachments */}
+                    <div>
+                        <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                            <Paperclip size={10} />
+                            {t('tasksPage.attachments', 'Attachments')}
+                        </label>
+                        <label className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
+                            <Plus size={14} />
+                            {t('tasksPage.addFiles', 'Add files')}
+                            <input
+                                type="file"
+                                multiple
+                                className="hidden"
+                                onChange={e => {
+                                    const newFiles = Array.from(e.target.files || []);
+                                    if (newFiles.length > 0) setFiles(prev => [...prev, ...newFiles]);
+                                    e.target.value = '';
+                                }}
+                            />
+                        </label>
+                        {files.length > 0 && (
+                            <div className="mt-2 space-y-1.5">
+                                {files.map((file, fi) => (
+                                    <div key={fi} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
+                                        <FileText size={14} className="text-gray-400 shrink-0" />
+                                        <span className="flex-1 text-sm text-gray-700 truncate">{file.name}</span>
+                                        <span className="text-[10px] text-gray-400 shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFiles(prev => prev.filter((_, i) => i !== fi))}
+                                            className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Footer */}
@@ -363,7 +442,7 @@ const AddTaskModal = ({
                         {t('tasks.selfAssign.cancel')}
                     </button>
                     <button
-                        onClick={() => {
+                        onClick={async () => {
                             if (!isValid) return;
                             const dto: CreateTaskDto = {
                                 title: form.title,
@@ -372,12 +451,21 @@ const AddTaskModal = ({
                                 assignedToId: form.assignedToId,
                                 projectId: form.projectId || undefined,
                                 natureId: form.natureId || undefined,
+                                leadId: form.leadId || undefined,
                                 startDate: form.startDate || undefined,
                                 endDate: form.endDate || undefined,
                                 dueDate: form.endDate || undefined,
                                 startTime: form.startTime || undefined,
                             };
-                            createTask.mutate(dto, { onSuccess: () => onClose() });
+                            try {
+                                const created = await createTask.mutateAsync(dto);
+                                if (files.length > 0 && created?.id) {
+                                    for (const file of files) {
+                                        await uploadAttachment.mutateAsync({ taskId: created.id, file });
+                                    }
+                                }
+                                onClose();
+                            } catch { /* handled by mutation */ }
                         }}
                         disabled={!isValid || createTask.isPending}
                         className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${
@@ -391,7 +479,7 @@ const AddTaskModal = ({
                         ) : (
                             <Plus size={14} className="sm:w-4 sm:h-4" />
                         )}
-                        {t('task.selfAssign.submit')}
+                        {t('tasks.selfAssign.submit')}
                     </button>
                 </div>
             </motion.div>
@@ -414,7 +502,7 @@ const TaskCard = ({ task }: { task: Task }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-white rounded-lg border border-gray-200 p-3 hover:shadow-md transition-shadow cursor-pointer"
+            className="bg-white rounded-lg border border-gray-200 p-3  transition-shadow cursor-pointer"
         >
             {/* Employee info */}
             {task.assignedTo && (
@@ -431,7 +519,15 @@ const TaskCard = ({ task }: { task: Task }) => {
             )}
 
             <div className="flex items-start justify-between gap-2 mb-2">
-                <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{task.title}</h4>
+                <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{task.title}</h4>
+                    {task.transferredFromWeek && (
+                        <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 mt-1">
+                            <RotateCcw size={8} />
+                            TR
+                        </span>
+                    )}
+                </div>
                 <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                         difficultyColors[task.difficulty]
@@ -467,6 +563,13 @@ const TaskCard = ({ task }: { task: Task }) => {
                         >
                             {task.nature.name}
                         </span>
+                    </div>
+                )}
+
+                {task.attachments && task.attachments.length > 0 && (
+                    <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-1">
+                        <Paperclip size={10} />
+                        <span>{task.attachments.length}</span>
                     </div>
                 )}
             </div>

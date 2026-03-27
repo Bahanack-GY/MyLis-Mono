@@ -17,7 +17,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
 export class DemandsController {
     constructor(private readonly demandsService: DemandsService) { }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL', 'ACCOUNTANT')
     @Post('upload')
     @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({
@@ -54,7 +54,7 @@ export class DemandsController {
         };
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL', 'ACCOUNTANT')
     @Post()
     create(@Body() createDemandDto: any, @Request() req) {
         return this.demandsService.create(createDemandDto, req.user.userId);
@@ -67,7 +67,7 @@ export class DemandsController {
         return deptId ? this.demandsService.findAll(deptId) : this.demandsService.findAll();
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL', 'ACCOUNTANT')
     @Get('my')
     findMyDemands(@Request() req) {
         return this.demandsService.findByEmployee(req.user.userId);

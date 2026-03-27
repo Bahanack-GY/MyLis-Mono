@@ -3,6 +3,7 @@ import { ticketsApi } from './api';
 import type { CreateTicketDto, TakeTicketDto } from './types';
 import { toast } from 'sonner';
 import i18n from '../../i18n/config';
+import { useSSE } from '../../hooks/useSSE';
 
 export const ticketKeys = {
     all: ['tickets'] as const,
@@ -11,11 +12,13 @@ export const ticketKeys = {
     department: ['tickets', 'department'] as const,
 };
 
-export const useTickets = (departmentId?: string) =>
-    useQuery({
+export const useTickets = (departmentId?: string) => {
+    useSSE('/tickets/sse', [ticketKeys.all, ticketKeys.myTickets, ticketKeys.department]);
+    return useQuery({
         queryKey: departmentId ? [...ticketKeys.all, departmentId] : ticketKeys.all,
         queryFn: () => ticketsApi.getAll(departmentId),
     });
+};
 
 export const useTicket = (id: string) =>
     useQuery({
