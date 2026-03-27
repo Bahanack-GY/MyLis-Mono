@@ -2,6 +2,17 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
+const apiTarget = 'http://server:3025'
+const apiPaths = [
+  '/auth', '/users', '/employees', '/tasks', '/hr',
+  '/organization', '/logs', '/tickets', '/clients',
+  '/projects', '/meetings', '/invoices', '/notifications',
+  '/chat', '/demands', '/expenses', '/salary', '/uploads',
+  '/api', '/leads', '/lead-activities', '/client-payments',
+  '/task-natures', '/teams', '/departments', '/gamification',
+  '/payroll', '/tax', '/accounting',
+]
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -12,27 +23,17 @@ export default defineConfig({
       clientPort: parseInt(process.env.UI_PORT || '8080'),
     },
     proxy: {
-      '/auth': 'http://server:3025',
-      '/users': 'http://server:3025',
-      '/employees': 'http://server:3025',
-      '/tasks': 'http://server:3025',
-      '/hr': 'http://server:3025',
-      '/organization': 'http://server:3025',
-      '/logs': 'http://server:3025',
-      '/tickets': 'http://server:3025',
-      '/clients': 'http://server:3025',
-      '/projects': 'http://server:3025',
-      '/meetings': 'http://server:3025',
-      '/invoices': 'http://server:3025',
-      '/notifications': 'http://server:3025',
-      '/chat': 'http://server:3025',
-      '/demands': 'http://server:3025',
-      '/expenses': 'http://server:3025',
-      '/salary': 'http://server:3025',
-      '/uploads': 'http://server:3025',
-      '/api': 'http://server:3025',
+      ...Object.fromEntries(
+        apiPaths.map(path => [path, {
+          target: apiTarget,
+          bypass: (req: any) => {
+            // Let browser page navigations (HTML) fall through to the SPA
+            if (req.headers.accept?.includes('text/html')) return req.url
+          },
+        }])
+      ),
       '/socket.io': {
-        target: 'http://server:3025',
+        target: apiTarget,
         ws: true,
       },
     },

@@ -17,6 +17,7 @@ import {
     FileText,
     Target,
     RotateCcw,
+    Flag,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -94,6 +95,8 @@ const AddTaskModal = ({
         startDate: prefilledDate || '',
         endDate: prefilledDate || '',
         startTime: '',
+        urgent: false,
+        important: false,
     });
     const [files, setFiles] = useState<File[]>([]);
 
@@ -392,6 +395,30 @@ const AddTaskModal = ({
                         </div>
                     </div>
 
+                    {/* Urgent / Important */}
+                    <div className="flex items-center gap-6">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={form.urgent}
+                                onChange={e => update('urgent', e.target.checked)}
+                                className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400"
+                            />
+                            <AlertCircle size={14} className="text-red-400" />
+                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={form.important}
+                                onChange={e => update('important', e.target.checked)}
+                                className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                            />
+                            <Flag size={14} className="text-amber-400" />
+                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
+                        </label>
+                    </div>
+
                     {/* File attachments */}
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
@@ -456,6 +483,8 @@ const AddTaskModal = ({
                                 endDate: form.endDate || undefined,
                                 dueDate: form.endDate || undefined,
                                 startTime: form.startTime || undefined,
+                                urgent: form.urgent,
+                                important: form.important,
                             };
                             try {
                                 const created = await createTask.mutateAsync(dto);
