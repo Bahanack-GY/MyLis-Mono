@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3025';
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3025').replace(/\/$/, '');
 
 /**
  * Opens an SSE connection to `path?token=<jwt>` and invalidates the given
@@ -23,7 +23,7 @@ export function useSSE(path: string, queryKeys: unknown[][]): void {
             const token = localStorage.getItem('access_token');
             if (!token || destroyed) return;
 
-            const url = `${API_URL}${path}?token=${encodeURIComponent(token)}`;
+            const url = `${API_BASE}${path}?token=${encodeURIComponent(token)}`;
             const es = new EventSource(url);
             esRef.current = es;
 

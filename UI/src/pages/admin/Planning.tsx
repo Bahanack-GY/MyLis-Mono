@@ -751,7 +751,7 @@ export default function Planning() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-2">
                         <div>
                             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2 sm:gap-3">
-                                <Calendar className="text-[#33cbcc]" size={24} className="sm:w-8 sm:h-8" />
+                                <Calendar className="text-[#33cbcc] sm:w-8 sm:h-8" size={24} />
                                 <span>{t('planning.title')}</span>
                             </h1>
                             <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">{t('planning.subtitle')}</p>

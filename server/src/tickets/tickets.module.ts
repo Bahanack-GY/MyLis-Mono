@@ -13,7 +13,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
     imports: [SequelizeModule.forFeature([Ticket, Task, Employee, Department]), TasksModule, NotificationsModule],
-    controllers: [TicketsController, TicketsSseController],
+    controllers: [TicketsSseController, TicketsController],
     providers: [TicketsService],
     exports: [TicketsService],
 })

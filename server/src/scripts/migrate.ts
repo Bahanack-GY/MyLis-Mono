@@ -158,7 +158,43 @@ async function migrate() {
         await sequelize.authenticate();
         console.log('\n✓ Database connection established.\n');
 
-        console.log('Running ALTER sync — adding missing tables & columns...\n');
+        // Pre-create tables that other models reference via FK but may not exist yet.
+        // sync({ alter: true }) processes models in declaration order, so a FK to a
+        // not-yet-created table causes "relation does not exist". Creating stubs first
+        // ensures all parent tables exist before any FK is added.
+        console.log('Pass 1 — pre-creating missing parent tables...\n');
+        const stubTables = [
+            '"leads"',
+            '"lead_activities"',
+            '"EmployeeTransferHistories"',
+            '"Subtasks"',
+            '"task_attachments"',
+            '"fiscal_years"',
+            '"account_categories"',
+            '"accounts"',
+            '"journals"',
+            '"journal_entries"',
+            '"journal_entry_lines"',
+            '"tax_configs"',
+            '"payroll_runs"',
+            '"payslips"',
+            '"tax_declarations"',
+            '"credit_notes"',
+            '"budgets"',
+            '"deduction_types"',
+            '"client_payments"',
+            '"commercial_goals"',
+            '"BusinessExpenseTypes"',
+            '"business_expenses"',
+            '"Reports"',
+        ];
+        for (const table of stubTables) {
+            await sequelize.query(
+                `CREATE TABLE IF NOT EXISTS ${table} ("id" UUID NOT NULL DEFAULT gen_random_uuid(), PRIMARY KEY ("id"))`,
+            );
+        }
+
+        console.log('Pass 2 — altering all tables to match current models...\n');
         await sequelize.sync({ alter: true });
 
         console.log('\n✓ Migration complete — schema is now in sync with all models.\n');

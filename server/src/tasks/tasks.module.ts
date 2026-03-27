@@ -22,7 +22,7 @@ import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
     imports: [SequelizeModule.forFeature([Task, Subtask, Employee, Team, Project, Ticket, Department, TaskHistory, TaskNature, Lead, TaskAttachment]), NotificationsModule, GamificationModule],
-    controllers: [EmployeeTasksController, TasksController, TasksSseController],
+    controllers: [EmployeeTasksController, TasksSseController, TasksController],
     providers: [TasksService, TaskRemindersService],
     exports: [TasksService],
 })

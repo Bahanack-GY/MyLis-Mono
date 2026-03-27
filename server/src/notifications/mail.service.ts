@@ -111,7 +111,7 @@ export class MailService {
                 <tr>
                   <td style="padding:28px 40px 24px;" align="center">
                     <img
-                      src="https://admin.mylisapp.online/Logo.png"
+                      src="https://mylisapp.online/Logo.png"
                       alt="MyLIS"
                       width="120"
                       style="display:block;height:auto;max-width:120px;"

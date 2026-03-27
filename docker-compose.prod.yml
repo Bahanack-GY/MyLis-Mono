@@ -17,7 +17,7 @@ services:
   server:
     build:
       context: ./server
-      target: development
+      target: production
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -25,6 +25,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
+      NODE_ENV: production
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USERNAME: ${POSTGRES_USER:-postgres}
@@ -33,38 +34,35 @@ services:
       JWT_SECRET: ${JWT_SECRET:-mylis-very-sec-key}
       PORT: 3025
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:7b}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3:14b}
       WHISPER_URL: ${WHISPER_URL:-http://whisper:9001}
+      SMTP_HOST: ${SMTP_HOST:-ssl0.ovh.net}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-mychurch@lis.cm}
+      SMTP_PASS: ${SMTP_PASS:-L1sm0negli5e}
     volumes:
       - ./uploads:/app/uploads
-      - ./server/src:/app/src
     ports:
-      - "${SERVER_PORT:-3025}:3025"
+      - "127.0.0.1:3025:3025"
 
   whisper:
     build:
       context: ./whisper-service
     restart: unless-stopped
     ports:
-      - "9001:9001"
+      - "127.0.0.1:9001:9001"
     environment:
       WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
 
   ui:
     build:
       context: ./UI
-      target: development
+      target: production
     restart: unless-stopped
     depends_on:
       - server
-    environment:
-      - UI_PORT=${UI_PORT:-8080}
-    volumes:
-      - ./UI/src:/app/src
-      - ./UI/index.html:/app/index.html
-      - ./UI/vite.config.ts:/app/vite.config.ts
     ports:
-      - "${UI_PORT:-8080}:5173"
+      - "127.0.0.1:8080:80"
 
 volumes:
   pgdata:
