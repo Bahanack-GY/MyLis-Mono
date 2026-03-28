@@ -44,7 +44,7 @@ export interface Task {
     assignedToId: string;
     assignedToTeamId: string;
     projectId: string;
-    assignedTo?: { id: string; firstName: string; lastName: string; avatarUrl: string };
+    assignedTo?: { id: string; firstName: string; lastName: string; avatarUrl: string; departmentId?: string };
     assignedToTeam?: { id: string; name: string };
     project?: { id: string; name: string };
     natureId?: string;

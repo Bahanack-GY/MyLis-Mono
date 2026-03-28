@@ -22,8 +22,24 @@ export class EmployeesController {
 
     @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL')
     @Get()
-    findAll(@Query('departmentId') departmentId: string, @Request() req) {
+    findAll(
+        @Query('departmentId') departmentId: string,
+        @Query('search') search: string,
+        @Query('page') page: string,
+        @Query('limit') limit: string,
+        @Query('dismissed') dismissed: string,
+        @Request() req,
+    ) {
         const deptId = req.user.role === 'HEAD_OF_DEPARTMENT' ? req.user.departmentId : departmentId;
+        if (page && limit) {
+            return this.employeesService.findAllPaginated({
+                departmentId: deptId,
+                search,
+                dismissed: dismissed === 'true',
+                page: parseInt(page, 10),
+                limit: parseInt(limit, 10),
+            });
+        }
         return this.employeesService.findAll(deptId);
     }
 

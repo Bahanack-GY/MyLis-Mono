@@ -13,6 +13,12 @@ export const departmentsApi = {
 
     update: (id: string, dto: UpdateDepartmentDto) =>
         api.patch<Department>(`/organization/departments/${id}`, dto).then(r => r.data),
+
+    getPaginated: (params: { search?: string; page: number; limit: number }) => {
+        const p: Record<string, string | number> = { page: params.page, limit: params.limit };
+        if (params.search) p.search = params.search;
+        return api.get<{ rows: Department[]; count: number }>('/organization/departments', { params: p }).then(r => r.data);
+    },
 };
 
 export const departmentGoalsApi = {

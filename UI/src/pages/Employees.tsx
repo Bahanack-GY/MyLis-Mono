@@ -34,7 +34,7 @@ import {
     List,
     ArrowUpRight,
 } from 'lucide-react';
-import { useEmployees, useCreateEmployee, useLeaderboard } from '../api/employees/hooks';
+import { useInfiniteEmployees, useCreateEmployee, useLeaderboard } from '../api/employees/hooks';
 import { EmployeesSkeleton } from '../components/Skeleton';
 import { useDepartmentScope, useAuth } from '../contexts/AuthContext';
 import { useDepartments } from '../api/departments/hooks';
@@ -796,17 +796,58 @@ const Employees = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [selectedDepartment, setSelectedDepartment] = useState('');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showDismissed, setShowDismissed] = useState(false);
     const deptScope = useDepartmentScope();
     const { role, departmentId } = useAuth();
-    const { data: apiEmployees, isLoading } = useEmployees(deptScope);
     const { data: apiDepartments } = useDepartments();
     const { data: leaderboard } = useLeaderboard();
 
-    const allEmployees = (apiEmployees || []).map((emp, i) => ({
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+        return () => clearTimeout(t);
+    }, [searchQuery]);
+
+    const queryParams = {
+        departmentId: deptScope || selectedDepartment || undefined,
+        search: debouncedSearch || undefined,
+    };
+    const activeQuery = useInfiniteEmployees(queryParams);
+    const dismissedQuery = useInfiniteEmployees({ ...queryParams, dismissed: true });
+
+    const activeSentinelRef = useRef<HTMLDivElement>(null);
+    const dismissedSentinelRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const el = activeSentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && activeQuery.hasNextPage && !activeQuery.isFetchingNextPage) {
+                activeQuery.fetchNextPage();
+            }
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [activeQuery.hasNextPage, activeQuery.isFetchingNextPage, activeQuery.fetchNextPage]);
+
+    useEffect(() => {
+        const el = dismissedSentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && dismissedQuery.hasNextPage && !dismissedQuery.isFetchingNextPage) {
+                dismissedQuery.fetchNextPage();
+            }
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [dismissedQuery.hasNextPage, dismissedQuery.isFetchingNextPage, dismissedQuery.fetchNextPage]);
+
+    const isLoading = activeQuery.isPending;
+
+    const mapEmp = (emp: any, i: number, dismissed: boolean) => ({
         id: emp.id,
         name: `${emp.firstName} ${emp.lastName}`,
         role: emp.position?.title || '—',
@@ -814,17 +855,11 @@ const Employees = () => {
         departmentName: emp.department?.name || '',
         avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=33cbcc&color=fff`,
         color: i % 2 === 0 ? '#33cbcc' : '#283852',
-        dismissed: emp.dismissed || false,
-    }));
+        dismissed,
+    });
 
-    const filterFn = (emp: typeof allEmployees[0]) => {
-        const matchesSearch = !searchQuery || emp.name.toLowerCase().includes(searchQuery.toLowerCase()) || emp.role.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesDept = !selectedDepartment || emp.departmentId === selectedDepartment;
-        return matchesSearch && matchesDept;
-    };
-
-    const employees = allEmployees.filter(emp => !emp.dismissed && filterFn(emp));
-    const dismissedEmployees = allEmployees.filter(emp => emp.dismissed && filterFn(emp));
+    const employees = (activeQuery.data?.pages.flatMap(p => p.rows) || []).map((emp, i) => mapEmp(emp, i, false));
+    const dismissedEmployees = (dismissedQuery.data?.pages.flatMap(p => p.rows) || []).map((emp, i) => mapEmp(emp, i, true));
 
     return (
         <div className="space-y-8 ">
@@ -1043,8 +1078,16 @@ const Employees = () => {
                 </div>
             )}
 
+            {/* Active employees scroll sentinel */}
+            <div ref={activeSentinelRef} className="h-1" />
+            {activeQuery.isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                    <Loader2 size={20} className="animate-spin text-[#33cbcc]" />
+                </div>
+            )}
+
             {/* Dismissed Employees Section */}
-            {dismissedEmployees.length > 0 && (
+            {(dismissedEmployees.length > 0 || (dismissedQuery.data?.pages[0]?.count ?? 0) > 0) && (
                 <div>
                     <button
                         onClick={() => setShowDismissed(v => !v)}
@@ -1054,7 +1097,7 @@ const Employees = () => {
                             <UserPlus size={15} className="rotate-45" />
                             {t('employees.dismissed', 'Dismissed / Suspended')}
                             <span className="bg-red-100 text-red-500 px-2 py-0.5 rounded-full text-xs font-bold">
-                                {dismissedEmployees.length}
+                                {dismissedQuery.data?.pages[0]?.count ?? dismissedEmployees.length}
                             </span>
                             <motion.span
                                 animate={{ rotate: showDismissed ? 180 : 0 }}
@@ -1128,6 +1171,12 @@ const Employees = () => {
                                                 <ArrowUpRight size={16} className="text-gray-300 group-hover:text-red-400 transition-colors shrink-0" />
                                             </motion.div>
                                         ))}
+                                    </div>
+                                )}
+                                <div ref={dismissedSentinelRef} className="h-1" />
+                                {dismissedQuery.isFetchingNextPage && (
+                                    <div className="flex justify-center py-4">
+                                        <Loader2 size={20} className="animate-spin text-red-400" />
                                     </div>
                                 )}
                             </motion.div>

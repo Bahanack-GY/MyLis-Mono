@@ -360,6 +360,8 @@ const DragOverlayCard = ({ task }: { task: MappedTask }) => (
 
 /* ─── Kanban Column (Droppable) ──────────────────────────── */
 
+const PAGE_SIZE = 10;
+
 const KanbanColumn = ({
     status,
     tasks,
@@ -380,6 +382,32 @@ const KanbanColumn = ({
     const { t } = useTranslation();
     const { setNodeRef } = useDroppable({ id: status });
     const col = COLUMN_COLORS[status];
+    const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+    const sentinelRef = useRef<HTMLDivElement>(null);
+
+    // Reset when tasks list changes (filter/search applied)
+    useEffect(() => {
+        setVisibleCount(PAGE_SIZE);
+    }, [tasks]);
+
+    // Intersection observer to load more on scroll
+    useEffect(() => {
+        const sentinel = sentinelRef.current;
+        if (!sentinel) return;
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting) {
+                    setVisibleCount((c) => Math.min(c + PAGE_SIZE, tasks.length));
+                }
+            },
+            { threshold: 0.1 },
+        );
+        observer.observe(sentinel);
+        return () => observer.disconnect();
+    }, [tasks.length]);
+
+    const visibleTasks = tasks.slice(0, visibleCount);
+    const hasMore = visibleCount < tasks.length;
 
     const statusIcons: Record<MappedStatus, React.ReactNode> = {
         todo: <ClipboardList size={16} />,
@@ -418,14 +446,21 @@ const KanbanColumn = ({
                         <span>{t('tasks.kanban.emptyColumn')}</span>
                     </div>
                 ) : (
-                    tasks.map((task) => (
-                        <KanbanCard
-                            key={task.id}
-                            task={task}
-                            onClick={() => onTaskClick(task)}
-                            onEdit={onEditTask ? () => onEditTask(task) : undefined}
-                        />
-                    ))
+                    <>
+                        {visibleTasks.map((task) => (
+                            <KanbanCard
+                                key={task.id}
+                                task={task}
+                                onClick={() => onTaskClick(task)}
+                                onEdit={onEditTask ? () => onEditTask(task) : undefined}
+                            />
+                        ))}
+                        {hasMore && (
+                            <div ref={sentinelRef} className="flex items-center justify-center py-3">
+                                <Loader2 size={16} className="animate-spin text-gray-300" />
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>
@@ -434,10 +469,10 @@ const KanbanColumn = ({
 
 /* ─── Subtasks Section ───────────────────────────────────── */
 
-const SubtasksSection = ({ task }: { task: MappedTask }) => {
+const SubtasksSection = ({ task, onAllCompleted }: { task: MappedTask; onAllCompleted?: () => void }) => {
     const { t } = useTranslation();
     const createSubtask = useCreateSubtask();
-    const toggleSubtask = useToggleSubtask();
+    const toggleSubtask = useToggleSubtask(onAllCompleted);
     const deleteSubtask = useDeleteSubtask();
     const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
 
@@ -587,6 +622,7 @@ const TaskDetailModal = ({
     const [showBlockForm, setShowBlockForm] = useState(false);
     const [blockReason, setBlockReason] = useState('');
     const [blockError, setBlockError] = useState(false);
+    const [showCompletePrompt, setShowCompletePrompt] = useState(false);
     const totalTimeMs = task.startedAt && task.completedAt
         ? new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime()
         : null;
@@ -658,7 +694,7 @@ const TaskDetailModal = ({
                         <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
-                                <h3 className="text-lg font-bold text-gray-800 truncate">{task.title}</h3>
+                                <h3 className="text-lg font-bold text-gray-800 break-words">{task.title}</h3>
                                 {task.urgent && (
                                     <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">
                                         <AlertTriangle size={10} />
@@ -789,7 +825,56 @@ const TaskDetailModal = ({
                     )}
 
                     {/* Subtasks section */}
-                    <SubtasksSection task={task} />
+                    <SubtasksSection
+                        task={task}
+                        onAllCompleted={task.status !== 'done' ? () => setShowCompletePrompt(true) : undefined}
+                    />
+
+                    {/* Complete task prompt */}
+                    {showCompletePrompt && task.status !== 'done' && (
+                        <div className="flex items-center gap-3 bg-[#33cbcc]/8 border border-[#33cbcc]/30 rounded-xl p-3">
+                            <CheckCircle size={16} className="text-[#33cbcc] shrink-0" />
+                            <p className="text-sm text-gray-700 flex-1">{t('subtasks.allDonePrompt', 'All subtasks done! Mark task as complete?')}</p>
+                            <div className="flex gap-2 shrink-0">
+                                <button
+                                    onClick={() => setShowCompletePrompt(false)}
+                                    className="px-3 py-1 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors"
+                                >
+                                    {t('subtasks.later', 'Later')}
+                                </button>
+                                <button
+                                    disabled={isUpdating}
+                                    onClick={() => { setShowCompletePrompt(false); onUpdateState(task.id, 'COMPLETED'); }}
+                                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-[#33cbcc] text-white hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors"
+                                >
+                                    {isUpdating ? <Loader2 size={12} className="animate-spin" /> : t('subtasks.complete', 'Complete')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Complete task prompt */}
+                    {showCompletePrompt && task.status !== 'done' && (
+                        <div className="flex items-center gap-3 bg-[#33cbcc]/8 border border-[#33cbcc]/30 rounded-xl p-3">
+                            <CheckCircle size={16} className="text-[#33cbcc] shrink-0" />
+                            <p className="text-sm text-gray-700 flex-1">{t('subtasks.allDonePrompt', 'All subtasks done! Mark task as complete?')}</p>
+                            <div className="flex gap-2 shrink-0">
+                                <button
+                                    onClick={() => setShowCompletePrompt(false)}
+                                    className="px-3 py-1 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors"
+                                >
+                                    {t('subtasks.later', 'Later')}
+                                </button>
+                                <button
+                                    disabled={isUpdating}
+                                    onClick={() => { setShowCompletePrompt(false); onUpdateState(task.id, 'COMPLETED'); }}
+                                    className="px-3 py-1 rounded-lg text-xs font-semibold bg-[#33cbcc] text-white hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors"
+                                >
+                                    {isUpdating ? <Loader2 size={12} className="animate-spin" /> : t('subtasks.complete', 'Complete')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Attachments */}
                     {task.attachments && task.attachments.length > 0 && (
@@ -1514,7 +1599,7 @@ const Tasks = () => {
     const [showSelfAssign, setShowSelfAssign] = useState(false);
     const [showComplianceBlock, setShowComplianceBlock] = useState(false);
     const [compliancePendingTasks, setCompliancePendingTasks] = useState<Task[]>([]);
-    const [selectedTask, setSelectedTask] = useState<MappedTask | null>(null);
+    const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
     const [activeDragTask, setActiveDragTask] = useState<MappedTask | null>(null);
     const [overColumnId, setOverColumnId] = useState<MappedStatus | null>(null);
     const [gamificationData, setGamificationData] = useState<GamificationResult | null>(null);
@@ -1566,6 +1651,9 @@ const Tasks = () => {
         [apiTasks],
     );
 
+    /* ── Selected task (live — always reflects latest cache) ── */
+    const selectedTask = selectedTaskId ? (tasks.find(t => t.id === selectedTaskId) ?? null) : null;
+
     /* ── Filtering (search + date) ── */
     const filteredTasks = useMemo(() =>
         tasks.filter((task) => {
@@ -1600,7 +1688,7 @@ const Tasks = () => {
         const task = event.active.data.current?.task as MappedTask | undefined;
         if (task) {
             setActiveDragTask(task);
-            setSelectedTask(null);
+            setSelectedTaskId(null);
         }
     }, []);
 
@@ -1844,7 +1932,7 @@ const Tasks = () => {
                             isOver={overColumnId === status}
                             canDrop={activeDragTask ? (canTransition(activeDragTask.status, status) || (activeDragTask.state === 'BLOCKED' && status === 'in_progress')) : false}
                             isDragging={!!activeDragTask}
-                            onTaskClick={(task) => setSelectedTask(task)}
+                            onTaskClick={(task) => setSelectedTaskId(task.id)}
                             onEditTask={(task) => task.selfAssigned && task.status !== 'done' ? setEditingTask(task) : undefined}
                         />
                     ))}
@@ -1860,14 +1948,14 @@ const Tasks = () => {
                 {selectedTask && (
                     <TaskDetailModal
                         task={selectedTask}
-                        onClose={() => setSelectedTask(null)}
+                        onClose={() => setSelectedTaskId(null)}
                         isUpdating={updateTaskState.isPending}
                         onUpdateState={(taskId, state) => {
                             updateTaskState.mutate(
                                 { taskId, state },
                                 {
                                     onSuccess: (data) => {
-                                        setSelectedTask(null);
+                                        setSelectedTaskId(null);
                                         if (data.gamification) {
                                             setGamificationData(data.gamification);
                                             setShowPointsModal(true);
@@ -1879,7 +1967,7 @@ const Tasks = () => {
                         onBlockTask={(taskId, reason) => {
                             updateTaskState.mutate(
                                 { taskId, state: 'BLOCKED', blockReason: reason },
-                                { onSuccess: () => setSelectedTask(null) },
+                                { onSuccess: () => setSelectedTaskId(null) },
                             );
                         }}
                         onEdit={selectedTask.selfAssigned && selectedTask.status !== 'done' ? () => setEditingTask(selectedTask) : undefined}

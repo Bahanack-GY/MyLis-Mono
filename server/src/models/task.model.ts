@@ -17,6 +17,7 @@ import { TaskAttachment } from './task-attachment.model';
         { fields: ['ticketId'] },
         { fields: ['leadId'] },
         { fields: ['state'] },
+        { fields: ['createdAt'] },
     ],
 })
 export class Task extends Model {

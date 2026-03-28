@@ -896,7 +896,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                         <span className="text-sm text-gray-400 ml-2">{t('employeeDetail.progress.avgActivity')}</span>
                     </div>
                     <div className="h-[180px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={weeklyData} barCategoryGap="30%">
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} />
                                 <YAxis hide />
@@ -923,7 +923,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                         <span className="text-xs text-gray-400 ml-1">{t('employeeDetail.productivity.vsLastMonth')}</span>
                     </div>
                     <div className="h-[200px]">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <AreaChart data={productivityData}>
                                 <defs>
                                     <linearGradient id={`prodGradient-${employee.id}`} x1="0" y1="0" x2="0" y2="1">
@@ -981,7 +981,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                         <h3 className="font-semibold text-gray-800 text-sm mb-0.5">{t('employeeDetail.tasks.timeDistribution')}</h3>
                         <p className="text-[11px] text-gray-400 mb-4">{t('employeeDetail.tasks.timeDistributionDesc')}</p>
                         <div className="relative w-full h-[180px] mb-4">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                 <PieChart>
                                     <Pie
                                         data={timeDistribution}
@@ -1529,7 +1529,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                     <p className="text-xs text-gray-400 mb-4">{t('employeeDetail.tasks.timeDistributionDesc')}</p>
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="relative w-[200px] h-[200px] shrink-0">
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                 <PieChart>
                                     <Pie
                                         data={timeDistribution}

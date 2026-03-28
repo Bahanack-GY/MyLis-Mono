@@ -21,11 +21,25 @@ export class ClientsController {
     }
 
     @Get()
-    findAll(@Query('departmentId') departmentId: string, @Request() req): Promise<Client[]> {
+    findAll(
+        @Query('departmentId') departmentId: string,
+        @Query('search') search: string,
+        @Query('type') type: string,
+        @Query('page') page: string,
+        @Query('limit') limit: string,
+        @Request() req,
+    ) {
         const deptId = req.user.role === 'HEAD_OF_DEPARTMENT' ? req.user.departmentId : departmentId;
-        if (deptId) {
-            return this.clientsService.findByDepartment(deptId);
+        if (page && limit) {
+            return this.clientsService.findAllPaginated({
+                departmentId: deptId,
+                search,
+                type,
+                page: parseInt(page, 10),
+                limit: parseInt(limit, 10),
+            });
         }
+        if (deptId) return this.clientsService.findByDepartment(deptId);
         return this.clientsService.findAll();
     }
 

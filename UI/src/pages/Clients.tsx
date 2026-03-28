@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,7 +19,7 @@ import {
     Edit3,
     TrendingUp
 } from 'lucide-react';
-import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '../api/clients/hooks';
+import { useInfiniteClients, useCreateClient, useUpdateClient, useDeleteClient } from '../api/clients/hooks';
 import { ClientsSkeleton } from '../components/Skeleton';
 import { useInvoices } from '../api/invoices/hooks';
 import { useDepartments } from '../api/departments/hooks';
@@ -238,19 +238,42 @@ const Clients = () => {
     const isManager = role === 'MANAGER';
 
     const [searchQuery, setSearchQuery] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [filterType, setFilterType] = useState<'all' | 'one_time' | 'subscription'>('all');
     const [filterDepartment, setFilterDepartment] = useState('');
     const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [editingClient, setEditingClient] = useState<Client | null>(null);
 
-    const { data: apiClients, isLoading } = useClients(deptScope);
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedSearch(searchQuery), 300);
+        return () => clearTimeout(t);
+    }, [searchQuery]);
+
+    const clientsQuery = useInfiniteClients({
+        departmentId: deptScope || filterDepartment || undefined,
+        search: debouncedSearch || undefined,
+    });
     const { data: apiInvoices } = useInvoices(deptScope);
     const { data: departments } = useDepartments();
     const deleteClient = useDeleteClient();
 
-    const clients: Client[] = apiClients || [];
+    const isLoading = clientsQuery.isPending;
+    const clients: Client[] = clientsQuery.data?.pages.flatMap(p => p.rows) || [];
     const invoices = apiInvoices || [];
+
+    const sentinelRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && clientsQuery.hasNextPage && !clientsQuery.isFetchingNextPage) {
+                clientsQuery.fetchNextPage();
+            }
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [clientsQuery.hasNextPage, clientsQuery.isFetchingNextPage, clientsQuery.fetchNextPage]);
 
     /* Client revenue map */
     const clientRevenue = useMemo(() => {
@@ -291,14 +314,10 @@ const Clients = () => {
         return <ClientsSkeleton />;
     }
 
-    /* Filters */
-    const filteredClients = clients.filter(c => {
-        const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (c.projectDescription || '').toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesType = filterType === 'all' || c.type === filterType;
-        const matchesDept = !filterDepartment || c.departmentId === filterDepartment;
-        return matchesSearch && matchesType && matchesDept;
-    });
+    /* Filters — search & dept are server-side; type is client-side */
+    const filteredClients = filterType === 'all'
+        ? clients
+        : clients.filter(c => c.type === filterType);
 
     /* Stats */
     const subscriptionCount = clients.filter(c => c.type === 'subscription').length;
@@ -395,7 +414,7 @@ const Clients = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('clients.charts.byType')}</h3>
                     <div className="h-64 relative">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <PieChart>
                                 <Pie
                                     data={typeChartData}
@@ -440,7 +459,7 @@ const Clients = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('clients.charts.revenueActivity')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <AreaChart data={activityData}>
                                 <defs>
                                     <linearGradient id="colorClientRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -682,8 +701,16 @@ const Clients = () => {
                 </div>
             )}
 
+            {/* ── Scroll sentinel ── */}
+            <div ref={sentinelRef} className="h-1" />
+            {clientsQuery.isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                    <Loader2 size={20} className="animate-spin text-[#33cbcc]" />
+                </div>
+            )}
+
             {/* ── Empty State ── */}
-            {filteredClients.length === 0 && (
+            {filteredClients.length === 0 && !isLoading && (
                 <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
                     <UserCircle size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-400 font-medium">{t('clients.noResults')}</p>

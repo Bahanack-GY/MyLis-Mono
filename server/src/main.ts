@@ -6,6 +6,8 @@ import { WinstonModule, utilities as nestWinstonUtilities } from 'nest-winston';
 import * as winston from 'winston';
 import { join } from 'path';
 import { Request, Response, NextFunction } from 'express';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const compression = require('compression');
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
@@ -25,13 +27,18 @@ async function bootstrap() {
     }),
   });
 
+  app.use(compression());
+
   // JSON limit for normal API payloads; file uploads use multipart (no body parser needed)
   app.useBodyParser('json', { limit: '10mb' });
   app.useBodyParser('urlencoded', { limit: '10mb', extended: true });
 
   app.enableCors({
-    origin: true,
+    origin: ['https://mylisapp.online', 'https://www.mylisapp.online'],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    maxAge: 86400, // cache preflight for 24 hours
   });
 
   // Serve uploaded files statically with CORS headers

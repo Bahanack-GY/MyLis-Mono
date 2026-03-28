@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { tasksApi } from './api';
 import type { CreateTaskDto, UpdateTaskDto, SelfAssignTaskDto, Task, TaskState } from './types';
 import { toast } from 'sonner';
@@ -19,13 +19,30 @@ export const taskKeys = {
     allWeek: (start: string) => ['tasks', 'all-week', start] as const,
 };
 
-export const useTasks = (departmentId?: string, from?: string, to?: string) => {
+export const useTasks = (departmentId?: string, from?: string, to?: string, enabled = true) => {
     useSSE('/tasks/sse', [taskKeys.all, taskKeys.myTasks]);
     return useQuery({
         queryKey: [...taskKeys.all, departmentId, from, to].filter(Boolean),
         queryFn: () => tasksApi.getAll(departmentId, from, to),
+        enabled,
     });
 };
+
+export const useInfiniteTasksByStates = (
+    states: string[],
+    filters: { departmentId?: string; employeeId?: string; boardFrom?: string; boardTo?: string },
+    enabled = true,
+) => useInfiniteQuery({
+    queryKey: ['tasks', 'board', states.join(','), filters],
+    queryFn: ({ pageParam }) =>
+        tasksApi.getPaginated({ states, page: pageParam as number, limit: 10, ...filters }),
+    getNextPageParam: (lastPage, allPages) => {
+        const loaded = allPages.reduce((sum, p) => sum + p.rows.length, 0);
+        return loaded < lastPage.count ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
+    enabled: enabled && !!filters.boardFrom && !!filters.boardTo,
+});
 
 export const useTask = (id: string) =>
     useQuery({
@@ -192,12 +209,26 @@ export const useCreateSubtask = () => {
     return useMutation({
         mutationFn: ({ taskId, title }: { taskId: string; title: string }) =>
             tasksApi.createSubtask(taskId, title),
-        onSuccess: (_, { taskId }) => {
-            qc.invalidateQueries({ queryKey: taskKeys.all });
+        onMutate: async ({ taskId, title }) => {
+            await qc.cancelQueries({ queryKey: taskKeys.myTasks });
+            const previous = qc.getQueryData<Task[]>(taskKeys.myTasks);
+            const tempSubtask = { id: `temp-${Date.now()}`, taskId, title, completed: false, completedAt: null, order: 9999 };
+            qc.setQueryData<Task[]>(taskKeys.myTasks, old =>
+                old?.map(t => t.id === taskId
+                    ? { ...t, subtasks: [...(t.subtasks || []), tempSubtask] }
+                    : t
+                )
+            );
+            return { previous };
+        },
+        onError: (_err, _vars, context) => {
+            toast.error(i18n.t('toast.error'));
+            if (context?.previous) qc.setQueryData(taskKeys.myTasks, context.previous);
+        },
+        onSettled: (_, _err, { taskId }) => {
             qc.invalidateQueries({ queryKey: taskKeys.myTasks });
             qc.invalidateQueries({ queryKey: taskKeys.detail(taskId) });
         },
-        onError: () => toast.error(i18n.t('toast.error')),
     });
 };
 
@@ -218,23 +249,67 @@ export const useDeleteSubtask = () => {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: (id: string) => tasksApi.deleteSubtask(id),
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: taskKeys.all });
+        onMutate: async (id) => {
+            await qc.cancelQueries({ queryKey: taskKeys.myTasks });
+            const previous = qc.getQueryData<Task[]>(taskKeys.myTasks);
+            qc.setQueryData<Task[]>(taskKeys.myTasks, old =>
+                old?.map(t => ({
+                    ...t,
+                    subtasks: (t.subtasks || []).filter(s => s.id !== id),
+                }))
+            );
+            return { previous };
+        },
+        onError: (_err, _vars, context) => {
+            toast.error(i18n.t('toast.error'));
+            if (context?.previous) qc.setQueryData(taskKeys.myTasks, context.previous);
+        },
+        onSettled: () => {
             qc.invalidateQueries({ queryKey: taskKeys.myTasks });
         },
-        onError: () => toast.error(i18n.t('toast.error')),
     });
 };
 
-export const useToggleSubtask = () => {
+export const useToggleSubtask = (onAllCompleted?: () => void) => {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: (id: string) => tasksApi.toggleSubtask(id),
-        onSuccess: () => {
-            qc.invalidateQueries({ queryKey: taskKeys.all });
+        onMutate: async (id) => {
+            await qc.cancelQueries({ queryKey: taskKeys.myTasks });
+            const previous = qc.getQueryData<Task[]>(taskKeys.myTasks);
+            qc.setQueryData<Task[]>(taskKeys.myTasks, old =>
+                old?.map(t => {
+                    const subtask = (t.subtasks || []).find(s => s.id === id);
+                    if (!subtask) return t;
+                    const nowCompleted = !subtask.completed;
+                    // If completing and task hasn't started, optimistically move it to IN_PROGRESS
+                    const newState = nowCompleted && (t.state === 'CREATED' || t.state === 'ASSIGNED') ? 'IN_PROGRESS' : t.state;
+                    return {
+                        ...t,
+                        state: newState as TaskState,
+                        subtasks: (t.subtasks || []).map(s =>
+                            s.id === id ? { ...s, completed: nowCompleted, completedAt: nowCompleted ? new Date().toISOString() : null } : s
+                        ),
+                    };
+                })
+            );
+            return { previous };
+        },
+        onSuccess: (data) => {
+            if (data.pointsEarned > 0) {
+                toast.success(`+${data.pointsEarned} point`, { icon: '⭐' });
+            }
+            if (data.allCompleted && onAllCompleted) {
+                onAllCompleted();
+            }
+        },
+        onError: (_err, _vars, context) => {
+            toast.error(i18n.t('toast.error'));
+            if (context?.previous) qc.setQueryData(taskKeys.myTasks, context.previous);
+        },
+        onSettled: () => {
             qc.invalidateQueries({ queryKey: taskKeys.myTasks });
         },
-        onError: () => toast.error(i18n.t('toast.error')),
     });
 };
 

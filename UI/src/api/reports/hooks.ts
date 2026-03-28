@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { reportsApi } from './api';
 import type { GenerateReportDto } from './types';
 import { toast } from 'sonner';
@@ -15,6 +15,18 @@ export const useReports = () =>
         queryKey: reportKeys.all,
         queryFn: reportsApi.getAll,
         refetchInterval: 5000, // poll to pick up GENERATING -> COMPLETED transitions
+    });
+
+export const useInfiniteReports = () =>
+    useInfiniteQuery({
+        queryKey: ['reports', 'infinite'],
+        queryFn: ({ pageParam }) => reportsApi.getPaginated({ page: pageParam as number, limit: 20 }),
+        getNextPageParam: (lastPage, allPages) => {
+            const loaded = allPages.reduce((s, p) => s + p.rows.length, 0);
+            return loaded < lastPage.count ? allPages.length + 1 : undefined;
+        },
+        initialPageParam: 1,
+        refetchInterval: 5000,
     });
 
 export const useReport = (id: string) =>

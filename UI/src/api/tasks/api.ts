@@ -61,6 +61,27 @@ export const tasksApi = {
     transferTask: (taskId: string, targetWeekStart: string) =>
         api.post<Task>(`/tasks/transfer/${taskId}`, { targetWeekStart }).then(r => r.data),
 
+    getPaginated: (params: {
+        states: string[];
+        page: number;
+        limit: number;
+        departmentId?: string;
+        employeeId?: string;
+        boardFrom?: string;
+        boardTo?: string;
+    }) => {
+        const p: Record<string, string | number> = {
+            states: params.states.join(','),
+            page: params.page,
+            limit: params.limit,
+        };
+        if (params.departmentId) p.departmentId = params.departmentId;
+        if (params.employeeId) p.employeeId = params.employeeId;
+        if (params.boardFrom) p.boardFrom = params.boardFrom;
+        if (params.boardTo) p.boardTo = params.boardTo;
+        return api.get<{ rows: Task[]; count: number }>('/tasks', { params: p }).then(r => r.data);
+    },
+
     // Subtasks
     createSubtask: (taskId: string, title: string) =>
         api.post<Subtask>(`/tasks/${taskId}/subtasks`, { title }).then(r => r.data),
@@ -75,7 +96,7 @@ export const tasksApi = {
         api.delete(`/tasks/subtasks/${id}`).then(r => r.data),
 
     toggleSubtask: (id: string) =>
-        api.patch<Subtask>(`/tasks/subtasks/${id}/toggle`).then(r => r.data),
+        api.patch<{ subtask: Subtask; pointsEarned: number; totalPoints: number; allCompleted: boolean; taskStarted: boolean }>(`/tasks/subtasks/${id}/toggle`).then(r => r.data),
 
     reorderSubtasks: (taskId: string, subtaskIds: string[]) =>
         api.patch(`/tasks/${taskId}/subtasks/reorder`, { subtaskIds }).then(r => r.data),

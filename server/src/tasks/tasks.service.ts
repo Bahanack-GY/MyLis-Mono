@@ -144,10 +144,86 @@ export class TasksService {
             if (from) where.createdAt[Op.gte] = new Date(from);
             if (to) where.createdAt[Op.lte] = new Date(to);
         }
+        const baseInclude: any[] = [
+            { model: Team, as: 'assignedToTeam', attributes: ['id', 'name'] },
+            { model: Project, attributes: ['id', 'name'] },
+            { model: TaskNature, attributes: ['id', 'name', 'color'] },
+            { model: Lead, attributes: ['id', 'code', 'company'] },
+            {
+                model: Subtask, as: 'subtasks',
+                attributes: ['id', 'taskId', 'title', 'completed', 'completedAt', 'order'],
+            },
+        ];
         const include: any[] = departmentId
-            ? [{ model: Employee, as: 'assignedTo', where: { departmentId }, required: true }, { model: Team, as: 'assignedToTeam' }, Project, TaskNature, { model: Lead, attributes: ['id', 'code', 'company'] }, { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' }]
-            : [{ model: Employee, as: 'assignedTo' }, { model: Team, as: 'assignedToTeam' }, Project, TaskNature, { model: Lead, attributes: ['id', 'code', 'company'] }, { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' }];
+            ? [{ model: Employee, as: 'assignedTo', where: { departmentId }, required: true, attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'departmentId'] }, ...baseInclude]
+            : [{ model: Employee, as: 'assignedTo', attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'departmentId'] }, ...baseInclude];
         return this.taskModel.findAll({ where, include });
+    }
+
+    async findAllPaginated(params: {
+        departmentId?: string;
+        employeeId?: string;
+        states?: string[];
+        boardFrom?: string;
+        boardTo?: string;
+        page: number;
+        limit: number;
+    }): Promise<{ rows: Task[]; count: number }> {
+        const where: any = {};
+
+        if (params.states?.length) {
+            where.state = { [Op.in]: params.states };
+        }
+        if (params.employeeId) {
+            where.assignedToId = params.employeeId;
+        }
+
+        // Date-range overlap: task overlaps [boardFrom, boardTo]
+        // Show task if: (startDate IS NULL OR startDate <= boardTo) AND (endDate IS NULL OR endDate >= boardFrom)
+        const andConditions: any[] = [];
+        if (params.boardTo) {
+            andConditions.push({
+                [Op.or]: [{ startDate: null }, { startDate: { [Op.lte]: new Date(params.boardTo) } }],
+            });
+        }
+        if (params.boardFrom) {
+            andConditions.push({
+                [Op.or]: [{ endDate: null }, { endDate: { [Op.gte]: new Date(params.boardFrom) } }],
+            });
+        }
+        if (andConditions.length) {
+            where[Op.and] = andConditions;
+        }
+
+        const employeeInclude: any = {
+            model: Employee,
+            as: 'assignedTo',
+            attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'departmentId'],
+        };
+        if (params.departmentId) {
+            employeeInclude.where = { departmentId: params.departmentId };
+            employeeInclude.required = true;
+        }
+
+        return this.taskModel.findAndCountAll({
+            where,
+            include: [
+                employeeInclude,
+                { model: Team, as: 'assignedToTeam', attributes: ['id', 'name'] },
+                { model: Project, attributes: ['id', 'name'] },
+                { model: TaskNature, attributes: ['id', 'name', 'color'] },
+                { model: Lead, attributes: ['id', 'code', 'company'] },
+                {
+                    model: Subtask,
+                    as: 'subtasks',
+                    attributes: ['id', 'taskId', 'title', 'completed', 'completedAt', 'order'],
+                },
+            ],
+            limit: params.limit,
+            offset: (params.page - 1) * params.limit,
+            order: [['createdAt', 'DESC']],
+            distinct: true,
+        });
     }
 
     async findOne(id: string): Promise<Task | null> {
@@ -852,16 +928,48 @@ export class TasksService {
         await subtask.destroy();
     }
 
-    async toggleSubtask(id: string): Promise<Subtask> {
+    async toggleSubtask(id: string, userId?: string): Promise<{ subtask: Subtask; pointsEarned: number; totalPoints: number; allCompleted: boolean; taskStarted: boolean }> {
         const subtask = await this.subtaskModel.findByPk(id);
         if (!subtask) {
             throw new NotFoundException('Subtask not found');
         }
 
+        const wasCompleted = subtask.completed;
         subtask.completed = !subtask.completed;
         subtask.completedAt = subtask.completed ? new Date() : null;
         await subtask.save();
-        return subtask;
+
+        let pointsEarned = 0;
+        let totalPoints = 0;
+        let taskStarted = false;
+
+        const taskId = subtask.getDataValue('taskId');
+
+        // If completing a subtask and the task hasn't started yet, transition it to IN_PROGRESS
+        if (!wasCompleted && subtask.completed) {
+            const task = await this.taskModel.findByPk(taskId);
+            if (task && (task.getDataValue('state') === 'CREATED' || task.getDataValue('state') === 'ASSIGNED')) {
+                await task.update({ state: 'IN_PROGRESS', startedAt: new Date() });
+                taskStarted = true;
+            }
+        }
+
+        // Award 1 point when checking a subtask (not when unchecking)
+        if (!wasCompleted && subtask.completed && userId) {
+            const employee = await this.employeeModel.findOne({ where: { userId } });
+            if (employee) {
+                const current = employee.getDataValue('points') || 0;
+                totalPoints = current + 1;
+                await employee.update({ points: totalPoints });
+                pointsEarned = 1;
+            }
+        }
+
+        // Check if all subtasks of the parent task are now completed
+        const allSubtasks = await this.subtaskModel.findAll({ where: { taskId } });
+        const allCompleted = allSubtasks.length > 0 && allSubtasks.every(s => s.getDataValue('completed'));
+
+        return { subtask, pointsEarned, totalPoints, allCompleted, taskStarted };
     }
 
     async reorderSubtasks(taskId: string, subtaskIds: string[]): Promise<void> {

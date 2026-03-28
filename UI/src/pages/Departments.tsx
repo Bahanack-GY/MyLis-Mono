@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,7 +26,7 @@ import {
     LayoutGrid,
     List,
 } from 'lucide-react';
-import { useDepartments, useCreateDepartment, useUpdateDepartment } from '../api/departments/hooks';
+import { useInfiniteDepartments, useCreateDepartment, useUpdateDepartment } from '../api/departments/hooks';
 import { DepartmentsSkeleton } from '../components/Skeleton';
 import { useEmployees } from '../api/employees/hooks';
 import { useInvoices } from '../api/invoices/hooks';
@@ -769,11 +769,26 @@ const Departments = () => {
     const isHOD = role === 'HEAD_OF_DEPARTMENT';
 
     // API data
-    const { data: allDepartments, isLoading } = useDepartments();
+    const departmentsQuery = useInfiniteDepartments();
+    const allDepartments = departmentsQuery.data?.pages.flatMap(p => p.rows);
+    const isLoading = departmentsQuery.isPending;
     const { data: allInvoices } = useInvoices();
     const apiDepartments = isHOD && deptScope
         ? allDepartments?.filter(d => d.id === deptScope)
         : allDepartments;
+
+    const sentinelRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && departmentsQuery.hasNextPage && !departmentsQuery.isFetchingNextPage) {
+                departmentsQuery.fetchNextPage();
+            }
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [departmentsQuery.hasNextPage, departmentsQuery.isFetchingNextPage, departmentsQuery.fetchNextPage]);
 
     // UI config for cycling colors and icons
     const DEPT_COLORS = ['#33cbcc', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#3b82f6'];
@@ -902,7 +917,7 @@ const Departments = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('departments.charts.employeeDistribution')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={barData} barSize={36}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -927,7 +942,7 @@ const Departments = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-4">{t('departments.charts.revenueByDepartment', 'Revenue by Department')}</h3>
                     <div className="h-50 relative">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <PieChart>
                                 <Pie
                                     data={donutData}
@@ -1107,6 +1122,14 @@ const Departments = () => {
                             </div>
                         </motion.div>
                     ))}
+                </div>
+            )}
+
+            {/* Scroll sentinel */}
+            <div ref={sentinelRef} className="h-1" />
+            {departmentsQuery.isFetchingNextPage && (
+                <div className="flex justify-center py-4">
+                    <Loader2 size={20} className="animate-spin text-[#33cbcc]" />
                 </div>
             )}
 

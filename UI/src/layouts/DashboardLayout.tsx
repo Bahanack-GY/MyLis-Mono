@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, PartyPopper, Cake, Sparkles } from 'lucide-react';
+import { X, PartyPopper, Cake, Sparkles, Quote } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import MeetingRecordingPrompt from '../components/MeetingRecordingPrompt';
@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../api/auth/api';
 import { employeesApi, type BirthdayEmployee } from '../api/employees/api';
 import { useBrowserNotifications } from '../hooks/useBrowserNotifications';
+import { getQuoteOfTheDay } from '../data/quotes';
 
 /* -- Welcome Modal ---------------------------------------- */
 
@@ -197,6 +198,106 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
     );
 };
 
+/* -- Quote Modal ------------------------------------------ */
+
+const QUOTE_COUNTDOWN = 10;
+
+const QuoteModal = ({ onClose }: { onClose: () => void }) => {
+    const [seconds, setSeconds] = useState(QUOTE_COUNTDOWN);
+    const quote = getQuoteOfTheDay();
+    const canClose = seconds === 0;
+
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = ''; };
+    }, []);
+
+    useEffect(() => {
+        if (seconds === 0) return;
+        const id = setTimeout(() => setSeconds(s => s - 1), 1000);
+        return () => clearTimeout(id);
+    }, [seconds]);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+        >
+            <motion.div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="quote-modal-title"
+                initial={{ scale: 0.8, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0, y: 20 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden"
+            >
+                <div className="bg-[#283852] px-8 pt-10 pb-8 text-center relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-10" aria-hidden="true">
+                        {[...Array(6)].map((_, i) => (
+                            <Sparkles
+                                key={i}
+                                size={24}
+                                className="absolute text-white animate-pulse"
+                                style={{
+                                    top: `${15 + (i * 15) % 70}%`,
+                                    left: `${10 + (i * 20) % 80}%`,
+                                    animationDelay: `${i * 0.3}s`,
+                                }}
+                            />
+                        ))}
+                    </div>
+                    <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                        className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4"
+                        aria-hidden="true"
+                    >
+                        <Quote size={40} className="text-white" />
+                    </motion.div>
+                    <h2 id="quote-modal-title" className="text-lg font-bold text-white mb-1">
+                        Citation du jour
+                    </h2>
+                    <p className="text-white/70 text-xs">Votre dose quotidienne de motivation</p>
+                </div>
+
+                <div className="px-8 py-6 text-center">
+                    <blockquote className="text-gray-700 text-base leading-relaxed italic mb-4">
+                        "{quote.text}"
+                    </blockquote>
+                    <p className="text-sm font-semibold text-[#283852] mb-6">— {quote.author}</p>
+
+                    {/* Countdown progress bar */}
+                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
+                        <motion.div
+                            className="h-full bg-[#283852] rounded-full"
+                            initial={{ width: '100%' }}
+                            animate={{ width: '0%' }}
+                            transition={{ duration: QUOTE_COUNTDOWN, ease: 'linear' }}
+                        />
+                    </div>
+
+                    <button
+                        onClick={onClose}
+                        disabled={!canClose}
+                        className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
+                            canClose
+                                ? 'bg-[#283852] text-white cursor-pointer'
+                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        }`}
+                    >
+                        {canClose ? 'Commencer la journée' : `Fermer dans ${seconds}s`}
+                    </button>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 /* -- Dashboard Layout ------------------------------------- */
 
 const DashboardLayout = () => {
@@ -205,6 +306,7 @@ const DashboardLayout = () => {
     const [showWelcome, setShowWelcome] = useState(false);
     const [birthdayPeople, setBirthdayPeople] = useState<BirthdayEmployee[]>([]);
     const [showBirthday, setShowBirthday] = useState(false);
+    const [showQuote, setShowQuote] = useState(false);
 
     // Browser notifications
     useBrowserNotifications();
@@ -238,6 +340,21 @@ const DashboardLayout = () => {
     const handleBirthdayClose = () => {
         setShowBirthday(false);
         const todayKey = `birthday_dismissed_${new Date().toISOString().split('T')[0]}`;
+        localStorage.setItem(todayKey, '1');
+    };
+
+    // Quote modal: show once per day for non-MANAGER roles
+    useEffect(() => {
+        if (!user) return;
+        if (user.role === 'MANAGER') return;
+        const todayKey = `quote_dismissed_${new Date().toISOString().split('T')[0]}`;
+        if (localStorage.getItem(todayKey)) return;
+        setShowQuote(true);
+    }, [user]);
+
+    const handleQuoteClose = () => {
+        setShowQuote(false);
+        const todayKey = `quote_dismissed_${new Date().toISOString().split('T')[0]}`;
         localStorage.setItem(todayKey, '1');
     };
 
@@ -275,6 +392,11 @@ const DashboardLayout = () => {
                         people={birthdayPeople}
                         onClose={handleBirthdayClose}
                     />
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {showQuote && !showWelcome && !showBirthday && (
+                    <QuoteModal onClose={handleQuoteClose} />
                 )}
             </AnimatePresence>
 

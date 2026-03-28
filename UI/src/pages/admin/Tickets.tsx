@@ -634,7 +634,7 @@ const Tickets = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('tickets.charts.byPriority')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={priorityChartData} barSize={36}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
@@ -659,7 +659,7 @@ const Tickets = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('tickets.charts.activity')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <AreaChart data={ticketActivityData}>
                                 <defs>
                                     <linearGradient id="colorTicketActivity" x1="0" y1="0" x2="0" y2="1">

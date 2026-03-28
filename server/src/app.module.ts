@@ -30,6 +30,7 @@ import { CommercialModule } from './commercial/commercial.module';
 import { BusinessExpensesModule } from './business-expenses/business-expenses.module';
 import { ReportsModule } from './reports/reports.module';
 import { SseModule } from './sse/sse.module';
+import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RolesGuard } from './auth/roles.guard';
 import { ActivityInterceptor } from './logs/activity.interceptor';
@@ -72,6 +73,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     MeetingsModule,
     InvoicesModule,
     NotificationsModule,
+    WhatsAppModule,
     ChatModule,
     DemandsModule,
     ExpensesModule,

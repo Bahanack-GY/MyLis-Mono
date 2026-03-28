@@ -61,9 +61,9 @@ export class ReportsService {
     /* ── Lock check ──────────────────────────────────────── */
 
     async getLockStatus(): Promise<{ locked: boolean; model?: string }> {
-        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const twentyMinutesAgo = new Date(Date.now() - 20 * 60 * 1000);
         const locked = await this.reportModel.findOne({
-            where: { status: 'GENERATING', createdAt: { [Op.gte]: tenMinutesAgo } },
+            where: { status: 'GENERATING', createdAt: { [Op.gte]: twentyMinutesAgo } },
         });
         return { locked: !!locked, model: this.ollamaModel };
     }
@@ -656,7 +656,7 @@ ${headingInstruction}
 
     private async callOllama(prompt: string): Promise<string> {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 300_000); // 5 minutes
+        const timeout = setTimeout(() => controller.abort(), 900_000); // 15 minutes
 
         try {
             this.logger.debug(`Calling Ollama at ${this.ollamaBaseUrl} with model ${this.ollamaModel}`);
@@ -668,9 +668,11 @@ ${headingInstruction}
                     model: this.ollamaModel,
                     prompt,
                     stream: false,
+                    think: false,
                     options: {
                         temperature: 0.4,
-                        num_predict: 4000,
+                        num_predict: 8000,
+                        num_ctx: 16384,
                         top_p: 0.9,
                         top_k: 40,
                     },
@@ -685,7 +687,10 @@ ${headingInstruction}
             }
 
             const data: any = await response.json();
-            const result = (data.response || '').trim();
+            // Strip any thinking tags that qwen3 may emit
+            const result = (data.response || '')
+                .replace(/<think>[\s\S]*?<\/think>/gi, '')
+                .trim();
 
             if (!result) {
                 this.logger.warn('Ollama returned empty response');
@@ -696,7 +701,7 @@ ${headingInstruction}
             return result;
         } catch (error) {
             if (error.name === 'AbortError') {
-                this.logger.error('Ollama timeout after 5 minutes');
+                this.logger.error('Ollama timeout after 15 minutes');
                 throw new Error('AI timeout');
             }
             throw error;
@@ -1336,9 +1341,9 @@ This report will be presented to management and potentially external auditors. I
 
     async generate(dto: any, userId: string, userRole: string, userDepartmentId?: string): Promise<Report> {
         // 1. Check global lock
-        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const twentyMinutesAgo = new Date(Date.now() - 20 * 60 * 1000);
         const locked = await this.reportModel.findOne({
-            where: { status: 'GENERATING', createdAt: { [Op.gte]: tenMinutesAgo } },
+            where: { status: 'GENERATING', createdAt: { [Op.gte]: twentyMinutesAgo } },
         });
         if (locked) throw new ConflictException('A report is currently being generated. Please try again in a moment.');
 
@@ -1430,6 +1435,36 @@ This report will be presented to management and potentially external auditors. I
             where,
             include: this.includeOptions(),
             order: [['createdAt', 'DESC']],
+        });
+    }
+
+    async findAllPaginated(
+        userId: string,
+        userRole: string,
+        userDepartmentId?: string,
+        page = 1,
+        limit = 20,
+    ): Promise<{ rows: Report[]; count: number }> {
+        let where: any = {};
+        if (userRole === 'EMPLOYEE' || userRole === 'COMMERCIAL') {
+            where = { generatedByUserId: userId };
+        } else if (userRole === 'HEAD_OF_DEPARTMENT') {
+            const employees = await this.employeeModel.findAll({ where: { departmentId: userDepartmentId } });
+            const empIds = employees.map(e => e.id);
+            where = {
+                [Op.or]: [
+                    { targetDepartmentId: userDepartmentId },
+                    { targetEmployeeId: { [Op.in]: empIds } },
+                ],
+            };
+        }
+        return this.reportModel.findAndCountAll({
+            where,
+            include: this.includeOptions(),
+            order: [['createdAt', 'DESC']],
+            limit,
+            offset: (page - 1) * limit,
+            distinct: true,
         });
     }
 

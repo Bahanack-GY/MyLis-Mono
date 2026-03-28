@@ -7,6 +7,14 @@ export const employeesApi = {
     getAll: (departmentId?: string) =>
         api.get<Employee[]>('/employees', { params: departmentId ? { departmentId } : {} }).then(r => r.data),
 
+    getPaginated: (params: { departmentId?: string; search?: string; dismissed?: boolean; page: number; limit: number }) => {
+        const p: Record<string, string | number | boolean> = { page: params.page, limit: params.limit };
+        if (params.departmentId) p.departmentId = params.departmentId;
+        if (params.search) p.search = params.search;
+        if (params.dismissed) p.dismissed = true;
+        return api.get<{ rows: Employee[]; count: number }>('/employees', { params: p }).then(r => r.data);
+    },
+
     getLeaderboard: (limit?: number) =>
         api.get<LeaderboardEmployee[]>('/employees/leaderboard', { params: limit ? { limit } : {} }).then(r => r.data),
 

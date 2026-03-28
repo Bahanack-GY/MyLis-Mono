@@ -7,6 +7,7 @@ import { Employee } from '../models/employee.model';
 import { User } from '../models/user.model';
 import { Position } from '../models/position.model';
 import { Project } from '../models/project.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class DepartmentsService {
@@ -70,6 +71,30 @@ export class DepartmentsService {
                 { model: Employee, as: 'head' },
                 Project,
             ],
+        });
+    }
+
+    async findAllPaginated(params: {
+        search?: string;
+        page: number;
+        limit: number;
+    }): Promise<{ rows: Department[]; count: number }> {
+        const where: any = {};
+        if (params.search) {
+            where.name = { [Op.iLike]: `%${params.search}%` };
+        }
+        return this.departmentModel.findAndCountAll({
+            where,
+            include: [
+                DepartmentGoal,
+                { model: Employee, as: 'employees', include: [Position] },
+                { model: Employee, as: 'head' },
+                Project,
+            ],
+            limit: params.limit,
+            offset: (params.page - 1) * params.limit,
+            order: [['name', 'ASC']],
+            distinct: true,
         });
     }
 

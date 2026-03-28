@@ -655,7 +655,7 @@ export default function CommercialDashboard() {
                     </div>
                     <div className="h-[280px]">
                         {stageChartData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                 <BarChart
                                     data={stageChartData}
                                     layout="vertical"
@@ -701,7 +701,7 @@ export default function CommercialDashboard() {
                     </div>
                     <div className="h-[240px] relative">
                         {stageChartData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                 <PieChart>
                                     <Pie
                                         data={stageChartData}
@@ -764,7 +764,7 @@ export default function CommercialDashboard() {
                     </div>
                     <div className="h-[280px]">
                         {revenueTrendData.length > 0 && revenueTrendData.some(d => d.revenue > 0) ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <LineChart data={revenueTrendData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
@@ -812,7 +812,7 @@ export default function CommercialDashboard() {
                     </div>
                     <div className="h-[240px] relative">
                         {sourceChartData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                 <PieChart>
                                     <Pie
                                         data={sourceChartData}

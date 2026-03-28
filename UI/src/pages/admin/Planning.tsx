@@ -181,9 +181,9 @@ const AddTaskModal = ({
                             {t('tasksPage.assignee')}
                         </label>
                         <div className="relative">
-                            {selectedEmp?.photoUrl && (
+                            {selectedEmp?.avatarUrl && (
                                 <img
-                                    src={selectedEmp.photoUrl}
+                                    src={selectedEmp.avatarUrl}
                                     alt=""
                                     className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-gray-200 pointer-events-none object-cover"
                                 />
@@ -192,7 +192,7 @@ const AddTaskModal = ({
                                 value={form.assignedToId}
                                 onChange={e => update('assignedToId', e.target.value)}
                                 className={`w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer ${
-                                    selectedEmp?.photoUrl ? 'pl-11' : ''
+                                    selectedEmp?.avatarUrl ? 'pl-11' : ''
                                 }`}
                             >
                                 <option value="">{t('tasksPage.selectEmployee')}</option>
@@ -516,9 +516,202 @@ const AddTaskModal = ({
     );
 };
 
+/* ─── Task Detail Modal ──────────────────────────────────── */
+
+const STATE_COLORS: Record<string, string> = {
+    CREATED: 'bg-gray-100 text-gray-600',
+    ASSIGNED: 'bg-blue-100 text-blue-700',
+    IN_PROGRESS: 'bg-amber-100 text-amber-700',
+    BLOCKED: 'bg-red-100 text-red-600',
+    COMPLETED: 'bg-green-100 text-green-700',
+    REVIEWED: 'bg-purple-100 text-purple-700',
+};
+
+const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void }) => {
+    const { t } = useTranslation();
+
+    const difficultyColors: Record<TaskDifficulty, string> = {
+        EASY: 'bg-[#33cbcc]/10 text-[#33cbcc] border-[#33cbcc]/20',
+        MEDIUM: 'bg-[#283852]/10 text-[#283852] border-[#283852]/20',
+        HARD: 'bg-red-50 text-red-500 border-red-200',
+    };
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', handler);
+        document.body.style.overflow = 'hidden';
+        return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = ''; };
+    }, [onClose]);
+
+    const avatarUrl = (task.assignedTo as any)?.avatarUrl
+        || (task.assignedTo as any)?.photoUrl
+        || (task.assignedTo ? `https://ui-avatars.com/api/?name=${encodeURIComponent((task.assignedTo as any).firstName + '+' + (task.assignedTo as any).lastName)}&background=33cbcc&color=fff` : '');
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+        >
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden"
+            >
+                {/* Header */}
+                <div className="px-5 py-4 border-b border-gray-100 flex items-start justify-between gap-3 shrink-0">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-1.5 mb-1">
+                            {task.urgent && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-600 uppercase tracking-wide">
+                                    {t('tasks.urgent')}
+                                </span>
+                            )}
+                            {task.important && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 uppercase tracking-wide flex items-center gap-0.5">
+                                    <Flag size={8} />
+                                    {t('tasks.important')}
+                                </span>
+                            )}
+                        </div>
+                        <h3 className="text-base font-bold text-gray-800 leading-snug">{task.title}</h3>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="shrink-0 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <X size={16} />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+                    {/* State + Difficulty */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATE_COLORS[task.state] || 'bg-gray-100 text-gray-600'}`}>
+                            {t(`tasks.states.${task.state?.toLowerCase()}`, task.state)}
+                        </span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${difficultyColors[task.difficulty]}`}>
+                            {task.difficulty}
+                        </span>
+                        {task.transferredFromWeek && (
+                            <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                                <RotateCcw size={8} />
+                                {t('planning.transferred', 'Transferred')}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Assignee */}
+                    {task.assignedTo && (
+                        <div className="flex items-center gap-2.5">
+                            <img
+                                src={avatarUrl}
+                                alt=""
+                                className="w-8 h-8 rounded-full border border-gray-200 object-cover shrink-0"
+                                onError={e => { (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent((task.assignedTo as any).firstName + '+' + (task.assignedTo as any).lastName)}&background=33cbcc&color=fff`; }}
+                            />
+                            <div>
+                                <p className="text-sm font-semibold text-gray-800">
+                                    {(task.assignedTo as any).firstName} {(task.assignedTo as any).lastName}
+                                </p>
+                                <p className="text-[10px] text-gray-400">{t('tasksPage.assignee')}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Description */}
+                    {task.description && (
+                        <div>
+                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                                <FileText size={10} />
+                                {t('tasks.description')}
+                            </p>
+                            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{task.description}</p>
+                        </div>
+                    )}
+
+                    {/* Dates */}
+                    <div className="grid grid-cols-2 gap-3">
+                        {task.startDate && (
+                            <div className="bg-gray-50 rounded-xl p-3">
+                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                    <Calendar size={10} />
+                                    {t('planning.startDate', 'Start')}
+                                </p>
+                                <p className="text-sm font-semibold text-gray-700">{task.startDate}</p>
+                                {task.startTime && (
+                                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                        <Clock size={10} />
+                                        {task.startTime}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                        {task.endDate && (
+                            <div className="bg-gray-50 rounded-xl p-3">
+                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                    <Target size={10} />
+                                    {t('planning.endDate', 'End')}
+                                </p>
+                                <p className="text-sm font-semibold text-gray-700">{task.endDate}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Project */}
+                    {task.project && (
+                        <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+                            <Briefcase size={14} className="text-gray-400 shrink-0" />
+                            <div>
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">{t('tasksPage.project')}</p>
+                                <p className="text-sm font-semibold text-gray-700">{task.project.name}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Nature */}
+                    {task.nature && (
+                        <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
+                            <Tag size={14} style={{ color: task.nature.color || '#6b7280' }} className="shrink-0" />
+                            <div>
+                                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">{t('tasks.nature')}</p>
+                                <p className="text-sm font-semibold" style={{ color: task.nature.color || '#374151' }}>{task.nature.name}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Subtasks & Attachments */}
+                    {((task.subtasks && task.subtasks.length > 0) || (task.attachments && task.attachments.length > 0)) && (
+                        <div className="flex gap-3">
+                            {task.subtasks && task.subtasks.length > 0 && (
+                                <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 rounded-lg px-2.5 py-1.5">
+                                    <AlertCircle size={12} className="text-gray-400" />
+                                    <span>{task.subtasks.length} {t('tasks.subtasks', 'subtask(s)')}</span>
+                                </div>
+                            )}
+                            {task.attachments && task.attachments.length > 0 && (
+                                <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 rounded-lg px-2.5 py-1.5">
+                                    <Paperclip size={12} className="text-gray-400" />
+                                    <span>{task.attachments.length} {t('tasks.file', 'file(s)')}</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 /* ─── Task Card Component ────────────────────────────────── */
 
-const TaskCard = ({ task }: { task: Task }) => {
+const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
     const difficultyColors: Record<TaskDifficulty, string> = {
         EASY: 'bg-[#33cbcc]/10 text-[#33cbcc] border-[#33cbcc]/20',
         MEDIUM: 'bg-[#283852]/10 text-[#283852] border-[#283852]/20',
@@ -531,13 +724,14 @@ const TaskCard = ({ task }: { task: Task }) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-white rounded-lg border border-gray-200 p-3  transition-shadow cursor-pointer"
+            onClick={onClick}
+            className="bg-white rounded-lg border border-gray-200 p-3 transition-shadow cursor-pointer hover:border-[#33cbcc]/40 hover:shadow-sm"
         >
             {/* Employee info */}
             {task.assignedTo && (
                 <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
                     <img
-                        src={task.assignedTo.photoUrl || '/default-avatar.png'}
+                        src={task.assignedTo.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(task.assignedTo.firstName + '+' + task.assignedTo.lastName)}&background=33cbcc&color=fff`}
                         alt=""
                         className="w-5 h-5 rounded-full border border-gray-200 object-cover"
                     />
@@ -613,11 +807,13 @@ const DayColumn = ({
     tasks,
     isToday,
     onAddTask,
+    onTaskClick,
 }: {
     date: Date;
     tasks: Task[];
     isToday: boolean;
     onAddTask: () => void;
+    onTaskClick: (task: Task) => void;
 }) => {
     const { t, i18n } = useTranslation();
 
@@ -627,10 +823,10 @@ const DayColumn = ({
     const month = date.toLocaleDateString(i18n.language, { month: 'short' });
 
     return (
-        <div className="flex flex-col min-w-[280px] sm:min-w-[240px] md:min-w-0 flex-1">
+        <div className="flex flex-col min-w-[280px] sm:min-w-[240px] md:min-w-0 flex-1 h-full">
             {/* Day Header */}
             <div
-                className={`flex flex-col items-center p-2 sm:p-3 rounded-t-xl border-b-2 ${
+                className={`flex flex-col items-center p-2 sm:p-3 rounded-t-xl border-b-2 shrink-0 ${
                     isToday
                         ? 'bg-[#33cbcc]/10 border-[#33cbcc]'
                         : 'bg-gray-50 border-gray-200'
@@ -644,23 +840,33 @@ const DayColumn = ({
                 <span className="text-[10px] sm:text-xs text-gray-500">{month}</span>
             </div>
 
-            {/* Tasks Container */}
-            <div className="flex-1 bg-gray-50/50 rounded-b-xl border border-gray-200 border-t-0 p-2 sm:p-3 space-y-2 min-h-[300px] sm:min-h-[400px] max-h-[500px] sm:max-h-none overflow-y-auto">
-                <AnimatePresence mode="popLayout">
-                    {tasks.map(task => (
-                        <TaskCard key={task.id} task={task} />
-                    ))}
-                </AnimatePresence>
+            {/* Tasks Container — flex column so tasks scroll, button stays pinned */}
+            <div className="flex flex-col flex-1 min-h-0 bg-gray-50/50 rounded-b-xl border border-gray-200 border-t-0">
+                {/* Scrollable tasks list */}
+                <div className="flex-1 overflow-y-auto p-2 sm:p-3 space-y-2 min-h-0">
+                    <AnimatePresence mode="popLayout">
+                        {tasks.map(task => (
+                            <TaskCard key={task.id} task={task} onClick={() => onTaskClick(task)} />
+                        ))}
+                    </AnimatePresence>
+                    {tasks.length === 0 && (
+                        <div className="flex items-center justify-center h-16 text-gray-300 text-xs">
+                            —
+                        </div>
+                    )}
+                </div>
 
-                {/* Add Task Button */}
-                <button
-                    onClick={onAddTask}
-                    className="w-full py-2 sm:py-2.5 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-all flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-medium"
-                >
-                    <Plus size={14} className="sm:w-4 sm:h-4" />
-                    <span className="hidden sm:inline">{t('planning.addTask')}</span>
-                    <span className="sm:hidden">+</span>
-                </button>
+                {/* Pinned Add Task Button */}
+                <div className="shrink-0 p-2 sm:p-3 border-t border-gray-100">
+                    <button
+                        onClick={onAddTask}
+                        className="w-full py-2 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-all flex items-center justify-center gap-1.5 text-xs font-medium"
+                    >
+                        <Plus size={13} />
+                        <span className="hidden sm:inline">{t('planning.addTask')}</span>
+                        <span className="sm:hidden">+</span>
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -675,6 +881,7 @@ export default function Planning() {
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
     const [showModal, setShowModal] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string | undefined>();
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
     const { data: employees = [] } = useEmployees(deptScope);
 
@@ -843,7 +1050,7 @@ export default function Planning() {
                     <>
                         {/* Mobile/Tablet: Horizontal Scroll */}
                         <div className="md:hidden overflow-x-auto pb-4 -mx-3 px-3">
-                            <div className="flex gap-3 min-w-max">
+                            <div className="flex gap-3 min-w-max h-[520px]">
                                 {[...Array(7)].map((_, i) => {
                                     const date = addDays(currentMonday, i);
                                     const dateKey = formatDate(date);
@@ -857,6 +1064,7 @@ export default function Planning() {
                                             tasks={dayTasks}
                                             isToday={isToday}
                                             onAddTask={() => handleAddTask(dateKey)}
+                                            onTaskClick={setSelectedTask}
                                         />
                                     );
                                 })}
@@ -864,7 +1072,7 @@ export default function Planning() {
                         </div>
 
                         {/* Desktop: Grid */}
-                        <div className="hidden md:grid md:grid-cols-7 gap-3 lg:gap-4">
+                        <div className="hidden md:grid md:grid-cols-7 gap-3 lg:gap-4" style={{ height: 'calc(100vh - 320px)', minHeight: '480px' }}>
                             {[...Array(7)].map((_, i) => {
                                 const date = addDays(currentMonday, i);
                                 const dateKey = formatDate(date);
@@ -878,6 +1086,7 @@ export default function Planning() {
                                         tasks={dayTasks}
                                         isToday={isToday}
                                         onAddTask={() => handleAddTask(dateKey)}
+                                        onTaskClick={setSelectedTask}
                                     />
                                 );
                             })}
@@ -894,6 +1103,12 @@ export default function Planning() {
                         prefilledDate={selectedDate}
                         prefilledEmployeeId={selectedEmployeeId}
                         employees={employees}
+                    />
+                )}
+                {selectedTask && (
+                    <TaskDetailModal
+                        task={selectedTask}
+                        onClose={() => setSelectedTask(null)}
                     />
                 )}
             </AnimatePresence>

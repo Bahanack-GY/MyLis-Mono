@@ -3,7 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Notification } from '../models/notification.model';
 import { User } from '../models/user.model';
+import { Employee } from '../models/employee.model';
 import { MailService } from './mail.service';
+import { WhatsAppService } from '../whatsapp/whatsapp.service';
 
 type PushCallback = (userId: string, payload: { title: string; body: string; type: string }) => void;
 type DirectEmitCallback = (userId: string, event: string, payload: object) => void;
@@ -18,7 +20,10 @@ export class NotificationsService {
         private notificationModel: typeof Notification,
         @InjectModel(User)
         private userModel: typeof User,
+        @InjectModel(Employee)
+        private employeeModel: typeof Employee,
         private mailService: MailService,
+        private whatsAppService: WhatsAppService,
     ) { }
 
     /** Called by ChatGateway to register socket push */
@@ -40,10 +45,18 @@ export class NotificationsService {
         const notif = await this.notificationModel.create(data);
         this.pushCallback?.(data.userId, { title: data.title, body: data.body, type: data.type });
 
-        // Send email asynchronously (non-blocking)
-        this.userModel.findByPk(data.userId).then(user => {
+        // Send email + WhatsApp asynchronously (non-blocking)
+        this.userModel.findByPk(data.userId).then(async user => {
             if (user?.email) {
                 this.mailService.sendNotification(user.email, data.title, data.body, data.titleFr, data.bodyFr);
+            }
+            const employee = await this.employeeModel.findOne({
+                where: { userId: data.userId },
+                attributes: ['phoneNumber'],
+            });
+            const phone = employee?.getDataValue('phoneNumber');
+            if (phone) {
+                this.whatsAppService.enqueue(phone, this.buildWhatsAppText(data.title, data.body, data.titleFr, data.bodyFr));
             }
         });
 
@@ -57,15 +70,22 @@ export class NotificationsService {
             this.pushCallback?.(n.userId, { title: n.title, body: n.body, type: n.type });
         }
 
-        // Send emails asynchronously — batch by unique userId
+        // Send emails + WhatsApp asynchronously — batch by unique userId
         const userIds = [...new Set(notifications.map(n => n.userId))];
-        this.userModel.findAll({ where: { id: userIds } }).then(users => {
+        Promise.all([
+            this.userModel.findAll({ where: { id: userIds } }),
+            this.employeeModel.findAll({ where: { userId: userIds }, attributes: ['userId', 'phoneNumber'] }),
+        ]).then(([users, employees]) => {
             const emailByUserId = Object.fromEntries(users.map(u => [u.id, u.email]));
+            const phoneByUserId = Object.fromEntries(
+                employees.map(e => [e.getDataValue('userId'), e.getDataValue('phoneNumber')]),
+            );
             for (const n of notifications) {
                 const email = emailByUserId[n.userId];
-                if (email) {
-                    this.mailService.sendNotification(email, n.title, n.body, n.titleFr, n.bodyFr);
-                }
+                if (email) this.mailService.sendNotification(email, n.title, n.body, n.titleFr, n.bodyFr);
+
+                const phone = phoneByUserId[n.userId];
+                if (phone) this.whatsAppService.enqueue(phone, this.buildWhatsAppText(n.title, n.body, n.titleFr, n.bodyFr));
             }
         });
 
@@ -92,5 +112,16 @@ export class NotificationsService {
             { read: true },
             { where: { userId, read: false } },
         );
+    }
+
+    /**
+     * Build a clean WhatsApp message.
+     * Uses French first (Cameroon primary), English fallback.
+     * Bold title + body + signature — no HTML, no headers, just readable text.
+     */
+    private buildWhatsAppText(titleEn: string, bodyEn: string, titleFr?: string, bodyFr?: string): string {
+        const title = titleFr || titleEn;
+        const body = bodyFr || bodyEn;
+        return `*${title}*\n\n${body}\n\n_— MyLIS_`;
     }
 }

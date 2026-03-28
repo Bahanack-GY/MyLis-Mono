@@ -1,5 +1,5 @@
 
-import { Controller, Get, Post, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
@@ -20,7 +20,14 @@ export class DepartmentsController {
 
     @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get()
-    findAll() {
+    findAll(@Query('search') search: string, @Query('page') page: string, @Query('limit') limit: string) {
+        if (page && limit) {
+            return this.departmentsService.findAllPaginated({
+                search,
+                page: parseInt(page, 10),
+                limit: parseInt(limit, 10),
+            });
+        }
         return this.departmentsService.findAll();
     }
 

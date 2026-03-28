@@ -44,6 +44,7 @@ const AdminReports = lazy(() => import("./pages/admin/Reports"))
 const EmployeeReports = lazy(() => import("./pages/employee/Reports"))
 
 // Admin-only pages
+const WhatsAppPage = lazy(() => import("./pages/admin/WhatsApp"))
 const Employees = lazy(() => import("./pages/Employees"))
 const Departments = lazy(() => import("./pages/Departments"))
 const ActivityPage = lazy(() => import("./pages/Activity"))
@@ -144,10 +145,11 @@ function App() {
           <Route path="/departments/:id" element={<DepartmentDetailLayout />} />
         </Route>
 
-        {/* Activity — MANAGER only */}
+        {/* Activity + WhatsApp — MANAGER only */}
         <Route element={<ProtectedRoute allowedRoles={['MANAGER']} />}>
           <Route element={<DashboardLayout />}>
             <Route path="/activity" element={<ActivityPage />} />
+            <Route path="/whatsapp" element={<WhatsAppPage />} />
           </Route>
         </Route>
 

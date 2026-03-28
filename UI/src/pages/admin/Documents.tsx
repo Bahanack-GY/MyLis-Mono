@@ -586,7 +586,7 @@ const Documents = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('documents.charts.byCategory')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={categoryChartData} barSize={36}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
@@ -611,7 +611,7 @@ const Documents = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('documents.charts.uploadActivity')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <AreaChart data={uploadActivityData}>
                                 <defs>
                                     <linearGradient id="colorDocUploads" x1="0" y1="0" x2="0" y2="1">

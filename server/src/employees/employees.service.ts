@@ -46,6 +46,32 @@ export class EmployeesService {
         });
     }
 
+    async findAllPaginated(params: {
+        departmentId?: string;
+        search?: string;
+        dismissed?: boolean;
+        page: number;
+        limit: number;
+    }): Promise<{ rows: Employee[]; count: number }> {
+        const where: any = {};
+        if (params.departmentId) where.departmentId = params.departmentId;
+        where.dismissed = params.dismissed ? true : { [Op.or]: [false, null] };
+        if (params.search) {
+            where[Op.or] = [
+                { firstName: { [Op.iLike]: `%${params.search}%` } },
+                { lastName: { [Op.iLike]: `%${params.search}%` } },
+            ];
+        }
+        return this.employeeModel.findAndCountAll({
+            where,
+            include: [User, Department, Position],
+            limit: params.limit,
+            offset: (params.page - 1) * params.limit,
+            order: [['firstName', 'ASC'], ['lastName', 'ASC']],
+            distinct: true,
+        });
+    }
+
     async findOne(id: string): Promise<Employee | null> {
         return this.employeeModel.findByPk(id, {
             include: [User, Department, Position],

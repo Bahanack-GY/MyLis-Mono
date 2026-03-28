@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
     FileBarChart,
@@ -18,7 +18,7 @@ import {
     Users,
     BarChart2,
 } from 'lucide-react';
-import { useReports, useGenerateReport, useDeleteReport, useReportLockStatus } from '../../api/reports/hooks';
+import { useInfiniteReports, useGenerateReport, useDeleteReport, useReportLockStatus } from '../../api/reports/hooks';
 import { useEmployees } from '../../api/employees/hooks';
 import { useDepartments } from '../../api/departments/hooks';
 import { useAuth } from '../../contexts/AuthContext';
@@ -276,7 +276,22 @@ export default function AdminReports() {
     const isManager = role === 'MANAGER';
     const canGenerateDept = isHOD || isManager;
 
-    const { data: reports = [], isLoading } = useReports();
+    const reportsQuery = useInfiniteReports();
+    const reports: Report[] = reportsQuery.data?.pages.flatMap(p => p.rows) || [];
+    const isLoading = reportsQuery.isPending;
+
+    const sentinelRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting && reportsQuery.hasNextPage && !reportsQuery.isFetchingNextPage) {
+                reportsQuery.fetchNextPage();
+            }
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [reportsQuery.hasNextPage, reportsQuery.isFetchingNextPage, reportsQuery.fetchNextPage]);
     const { data: lockData } = useReportLockStatus();
     const { data: employees = [] } = useEmployees(isHOD ? departmentId || undefined : undefined);
     const { data: allEmployees = [] } = useEmployees();
@@ -315,7 +330,7 @@ export default function AdminReports() {
 
     /* ── Stats ── */
     const stats = useMemo(() => {
-        const all = reports as Report[];
+        const all = reports;
         const completed = all.filter(r => r.status === 'COMPLETED');
         const avgRate = completed.length
             ? Math.round(completed.reduce((sum, r) => sum + (r.reportData?.summary?.completionRate ?? 0), 0) / completed.length)
@@ -357,7 +372,7 @@ export default function AdminReports() {
     }, [period, customStart, customEnd, reportType, targetEmployeeId, isHOD]);
 
     const filteredReports = useMemo(() => {
-        return (reports as Report[]).filter(r => {
+        return (reports).filter(r => {
             if (filterStatus && r.status !== filterStatus) return false;
             if (filterType && r.type !== filterType) return false;
             if (filterDepartment && r.targetDepartment?.id !== filterDepartment) return false;
@@ -548,7 +563,7 @@ export default function AdminReports() {
             )}
 
             {/* ── Filter bar ── */}
-            {!isLoading && (reports as Report[]).length > 0 && (
+            {!isLoading && (reports).length > 0 && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-4 space-y-3">
                     <div className="flex gap-2">
                         <div className="relative flex-1">
@@ -604,7 +619,7 @@ export default function AdminReports() {
 
                     {hasFilters && (
                         <p className="text-xs text-gray-400">
-                            {t('reports.filters.results', { count: filteredReports.length, total: (reports as Report[]).length })}
+                            {t('reports.filters.results', { count: filteredReports.length, total: (reports).length })}
                         </p>
                     )}
                 </div>
@@ -615,7 +630,7 @@ export default function AdminReports() {
                 <div className="flex justify-center py-16">
                     <Loader2 size={28} className="animate-spin text-[#283852]" />
                 </div>
-            ) : (reports as Report[]).length === 0 ? (
+            ) : (reports).length === 0 ? (
                 <div className="text-center py-20 text-gray-400">
                     <FileBarChart size={44} className="mx-auto mb-3 opacity-20" />
                     <p className="font-semibold text-gray-500">{t('reports.empty')}</p>
@@ -631,6 +646,12 @@ export default function AdminReports() {
                     {filteredReports.map((report: Report) => (
                         <ReportCard key={report.id} report={report} onDelete={handleDelete} onExport={handleExport} />
                     ))}
+                    <div ref={sentinelRef} className="h-1" />
+                    {reportsQuery.isFetchingNextPage && (
+                        <div className="flex justify-center py-4">
+                            <Loader2 size={20} className="animate-spin text-[#283852]" />
+                        </div>
+                    )}
                 </div>
             )}
         </div>

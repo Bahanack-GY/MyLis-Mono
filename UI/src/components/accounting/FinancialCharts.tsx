@@ -34,7 +34,7 @@ const formatXAF = (value: number) => {
 };
 
 export const RevenueExpensesChart = ({ data }: { data: MonthlyData[] }) => (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={300} debounce={50}>
         <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
@@ -56,7 +56,7 @@ export const RevenueExpensesChart = ({ data }: { data: MonthlyData[] }) => (
 );
 
 export const NetIncomeChart = ({ data }: { data: MonthlyData[] }) => (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={300} debounce={50}>
         <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
@@ -85,7 +85,7 @@ export const NetIncomeChart = ({ data }: { data: MonthlyData[] }) => (
 );
 
 export const RevenueBreakdownPie = ({ data }: { data: ChartData[] }) => (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={300} debounce={50}>
         <PieChart>
             <Pie
                 data={data}
@@ -116,7 +116,7 @@ export const RevenueBreakdownPie = ({ data }: { data: ChartData[] }) => (
 );
 
 export const BudgetVarianceChart = ({ data }: { data: Array<{ name: string; budgeted: number; actual: number }> }) => (
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={300} debounce={50}>
         <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="name" stroke="#6b7280" style={{ fontSize: '12px' }} />
@@ -145,7 +145,7 @@ export const BalanceSheetChart = ({ assets, liabilities, equity }: { assets: num
     ];
 
     return (
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={300} debounce={50}>
             <PieChart>
                 <Pie
                     data={data}

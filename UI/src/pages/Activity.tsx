@@ -203,7 +203,7 @@ const ActivityPage = () => {
             >
                 <h3 className="text-lg font-bold text-gray-800 mb-6">{t('activity.chart.title')}</h3>
                 <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" debounce={50}>
                         <AreaChart data={chartData}>
                             <defs>
                                 <linearGradient id="colorActivityCount" x1="0" y1="0" x2="0" y2="1">

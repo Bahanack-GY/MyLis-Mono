@@ -108,7 +108,7 @@ export class ChatGateway
 
       this.logger.log(`Client connected: ${userData.email} (${client.id})`);
     } catch {
-      client.emit('connect_error', { message: 'Unauthorized: invalid or expired token' });
+      client.emit('auth_error', { message: 'Unauthorized: invalid or expired token' });
       client.disconnect();
     }
   }

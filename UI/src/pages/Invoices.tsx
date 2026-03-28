@@ -542,7 +542,7 @@ const Invoices = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('invoices.charts.monthlyRevenue')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={monthlyRevenueData} barSize={28}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
@@ -566,7 +566,7 @@ const Invoices = () => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('invoices.charts.statusDistribution')}</h3>
                     <div className="h-64 flex items-center justify-center">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <PieChart>
                                 <Pie
                                     data={statusDistribution.filter(d => d.value > 0)}

@@ -306,7 +306,7 @@ const Dashboard = () => {
                 <p className="text-sm text-gray-400">{t('dashboard.charts.noTasks', 'No tasks in this period')}</p>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" debounce={50}>
                 <AreaChart data={chartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorTasks" x1="0" y1="0" x2="0" y2="1">
@@ -347,7 +347,7 @@ const Dashboard = () => {
           ) : (
             <>
               <div className="flex-1 min-h-[200px] relative">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" debounce={50}>
                   <PieChart>
                     <Pie
                       data={pieData}
@@ -408,7 +408,7 @@ const Dashboard = () => {
             <p className="text-xs text-gray-400 mt-0.5">{t('dashboard.charts.paidInvoices', 'Paid invoices only')}</p>
           </div>
           <div className="h-[280px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" debounce={50}>
               <BarChart
                 data={revenueByDept}
                 margin={{ top: 4, right: 24, left: 0, bottom: 4 }}

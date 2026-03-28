@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { departmentsApi, departmentGoalsApi } from './api';
 import type { CreateDepartmentDto, UpdateDepartmentDto, CreateDepartmentGoalDto, UpdateDepartmentGoalDto } from './types';
 import { toast } from 'sonner';
@@ -15,6 +15,18 @@ export const useDepartments = () =>
     useQuery({
         queryKey: departmentKeys.all,
         queryFn: departmentsApi.getAll,
+    });
+
+export const useInfiniteDepartments = (params: { search?: string } = {}) =>
+    useInfiniteQuery({
+        queryKey: ['departments', 'infinite', params],
+        queryFn: ({ pageParam }) =>
+            departmentsApi.getPaginated({ ...params, page: pageParam as number, limit: 20 }),
+        getNextPageParam: (lastPage, allPages) => {
+            const loaded = allPages.reduce((s, p) => s + p.rows.length, 0);
+            return loaded < lastPage.count ? allPages.length + 1 : undefined;
+        },
+        initialPageParam: 1,
     });
 
 export const useDepartment = (id: string) =>

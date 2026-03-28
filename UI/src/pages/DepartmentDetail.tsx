@@ -660,7 +660,7 @@ const OverviewView = ({ department }: { department: Department }) => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('departmentDetail.overview.monthlyActivity')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <AreaChart data={activityData}>
                                 <defs>
                                     <linearGradient id="colorDeptActivity" x1="0" y1="0" x2="0" y2="1">
@@ -687,7 +687,7 @@ const OverviewView = ({ department }: { department: Department }) => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-4">{t('departmentDetail.overview.roleDistribution')}</h3>
                     <div className="h-50 relative">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <PieChart>
                                 <Pie
                                     data={roleData}
@@ -1076,7 +1076,7 @@ const BudgetView = ({ department }: { department: Department }) => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('departmentDetail.budget.expenseBreakdown')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={expenses} barSize={36}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="category" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
@@ -1104,7 +1104,7 @@ const BudgetView = ({ department }: { department: Department }) => {
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-6">{t('departmentDetail.budget.monthlySpend')}</h3>
                     <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <AreaChart data={monthlyData}>
                                 <defs>
                                     <linearGradient id="colorDeptBudgetSpend" x1="0" y1="0" x2="0" y2="1">

@@ -23,8 +23,30 @@ export class TasksController {
     }
 
     @Get()
-    findAll(@Query('departmentId') departmentId: string, @Query('from') from: string, @Query('to') to: string, @Request() req) {
+    findAll(
+        @Query('departmentId') departmentId: string,
+        @Query('from') from: string,
+        @Query('to') to: string,
+        @Query('states') states: string,
+        @Query('page') page: string,
+        @Query('limit') limit: string,
+        @Query('employeeId') employeeId: string,
+        @Query('boardFrom') boardFrom: string,
+        @Query('boardTo') boardTo: string,
+        @Request() req,
+    ) {
         const deptId = req.user.role === 'HEAD_OF_DEPARTMENT' ? req.user.departmentId : departmentId;
+        if (page && limit) {
+            return this.tasksService.findAllPaginated({
+                departmentId: deptId,
+                employeeId,
+                states: states ? states.split(',') : undefined,
+                boardFrom,
+                boardTo,
+                page: parseInt(page, 10),
+                limit: parseInt(limit, 10),
+            });
+        }
         return this.tasksService.findAll(deptId, from, to);
     }
 
@@ -74,7 +96,7 @@ export class TasksController {
         return this.tasksService.findByLead(leadId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Post(':taskId/attachments')
     @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({
@@ -100,67 +122,67 @@ export class TasksController {
         }, req.user.userId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Delete(':taskId/attachments/:attachmentId')
     removeAttachment(@Param('taskId') taskId: string, @Param('attachmentId') attachmentId: string) {
         return this.tasksService.removeAttachment(taskId, attachmentId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Post(':taskId/subtasks')
     createSubtask(@Param('taskId') taskId: string, @Body('title') title: string) {
         return this.tasksService.createSubtask(taskId, title);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get(':taskId/subtasks')
     getSubtasks(@Param('taskId') taskId: string) {
         return this.tasksService.getSubtasks(taskId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Patch('subtasks/:id')
     updateSubtask(@Param('id') id: string, @Body() dto: { title?: string; completed?: boolean; order?: number }) {
         return this.tasksService.updateSubtask(id, dto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Patch('subtasks/:id/toggle')
-    toggleSubtask(@Param('id') id: string) {
-        return this.tasksService.toggleSubtask(id);
+    toggleSubtask(@Param('id') id: string, @Request() req) {
+        return this.tasksService.toggleSubtask(id, req.user.userId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Patch(':taskId/subtasks/reorder')
     reorderSubtasks(@Param('taskId') taskId: string, @Body('subtaskIds') subtaskIds: string[]) {
         return this.tasksService.reorderSubtasks(taskId, subtaskIds);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Delete('subtasks/:id')
     deleteSubtask(@Param('id') id: string) {
         return this.tasksService.deleteSubtask(id);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.tasksService.findOne(id);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Patch(':id')
     update(@Param('id') id: string, @Body() updateTaskDto: any, @Request() req) {
         return this.tasksService.updateByUser(id, req.user.userId, req.user.role, updateTaskDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Delete(':id')
     remove(@Param('id') id: string, @Request() req) {
         return this.tasksService.removeByUser(id, req.user.userId, req.user.role);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get(':id/history')
     getHistory(@Param('id') id: string) {
         return this.tasksService.getHistory(id);

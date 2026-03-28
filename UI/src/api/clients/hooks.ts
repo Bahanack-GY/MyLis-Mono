@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { clientsApi } from './api';
 import type { CreateClientDto, UpdateClientDto } from './types';
 import { toast } from 'sonner';
@@ -14,6 +14,20 @@ export const useClients = (departmentId?: string) =>
     useQuery({
         queryKey: departmentId ? [...clientKeys.all, departmentId] : clientKeys.all,
         queryFn: () => clientsApi.getAll(departmentId),
+    });
+
+export const useInfiniteClients = (
+    params: { departmentId?: string; search?: string; type?: string } = {},
+) =>
+    useInfiniteQuery({
+        queryKey: ['clients', 'infinite', params],
+        queryFn: ({ pageParam }) =>
+            clientsApi.getPaginated({ ...params, page: pageParam as number, limit: 20 }),
+        getNextPageParam: (lastPage, allPages) => {
+            const loaded = allPages.reduce((s, p) => s + p.rows.length, 0);
+            return loaded < lastPage.count ? allPages.length + 1 : undefined;
+        },
+        initialPageParam: 1,
     });
 
 export const useClient = (id: string) =>

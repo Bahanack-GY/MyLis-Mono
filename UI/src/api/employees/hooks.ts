@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { employeesApi } from './api';
 import type { CreateEmployeeDto, UpdateEmployeeDto } from './types';
 import { toast } from 'sonner';
@@ -19,6 +19,22 @@ export const useEmployees = (departmentId?: string) =>
     useQuery({
         queryKey: departmentId ? [...employeeKeys.all, departmentId] : employeeKeys.all,
         queryFn: () => employeesApi.getAll(departmentId),
+    });
+
+export const useInfiniteEmployees = (
+    params: { departmentId?: string; search?: string; dismissed?: boolean } = {},
+    enabled = true,
+) =>
+    useInfiniteQuery({
+        queryKey: ['employees', 'infinite', params],
+        queryFn: ({ pageParam }) =>
+            employeesApi.getPaginated({ ...params, page: pageParam as number, limit: 20 }),
+        getNextPageParam: (lastPage, allPages) => {
+            const loaded = allPages.reduce((s, p) => s + p.rows.length, 0);
+            return loaded < lastPage.count ? allPages.length + 1 : undefined;
+        },
+        initialPageParam: 1,
+        enabled,
     });
 
 export const useEmployee = (id: string) =>

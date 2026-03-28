@@ -5,6 +5,7 @@ import {
     Delete,
     Param,
     Body,
+    Query,
     Request,
     UseGuards,
 } from '@nestjs/common';
@@ -35,7 +36,16 @@ export class ReportsController {
     }
 
     @Get()
-    findAll(@Request() req) {
+    findAll(@Query('page') page: string, @Query('limit') limit: string, @Request() req) {
+        if (page && limit) {
+            return this.reportsService.findAllPaginated(
+                req.user.userId,
+                req.user.role,
+                req.user.departmentId,
+                parseInt(page, 10),
+                parseInt(limit, 10),
+            );
+        }
         return this.reportsService.findAll(
             req.user.userId,
             req.user.role,

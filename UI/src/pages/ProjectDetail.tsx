@@ -201,7 +201,7 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
                     <h3 className="text-lg font-bold text-gray-800 mb-4">{t('projectDetail.overview.weeklyActivity')}</h3>
                     <div className="h-64">
                         {statusBarData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                 <BarChart data={statusBarData} barSize={36}>
                                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                     <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
@@ -231,7 +231,7 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
                 >
                     <h3 className="text-lg font-bold text-gray-800 mb-4">{t('projectDetail.overview.taskBreakdown')}</h3>
                     <div className="h-50 relative">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <PieChart>
                                 <Pie
                                     data={donutData}
@@ -510,7 +510,7 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
                         {revenue === 0 && totalExpenses === 0 ? (
                             <div className="flex items-center justify-center h-full text-gray-400 text-sm">—</div>
                         ) : (
-                            <ResponsiveContainer width="100%" height="100%">
+                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
                                 <PieChart>
                                     <Pie
                                         data={donutData}

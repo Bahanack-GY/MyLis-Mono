@@ -31,10 +31,10 @@ export class Client extends Model {
     declare price: string;
 
     @Column(DataType.STRING)
-    srs: string; // Link to SRS document? Or text? Assuming string for now based on req.
+    declare srs: string;
 
     @Column(DataType.STRING)
-    contract: string; // Link to contract?
+    declare contract: string;
 
     @Column({
         type: DataType.ENUM(...Object.values(ClientType)),

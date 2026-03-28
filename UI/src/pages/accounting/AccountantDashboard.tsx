@@ -345,7 +345,7 @@ const AccountantDashboard = () => {
  <h3 className="text-base font-bold text-gray-800 mb-1">Revenus vs Charges</h3>
  <p className="text-xs text-gray-400 mb-6">Repartition mensuelle</p>
  <div className="h-[300px] w-full">
- <ResponsiveContainer width="100%"height="100%">
+ <ResponsiveContainer width="100%" height="100%" debounce={50}>
  <RechartsBarChart
  data={monthlyData}
  margin={{ top: 8, right: 16, left: 0, bottom: 0 }}
@@ -418,7 +418,7 @@ const AccountantDashboard = () => {
  </div>
  ) : (
  <div className="flex-1 min-h-[280px] relative">
- <ResponsiveContainer width="100%"height="100%">
+ <ResponsiveContainer width="100%" height="100%" debounce={50}>
  <PieChart>
  <Pie
  data={pieData}

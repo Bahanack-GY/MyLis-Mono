@@ -19,4 +19,12 @@ export const clientsApi = {
 
     getByDepartment: (departmentId: string) =>
         api.get<Client[]>(`/clients/department/${departmentId}`).then(r => r.data),
+
+    getPaginated: (params: { departmentId?: string; search?: string; type?: string; page: number; limit: number }) => {
+        const p: Record<string, string | number> = { page: params.page, limit: params.limit };
+        if (params.departmentId) p.departmentId = params.departmentId;
+        if (params.search) p.search = params.search;
+        if (params.type) p.type = params.type;
+        return api.get<{ rows: Client[]; count: number }>('/clients', { params: p }).then(r => r.data);
+    },
 };

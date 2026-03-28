@@ -16,4 +16,7 @@ export const reportsApi = {
 
     remove: (id: string) =>
         api.delete(`/reports/${id}`).then(r => r.data),
+
+    getPaginated: (params: { page: number; limit: number }) =>
+        api.get<{ rows: Report[]; count: number }>('/reports', { params }).then(r => r.data),
 };

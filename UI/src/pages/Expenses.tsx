@@ -244,7 +244,7 @@ export default function Expenses() {
                 )}
                 <div className="h-72">
                     {allSeries.length > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <LineChart data={stats?.byMonth || []}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} dy={10} />
@@ -281,7 +281,7 @@ export default function Expenses() {
                 <h3 className="text-sm font-bold text-gray-800 mb-6 uppercase tracking-wider">Par Catégorie</h3>
                 <div className="h-64">
                     {(stats?.byCategory?.length || 0) > 0 ? (
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={stats?.byCategory || []} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
                                 <XAxis type="number" hide />

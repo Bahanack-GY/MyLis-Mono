@@ -280,19 +280,32 @@ Return ONLY a valid JSON object (no markdown, no code fences, no explanation):
 }`;
 
         try {
+            const ollamaController = new AbortController();
+            const ollamaTimeout = setTimeout(() => ollamaController.abort(), 900_000); // 15 minutes
+
             const ollamaResponse = await fetch(`${this.ollamaBaseUrl}/api/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: this.ollamaModel, prompt, stream: false }),
-            });
+                body: JSON.stringify({
+                    model: this.ollamaModel,
+                    prompt,
+                    stream: false,
+                    think: false,
+                    options: { temperature: 0.3, num_predict: 4000 },
+                }),
+                signal: ollamaController.signal,
+            }).finally(() => clearTimeout(ollamaTimeout));
 
             if (ollamaResponse.ok) {
                 const ollamaData = await ollamaResponse.json() as { response: string };
                 const raw = ollamaData.response || '';
                 console.log(`[Meetings] Ollama raw response (first 200): ${raw.slice(0, 200)}`);
 
-                // Strip markdown code fences if present, then extract JSON object
-                const stripped = raw.replace(/```(?:json)?/gi, '').replace(/```/g, '');
+                // Strip thinking tags, markdown fences, then extract JSON object
+                const stripped = raw
+                    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+                    .replace(/```(?:json)?/gi, '')
+                    .replace(/```/g, '');
                 const jsonMatch = stripped.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
                     const report = JSON.parse(jsonMatch[0]);

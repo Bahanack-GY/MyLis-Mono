@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Client } from '../models/client.model';
 import { Project } from '../models/project.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class ClientsService {
@@ -35,5 +36,31 @@ export class ClientsService {
 
     async findByDepartment(departmentId: string): Promise<Client[]> {
         return this.clientModel.findAll({ where: { departmentId }, include: [Project] });
+    }
+
+    async findAllPaginated(params: {
+        departmentId?: string;
+        search?: string;
+        type?: string;
+        page: number;
+        limit: number;
+    }): Promise<{ rows: Client[]; count: number }> {
+        const where: any = {};
+        if (params.departmentId) where.departmentId = params.departmentId;
+        if (params.type && params.type !== 'all') where.type = params.type;
+        if (params.search) {
+            where[Op.or] = [
+                { name: { [Op.iLike]: `%${params.search}%` } },
+                { projectDescription: { [Op.iLike]: `%${params.search}%` } },
+            ];
+        }
+        return this.clientModel.findAndCountAll({
+            where,
+            include: [Project],
+            limit: params.limit,
+            offset: (params.page - 1) * params.limit,
+            order: [['name', 'ASC']],
+            distinct: true,
+        });
     }
 }

@@ -34,7 +34,7 @@ export class ProjectsController {
         return this.projectsService.findByDepartmentForEmployee(deptId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
     @Get('my-projects/:id')
     async findMyProjectDetail(@Param('id') id: string) {
         return this.projectsService.findOneForEmployee(id);

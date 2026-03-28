@@ -9,6 +9,7 @@ describe('TasksController', () => {
   beforeEach(async () => {
     service = {
       findAll: jest.fn().mockResolvedValue([]),
+      findAllPaginated: jest.fn().mockResolvedValue({ rows: [], count: 0 }),
       findOne: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -29,13 +30,13 @@ describe('TasksController', () => {
   describe('findAll - department scoping', () => {
     it('should pass departmentId query param for MANAGER', async () => {
       const req = { user: { role: 'MANAGER', departmentId: null } };
-      await controller.findAll('dept-1', undefined as any, undefined as any, req);
+      await controller.findAll('dept-1', undefined as any, undefined as any, undefined as any, undefined as any, undefined as any, undefined as any, undefined as any, undefined as any, req);
       expect(service.findAll).toHaveBeenCalledWith('dept-1', undefined, undefined);
     });
 
     it('should force own departmentId for HEAD_OF_DEPARTMENT', async () => {
       const req = { user: { role: 'HEAD_OF_DEPARTMENT', departmentId: 'hod-dept' } };
-      await controller.findAll('other-dept', undefined as any, undefined as any, req);
+      await controller.findAll('other-dept', undefined as any, undefined as any, undefined as any, undefined as any, undefined as any, undefined as any, undefined as any, undefined as any, req);
       expect(service.findAll).toHaveBeenCalledWith('hod-dept', undefined, undefined);
     });
   });
@@ -72,8 +73,9 @@ describe('TasksController', () => {
     it('create should delegate to service.create', async () => {
       const dto = { title: 'New Task', state: 'CREATED' };
       service.create.mockResolvedValue({ id: '1', ...dto });
-      const result = await controller.create(dto);
-      expect(service.create).toHaveBeenCalledWith(dto);
+      const req = { user: { userId: 'user-1' } };
+      const result = await controller.create(dto, req);
+      expect(service.create).toHaveBeenCalledWith(dto, 'user-1');
       expect(result).toHaveProperty('id', '1');
     });
 

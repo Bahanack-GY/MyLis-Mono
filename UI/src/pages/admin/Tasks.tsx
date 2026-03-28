@@ -1,15 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ChevronLeft, ChevronRight, Flag, Search, X, AlertCircle,
+    ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Flag, Search, X, AlertCircle,
     ArrowLeft, Clock, Plus, CalendarDays,
     AlignLeft, Briefcase, BarChart3, RefreshCw, Loader2, Zap,
     Pencil, Trash2, History, Save, CalendarRange, Columns3, Tag, Settings,
     ListTodo, Target, Paperclip, Download, FileText, AlertTriangle, Star,
 } from 'lucide-react';
-import { useTasks, useCreateTask, useUpdateTask, useDeleteTask, useTaskHistory, useWeeklyCheckForEmployee, useCreateSubtask, useToggleSubtask, useDeleteSubtask, useUploadTaskAttachment, useDeleteTaskAttachment } from '../../api/tasks/hooks';
+import { useTasks, useInfiniteTasksByStates, useCreateTask, useUpdateTask, useDeleteTask, useTaskHistory, useWeeklyCheckForEmployee, useCreateSubtask, useToggleSubtask, useDeleteSubtask, useUploadTaskAttachment, useDeleteTaskAttachment } from '../../api/tasks/hooks';
+import type { Task } from '../../api/tasks/types';
 import type { Subtask, TaskAttachment } from '../../api/tasks/types';
 import { TasksAdminSkeleton } from '../../components/Skeleton';
 import { useEmployees } from '../../api/employees/hooks';
@@ -110,6 +111,7 @@ const ROW_H = 72; // Base row height (min height)
 const TASK_H = 40; // Height of a single task
 const TASK_GAP = 8; // Vertical gap between tasks
 const HEADER_H = 64;
+const MAX_VISIBLE_LANES = 2; // Lanes shown per row when collapsed
 const DAY_PX: Record<ViewMode, number> = { day: 600, week: 100, month: 52, year: 7 };
 
 /* ─── Lane Helper ─────────────────────────────────────────── */
@@ -1195,6 +1197,59 @@ const AddTaskModal = ({
     );
 };
 
+/* ─── Board Column with fixed height + lazy loading ─────── */
+
+const BoardColumn = ({ dot, label, count, tasks, hasMore, isLoadingMore, onLoadMore, renderCard }: {
+    dot: string;
+    label: string;
+    count: number;
+    tasks: any[];
+    hasMore: boolean;
+    isLoadingMore: boolean;
+    onLoadMore: () => void;
+    renderCard: (task: any) => React.ReactNode;
+}) => {
+    const sentinelRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const el = sentinelRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting && hasMore && !isLoadingMore) onLoadMore(); },
+            { threshold: 0.1 },
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [hasMore, isLoadingMore, onLoadMore]);
+
+    return (
+        <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dot }} />
+                    <span className="text-sm font-bold text-gray-700">{label}</span>
+                </div>
+                <span className="text-xs font-semibold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+                    {count}
+                </span>
+            </div>
+            <div className="flex flex-col gap-3 h-[calc(100vh-340px)] overflow-y-auto pr-1">
+                {tasks.map(task => renderCard(task))}
+                {(hasMore || isLoadingMore) && (
+                    <div ref={sentinelRef} className="flex items-center justify-center py-3">
+                        <Loader2 size={16} className="animate-spin text-gray-300" />
+                    </div>
+                )}
+                {!isLoadingMore && tasks.length === 0 && (
+                    <div className="flex-1 rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center py-10">
+                        <p className="text-xs text-gray-300">—</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 /* ═══════════════════════════════════════════════════════════ */
 /*  Main Component                                           */
 /* ═══════════════════════════════════════════════════════════ */
@@ -1202,7 +1257,7 @@ const AddTaskModal = ({
 const Tasks = () => {
     const { t } = useTranslation();
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [pageView, setPageView] = useState<'calendar' | 'board'>('calendar');
+    const [pageView, setPageView] = useState<'calendar' | 'board'>('board');
     const [viewMode, setViewMode] = useState<ViewMode>('week');
     const [boardFilterEmployee, setBoardFilterEmployee] = useState('');
     const [boardFilterDepartment, setBoardFilterDepartment] = useState('');
@@ -1215,10 +1270,13 @@ const Tasks = () => {
     const [editingGanttTask, setEditingGanttTask] = useState<{ task: GanttTask; emp: EmployeeRow } | null>(null);
     const [historyTaskId, setHistoryTaskId] = useState<string | null>(null);
     const [showNatureManager, setShowNatureManager] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+    const toggleRow = (id: number) => setExpandedRows(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
     // API data
     const deptScope = useDepartmentScope();
-    const { data: apiTasks, isLoading: loadingTasks } = useTasks(deptScope);
+    // Calendar view needs full task list; board view uses its own paginated queries
+    const { data: apiTasks, isLoading: loadingTasks } = useTasks(deptScope, undefined, undefined, pageView === 'calendar');
     const { data: apiEmployees, isLoading: loadingEmployees } = useEmployees(deptScope);
     const { data: apiDepartments } = useDepartments();
     const createTaskMutation = useCreateTask();
@@ -1292,6 +1350,7 @@ const Tasks = () => {
         origStart: Date; origEnd: Date;
     } | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+    const headerScrollRef = useRef<HTMLDivElement>(null);
     const wasDragging = useRef(false);
     const dayPxRef = useRef(0);
     const [timelineWidth, setTimelineWidth] = useState(0);
@@ -1304,6 +1363,18 @@ const Tasks = () => {
         });
         ro.observe(el);
         return () => ro.disconnect();
+    }, []);
+
+    // Sync fixed header horizontal scroll with the body timeline scroll
+    useEffect(() => {
+        const body = scrollRef.current;
+        if (!body) return;
+        const onScroll = () => {
+            const header = headerScrollRef.current;
+            if (header) header.scrollLeft = body.scrollLeft;
+        };
+        body.addEventListener('scroll', onScroll, { passive: true });
+        return () => body.removeEventListener('scroll', onScroll);
     }, []);
 
     const today = new Date();
@@ -1379,6 +1450,9 @@ const Tasks = () => {
         ? employees.find(e => e.id === selectedEmployeeId)
         : null;
 
+    const allExpanded = filteredEmployees.length > 0 && filteredEmployees.every(e => expandedRows.has(e.id));
+    const toggleAllRows = () => setExpandedRows(allExpanded ? new Set() : new Set(filteredEmployees.map(e => e.id)));
+
     /* ── Navigation ── */
 
     const nav = (dir: number) => {
@@ -1417,6 +1491,51 @@ const Tasks = () => {
         : numDaysInMonth(boardCurrentDate.getFullYear(), boardCurrentDate.getMonth());
 
     const boardViewEnd = addDays(boardViewStart, boardViewDays - 1);
+
+    // Board-view paginated queries — one per status group
+    const boardEndOfDay = new Date(boardViewEnd.getFullYear(), boardViewEnd.getMonth(), boardViewEnd.getDate(), 23, 59, 59, 999);
+    const boardFilters = {
+        departmentId: boardFilterDepartment || deptScope || undefined,
+        employeeId: boardFilterEmployee || undefined,
+        boardFrom: boardViewStart.toISOString(),
+        boardTo: boardEndOfDay.toISOString(),
+    };
+    const todoQuery = useInfiniteTasksByStates(['CREATED', 'ASSIGNED'], boardFilters, pageView === 'board');
+    const inProgressQuery = useInfiniteTasksByStates(['IN_PROGRESS', 'BLOCKED'], boardFilters, pageView === 'board');
+    const doneQuery = useInfiniteTasksByStates(['COMPLETED', 'REVIEWED'], boardFilters, pageView === 'board');
+    const boardTotalCount =
+        (todoQuery.data?.pages[0]?.count ?? 0) +
+        (inProgressQuery.data?.pages[0]?.count ?? 0) +
+        (doneQuery.data?.pages[0]?.count ?? 0);
+
+    // Map raw API task to board card shape
+    const deptNameMap = Object.fromEntries((apiDepartments || []).map(d => [d.id, (d as any).name as string]));
+    const TASK_COLOR_MAP_BOARD: Record<string, ColorKey> = { EASY: 'teal', MEDIUM: 'blue', HARD: 'rose' };
+    const STATE_STATUS_MAP_BOARD: Record<string, 'todo' | 'in_progress' | 'done'> = {
+        CREATED: 'todo', ASSIGNED: 'todo', IN_PROGRESS: 'in_progress',
+        BLOCKED: 'in_progress', COMPLETED: 'done', REVIEWED: 'done',
+    };
+    const mapBoardTask = (t: Task) => {
+        const emp = t.assignedTo;
+        const start = t.startDate ? new Date(t.startDate) : (t.dueDate ? new Date(t.dueDate) : new Date());
+        const end = t.endDate ? new Date(t.endDate) : start;
+        return {
+            ...t,
+            apiId: t.id,
+            startDate: start,
+            endDate: end,
+            status: STATE_STATUS_MAP_BOARD[t.state] || 'todo',
+            subtitle: t.project?.name || '',
+            color: (TASK_COLOR_MAP_BOARD[t.difficulty] || 'blue') as ColorKey,
+            natureName: t.nature?.name,
+            employee: {
+                apiId: emp?.id || '',
+                avatar: emp?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(((emp?.firstName || '') + '+' + (emp?.lastName || '')))}`,
+                name: emp ? `${emp.firstName} ${emp.lastName}` : '',
+                departmentName: emp?.departmentId ? (deptNameMap[emp.departmentId] || '') : '',
+            },
+        };
+    };
 
     const boardNavLabel = boardViewMode === 'week'
         ? (() => {
@@ -1659,32 +1778,25 @@ const Tasks = () => {
             {pageView === 'board' && (() => {
                 const selectCls = 'bg-white rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
 
-                const allTasks = employees.flatMap(emp => {
-                    if (boardFilterDepartment && emp.departmentId !== boardFilterDepartment) return [];
-                    if (boardFilterEmployee && emp.apiId !== boardFilterEmployee) return [];
-                    return emp.tasks
-                        .filter(t => {
-                            // date range overlap: task overlaps [boardViewStart, boardViewEnd]
-                            const ts = new Date(t.startDate); ts.setHours(0, 0, 0, 0);
-                            const te = new Date(t.endDate);   te.setHours(23, 59, 59, 999);
-                            if (ts > boardViewEnd || te < boardViewStart) return false;
-                            // text search: when an employee is already selected via dropdown, only match title
-                            // otherwise also match by employee name so typing a name shows their tasks
-                            if (searchQuery) {
-                                const titleMatch = t.title.toLowerCase().includes(searchQuery.toLowerCase());
-                                const nameMatch = !boardFilterEmployee && emp.name.toLowerCase().includes(searchQuery.toLowerCase());
-                                if (!titleMatch && !nameMatch) return false;
-                            }
-                            return true;
-                        })
-                        .map(t => ({ ...t, employee: emp }));
-                });
+                // Apply client-side text search on already-loaded results
+                const filterBySearch = (tasks: ReturnType<typeof mapBoardTask>[]) => {
+                    if (!searchQuery) return tasks;
+                    const q = searchQuery.toLowerCase();
+                    return tasks.filter(t =>
+                        t.title.toLowerCase().includes(q) ||
+                        t.employee.name.toLowerCase().includes(q),
+                    );
+                };
+
+                const todoTasks = filterBySearch((todoQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
+                const inProgressTasks = filterBySearch((inProgressQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
+                const doneTasks = filterBySearch((doneQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
 
                 const BOARD_COLS = [
-                    { key: 'todo',        label: t('tasksPage.todo'),       dot: '#9ca3af' },
-                    { key: 'in_progress', label: t('tasksPage.inProgress'), dot: '#f59e0b' },
-                    { key: 'done',        label: t('tasksPage.done'),        dot: '#22c55e' },
-                ] as const;
+                    { key: 'todo' as const,        label: t('tasksPage.todo'),       dot: '#9ca3af', query: todoQuery,       tasks: todoTasks },
+                    { key: 'in_progress' as const, label: t('tasksPage.inProgress'), dot: '#f59e0b', query: inProgressQuery, tasks: inProgressTasks },
+                    { key: 'done' as const,        label: t('tasksPage.done'),        dot: '#22c55e', query: doneQuery,       tasks: doneTasks },
+                ];
 
                 const diffLabel: Record<ColorKey, string> = {
                     teal:  t('tasksPage.difficultyEasy'),
@@ -1732,7 +1844,7 @@ const Tasks = () => {
                             </div>
 
                             <span className="text-xs text-gray-400">
-                                {allTasks.length} {allTasks.length === 1 ? t('tasksPage.taskNumber') : t('tasksPage.taskNumber') + 's'}
+                                {boardTotalCount} {boardTotalCount === 1 ? t('tasksPage.taskNumber') : t('tasksPage.taskNumber') + 's'}
                             </span>
                         </div>
 
@@ -1775,103 +1887,78 @@ const Tasks = () => {
 
                         {/* Columns */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            {BOARD_COLS.map(col => {
-                                const colTasks = allTasks.filter(t => t.status === col.key);
-                                return (
-                                    <div key={col.key} className="flex flex-col gap-3">
-                                        {/* Column header */}
-                                        <div className="flex items-center justify-between px-1">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: col.dot }} />
-                                                <span className="text-sm font-bold text-gray-700">{col.label}</span>
-                                            </div>
-                                            <span className="text-xs font-semibold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
-                                                {colTasks.length}
-                                            </span>
-                                        </div>
-
-                                        {/* Cards */}
-                                        <div className="flex flex-col gap-3 min-h-40">
-                                            {colTasks.map(task => {
-                                                const c = TASK_COLORS[task.color];
-                                                return (
-                                                    <motion.div
-                                                        key={task.id}
-                                                        initial={{ opacity: 0, y: 6 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        onClick={() => setModalData({ task, employee: task.employee })}
-                                                        className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-[#33cbcc]/30  transition-all"
-                                                        style={{ borderLeft: `3px solid ${c.border}` }}
-                                                    >
-                                                        {/* Title + flag */}
-                                                        <div className="flex items-start justify-between gap-2 mb-3">
-                                                            <p className="text-sm font-semibold text-gray-800 leading-snug">{task.title}</p>
-                                                            {task.hasFlag && <Flag size={13} className="shrink-0 mt-0.5 text-rose-400" />}
-                                                            {task.urgent && <AlertTriangle size={13} className="shrink-0 mt-0.5 text-red-400" />}
-                                                            {task.important && <Star size={13} className="shrink-0 mt-0.5 text-amber-400" />}
-                                                        </div>
-
-                                                        {/* Project */}
-                                                        {task.subtitle && (
-                                                            <div className="flex items-center gap-1.5 mb-2">
-                                                                <Briefcase size={11} className="text-gray-400 shrink-0" />
-                                                                <span className="text-[11px] text-gray-400">{task.subtitle}</span>
-                                                            </div>
-                                                        )}
-
-                                                        {/* Nature */}
-                                                        {task.natureName && (
-                                                            <div className="flex items-center gap-1.5 mb-2">
-                                                                <Tag size={11} className="text-gray-400 shrink-0" />
-                                                                <span className="text-[11px] text-gray-400">{task.natureName}</span>
-                                                            </div>
-                                                        )}
-
-                                                        {/* Date range */}
-                                                        <div className="flex items-center gap-1.5 mb-3">
-                                                            <CalendarDays size={11} className="text-gray-400 shrink-0" />
-                                                            <span className="text-[11px] text-gray-400">
-                                                                {task.startDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                                {' – '}
-                                                                {task.endDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                            </span>
-                                                        </div>
-
-                                                        {/* Footer: employee + difficulty */}
-                                                        <div className="flex items-center justify-between gap-2">
-                                                            <div className="flex items-center gap-2 min-w-0">
-                                                                <img
-                                                                    src={task.employee.avatar}
-                                                                    alt={task.employee.name}
-                                                                    className="w-6 h-6 rounded-full border border-gray-200 shrink-0 object-cover"
-                                                                />
-                                                                <div className="min-w-0">
-                                                                    <p className="text-[11px] text-gray-600 font-medium truncate">{task.employee.name}</p>
-                                                                    {task.employee.departmentName && (
-                                                                        <p className="text-[10px] text-gray-400 truncate">{task.employee.departmentName}</p>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <span
-                                                                className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                                                                style={{ backgroundColor: c.bg, color: c.text }}
-                                                            >
-                                                                {diffLabel[task.color]}
-                                                            </span>
-                                                        </div>
-                                                    </motion.div>
-                                                );
-                                            })}
-
-                                            {colTasks.length === 0 && (
-                                                <div className="flex-1 rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center py-10">
-                                                    <p className="text-xs text-gray-300">—</p>
+                            {BOARD_COLS.map(col => (
+                                <BoardColumn
+                                    key={col.key}
+                                    dot={col.dot}
+                                    label={col.label}
+                                    count={col.query.data?.pages[0]?.count ?? 0}
+                                    tasks={col.tasks}
+                                    hasMore={col.query.hasNextPage ?? false}
+                                    isLoadingMore={col.query.isFetchingNextPage}
+                                    onLoadMore={() => col.query.fetchNextPage()}
+                                    renderCard={(task) => {
+                                        const c = TASK_COLORS[task.color as ColorKey];
+                                        return (
+                                            <motion.div
+                                                key={task.id}
+                                                initial={{ opacity: 0, y: 6 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                onClick={() => setModalData({ task, employee: task.employee })}
+                                                className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-[#33cbcc]/30 transition-all"
+                                                style={{ borderLeft: `3px solid ${c.border}` }}
+                                            >
+                                                <div className="flex items-start justify-between gap-2 mb-3">
+                                                    <p className="text-sm font-semibold text-gray-800 leading-snug">{task.title}</p>
+                                                    {task.urgent && <AlertTriangle size={13} className="shrink-0 mt-0.5 text-red-400" />}
+                                                    {task.important && <Star size={13} className="shrink-0 mt-0.5 text-amber-400" />}
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })}
+                                                {task.subtitle && (
+                                                    <div className="flex items-center gap-1.5 mb-2">
+                                                        <Briefcase size={11} className="text-gray-400 shrink-0" />
+                                                        <span className="text-[11px] text-gray-400">{task.subtitle}</span>
+                                                    </div>
+                                                )}
+                                                {task.natureName && (
+                                                    <div className="flex items-center gap-1.5 mb-2">
+                                                        <Tag size={11} className="text-gray-400 shrink-0" />
+                                                        <span className="text-[11px] text-gray-400">{task.natureName}</span>
+                                                    </div>
+                                                )}
+                                                <div className="flex items-center gap-1.5 mb-3">
+                                                    <CalendarDays size={11} className="text-gray-400 shrink-0" />
+                                                    <span className="text-[11px] text-gray-400">
+                                                        {(task.startDate as Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                        {' – '}
+                                                        {(task.endDate as Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-2 min-w-0">
+                                                        <img
+                                                            src={task.employee.avatar}
+                                                            alt={task.employee.name}
+                                                            className="w-6 h-6 rounded-full border border-gray-200 shrink-0 object-cover"
+                                                        />
+                                                        <div className="min-w-0">
+                                                            <p className="text-[11px] text-gray-600 font-medium truncate">{task.employee.name}</p>
+                                                            {task.employee.departmentName && (
+                                                                <p className="text-[10px] text-gray-400 truncate">{task.employee.departmentName}</p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <span
+                                                        className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                                                        style={{ backgroundColor: c.bg, color: c.text }}
+                                                    >
+                                                        {diffLabel[task.color as ColorKey]}
+                                                    </span>
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    }}
+                                />
+                            ))}
                         </div>
                     </motion.div>
                 );
@@ -1965,43 +2052,129 @@ const Tasks = () => {
             </AnimatePresence>
 
             {/* ═══ Gantt chart ═══ */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
-                <div className="flex">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-100 shadow-sm" style={{ overflow: 'clip' }}>
+                <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 300px)' }}>
 
-                    {/* ── Employee column (sticky) ── */}
-                    <div className="shrink-0 w-15 sm:w-65 border-r border-gray-100 z-10 bg-white">
-                        <div style={{ height: `${HEADER_H}px` }} className="border-b border-gray-100 flex items-center px-3 sm:px-5">
+                    {/* ── Fixed header row (employees label + date headers) ── */}
+                    <div className="flex shrink-0 border-b border-gray-100 bg-white z-20">
+                        {/* Left: employees label + expand-all */}
+                        <div className="shrink-0 w-15 sm:w-65 border-r border-gray-100 flex items-center justify-between px-3 sm:px-5" style={{ height: `${HEADER_H}px` }}>
                             <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden sm:block">
                                 {t('tasksPage.employees')}
                             </span>
+                            <button
+                                onClick={toggleAllRows}
+                                title={allExpanded ? 'Collapse all' : 'Expand all'}
+                                className="hidden sm:flex items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-[#33cbcc] transition-colors px-2 py-1 rounded-lg hover:bg-[#33cbcc]/8"
+                            >
+                                {allExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                                {allExpanded ? 'Collapse' : 'Expand'}
+                            </button>
                         </div>
+                        {/* Right: date header — mirrors the scrollRef scroll position */}
+                        <div ref={headerScrollRef} className="flex-1 overflow-hidden">
+                            <div
+                                style={{ width: `${totalWidth}px`, height: `${HEADER_H}px` }}
+                                className="relative"
+                                id="gantt-header-inner"
+                            >
+                                {viewMode === 'year' ? (
+                                    <div className="flex h-full">
+                                        {yearMonths.map(m => {
+                                            const isCurrentMonth = today.getFullYear() === currentDate.getFullYear() && today.getMonth() === m.month;
+                                            return (
+                                                <div key={m.month} style={{ width: `${m.width}px` }}
+                                                    className={`shrink-0 flex items-center justify-center border-r border-gray-200 ${isCurrentMonth ? 'bg-[#33cbcc]/5' : m.month % 2 === 1 ? 'bg-gray-50/40' : ''}`}>
+                                                    <span className={`text-xs font-semibold ${isCurrentMonth ? 'text-[#33cbcc]' : 'text-gray-600'}`}>{m.name}</span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : viewMode === 'day' ? (
+                                    <div className="flex h-full">
+                                        <div style={{ width: `${dayPx}px` }} className={`shrink-0 flex items-center justify-center gap-3 ${columns[0]?.isToday ? 'bg-red-50/50' : ''}`}>
+                                            <span className={`text-sm font-semibold ${columns[0]?.isToday ? 'text-red-500' : 'text-gray-600'}`}>{DAY_NAMES_FULL[columns[0]?.dow ?? 0]}</span>
+                                            {columns[0]?.isToday
+                                                ? <span className="w-8 h-8 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center shadow-sm shadow-red-200">{columns[0]?.date.getDate()}</span>
+                                                : <span className="text-lg font-bold text-gray-800">{columns[0]?.date.getDate()}</span>}
+                                            <span className={`text-sm font-medium ${columns[0]?.isToday ? 'text-red-400' : 'text-gray-400'}`}>{MONTH_NAMES[columns[0]?.date.getMonth() ?? 0]}</span>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex h-full">
+                                        {columns.map(col => (
+                                            <div key={col.index} style={{ width: `${dayPx}px` }}
+                                                className={`shrink-0 flex flex-col items-center justify-center border-r border-gray-50 ${col.isWeekend ? 'bg-gray-50/50' : ''}`}>
+                                                <span className={`text-[11px] font-medium ${col.isToday ? 'text-red-500' : col.isWeekend ? 'text-gray-300' : 'text-gray-400'}`}>
+                                                    {viewMode === 'week' ? DAY_NAMES_FULL[col.dow] : DAY_NAMES_SHORT[col.dow]}
+                                                </span>
+                                                {col.isToday
+                                                    ? <span className="w-7 h-7 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center mt-1 shadow-sm shadow-red-200">{col.date.getDate()}</span>
+                                                    : <span className={`text-sm font-semibold mt-1 ${col.isWeekend ? 'text-gray-300' : 'text-gray-700'}`}>{col.date.getDate()}</span>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── Scrollable body ── */}
+                    <div className="flex flex-1 overflow-y-auto">
+
+                    {/* ── Employee column ── */}
+                    <div className="shrink-0 w-15 sm:w-65 border-r border-gray-100 z-10 bg-white">
 
                         {filteredEmployees.map(emp => {
                             const isActive = selectedEmployeeId === emp.id;
-                            const h = Math.max(ROW_H, (emp.laneCount || 1) * (TASK_H + TASK_GAP) + TASK_GAP * 2);
+                            const isExpanded = expandedRows.has(emp.id);
+                            const visibleLanes = isExpanded ? (emp.laneCount || 1) : Math.min(emp.laneCount || 1, MAX_VISIBLE_LANES);
+                            const h = Math.max(ROW_H, visibleLanes * (TASK_H + TASK_GAP) + TASK_GAP * 2);
+                            const hiddenCount = emp.tasks.filter(t => (t.lane || 0) >= MAX_VISIBLE_LANES).length;
                             return (
                                 <div
                                     key={emp.id}
-                                    onClick={() => setSelectedEmployeeId(prev => prev === emp.id ? null : emp.id)}
                                     style={{ height: `${h}px` }}
-                                    className={`border-b border-gray-50 flex items-center gap-3 px-2 sm:px-5 cursor-pointer transition-all group
+                                    className={`border-b border-gray-50 flex items-center gap-3 px-2 sm:px-5 transition-all group relative
                                         ${isActive ? 'bg-[#33cbcc]/5' : 'hover:bg-gray-50/80'}`}
                                 >
-                                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden shrink-0 border-2 transition-colors
-                                        ${isActive ? 'border-[#33cbcc] ring-2 ring-[#33cbcc]/20' : 'border-gray-100 group-hover:border-[#33cbcc]/40'}`}>
-                                        <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <div className="min-w-0 hidden sm:block flex-1">
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-sm font-semibold text-gray-800 truncate">{emp.name}</p>
-                                            {emp.tasks.length > 0 && (
-                                                <span className="shrink-0 text-[10px] font-bold text-[#33cbcc] bg-[#33cbcc]/10 rounded-full px-1.5 py-0.5 leading-none">
-                                                    {emp.tasks.length}
-                                                </span>
-                                            )}
+                                    <div
+                                        className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+                                        onClick={() => setSelectedEmployeeId(prev => prev === emp.id ? null : emp.id)}
+                                    >
+                                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden shrink-0 border-2 transition-colors
+                                            ${isActive ? 'border-[#33cbcc] ring-2 ring-[#33cbcc]/20' : 'border-gray-100 group-hover:border-[#33cbcc]/40'}`}>
+                                            <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
                                         </div>
-                                        <p className="text-xs text-gray-400 truncate mt-0.5">{emp.role}</p>
+                                        <div className="min-w-0 hidden sm:block flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <p className="text-sm font-semibold text-gray-800 truncate">{emp.name}</p>
+                                                {emp.tasks.length > 0 && (
+                                                    <span className="shrink-0 text-[10px] font-bold text-[#33cbcc] bg-[#33cbcc]/10 rounded-full px-1.5 py-0.5 leading-none">
+                                                        {emp.tasks.length}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-400 truncate mt-0.5">{emp.role}</p>
+                                        </div>
                                     </div>
+                                    {!isExpanded && hiddenCount > 0 && (
+                                        <button
+                                            onClick={() => toggleRow(emp.id)}
+                                            className="hidden sm:flex shrink-0 items-center gap-1 text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 rounded-full px-2 py-0.5 transition-colors"
+                                        >
+                                            <ChevronDown size={10} />
+                                            +{hiddenCount}
+                                        </button>
+                                    )}
+                                    {isExpanded && hiddenCount > 0 && (
+                                        <button
+                                            onClick={() => toggleRow(emp.id)}
+                                            className="hidden sm:flex shrink-0 items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-gray-600 rounded-full px-2 py-0.5 transition-colors"
+                                        >
+                                            <ChevronUp size={10} />
+                                        </button>
+                                    )}
                                 </div>
                             );
                         })}
@@ -2017,80 +2190,17 @@ const Tasks = () => {
                     <div ref={scrollRef} className="flex-1 overflow-x-auto">
                         <div style={{ width: `${totalWidth}px` }} className="relative">
 
-                            {/* ── Header row ── */}
-                            {viewMode === 'year' ? (
-                                /* Year: month-span headers */
-                                <div style={{ height: `${HEADER_H}px` }} className="border-b border-gray-100 flex sticky top-0 bg-white z-10">
-                                    {yearMonths.map(m => {
-                                        const isCurrentMonth = today.getFullYear() === currentDate.getFullYear() && today.getMonth() === m.month;
-                                        return (
-                                            <div
-                                                key={m.month}
-                                                style={{ width: `${m.width}px` }}
-                                                className={`shrink-0 flex items-center justify-center border-r border-gray-200
-                                                    ${isCurrentMonth ? 'bg-[#33cbcc]/5' : m.month % 2 === 1 ? 'bg-gray-50/40' : ''}`}
-                                            >
-                                                <span className={`text-xs font-semibold ${isCurrentMonth ? 'text-[#33cbcc]' : 'text-gray-600'}`}>{m.name}</span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            ) : viewMode === 'day' ? (
-                                /* Day: single wide column */
-                                <div style={{ height: `${HEADER_H}px` }} className="border-b border-gray-100 flex sticky top-0 bg-white z-10">
-                                    <div
-                                        style={{ width: `${dayPx}px` }}
-                                        className={`shrink-0 flex items-center justify-center gap-3 ${columns[0]?.isToday ? 'bg-red-50/50' : ''}`}
-                                    >
-                                        <span className={`text-sm font-semibold ${columns[0]?.isToday ? 'text-red-500' : 'text-gray-600'}`}>
-                                            {DAY_NAMES_FULL[columns[0]?.dow ?? 0]}
-                                        </span>
-                                        {columns[0]?.isToday ? (
-                                            <span className="w-8 h-8 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center shadow-sm shadow-red-200">
-                                                {columns[0]?.date.getDate()}
-                                            </span>
-                                        ) : (
-                                            <span className="text-lg font-bold text-gray-800">{columns[0]?.date.getDate()}</span>
-                                        )}
-                                        <span className={`text-sm font-medium ${columns[0]?.isToday ? 'text-red-400' : 'text-gray-400'}`}>
-                                            {MONTH_NAMES[columns[0]?.date.getMonth() ?? 0]}
-                                        </span>
-                                    </div>
-                                </div>
-                            ) : (
-                                /* Week / Month: day columns */
-                                <div style={{ height: `${HEADER_H}px` }} className="border-b border-gray-100 flex sticky top-0 bg-white z-10">
-                                    {columns.map(col => (
-                                        <div
-                                            key={col.index}
-                                            style={{ width: `${dayPx}px` }}
-                                            className={`shrink-0 flex flex-col items-center justify-center border-r border-gray-50
-                                                ${col.isWeekend ? 'bg-gray-50/50' : ''}`}
-                                        >
-                                            <span className={`text-[11px] font-medium
-                                                ${col.isToday ? 'text-red-500' : col.isWeekend ? 'text-gray-300' : 'text-gray-400'}`}>
-                                                {viewMode === 'week' ? DAY_NAMES_FULL[col.dow] : DAY_NAMES_SHORT[col.dow]}
-                                            </span>
-                                            {col.isToday ? (
-                                                <span className="w-7 h-7 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center mt-1 shadow-sm shadow-red-200">
-                                                    {col.date.getDate()}
-                                                </span>
-                                            ) : (
-                                                <span className={`text-sm font-semibold mt-1 ${col.isWeekend ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                    {col.date.getDate()}
-                                                </span>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
                             {/* ── Task rows ── */}
-                            {filteredEmployees.map(emp => (
+                            {filteredEmployees.map(emp => {
+                                const isExpanded = expandedRows.has(emp.id);
+                                const visibleLanes = isExpanded ? (emp.laneCount || 1) : Math.min(emp.laneCount || 1, MAX_VISIBLE_LANES);
+                                const rowH = Math.max(ROW_H, visibleLanes * (TASK_H + TASK_GAP) + TASK_GAP * 2);
+                                const hiddenTasks = emp.tasks.filter(t => (t.lane || 0) >= MAX_VISIBLE_LANES);
+                                return (
                                 <div
                                     key={emp.id}
-                                    style={{ height: `${Math.max(ROW_H, (emp.laneCount || 1) * (TASK_H + TASK_GAP) + TASK_GAP * 2)}px` }}
-                                    className={`border-b border-gray-50 relative flex cursor-pointer ${selectedEmployeeId === emp.id ? 'bg-[#33cbcc]/2' : ''}`}
+                                    style={{ height: `${rowH}px` }}
+                                    className={`border-b border-gray-50 relative flex cursor-pointer overflow-hidden ${selectedEmployeeId === emp.id ? 'bg-[#33cbcc]/2' : ''}`}
                                     onClick={e => handleRowClick(e, emp)}
                                 >
                                     {/* Background grid */}
@@ -2114,6 +2224,9 @@ const Tasks = () => {
                                     {/* Task bars */}
                                     {emp.tasks.map(task => {
                                         const isDrag = drag?.taskId === task.id;
+                                        // Hide tasks in collapsed lanes
+                                        if (!isExpanded && (task.lane || 0) >= MAX_VISIBLE_LANES) return null;
+
                                         let bar: { left: number; width: number } | null;
                                         let preview: { start: Date; end: Date } | null = null;
 
@@ -2202,8 +2315,20 @@ const Tasks = () => {
                                             </div>
                                         );
                                     })}
+
+                                    {/* +N more pill when collapsed */}
+                                    {!isExpanded && hiddenTasks.length > 0 && (
+                                        <button
+                                            onClick={e => { e.stopPropagation(); toggleRow(emp.id); }}
+                                            className="absolute bottom-1.5 right-2 flex items-center gap-1 text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 rounded-full px-2 py-0.5 transition-colors z-10"
+                                        >
+                                            <ChevronDown size={10} />
+                                            +{hiddenTasks.length} more
+                                        </button>
+                                    )}
                                 </div>
-                            ))}
+                                );
+                            })}
 
                             {/* Empty state */}
                             {filteredEmployees.length === 0 && (
@@ -2220,8 +2345,9 @@ const Tasks = () => {
                                 />
                             )}
                         </div>
-                    </div>
-                </div>
+                    </div>{/* end scrollRef timeline */}
+                    </div>{/* end scrollable body flex */}
+                </div>{/* end flex-col */}
             </motion.div>
             </>}
 
