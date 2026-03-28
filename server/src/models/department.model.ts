@@ -4,6 +4,7 @@ import { Client } from './client.model';
 import { Project } from './project.model';
 import { DepartmentGoal } from './department-goal.model';
 import { Position } from './position.model';
+import { DepartmentService } from './department-service.model';
 
 @Table
 export class Department extends Model {
@@ -47,4 +48,7 @@ export class Department extends Model {
 
     @HasMany(() => Position)
     declare positions: Position[];
+
+    @HasMany(() => DepartmentService)
+    declare services: DepartmentService[];
 }

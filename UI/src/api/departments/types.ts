@@ -37,3 +37,24 @@ export interface UpdateDepartmentDto {
 }
 
 export type UpdateDepartmentGoalDto = Partial<Omit<CreateDepartmentGoalDto, 'departmentId'>>;
+
+export interface DepartmentService {
+    id: string;
+    departmentId: string;
+    name: string;
+    description?: string;
+    price?: number;
+    duration?: string;
+    isActive: boolean;
+}
+
+export interface CreateDepartmentServiceDto {
+    departmentId: string;
+    name: string;
+    description?: string;
+    price?: number;
+    duration?: string;
+    isActive?: boolean;
+}
+
+export type UpdateDepartmentServiceDto = Partial<Omit<CreateDepartmentServiceDto, 'departmentId'>>;

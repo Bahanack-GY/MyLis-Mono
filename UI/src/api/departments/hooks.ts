@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { departmentsApi, departmentGoalsApi } from './api';
-import type { CreateDepartmentDto, UpdateDepartmentDto, CreateDepartmentGoalDto, UpdateDepartmentGoalDto } from './types';
+import { departmentsApi, departmentGoalsApi, departmentServicesApi } from './api';
+import type { CreateDepartmentDto, UpdateDepartmentDto, CreateDepartmentGoalDto, UpdateDepartmentGoalDto, CreateDepartmentServiceDto, UpdateDepartmentServiceDto } from './types';
 import { toast } from 'sonner';
 import i18n from '../../i18n/config';
 
@@ -9,6 +9,8 @@ export const departmentKeys = {
     detail: (id: string) => ['departments', id] as const,
     goals: ['department-goals'] as const,
     goalsByDept: (deptId: string) => ['department-goals', deptId] as const,
+    services: ['department-services'] as const,
+    servicesByDept: (deptId: string) => ['department-services', deptId] as const,
 };
 
 export const useDepartments = () =>
@@ -102,6 +104,52 @@ export const useDeleteDepartmentGoal = () => {
         onSuccess: () => {
             toast.success(i18n.t('toast.goalDeleted'));
             qc.invalidateQueries({ queryKey: departmentKeys.goals });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useDepartmentServices = (departmentId?: string) =>
+    useQuery({
+        queryKey: departmentId ? departmentKeys.servicesByDept(departmentId) : departmentKeys.services,
+        queryFn: () => departmentId
+            ? departmentServicesApi.getByDepartment(departmentId)
+            : departmentServicesApi.getAll(),
+    });
+
+export const useCreateDepartmentService = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (dto: CreateDepartmentServiceDto) => departmentServicesApi.create(dto),
+        onSuccess: (data) => {
+            toast.success(i18n.t('toast.serviceCreated'));
+            qc.invalidateQueries({ queryKey: departmentKeys.services });
+            qc.invalidateQueries({ queryKey: departmentKeys.servicesByDept(data.departmentId) });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useUpdateDepartmentService = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, dto }: { id: string; dto: UpdateDepartmentServiceDto }) =>
+            departmentServicesApi.update(id, dto),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.serviceUpdated'));
+            qc.invalidateQueries({ queryKey: departmentKeys.services });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useDeleteDepartmentService = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => departmentServicesApi.delete(id),
+        onSuccess: () => {
+            toast.success(i18n.t('toast.serviceDeleted'));
+            qc.invalidateQueries({ queryKey: departmentKeys.services });
         },
         onError: () => toast.error(i18n.t('toast.error')),
     });

@@ -25,8 +25,12 @@ import {
     Pencil,
     LayoutGrid,
     List,
+    Clock,
+    Trash2,
+    ToggleLeft,
+    ToggleRight,
 } from 'lucide-react';
-import { useInfiniteDepartments, useCreateDepartment, useUpdateDepartment } from '../api/departments/hooks';
+import { useInfiniteDepartments, useCreateDepartment, useUpdateDepartment, useDepartmentServices, useCreateDepartmentService, useUpdateDepartmentService, useDeleteDepartmentService } from '../api/departments/hooks';
 import { DepartmentsSkeleton } from '../components/Skeleton';
 import { useEmployees } from '../api/employees/hooks';
 import { useInvoices } from '../api/invoices/hooks';
@@ -556,6 +560,50 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
     const [headDropdownOpen, setHeadDropdownOpen] = useState(false);
     const [headSearch, setHeadSearch] = useState('');
 
+    // Services state
+    const { data: services = [] } = useDepartmentServices(department.id);
+    const createService = useCreateDepartmentService();
+    const updateService = useUpdateDepartmentService();
+    const deleteService = useDeleteDepartmentService();
+
+    const blankService = { name: '', description: '', price: '', duration: '', isActive: true };
+    const [newService, setNewService] = useState(blankService);
+    const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
+    const [editServiceForm, setEditServiceForm] = useState(blankService);
+
+    const handleAddService = () => {
+        if (!newService.name.trim()) return;
+        createService.mutate({
+            departmentId: department.id,
+            name: newService.name.trim(),
+            description: newService.description || undefined,
+            price: newService.price ? parseFloat(newService.price) : undefined,
+            duration: newService.duration || undefined,
+            isActive: newService.isActive,
+        }, { onSuccess: () => setNewService(blankService) });
+    };
+
+    const handleEditService = (svc: typeof services[0]) => {
+        setEditingServiceId(svc.id);
+        setEditServiceForm({
+            name: svc.name,
+            description: svc.description || '',
+            price: svc.price != null ? String(svc.price) : '',
+            duration: svc.duration || '',
+            isActive: svc.isActive,
+        });
+    };
+
+    const handleSaveEdit = (id: string) => {
+        updateService.mutate({ id, dto: {
+            name: editServiceForm.name.trim() || undefined,
+            description: editServiceForm.description || undefined,
+            price: editServiceForm.price ? parseFloat(editServiceForm.price) : undefined,
+            duration: editServiceForm.duration || undefined,
+            isActive: editServiceForm.isActive,
+        }}, { onSuccess: () => setEditingServiceId(null) });
+    };
+
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onClose();
@@ -715,6 +763,162 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                 </motion.div>
                             )}
                         </AnimatePresence>
+                    </div>
+
+                    {/* Services */}
+                    <div>
+                        <label className={labelCls}>
+                            <Briefcase size={12} />
+                            {t('departments.services.title')}
+                        </label>
+
+                        {/* Existing services list */}
+                        {services.length > 0 && (
+                            <div className="space-y-2 mb-3">
+                                {services.map(svc => (
+                                    <div key={svc.id} className={`rounded-xl border p-3 transition-all ${svc.isActive ? 'border-gray-200 bg-white' : 'border-gray-100 bg-gray-50 opacity-60'}`}>
+                                        {editingServiceId === svc.id ? (
+                                            <div className="space-y-2">
+                                                <input
+                                                    value={editServiceForm.name}
+                                                    onChange={e => setEditServiceForm(prev => ({ ...prev, name: e.target.value }))}
+                                                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                                    placeholder={t('departments.services.namePlaceholder')}
+                                                />
+                                                <input
+                                                    value={editServiceForm.description}
+                                                    onChange={e => setEditServiceForm(prev => ({ ...prev, description: e.target.value }))}
+                                                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                                    placeholder={t('departments.services.descriptionPlaceholder')}
+                                                />
+                                                <div className="flex gap-2">
+                                                    <div className="relative flex-1">
+                                                        <DollarSign size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                        <input
+                                                            type="number"
+                                                            value={editServiceForm.price}
+                                                            onChange={e => setEditServiceForm(prev => ({ ...prev, price: e.target.value }))}
+                                                            placeholder="0 FCFA"
+                                                            className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                                        />
+                                                    </div>
+                                                    <div className="relative flex-1">
+                                                        <Clock size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                        <input
+                                                            value={editServiceForm.duration}
+                                                            onChange={e => setEditServiceForm(prev => ({ ...prev, duration: e.target.value }))}
+                                                            placeholder={t('departments.services.durationPlaceholder')}
+                                                            className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <button onClick={() => setEditServiceForm(prev => ({ ...prev, isActive: !prev.isActive }))}>
+                                                        {editServiceForm.isActive
+                                                            ? <ToggleRight size={22} className="text-[#33cbcc]" />
+                                                            : <ToggleLeft size={22} className="text-gray-300" />
+                                                        }
+                                                    </button>
+                                                    <div className="flex gap-2">
+                                                        <button onClick={() => setEditingServiceId(null)} className="px-3 py-1 text-xs text-gray-500 hover:bg-gray-100 rounded-lg transition-colors">
+                                                            {t('common.cancel')}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleSaveEdit(svc.id)}
+                                                            disabled={!editServiceForm.name.trim() || updateService.isPending}
+                                                            className="flex items-center gap-1 px-3 py-1 text-xs text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-40"
+                                                        >
+                                                            {updateService.isPending ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
+                                                            {t('common.save')}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-800 truncate">{svc.name}</p>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        {svc.price != null && (
+                                                            <span className="text-xs text-gray-400 flex items-center gap-0.5">
+                                                                <DollarSign size={10} />{Number(svc.price).toLocaleString()} FCFA
+                                                            </span>
+                                                        )}
+                                                        {svc.duration && (
+                                                            <span className="text-xs text-gray-400 flex items-center gap-0.5">
+                                                                <Clock size={10} />{svc.duration}
+                                                            </span>
+                                                        )}
+                                                        {!svc.isActive && (
+                                                            <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-400 rounded-full">{t('departmentDetail.services.inactive')}</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <button onClick={() => handleEditService(svc)} className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors">
+                                                    <Pencil size={13} />
+                                                </button>
+                                                <button onClick={() => deleteService.mutate(svc.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                                                    <Trash2 size={13} />
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Add new service inline form */}
+                        <div className="border border-dashed border-gray-200 rounded-xl p-3 space-y-2 bg-gray-50/50">
+                            <input
+                                value={newService.name}
+                                onChange={e => setNewService(prev => ({ ...prev, name: e.target.value }))}
+                                placeholder={t('departments.services.namePlaceholder')}
+                                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                            />
+                            <input
+                                value={newService.description}
+                                onChange={e => setNewService(prev => ({ ...prev, description: e.target.value }))}
+                                placeholder={t('departments.services.descriptionPlaceholder')}
+                                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                            />
+                            <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                    <DollarSign size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        type="number"
+                                        value={newService.price}
+                                        onChange={e => setNewService(prev => ({ ...prev, price: e.target.value }))}
+                                        placeholder="0 FCFA"
+                                        className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                    />
+                                </div>
+                                <div className="relative flex-1">
+                                    <Clock size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input
+                                        value={newService.duration}
+                                        onChange={e => setNewService(prev => ({ ...prev, duration: e.target.value }))}
+                                        placeholder={t('departments.services.durationPlaceholder')}
+                                        className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <button onClick={() => setNewService(prev => ({ ...prev, isActive: !prev.isActive }))}>
+                                    {newService.isActive
+                                        ? <ToggleRight size={22} className="text-[#33cbcc]" />
+                                        : <ToggleLeft size={22} className="text-gray-300" />
+                                    }
+                                </button>
+                                <button
+                                    onClick={handleAddService}
+                                    disabled={!newService.name.trim() || createService.isPending}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                >
+                                    {createService.isPending ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                                    {t('departments.services.addService')}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

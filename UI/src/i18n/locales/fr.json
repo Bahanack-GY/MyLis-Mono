@@ -1047,6 +1047,13 @@
       "title": "Modifier le département",
       "submit": "Enregistrer"
     },
+    "services": {
+      "title": "Services",
+      "namePlaceholder": "Nom du service...",
+      "descriptionPlaceholder": "Courte description (optionnelle)...",
+      "durationPlaceholder": "ex. 2 heures",
+      "addService": "Ajouter un service"
+    },
     "empty": "Aucun département trouvé"
   },
   "departmentSidebar": {
@@ -1055,6 +1062,7 @@
     "members": "Membres",
     "projects": "Projets",
     "budget": "Budget",
+    "services": "Services",
     "settings": "Paramètres"
   },
   "departmentDetail": {
@@ -1116,6 +1124,31 @@
       "removeHod": "Retirer le chef",
       "appoint": "Nommer",
       "appointFrom": "Nommer parmi les membres"
+    },
+    "services": {
+      "title": "Services du Département",
+      "subtitle": "Services proposés par ce département",
+      "addService": "Ajouter un service",
+      "editService": "Modifier le service",
+      "create": "Créer le service",
+      "search": "Rechercher des services...",
+      "name": "Nom du service",
+      "namePlaceholder": "Saisissez le nom du service...",
+      "description": "Description",
+      "descriptionPlaceholder": "Décrivez le service...",
+      "price": "Prix (FCFA)",
+      "duration": "Durée",
+      "durationPlaceholder": "ex. 2 heures",
+      "active": "Actif",
+      "activeDesc": "Rendre ce service visible aux clients",
+      "inactive": "Inactif",
+      "empty": "Aucun service pour l'instant",
+      "emptyDesc": "Ajoutez le premier service proposé par ce département",
+      "stats": {
+        "total": "Total Services",
+        "active": "Actifs",
+        "withPrice": "Avec Tarif"
+      }
     }
   },
   "documents": {
@@ -2042,6 +2075,9 @@
     "goalAdded": "Objectif ajouté",
     "goalUpdated": "Objectif mis à jour",
     "goalDeleted": "Objectif supprimé",
+    "serviceCreated": "Service créé",
+    "serviceUpdated": "Service mis à jour",
+    "serviceDeleted": "Service supprimé",
     "clientCreated": "Client créé",
     "clientUpdated": "Client mis à jour",
     "clientDeleted": "Client supprimé",

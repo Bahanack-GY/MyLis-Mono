@@ -8,12 +8,13 @@ import {
     Settings,
     ChevronLeft,
     ChevronRight,
-    Code
+    Code,
+    Briefcase,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-export type DepartmentTab = 'overview' | 'members' | 'projects' | 'budget' | 'settings';
+export type DepartmentTab = 'overview' | 'members' | 'projects' | 'budget' | 'services' | 'settings';
 
 interface DepartmentDetailSidebarProps {
     department: { id: number | string; name: string; color: string; icon: typeof Code };
@@ -31,8 +32,9 @@ const DepartmentDetailSidebar = ({ department, activeTab, onTabChange, isOpen, s
         { id: 'overview', icon: LayoutDashboard, label: t('departmentSidebar.overview') },
         { id: 'members',  icon: Users,           label: t('departmentSidebar.members') },
         { id: 'projects', icon: FolderKanban,    label: t('departmentSidebar.projects') },
-        { id: 'budget',   icon: Wallet,           label: t('departmentSidebar.budget') },
-        { id: 'settings', icon: Settings,         label: t('departmentSidebar.settings') },
+        { id: 'budget',    icon: Wallet,     label: t('departmentSidebar.budget') },
+        { id: 'services',  icon: Briefcase,  label: t('departmentSidebar.services') },
+        { id: 'settings',  icon: Settings,   label: t('departmentSidebar.settings') },
     ];
 
     return (

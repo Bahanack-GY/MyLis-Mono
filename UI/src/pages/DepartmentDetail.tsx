@@ -23,6 +23,10 @@ import {
     AlignLeft,
     Check,
     UserCog,
+    Pencil,
+    Clock,
+    ToggleLeft,
+    ToggleRight,
 } from 'lucide-react';
 import {
     AreaChart,
@@ -46,7 +50,7 @@ import { useTasks } from '../api/tasks/hooks';
 import { useInvoices, useInvoiceStats } from '../api/invoices/hooks';
 import { useClients, useCreateClient } from '../api/clients/hooks';
 import { useDepartmentScope } from '../contexts/AuthContext';
-import { useUpdateDepartment } from '../api/departments/hooks';
+import { useUpdateDepartment, useDepartmentServices, useCreateDepartmentService, useUpdateDepartmentService, useDeleteDepartmentService } from '../api/departments/hooks';
 
 /* ─── Status helpers ────────────────────────────────────── */
 
@@ -1129,6 +1133,349 @@ const BudgetView = ({ department }: { department: Department }) => {
     );
 };
 
+/* ─── Services View ─────────────────────────────────────── */
+
+const ServiceFormModal = ({
+    departmentId,
+    service,
+    color,
+    onClose,
+}: {
+    departmentId: string;
+    service?: { id: string; name: string; description?: string; price?: number; duration?: string; isActive: boolean } | null;
+    color: string;
+    onClose: () => void;
+}) => {
+    const { t } = useTranslation();
+    const createService = useCreateDepartmentService();
+    const updateService = useUpdateDepartmentService();
+
+    const [name, setName] = useState(service?.name || '');
+    const [description, setDescription] = useState(service?.description || '');
+    const [price, setPrice] = useState(service?.price !== undefined ? String(service.price) : '');
+    const [duration, setDuration] = useState(service?.duration || '');
+    const [isActive, setIsActive] = useState(service?.isActive ?? true);
+
+    useEffect(() => {
+        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', handleKey);
+        document.body.style.overflow = 'hidden';
+        return () => { document.removeEventListener('keydown', handleKey); document.body.style.overflow = ''; };
+    }, [onClose]);
+
+    const isPending = createService.isPending || updateService.isPending;
+
+    const handleSubmit = () => {
+        if (!name.trim()) return;
+        const dto = {
+            name: name.trim(),
+            description: description || undefined,
+            price: price ? parseFloat(price) : undefined,
+            duration: duration || undefined,
+            isActive,
+        };
+        if (service) {
+            updateService.mutate({ id: service.id, dto }, { onSuccess: onClose });
+        } else {
+            createService.mutate({ ...dto, departmentId }, { onSuccess: onClose });
+        }
+    };
+
+    const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+        >
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            >
+                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
+                            <Briefcase size={18} style={{ color }} />
+                        </div>
+                        <h2 className="text-lg font-bold text-gray-800">
+                            {service ? t('departmentDetail.services.editService') : t('departmentDetail.services.addService')}
+                        </h2>
+                    </div>
+                    <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                        <X size={18} />
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-4">
+                    <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1.5 block">{t('departmentDetail.services.name')} *</label>
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                            placeholder={t('departmentDetail.services.namePlaceholder')}
+                            className={inputCls}
+                            autoFocus
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1.5 block">{t('departmentDetail.services.description')}</label>
+                        <textarea
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                            placeholder={t('departmentDetail.services.descriptionPlaceholder')}
+                            rows={3}
+                            className={`${inputCls} resize-none`}
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="text-xs font-medium text-gray-500 mb-1.5 block">{t('departmentDetail.services.price')}</label>
+                            <div className="relative">
+                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    type="number"
+                                    min="0"
+                                    value={price}
+                                    onChange={e => setPrice(e.target.value)}
+                                    placeholder="0"
+                                    className={`${inputCls} pl-8`}
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-xs font-medium text-gray-500 mb-1.5 block">{t('departmentDetail.services.duration')}</label>
+                            <div className="relative">
+                                <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    type="text"
+                                    value={duration}
+                                    onChange={e => setDuration(e.target.value)}
+                                    placeholder={t('departmentDetail.services.durationPlaceholder')}
+                                    className={`${inputCls} pl-8`}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                        <div>
+                            <p className="text-sm font-medium text-gray-700">{t('departmentDetail.services.active')}</p>
+                            <p className="text-xs text-gray-400">{t('departmentDetail.services.activeDesc')}</p>
+                        </div>
+                        <button onClick={() => setIsActive(v => !v)} className="transition-colors">
+                            {isActive
+                                ? <ToggleRight size={28} style={{ color }} />
+                                : <ToggleLeft size={28} className="text-gray-300" />
+                            }
+                        </button>
+                    </div>
+                </div>
+
+                <div className="px-6 pb-6 flex justify-end gap-2">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                    >
+                        {t('common.cancel')}
+                    </button>
+                    <button
+                        onClick={handleSubmit}
+                        disabled={!name.trim() || isPending}
+                        className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        style={{ backgroundColor: color }}
+                    >
+                        {isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                        {service ? t('common.save') : t('departmentDetail.services.create')}
+                    </button>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
+const ServicesView = ({ department }: { department: Department }) => {
+    const { t } = useTranslation();
+    const { data: services = [], isLoading } = useDepartmentServices(String(department.id));
+    const deleteService = useDeleteDepartmentService();
+    const updateService = useUpdateDepartmentService();
+
+    const [showModal, setShowModal] = useState(false);
+    const [editingService, setEditingService] = useState<typeof services[0] | null>(null);
+    const [search, setSearch] = useState('');
+
+    const filtered = services.filter(s =>
+        s.name.toLowerCase().includes(search.toLowerCase()) ||
+        (s.description || '').toLowerCase().includes(search.toLowerCase())
+    );
+
+    const handleToggleActive = (s: typeof services[0]) => {
+        updateService.mutate({ id: s.id, dto: { isActive: !s.isActive } });
+    };
+
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-800">{t('departmentDetail.services.title')}</h2>
+                    <p className="text-sm text-gray-500 mt-1">{t('departmentDetail.services.subtitle')}</p>
+                </div>
+                <button
+                    onClick={() => { setEditingService(null); setShowModal(true); }}
+                    className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-medium rounded-xl shadow-sm hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: department.color }}
+                >
+                    <Plus size={16} />
+                    {t('departmentDetail.services.addService')}
+                </button>
+            </div>
+
+            {/* Search */}
+            <div className="relative max-w-sm">
+                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input
+                    type="text"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    placeholder={t('departmentDetail.services.search')}
+                    className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] transition-all bg-white"
+                />
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {[
+                    { label: t('departmentDetail.services.stats.total'), value: services.length, icon: Briefcase },
+                    { label: t('departmentDetail.services.stats.active'), value: services.filter(s => s.isActive).length, icon: ToggleRight },
+                    { label: t('departmentDetail.services.stats.withPrice'), value: services.filter(s => s.price != null).length, icon: DollarSign },
+                ].map((stat, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.05 }}
+                        className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3"
+                    >
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${department.color}15` }}>
+                            <stat.icon size={18} style={{ color: department.color }} />
+                        </div>
+                        <div>
+                            <p className="text-xl font-bold text-gray-800">{stat.value}</p>
+                            <p className="text-xs text-gray-500">{stat.label}</p>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* List */}
+            {isLoading ? (
+                <div className="flex justify-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#33cbcc]" />
+                </div>
+            ) : filtered.length === 0 ? (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="bg-white rounded-2xl border border-gray-100 p-12 text-center"
+                >
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${department.color}15` }}>
+                        <Briefcase size={24} style={{ color: department.color }} />
+                    </div>
+                    <p className="font-semibold text-gray-700">{t('departmentDetail.services.empty')}</p>
+                    <p className="text-sm text-gray-400 mt-1">{t('departmentDetail.services.emptyDesc')}</p>
+                </motion.div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filtered.map((service, i) => (
+                        <motion.div
+                            key={service.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.05 }}
+                            className={`bg-white rounded-2xl border p-5 transition-all ${service.isActive ? 'border-gray-100' : 'border-gray-100 opacity-60'}`}
+                        >
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex items-start gap-3 min-w-0">
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: `${department.color}15` }}>
+                                        <Briefcase size={17} style={{ color: department.color }} />
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-semibold text-gray-800 text-sm truncate">{service.name}</p>
+                                            {!service.isActive && (
+                                                <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-400 rounded-full shrink-0">{t('departmentDetail.services.inactive')}</span>
+                                            )}
+                                        </div>
+                                        {service.description && (
+                                            <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{service.description}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                        onClick={() => { setEditingService(service); setShowModal(true); }}
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors"
+                                    >
+                                        <Pencil size={14} />
+                                    </button>
+                                    <button
+                                        onClick={() => deleteService.mutate(service.id)}
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-50">
+                                {service.price != null && (
+                                    <span className="flex items-center gap-1 text-xs text-gray-600 font-medium">
+                                        <DollarSign size={12} className="text-gray-400" />
+                                        {Number(service.price).toLocaleString()} FCFA
+                                    </span>
+                                )}
+                                {service.duration && (
+                                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                                        <Clock size={12} className="text-gray-400" />
+                                        {service.duration}
+                                    </span>
+                                )}
+                                <button
+                                    onClick={() => handleToggleActive(service)}
+                                    className="ml-auto transition-colors"
+                                >
+                                    {service.isActive
+                                        ? <ToggleRight size={22} style={{ color: department.color }} />
+                                        : <ToggleLeft size={22} className="text-gray-300" />
+                                    }
+                                </button>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
+
+            <AnimatePresence>
+                {showModal && (
+                    <ServiceFormModal
+                        departmentId={String(department.id)}
+                        service={editingService}
+                        color={department.color}
+                        onClose={() => { setShowModal(false); setEditingService(null); }}
+                    />
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
 /* ─── Settings View ─────────────────────────────────────── */
 
 const SettingsView = ({ department }: { department: Department }) => {
@@ -1333,6 +1680,8 @@ const DepartmentDetail = ({ department, activeTab }: DepartmentDetailProps) => {
             return <ProjectsView department={department} />;
         case 'budget':
             return <BudgetView department={department} />;
+        case 'services':
+            return <ServicesView department={department} />;
         case 'settings':
             return <SettingsView department={department} />;
         default:

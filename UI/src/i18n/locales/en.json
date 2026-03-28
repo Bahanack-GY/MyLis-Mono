@@ -1047,6 +1047,13 @@
       "title": "Edit Department",
       "submit": "Save Changes"
     },
+    "services": {
+      "title": "Services",
+      "namePlaceholder": "Service name...",
+      "descriptionPlaceholder": "Short description (optional)...",
+      "durationPlaceholder": "e.g. 2 hours",
+      "addService": "Add Service"
+    },
     "empty": "No departments found"
   },
   "departmentSidebar": {
@@ -1055,6 +1062,7 @@
     "members": "Members",
     "projects": "Projects",
     "budget": "Budget",
+    "services": "Services",
     "settings": "Settings"
   },
   "departmentDetail": {
@@ -1105,6 +1113,31 @@
       "perEmployee": "Per Employee",
       "expenseBreakdown": "Expense Breakdown",
       "monthlySpend": "Monthly turnover"
+    },
+    "services": {
+      "title": "Department Services",
+      "subtitle": "Services offered by this department",
+      "addService": "Add Service",
+      "editService": "Edit Service",
+      "create": "Create Service",
+      "search": "Search services...",
+      "name": "Service Name",
+      "namePlaceholder": "Enter service name...",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the service...",
+      "price": "Price (FCFA)",
+      "duration": "Duration",
+      "durationPlaceholder": "e.g. 2 hours",
+      "active": "Active",
+      "activeDesc": "Make this service visible to clients",
+      "inactive": "Inactive",
+      "empty": "No services yet",
+      "emptyDesc": "Add the first service offered by this department",
+      "stats": {
+        "total": "Total Services",
+        "active": "Active",
+        "withPrice": "With Price"
+      }
     },
     "settings": {
       "title": "Department Settings",
@@ -2032,6 +2065,9 @@
     "goalAdded": "Goal added",
     "goalUpdated": "Goal updated",
     "goalDeleted": "Goal deleted",
+    "serviceCreated": "Service created",
+    "serviceUpdated": "Service updated",
+    "serviceDeleted": "Service deleted",
     "clientCreated": "Client created",
     "clientUpdated": "Client updated",
     "clientDeleted": "Client deleted",

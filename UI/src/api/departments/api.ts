@@ -1,5 +1,5 @@
 import api from '../config';
-import type { Department, CreateDepartmentDto, UpdateDepartmentDto, DepartmentGoal, CreateDepartmentGoalDto, UpdateDepartmentGoalDto } from './types';
+import type { Department, CreateDepartmentDto, UpdateDepartmentDto, DepartmentGoal, CreateDepartmentGoalDto, UpdateDepartmentGoalDto, DepartmentService, CreateDepartmentServiceDto, UpdateDepartmentServiceDto } from './types';
 
 export const departmentsApi = {
     getAll: () =>
@@ -39,4 +39,24 @@ export const departmentGoalsApi = {
 
     delete: (id: string) =>
         api.delete(`/organization/department-goals/${id}`).then(r => r.data),
+};
+
+export const departmentServicesApi = {
+    getAll: () =>
+        api.get<DepartmentService[]>('/organization/department-services').then(r => r.data),
+
+    getByDepartment: (departmentId: string) =>
+        api.get<DepartmentService[]>(`/organization/department-services/department/${departmentId}`).then(r => r.data),
+
+    getById: (id: string) =>
+        api.get<DepartmentService>(`/organization/department-services/${id}`).then(r => r.data),
+
+    create: (dto: CreateDepartmentServiceDto) =>
+        api.post<DepartmentService>('/organization/department-services', dto).then(r => r.data),
+
+    update: (id: string, dto: UpdateDepartmentServiceDto) =>
+        api.patch<DepartmentService>(`/organization/department-services/${id}`, dto).then(r => r.data),
+
+    delete: (id: string) =>
+        api.delete(`/organization/department-services/${id}`).then(r => r.data),
 };

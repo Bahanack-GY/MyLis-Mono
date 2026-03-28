@@ -34,6 +34,7 @@ import { Formation } from '../models/formation.model';
 import { Sanction } from '../models/sanction.model';
 import { Document } from '../models/document.model';
 import { DepartmentGoal } from '../models/department-goal.model';
+import { DepartmentService } from '../models/department-service.model';
 import { EmployeeBadge } from '../models/employee-badge.model';
 import { EmployeeTransferHistory } from '../models/employee-transfer-history.model';
 import { Invoice } from '../models/invoice.model';
@@ -108,6 +109,7 @@ async function migrate() {
             Sanction,
             Document,
             DepartmentGoal,
+            DepartmentService,
             EmployeeBadge,
             EmployeeTransferHistory,
             Invoice,
