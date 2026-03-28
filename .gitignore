@@ -29,3 +29,6 @@ memory/
 
 # Docker volumes
 pgdata/
+
+# Whisper
+whisper/
