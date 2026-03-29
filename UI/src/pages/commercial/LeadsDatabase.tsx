@@ -15,6 +15,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useEmployees } from '../../api/employees/hooks';
 import ConvertToClientModal from '../../components/ConvertToClientModal';
 import LeadProfileSidebar from './LeadProfileSidebar';
+import LeadCreationWizard from '../../components/commercial/LeadCreationWizard';
 
 const priorityColors: Record<string, string> = {
     HOT: 'bg-red-100 text-red-700',
@@ -530,9 +531,11 @@ export default function LeadsDatabase() {
     const [page, setPage] = useState(1);
     const limit = 20;
 
-    // Modal
+    // Modal (edit only)
     const [modalOpen, setModalOpen] = useState(false);
     const [editingLead, setEditingLead] = useState<Lead | null>(null);
+    // Wizard (create new lead)
+    const [showWizard, setShowWizard] = useState(false);
 
     // Detail drawer
     const [detailLeadId, setDetailLeadId] = useState<string | null>(null);
@@ -576,8 +579,7 @@ export default function LeadsDatabase() {
     };
 
     const handleAdd = () => {
-        setEditingLead(null);
-        setModalOpen(true);
+        setShowWizard(true);
     };
 
     const handleCloseModal = () => {
@@ -752,14 +754,17 @@ export default function LeadsDatabase() {
                                             {lead.city}
                                         </td>
                                         <td className="px-4 py-3 text-sm">
-                                            <div className="text-gray-800">
-                                                {lead.contact1Name || '-'}
-                                            </div>
-                                            {lead.contact1Phone && (
-                                                <div className="text-xs text-gray-400">
-                                                    {lead.contact1Phone}
-                                                </div>
-                                            )}
+                                            {(() => {
+                                                const primary = lead.contacts?.find(c => c.isPrimary) ?? lead.contacts?.[0];
+                                                const name = primary?.name || lead.contact1Name;
+                                                const phone = primary?.phone || lead.contact1Phone;
+                                                return name ? (
+                                                    <>
+                                                        <div className="text-gray-800">{name}</div>
+                                                        {phone && <div className="text-xs text-gray-400">{phone}</div>}
+                                                    </>
+                                                ) : <span className="text-gray-300">—</span>;
+                                            })()}
                                         </td>
                                         <td className="px-4 py-3">
                                             <span
@@ -894,8 +899,15 @@ export default function LeadsDatabase() {
                 )}
             </div>
 
-            {/* ── Modal ── */}
+            {/* ── Edit Modal (existing leads only) ── */}
             <LeadModal isOpen={modalOpen} onClose={handleCloseModal} lead={editingLead} />
+
+            {/* ── Creation Wizard ── */}
+            <AnimatePresence>
+                {showWizard && (
+                    <LeadCreationWizard onClose={() => setShowWizard(false)} />
+                )}
+            </AnimatePresence>
 
             {/* ── Detail Drawer ── */}
             <AnimatePresence>

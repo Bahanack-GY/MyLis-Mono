@@ -5,14 +5,25 @@ import { Sequelize } from 'sequelize-typescript';
 import { Op } from 'sequelize';
 import { Lead, SaleStage, LeadStatus, LeadPriority } from '../models/lead.model';
 import { LeadActivity } from '../models/lead-activity.model';
+import { LeadContact } from '../models/lead-contact.model';
+import { LeadNeed } from '../models/lead-need.model';
+import { DepartmentService } from '../models/department-service.model';
 import { Client } from '../models/client.model';
 import { Employee } from '../models/employee.model';
+
+type CurrentUser = { userId: string; role: string; departmentId?: string };
 
 @Injectable()
 export class LeadsService {
     constructor(
         @InjectModel(Lead)
         private leadModel: typeof Lead,
+        @InjectModel(LeadContact)
+        private contactModel: typeof LeadContact,
+        @InjectModel(LeadNeed)
+        private needModel: typeof LeadNeed,
+        @InjectModel(DepartmentService)
+        private deptServiceModel: typeof DepartmentService,
         @InjectModel(Client)
         private clientModel: typeof Client,
         @InjectModel(Employee)
@@ -20,6 +31,23 @@ export class LeadsService {
         @InjectConnection()
         private sequelize: Sequelize,
     ) { }
+
+    /** Returns the set of lead IDs that have at least one need for a service in the given department. */
+    private async getLeadIdsByDepartment(departmentId: string): Promise<string[]> {
+        const services = await this.deptServiceModel.findAll({
+            where: { departmentId },
+            attributes: ['id'],
+            raw: true,
+        });
+        if (!services.length) return [];
+        const serviceIds = services.map((s: any) => s.id);
+        const needs = await this.needModel.findAll({
+            where: { serviceId: { [Op.in]: serviceIds } },
+            attributes: ['leadId'],
+            raw: true,
+        });
+        return [...new Set(needs.map((n: any) => n.leadId))];
+    }
 
     private async getEmployeeIdByUserId(userId: string): Promise<string | null> {
         const employee = await this.employeeModel.findOne({ where: { userId }, attributes: ['id'] });
@@ -69,7 +97,7 @@ export class LeadsService {
         });
     }
 
-    async create(dto: any, currentUser?: { userId: string; role: string }): Promise<Lead> {
+    async create(dto: any, currentUser?: CurrentUser): Promise<Lead> {
         const code = await this.generateLeadCode();
 
         // COMMERCIAL users auto-assign leads to themselves
@@ -78,46 +106,58 @@ export class LeadsService {
             if (employeeId) dto.assignedToId = employeeId;
         }
 
-        const saleStage = dto.saleStage || SaleStage.PROSPECTION;
+        const { contacts, needs, ...leadData } = dto;
+
+        const saleStage = leadData.saleStage || SaleStage.PROSPECTION;
         const leadStatus = this.mapStageToStatus(saleStage);
-        const priority = this.mapStageToPriority(saleStage);
+        // New leads always start COLD regardless of what the client sends
+        const priority = LeadPriority.COLD;
 
         // Set default success rate if not provided
-        if (dto.successRate === undefined || dto.successRate === null) {
+        if (leadData.successRate === undefined || leadData.successRate === null) {
             switch (saleStage) {
-                case SaleStage.PROSPECTION:
-                    dto.successRate = 10;
-                    break;
-                case SaleStage.QUALIFICATION:
-                    dto.successRate = 25;
-                    break;
-                case SaleStage.PROPOSITION:
-                    dto.successRate = 50;
-                    break;
-                case SaleStage.NEGOCIATION:
-                    dto.successRate = 70;
-                    break;
-                case SaleStage.CLOSING:
-                    dto.successRate = 90;
-                    break;
-                case SaleStage.GAGNE:
-                    dto.successRate = 100;
-                    break;
-                case SaleStage.PERDU:
-                    dto.successRate = 0;
-                    break;
-                default:
-                    dto.successRate = 10;
+                case SaleStage.PROSPECTION: leadData.successRate = 10; break;
+                case SaleStage.QUALIFICATION: leadData.successRate = 25; break;
+                case SaleStage.PROPOSITION: leadData.successRate = 50; break;
+                case SaleStage.NEGOCIATION: leadData.successRate = 70; break;
+                case SaleStage.CLOSING: leadData.successRate = 90; break;
+                case SaleStage.GAGNE: leadData.successRate = 100; break;
+                case SaleStage.PERDU: leadData.successRate = 0; break;
+                default: leadData.successRate = 10;
             }
         }
 
         const lead = await this.leadModel.create({
-            ...dto,
+            ...leadData,
             code,
             saleStage,
             leadStatus,
             priority,
         });
+
+        // Bulk-create contacts
+        if (Array.isArray(contacts) && contacts.length > 0) {
+            await this.contactModel.bulkCreate(
+                contacts.map((c: any, i: number) => ({
+                    ...c,
+                    leadId: lead.id,
+                    order: i,
+                    isPrimary: i === 0 ? true : (c.isPrimary ?? false),
+                })),
+            );
+        }
+
+        // Bulk-create needs
+        if (Array.isArray(needs) && needs.length > 0) {
+            await this.needModel.bulkCreate(
+                needs.filter((n: any) => n.description?.trim()).map((n: any) => ({
+                    description: n.description,
+                    serviceId: n.serviceId || null,
+                    leadId: lead.id,
+                })),
+            );
+        }
+
         return this.findOne(lead.id);
     }
 
@@ -130,7 +170,9 @@ export class LeadsService {
         priority?: string;
         leadType?: string;
         assignedToId?: string;
-    }, currentUser?: { userId: string; role: string }) {
+        dateFrom?: string;
+        dateTo?: string;
+    }, currentUser?: CurrentUser) {
         const page = filters.page || 1;
         const limit = filters.limit || 20;
         const offset = (page - 1) * limit;
@@ -142,11 +184,26 @@ export class LeadsService {
         if (filters.priority) where.priority = filters.priority;
         if (filters.leadType) where.leadType = filters.leadType;
         if (filters.assignedToId) where.assignedToId = filters.assignedToId;
+        if (filters.dateFrom || filters.dateTo) {
+            where.createdAt = {};
+            if (filters.dateFrom) where.createdAt[Op.gte] = new Date(filters.dateFrom);
+            if (filters.dateTo) {
+                const to = new Date(filters.dateTo);
+                to.setHours(23, 59, 59, 999);
+                where.createdAt[Op.lte] = to;
+            }
+        }
 
         // COMMERCIAL users can only see their own leads
         if (currentUser?.role === 'COMMERCIAL') {
             const employeeId = await this.getEmployeeIdByUserId(currentUser.userId);
             if (employeeId) where.assignedToId = employeeId;
+        }
+
+        // HOD sees only leads that reference at least one service from their department
+        if (currentUser?.role === 'HEAD_OF_DEPARTMENT' && currentUser.departmentId) {
+            const leadIds = await this.getLeadIdsByDepartment(currentUser.departmentId);
+            where.id = { [Op.in]: leadIds.length ? leadIds : ['00000000-0000-0000-0000-000000000000'] };
         }
 
         if (filters.search) {
@@ -164,10 +221,13 @@ export class LeadsService {
             include: [
                 { model: Employee, as: 'assignedTo', attributes: ['id', 'firstName', 'lastName'] },
                 { model: Client, attributes: ['id', 'name'], required: false },
+                { model: LeadContact, order: [['order', 'ASC']] },
+                { model: LeadNeed, include: [{ model: DepartmentService, attributes: ['id', 'name', 'price'] }] },
             ],
             order: [['createdAt', 'DESC']],
             limit,
             offset,
+            distinct: true,
         });
 
         return {
@@ -184,6 +244,8 @@ export class LeadsService {
                 { model: Employee, as: 'assignedTo', attributes: ['id', 'firstName', 'lastName'] },
                 { model: Client, attributes: ['id', 'name'], required: false },
                 { model: LeadActivity, include: [{ model: Employee, attributes: ['id', 'firstName', 'lastName'] }] },
+                { model: LeadContact, order: [['order', 'ASC']] },
+                { model: LeadNeed, include: [{ model: DepartmentService, attributes: ['id', 'name', 'price'] }] },
             ],
         });
         if (!lead) throw new NotFoundException('Lead not found');
@@ -197,38 +259,59 @@ export class LeadsService {
             throw new BadRequestException('Cannot change stage of a won lead');
         }
 
-        if (dto.saleStage) {
-            dto.leadStatus = this.mapStageToStatus(dto.saleStage);
-            dto.priority = this.mapStageToPriority(dto.saleStage);
+        const { contacts, needs, ...leadData } = dto;
 
-            // Automatically set success rate based on sale stage
-            if (dto.saleStage === SaleStage.GAGNE) {
-                dto.successRate = 100;
-            } else if (dto.saleStage === SaleStage.PERDU) {
-                dto.successRate = 0;
-            } else if (dto.successRate === undefined || dto.successRate === null) {
-                // If success rate is not manually set, assign default based on stage
-                switch (dto.saleStage) {
-                    case SaleStage.PROSPECTION:
-                        dto.successRate = 10;
-                        break;
-                    case SaleStage.QUALIFICATION:
-                        dto.successRate = 25;
-                        break;
-                    case SaleStage.PROPOSITION:
-                        dto.successRate = 50;
-                        break;
-                    case SaleStage.NEGOCIATION:
-                        dto.successRate = 70;
-                        break;
-                    case SaleStage.CLOSING:
-                        dto.successRate = 90;
-                        break;
+        if (leadData.saleStage) {
+            leadData.leadStatus = this.mapStageToStatus(leadData.saleStage);
+            leadData.priority = this.mapStageToPriority(leadData.saleStage);
+
+            if (leadData.saleStage === SaleStage.GAGNE) {
+                leadData.successRate = 100;
+            } else if (leadData.saleStage === SaleStage.PERDU) {
+                leadData.successRate = 0;
+            } else if (leadData.successRate === undefined || leadData.successRate === null) {
+                switch (leadData.saleStage) {
+                    case SaleStage.PROSPECTION: leadData.successRate = 10; break;
+                    case SaleStage.QUALIFICATION: leadData.successRate = 25; break;
+                    case SaleStage.PROPOSITION: leadData.successRate = 50; break;
+                    case SaleStage.NEGOCIATION: leadData.successRate = 70; break;
+                    case SaleStage.CLOSING: leadData.successRate = 90; break;
                 }
             }
         }
 
-        await lead.update(dto);
+        await lead.update(leadData);
+
+        // Replace contacts if provided
+        if (Array.isArray(contacts)) {
+            await this.contactModel.destroy({ where: { leadId: id } });
+            if (contacts.length > 0) {
+                await this.contactModel.bulkCreate(
+                    contacts.map((c: any, i: number) => ({
+                        ...c,
+                        leadId: id,
+                        order: i,
+                        isPrimary: i === 0 ? true : (c.isPrimary ?? false),
+                    })),
+                );
+            }
+        }
+
+        // Replace needs if provided
+        if (Array.isArray(needs)) {
+            await this.needModel.destroy({ where: { leadId: id } });
+            const validNeeds = needs.filter((n: any) => n.description?.trim());
+            if (validNeeds.length > 0) {
+                await this.needModel.bulkCreate(
+                    validNeeds.map((n: any) => ({
+                        description: n.description,
+                        serviceId: n.serviceId || null,
+                        leadId: id,
+                    })),
+                );
+            }
+        }
+
         return this.findOne(id);
     }
 
@@ -266,7 +349,7 @@ export class LeadsService {
         });
     }
 
-    async getStats(filters?: { dateFrom?: string; dateTo?: string; assignedToId?: string }, currentUser?: { userId: string; role: string }) {
+    async getStats(filters?: { dateFrom?: string; dateTo?: string; assignedToId?: string }, currentUser?: CurrentUser) {
         const where: any = {};
         if (filters?.dateFrom || filters?.dateTo) {
             where.createdAt = {};
@@ -283,6 +366,12 @@ export class LeadsService {
         if (currentUser?.role === 'COMMERCIAL') {
             const employeeId = await this.getEmployeeIdByUserId(currentUser.userId);
             if (employeeId) where.assignedToId = employeeId;
+        }
+
+        // HOD sees only leads that reference at least one service from their department
+        if (currentUser?.role === 'HEAD_OF_DEPARTMENT' && currentUser.departmentId) {
+            const leadIds = await this.getLeadIdsByDepartment(currentUser.departmentId);
+            where.id = { [Op.in]: leadIds.length ? leadIds : ['00000000-0000-0000-0000-000000000000'] };
         }
 
         const leads = await this.leadModel.findAll({ where });

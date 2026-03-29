@@ -26,6 +26,8 @@ export class LeadsController {
         @Query('priority') priority?: string,
         @Query('leadType') leadType?: string,
         @Query('assignedToId') assignedToId?: string,
+        @Query('dateFrom') dateFrom?: string,
+        @Query('dateTo') dateTo?: string,
     ) {
         return this.leadsService.findAll({
             page: page ? parseInt(page, 10) : undefined,
@@ -36,6 +38,8 @@ export class LeadsController {
             priority,
             leadType,
             assignedToId,
+            dateFrom,
+            dateTo,
         }, req.user);
     }
 

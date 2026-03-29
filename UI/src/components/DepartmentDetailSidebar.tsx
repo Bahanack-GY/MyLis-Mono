@@ -71,9 +71,9 @@ const DepartmentDetailSidebar = ({ department, activeTab, onTabChange, isOpen, s
                 <div className="flex items-center gap-3 overflow-hidden">
                     <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ backgroundColor: `${department.color}15` }}
+                        style={{ backgroundColor: 'rgba(255,255,255,0.12)' }}
                     >
-                        <department.icon size={20} style={{ color: department.color }} />
+                        <department.icon size={20} style={{ color: 'white' }} />
                     </div>
                     <AnimatePresence>
                         {isOpen && (
@@ -94,7 +94,7 @@ const DepartmentDetailSidebar = ({ department, activeTab, onTabChange, isOpen, s
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="absolute -right-3 top-24 bg-[#33cbcc] p-1 rounded-full shadow-lg hover:bg-[#2bb5b6] transition-colors z-50"
+                className="absolute -right-3 top-24 bg-white p-1 rounded-full shadow-lg hover:bg-gray-100 transition-colors z-50 text-[#283852]"
             >
                 {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
             </button>
@@ -110,12 +110,12 @@ const DepartmentDetailSidebar = ({ department, activeTab, onTabChange, isOpen, s
                             className={`
                                 flex items-center p-3 rounded-xl cursor-pointer transition-all duration-200 group relative
                                 ${isActive
-                                    ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
+                                    ? 'bg-white/15 text-white shadow-lg'
                                     : 'text-gray-400 hover:bg-white/5 hover:text-white'
                                 }
                             `}
                         >
-                            <tab.icon size={22} className={`min-w-[22px] ${!isActive && 'group-hover:text-[#33cbcc]'}`} />
+                            <tab.icon size={22} className={`min-w-[22px] ${!isActive && 'group-hover:text-white'}`} />
 
                             <AnimatePresence>
                                 {isOpen && (

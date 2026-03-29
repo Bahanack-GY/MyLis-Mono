@@ -7,6 +7,38 @@ export type ActivityStatus = 'PLANNED' | 'COMPLETED' | 'CANCELLED';
 export type PaymentMethod = 'CHEQUE' | 'VIREMENT' | 'ESPECES' | 'MOBILE_MONEY' | 'CARTE' | 'AUTRE';
 export type HealthStatus = 'HEALTHY' | 'GOOD' | 'NEEDS_FOLLOWUP' | 'ATTENTION_NEEDED' | 'AT_RISK' | 'NEW';
 
+export interface LeadContact {
+    id: string;
+    leadId: string;
+    name: string;
+    role?: string;
+    email?: string;
+    phone?: string;
+    isPrimary: boolean;
+    order: number;
+}
+
+export interface LeadNeed {
+    id: string;
+    leadId: string;
+    description: string;
+    serviceId?: string | null;
+    service?: { id: string; name: string; price?: number };
+}
+
+export interface CreateLeadContactDto {
+    name: string;
+    role?: string;
+    email?: string;
+    phone?: string;
+    isPrimary?: boolean;
+}
+
+export interface CreateLeadNeedDto {
+    description: string;
+    serviceId?: string | null;
+}
+
 export interface Lead {
     id: string;
     code: string;
@@ -50,6 +82,8 @@ export interface Lead {
     client?: { id: string; name: string };
     convertedAt: string | null;
     activities?: LeadActivity[];
+    contacts?: LeadContact[];
+    needs?: LeadNeed[];
     createdAt: string;
     updatedAt: string;
 }
@@ -90,6 +124,8 @@ export interface CreateLeadDto {
     nextAction?: string;
     nextActionDeadline?: string;
     comment?: string;
+    contacts?: CreateLeadContactDto[];
+    needs?: CreateLeadNeedDto[];
 }
 
 export interface LeadActivity {
@@ -113,8 +149,9 @@ export interface LeadActivity {
 }
 
 export interface CreateLeadActivityDto {
-    leadId: string;
-    employeeId: string;
+    leadId?: string;
+    clientId?: string;
+    employeeId?: string;
     type: ActivityType;
     activityStatus?: ActivityStatus;
     date: string;
@@ -123,6 +160,7 @@ export interface CreateLeadActivityDto {
     description?: string;
     result?: string;
     nextAction?: string;
+    nextActionDeadline?: string;
     cost?: number;
     location?: string;
 }

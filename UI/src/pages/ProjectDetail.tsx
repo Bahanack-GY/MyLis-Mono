@@ -18,7 +18,8 @@ import {
     Pencil,
     Plus,
     Trash2,
-    Loader2
+    Loader2,
+    Wrench
 } from 'lucide-react';
 import {
     XAxis,
@@ -270,6 +271,26 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
                     </div>
                 </motion.div>
             </div>
+
+            {/* Services */}
+            {project.services && project.services.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="bg-white rounded-2xl p-5 border border-gray-100">
+                    <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+                        <Wrench size={14} />
+                        <span className="font-semibold uppercase tracking-wider">Services</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {project.services.map(s => (
+                            <div key={s.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] text-sm font-medium">
+                                <span>{s.name}</span>
+                                {s.price != null && (
+                                    <span className="text-xs opacity-70">{new Intl.NumberFormat('fr-FR').format(s.price)} FCFA</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
 
             {/* Info grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

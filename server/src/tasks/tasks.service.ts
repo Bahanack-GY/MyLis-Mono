@@ -1002,6 +1002,62 @@ export class TasksService {
 
     /* ─── Time Distribution ──────────────────────────────────── */
 
+    async getDailyHours(employeeId: string, dateFrom: string, dateTo: string): Promise<{ date: string; hours: number }[]> {
+        const tasks = await this.taskModel.findAll({
+            where: { assignedToId: employeeId, startDate: { [Op.ne]: null } },
+            attributes: ['startTime', 'endTime', 'startDate', 'endDate'],
+            raw: true,
+        });
+
+        // Build zeroed map for every day in [dateFrom, dateTo]
+        const toUTCStr = (d: Date) =>
+            `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+
+        const dailyMap: Record<string, number> = {};
+        const cur = new Date(dateFrom + 'T00:00:00Z');
+        const endD = new Date(dateTo + 'T00:00:00Z');
+        while (cur <= endD) {
+            dailyMap[toUTCStr(cur)] = 0;
+            cur.setUTCDate(cur.getUTCDate() + 1);
+        }
+
+        for (const task of tasks as any[]) {
+            if (!task.startDate) continue;
+
+            const normDate = (v: any): string =>
+                typeof v === 'string' ? v.split('T')[0] : new Date(v).toISOString().split('T')[0];
+
+            const taskStart = normDate(task.startDate);
+            const taskEnd = task.endDate ? normDate(task.endDate) : taskStart;
+
+            // Skip if doesn't overlap range
+            if (taskStart > dateTo || taskEnd < dateFrom) continue;
+
+            let dailyHours = 1;
+            if (task.startTime && task.endTime) {
+                const [sh, sm] = (task.startTime as string).split(':').map(Number);
+                const [eh, em] = (task.endTime as string).split(':').map(Number);
+                const h = (eh * 60 + em - sh * 60 - sm) / 60;
+                if (h > 0) dailyHours = h;
+            }
+
+            const effStart = taskStart < dateFrom ? dateFrom : taskStart;
+            const effEnd = taskEnd > dateTo ? dateTo : taskEnd;
+
+            const dayCur = new Date(effStart + 'T00:00:00Z');
+            const dayEnd = new Date(effEnd + 'T00:00:00Z');
+            while (dayCur <= dayEnd) {
+                const key = toUTCStr(dayCur);
+                if (key in dailyMap) dailyMap[key] += dailyHours;
+                dayCur.setUTCDate(dayCur.getUTCDate() + 1);
+            }
+        }
+
+        return Object.keys(dailyMap)
+            .sort()
+            .map(date => ({ date, hours: Math.round(dailyMap[date] * 10) / 10 }));
+    }
+
     async getTimeDistribution(employeeId: string) {
         const tasks = await this.taskModel.findAll({
             where: { assignedToId: employeeId },

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { DepartmentServicesService } from './department-services.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
@@ -13,6 +13,16 @@ export class DepartmentServicesController {
     @Post()
     create(@Body() createDto: any) {
         return this.departmentServicesService.create(createDto);
+    }
+
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+    @Get('stats')
+    getServiceStats(
+        @Query('from') from?: string,
+        @Query('to') to?: string,
+        @Query('departmentId') departmentId?: string,
+    ) {
+        return this.departmentServicesService.getServiceStats(from, to, departmentId);
     }
 
     @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')

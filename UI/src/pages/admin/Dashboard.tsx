@@ -31,7 +31,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEmployees } from '../../api/employees/hooks';
 import { useProjects } from '../../api/projects/hooks';
 import { useTasks } from '../../api/tasks/hooks';
-import { useDepartments } from '../../api/departments/hooks';
+import { useDepartments, useServiceStats } from '../../api/departments/hooks';
 import { useInvoiceStats, useRevenueByDepartment } from '../../api/invoices/hooks';
 import { useExpenseStats } from '../../api/expenses/hooks';
 import { useDepartmentScope } from '../../contexts/AuthContext';
@@ -96,6 +96,7 @@ const Dashboard = () => {
   const { data: invoiceStats } = useInvoiceStats(deptScope, from, to);
   const { data: expenseStats } = useExpenseStats(undefined, deptScope);
   const { data: revenueByDeptRaw } = useRevenueByDepartment(from, to);
+  const { data: serviceStats } = useServiceStats(from, to, deptScope);
 
   // For HOD, show only their department in the revenue chart
   const revenueByDept = deptScope
@@ -466,6 +467,76 @@ const Dashboard = () => {
                 </span>
               </div>
             ))}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Most Sold Services */}
+      {serviceStats && serviceStats.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.65 }}
+          className="bg-white p-6 rounded-2xl border border-gray-100"
+        >
+          <div className="mb-6">
+            <h3 className="text-base font-bold text-gray-800">{t('dashboard.charts.mostSoldServices', 'Most Sold Services')}</h3>
+            <p className="text-xs text-gray-400 mt-0.5">{t('dashboard.charts.servicesSub', 'Projects + lead needs combined')}</p>
+          </div>
+          <div style={{ height: Math.max(220, serviceStats.length * 44) }} className="w-full">
+            <ResponsiveContainer width="100%" height="100%" debounce={50}>
+              <BarChart
+                layout="vertical"
+                data={serviceStats}
+                margin={{ top: 4, right: 40, left: 8, bottom: 4 }}
+                barCategoryGap="25%"
+              >
+                <defs>
+                  <linearGradient id="svcGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#33cbcc" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#33cbcc" stopOpacity={0.5} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid horizontal={false} stroke="#E5E7EB" strokeDasharray="3 3" />
+                <XAxis
+                  type="number"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#9CA3AF', fontSize: 11 }}
+                  allowDecimals={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#6B7280', fontSize: 12 }}
+                  width={130}
+                  tickFormatter={(v: string) => v.length > 18 ? v.slice(0, 18) + '…' : v}
+                />
+                <Tooltip
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                  cursor={{ fill: '#f3f4f6' }}
+                  formatter={(value: any, name: string) => {
+                    if (name === 'projectCount') return [value, t('dashboard.charts.projects', 'Projects')];
+                    if (name === 'leadCount') return [value, t('dashboard.charts.leads', 'Leads')];
+                    return [value, name];
+                  }}
+                />
+                <Bar dataKey="projectCount" stackId="a" fill="url(#svcGrad)" radius={[0, 0, 0, 0]} />
+                <Bar dataKey="leadCount" stackId="a" fill="#283852" opacity={0.7} radius={[0, 4, 4, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="mt-4 flex items-center gap-6 text-xs text-gray-500">
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm" style={{ background: 'linear-gradient(to right, #33cbcc, #33cbcc80)' }} />
+              <span>{t('dashboard.charts.projects', 'Projects')}</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-sm bg-[#283852] opacity-70" />
+              <span>{t('dashboard.charts.leads', 'Leads')}</span>
+            </div>
           </div>
         </motion.div>
       )}

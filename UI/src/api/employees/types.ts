@@ -82,3 +82,21 @@ export interface TransferEmployeeDto {
     toDepartmentId: string;
     reason?: string;
 }
+
+export interface EmployeePromotionHistory {
+    id: string;
+    employeeId: string;
+    fromPositionId: string | null;
+    toPositionId: string;
+    fromPosition?: { id: string; title: string } | null;
+    toPosition: { id: string; title: string };
+    promotedByUserId: string | null;
+    promotedByName: string;
+    reason: string | null;
+    createdAt: string;
+}
+
+export interface PromoteEmployeeDto {
+    toPositionId: string;
+    reason?: string;
+}

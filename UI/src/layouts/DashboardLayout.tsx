@@ -302,6 +302,7 @@ const QuoteModal = ({ onClose }: { onClose: () => void }) => {
 
 const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { user } = useAuth();
     const [showWelcome, setShowWelcome] = useState(false);
     const [birthdayPeople, setBirthdayPeople] = useState<BirthdayEmployee[]>([]);
@@ -365,7 +366,7 @@ const DashboardLayout = () => {
                 <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             </div>
             <div className="flex-1 flex flex-col overflow-hidden relative">
-                <Header />
+                <Header onMobileMenuOpen={() => setMobileMenuOpen(true)} />
                 <main className="flex-1 overflow-x-hidden overflow-y-auto pb-20 md:pb-0">
                     <div className="container mx-auto px-4 md:px-6 py-6 md:py-8">
                         <Outlet />
@@ -374,7 +375,7 @@ const DashboardLayout = () => {
             </div>
             {/* Mobile bottom nav */}
             <div className="md:hidden">
-                <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+                <Sidebar isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
             </div>
 
             {/* Modals */}

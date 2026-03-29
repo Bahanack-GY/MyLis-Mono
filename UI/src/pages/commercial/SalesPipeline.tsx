@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useLeads, useUpdateLead, useLeadStats, useCreateLeadActivity, useLead, useLeadActivities } from '../../api/commercial/hooks';
 import type { Lead, SaleStage, CreateLeadActivityDto, ActivityType } from '../../api/commercial/types';
+import StageChangeModal, { isForwardMove, STAGE_ORDER } from '../../components/commercial/StageChangeModal';
 import { useTasksByLead } from '../../api/tasks/hooks';
 import { useEmployees } from '../../api/employees/hooks';
 import { useAuth } from '../../contexts/AuthContext';
@@ -164,9 +165,15 @@ const PipelineEditModal = ({
                                     onChange={e => setForm(prev => ({ ...prev, saleStage: e.target.value as SaleStage }))}
                                     className={selectCls}
                                 >
-                                    {ALL_STAGES.map(s => (
-                                        <option key={s} value={s}>{t(`commercial.pipeline.stages.${s}`)}</option>
-                                    ))}
+                                    {ALL_STAGES.map(s => {
+                                        const reachable = s === form.saleStage || isForwardMove(lead.saleStage, s);
+                                        return (
+                                            <option key={s} value={s} disabled={!reachable}>
+                                                {t(`commercial.pipeline.stages.${s}`)}
+                                                {!reachable ? ' ✕' : ''}
+                                            </option>
+                                        );
+                                    })}
                                 </select>
                             </div>
 
@@ -517,50 +524,69 @@ const QuickStageDropdown = ({
 }) => {
     const { t } = useTranslation();
     const updateLead = useUpdateLead();
+    const [pendingStage, setPendingStage] = useState<SaleStage | null>(null);
 
     const handleChange = (stage: SaleStage) => {
-        if (stage === lead.saleStage) {
-            onClose();
-            return;
-        }
-        if (lead.saleStage === 'GAGNE') {
-            onClose();
-            return; // locked
-        }
-        if (stage === 'GAGNE') {
+        if (stage === lead.saleStage) { onClose(); return; }
+        // Open confirmation modal (it blocks backward moves internally)
+        setPendingStage(stage);
+    };
+
+    const confirmChange = () => {
+        if (!pendingStage) return;
+        if (pendingStage === 'GAGNE') {
+            setPendingStage(null);
             onClose();
             onConvert(lead);
             return;
         }
         updateLead.mutate(
-            { id: lead.id, data: { saleStage: stage } },
-            { onSuccess: () => onClose() },
+            { id: lead.id, data: { saleStage: pendingStage } },
+            { onSuccess: () => { setPendingStage(null); onClose(); } },
         );
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            className="absolute z-40 top-full left-0 mt-1 bg-white rounded-xl xl border border-gray-100 py-1 min-w-[160px]"
-        >
-            {ALL_STAGES.map(s => {
-                const colors = STAGE_COLORS[s];
-                return (
-                    <button
-                        key={s}
-                        onClick={() => handleChange(s)}
-                        className={`w-full text-left px-3 py-2 text-xs font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 ${
-                            s === lead.saleStage ? 'bg-gray-50' : ''
-                        }`}
-                    >
-                        <span className={`w-2 h-2 rounded-full ${colors.bg} ${colors.border} border`} />
-                        <span className={colors.text}>{t(`commercial.pipeline.stages.${s}`)}</span>
-                    </button>
-                );
-            })}
-        </motion.div>
+        <>
+            <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                className="absolute z-40 top-full left-0 mt-1 bg-white rounded-xl border border-gray-100 py-1 min-w-[160px] shadow-lg"
+            >
+                {ALL_STAGES.map(s => {
+                    const colors = STAGE_COLORS[s];
+                    const isActive = s === lead.saleStage;
+                    const canReach = !isActive && isForwardMove(lead.saleStage, s);
+                    return (
+                        <button
+                            key={s}
+                            onClick={() => handleChange(s)}
+                            disabled={isActive}
+                            className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors flex items-center gap-2 ${
+                                isActive ? 'bg-gray-50 cursor-default' :
+                                canReach ? 'hover:bg-gray-50' :
+                                'opacity-40 cursor-not-allowed'
+                            }`}
+                        >
+                            <span className={`w-2 h-2 rounded-full ${colors.bg} ${colors.border} border`} />
+                            <span className={colors.text}>{t(`commercial.pipeline.stages.${s}`)}</span>
+                        </button>
+                    );
+                })}
+            </motion.div>
+
+            {pendingStage && (
+                <StageChangeModal
+                    from={lead.saleStage}
+                    to={pendingStage}
+                    companyName={lead.company}
+                    isPending={updateLead.isPending}
+                    onConfirm={confirmChange}
+                    onCancel={() => setPendingStage(null)}
+                />
+            )}
+        </>
     );
 };
 

@@ -3,9 +3,13 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { LeadActivity } from '../models/lead-activity.model';
 import { Lead } from '../models/lead.model';
+import { LeadNeed } from '../models/lead-need.model';
+import { DepartmentService } from '../models/department-service.model';
 import { Employee } from '../models/employee.model';
 import { Invoice } from '../models/invoice.model';
 import { Client } from '../models/client.model';
+
+type CurrentUser = { userId: string; role: string; departmentId?: string };
 
 @Injectable()
 export class LeadActivitiesService {
@@ -14,6 +18,10 @@ export class LeadActivitiesService {
         private activityModel: typeof LeadActivity,
         @InjectModel(Lead)
         private leadModel: typeof Lead,
+        @InjectModel(LeadNeed)
+        private needModel: typeof LeadNeed,
+        @InjectModel(DepartmentService)
+        private deptServiceModel: typeof DepartmentService,
         @InjectModel(Employee)
         private employeeModel: typeof Employee,
         @InjectModel(Invoice)
@@ -27,12 +35,37 @@ export class LeadActivitiesService {
         return employee?.id || null;
     }
 
-    async create(dto: any, currentUser?: { userId: string; role: string }): Promise<LeadActivity> {
-        // Validation: Either leadId OR clientId must be provided (not both, not neither)
+    /** Returns lead IDs and converted client IDs scoped to a department's services. */
+    private async getDeptLeadAndClientIds(departmentId: string): Promise<{ leadIds: string[]; clientIds: string[] }> {
+        const services = await this.deptServiceModel.findAll({
+            where: { departmentId },
+            attributes: ['id'],
+            raw: true,
+        });
+        if (!services.length) return { leadIds: [], clientIds: [] };
+        const serviceIds = services.map((s: any) => s.id);
+        const needs = await this.needModel.findAll({
+            where: { serviceId: { [Op.in]: serviceIds } },
+            attributes: ['leadId'],
+            raw: true,
+        });
+        const leadIds = [...new Set(needs.map((n: any) => n.leadId))];
+        if (!leadIds.length) return { leadIds: [], clientIds: [] };
+        const leads = await this.leadModel.findAll({
+            where: { id: { [Op.in]: leadIds }, clientId: { [Op.ne]: null } },
+            attributes: ['clientId'],
+            raw: true,
+        });
+        const clientIds = leads.map((l: any) => l.clientId).filter(Boolean);
+        return { leadIds, clientIds };
+    }
+
+    async create(dto: any, currentUser?: CurrentUser): Promise<LeadActivity> {
+        // Validation: leadId and clientId cannot both be provided
         const hasLeadId = !!dto.leadId;
         const hasClientId = !!dto.clientId;
-        if ((!hasLeadId && !hasClientId) || (hasLeadId && hasClientId)) {
-            throw new BadRequestException('Either leadId or clientId must be provided (not both)');
+        if (hasLeadId && hasClientId) {
+            throw new BadRequestException('Only one of leadId or clientId may be provided');
         }
 
         // COMMERCIAL users auto-set employeeId to self
@@ -65,7 +98,7 @@ export class LeadActivitiesService {
         activityStatus?: string;
         dateFrom?: string;
         dateTo?: string;
-    }, currentUser?: { userId: string; role: string }) {
+    }, currentUser?: CurrentUser) {
         const page = filters.page || 1;
         const limit = filters.limit || 20;
         const offset = (page - 1) * limit;
@@ -87,6 +120,21 @@ export class LeadActivitiesService {
         if (currentUser?.role === 'COMMERCIAL') {
             const employeeId = await this.getEmployeeIdByUserId(currentUser.userId);
             if (employeeId) where.employeeId = employeeId;
+        }
+
+        // HOD sees only activities linked to leads/clients from their department's services
+        if (currentUser?.role === 'HEAD_OF_DEPARTMENT' && currentUser.departmentId && !filters.leadId && !filters.clientId) {
+            const { leadIds, clientIds } = await this.getDeptLeadAndClientIds(currentUser.departmentId);
+            const empty = '00000000-0000-0000-0000-000000000000';
+            where[Op.and] = [
+                ...(where[Op.and] || []),
+                {
+                    [Op.or]: [
+                        { leadId: { [Op.in]: leadIds.length ? leadIds : [empty] } },
+                        { clientId: { [Op.in]: clientIds.length ? clientIds : [empty] } },
+                    ],
+                },
+            ];
         }
 
         const { count, rows } = await this.activityModel.findAndCountAll({
@@ -133,14 +181,25 @@ export class LeadActivitiesService {
         return { success: true };
     }
 
-    async getKpis(filters: { employeeId?: string; dateFrom?: string; dateTo?: string }, currentUser?: { userId: string; role: string }) {
+    async getKpis(filters: { employeeId?: string; dateFrom?: string; dateTo?: string }, currentUser?: CurrentUser) {
         // COMMERCIAL users see only their own KPIs
         if (currentUser?.role === 'COMMERCIAL' && !filters.employeeId) {
             const employeeId = await this.getEmployeeIdByUserId(currentUser.userId);
             if (employeeId) filters.employeeId = employeeId;
         }
 
-        // Activity filters
+        // HOD: pre-compute lead/client IDs scoped to their department
+        let deptLeadIds: string[] | null = null;
+        let deptClientIds: string[] | null = null;
+        if (currentUser?.role === 'HEAD_OF_DEPARTMENT' && currentUser.departmentId) {
+            const scope = await this.getDeptLeadAndClientIds(currentUser.departmentId);
+            deptLeadIds = scope.leadIds;
+            deptClientIds = scope.clientIds;
+        }
+
+        const empty = '00000000-0000-0000-0000-000000000000';
+
+        // ── Activity stats ──────────────────────────────────────
         const actWhere: any = { activityStatus: 'COMPLETED' };
         if (filters.employeeId) actWhere.employeeId = filters.employeeId;
         if (filters.dateFrom || filters.dateTo) {
@@ -148,9 +207,16 @@ export class LeadActivitiesService {
             if (filters.dateFrom) actWhere.date[Op.gte] = filters.dateFrom;
             if (filters.dateTo) actWhere.date[Op.lte] = filters.dateTo;
         }
+        if (deptLeadIds !== null) {
+            actWhere[Op.and] = [{
+                [Op.or]: [
+                    { leadId: { [Op.in]: deptLeadIds.length ? deptLeadIds : [empty] } },
+                    { clientId: { [Op.in]: deptClientIds!.length ? deptClientIds! : [empty] } },
+                ],
+            }];
+        }
 
         const activities = await this.activityModel.findAll({ where: actWhere });
-
         const visitesClients = activities.filter(a => a.type === 'VISITE_CLIENT').length;
         const visitesProspects = activities.filter(a => a.type === 'VISITE_PROSPECT').length;
         const totalVisites = visitesClients + visitesProspects;
@@ -158,7 +224,7 @@ export class LeadActivitiesService {
             .filter(a => ['VISITE_CLIENT', 'VISITE_PROSPECT'].includes(a.type))
             .reduce((sum, a) => sum + (Number(a.cost) || 0), 0);
 
-        // Invoice data for revenue KPIs — scoped to commercial's converted clients
+        // ── Invoice / CA stats ───────────────────────────────────
         const invWhere: any = { status: 'PAID' };
         if (filters.dateFrom || filters.dateTo) {
             invWhere.paidAt = {};
@@ -166,52 +232,47 @@ export class LeadActivitiesService {
             if (filters.dateTo) invWhere.paidAt[Op.lte] = filters.dateTo;
         }
         if (filters.employeeId) {
+            // scope invoices to clients converted by this commercial
             const convertedLeads = await this.leadModel.findAll({
                 where: { assignedToId: filters.employeeId, clientId: { [Op.ne]: null } },
                 attributes: ['clientId'],
             });
-            const clientIds = convertedLeads.map(l => l.clientId).filter(Boolean);
-            invWhere.clientId = clientIds.length > 0 ? { [Op.in]: clientIds } : null;
+            const empClientIds = convertedLeads.map(l => l.clientId).filter(Boolean);
+            invWhere.clientId = empClientIds.length > 0 ? { [Op.in]: empClientIds } : null;
+        } else if (deptClientIds !== null) {
+            // HOD: scope invoices to clients from their department
+            invWhere.clientId = deptClientIds.length > 0 ? { [Op.in]: deptClientIds } : null;
         }
         const invoices = await this.invoiceModel.findAll({ where: invWhere });
         const chiffreAffaire = invoices.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0);
         const panierMoyen = invoices.length > 0 ? Math.round(chiffreAffaire / invoices.length) : 0;
         const margeParVisite = totalVisites > 0 ? Math.round((chiffreAffaire - coutVisites) / totalVisites) : 0;
 
-        // Lead conversion data — scoped to employee if COMMERCIAL
-        const leadWhere: any = {};
-        if (filters.employeeId) leadWhere.assignedToId = filters.employeeId;
-        if (filters.dateFrom || filters.dateTo) {
-            leadWhere.convertedAt = {};
-            if (filters.dateFrom) leadWhere.convertedAt[Op.gte] = filters.dateFrom;
-            if (filters.dateTo) leadWhere.convertedAt[Op.lte] = filters.dateTo;
-        }
-        const conversions = await this.leadModel.count({
-            where: { ...leadWhere, leadStatus: 'GAGNE', convertedAt: { [Op.ne]: null } },
-        });
+        // ── Lead stats ────────────────────────────────────────────
+        // Base lead scope: employee filter OR HOD dept filter
+        const baseLead: any = {};
+        if (filters.employeeId) baseLead.assignedToId = filters.employeeId;
+        if (deptLeadIds !== null) baseLead.id = { [Op.in]: deptLeadIds.length ? deptLeadIds : [empty] };
 
-        const totalLeadsWhere: any = {};
-        if (filters.employeeId) totalLeadsWhere.assignedToId = filters.employeeId;
-        const totalLeads = await this.leadModel.count({ where: totalLeadsWhere });
+        const conversionWhere: any = { ...baseLead, leadStatus: 'GAGNE', clientId: { [Op.ne]: null } };
+        if (filters.dateFrom || filters.dateTo) {
+            conversionWhere.convertedAt = {};
+            if (filters.dateFrom) conversionWhere.convertedAt[Op.gte] = filters.dateFrom;
+            if (filters.dateTo) conversionWhere.convertedAt[Op.lte] = filters.dateTo;
+        }
+        const conversions = await this.leadModel.count({ where: conversionWhere });
+        const totalLeads = await this.leadModel.count({ where: baseLead });
         const tauxAcquisition = totalLeads > 0 ? Math.round(conversions / totalLeads * 100) : 0;
 
-        // Pipeline — scoped to employee if COMMERCIAL
-        const pipelineWhere: any = { saleStage: { [Op.notIn]: ['GAGNE', 'PERDU'] } };
-        if (filters.employeeId) pipelineWhere.assignedToId = filters.employeeId;
-        const pipelineLeads = await this.leadModel.findAll({ where: pipelineWhere });
+        const pipelineLeads = await this.leadModel.findAll({
+            where: { ...baseLead, saleStage: { [Op.notIn]: ['GAGNE', 'PERDU'] } },
+        });
         const pipelineValue = pipelineLeads.reduce((sum, l) => sum + (Number(l.potentialRevenue) || 0), 0);
         const weightedPipeline = pipelineLeads.reduce((sum, l) =>
             sum + ((Number(l.potentialRevenue) || 0) * (l.successRate || 0) / 100), 0);
 
-        // Win rate — scoped to employee if COMMERCIAL
-        const wonWhere: any = { leadStatus: 'GAGNE' };
-        const lostWhere: any = { leadStatus: 'PERDU' };
-        if (filters.employeeId) {
-            wonWhere.assignedToId = filters.employeeId;
-            lostWhere.assignedToId = filters.employeeId;
-        }
-        const wonLeads = await this.leadModel.count({ where: wonWhere });
-        const lostLeads = await this.leadModel.count({ where: lostWhere });
+        const wonLeads = await this.leadModel.count({ where: { ...baseLead, leadStatus: 'GAGNE' } });
+        const lostLeads = await this.leadModel.count({ where: { ...baseLead, leadStatus: 'PERDU' } });
         const winRate = (wonLeads + lostLeads) > 0 ? Math.round(wonLeads / (wonLeads + lostLeads) * 100) : 0;
         const conversionRate = totalLeads > 0 ? Math.round(wonLeads / totalLeads * 100) : 0;
 

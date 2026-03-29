@@ -1186,7 +1186,7 @@ const Messages = () => {
     }
 
     return (
-        <div className="flex h-screen bg-gray-50 overflow-hidden">
+        <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-gray-50 overflow-hidden">
             {/* Channel Sidebar — Desktop */}
             <div className="hidden md:flex">
                 <ChannelSidebar
@@ -1515,7 +1515,7 @@ const Messages = () => {
                             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
                             setIsAtBottom(true);
                         }}
-                        className="fixed bottom-24 right-8 w-10 h-10 rounded-full bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/30 flex items-center justify-center hover:bg-[#2bb5b6] transition-colors z-10"
+                        className="fixed bottom-20 md:bottom-8 right-6 w-10 h-10 rounded-full bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/30 flex items-center justify-center hover:bg-[#2bb5b6] transition-colors z-10"
                     >
                         <ChevronDown size={20} />
                     </motion.button>

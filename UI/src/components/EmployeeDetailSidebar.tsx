@@ -13,12 +13,13 @@ import {
     Target,
     Banknote,
     Repeat,
-    FileBarChart
+    FileBarChart,
+    TrendingUp,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-export type EmployeeTab = 'infos' | 'tasks' | 'commercial' | 'fraisDeVie' | 'documents' | 'sanctions' | 'recrutements' | 'education' | 'formations' | 'transfers' | 'reports';
+export type EmployeeTab = 'infos' | 'tasks' | 'commercial' | 'fraisDeVie' | 'documents' | 'sanctions' | 'recrutements' | 'education' | 'formations' | 'transfers' | 'reports' | 'promotions';
 
 interface Employee {
     id: number | string;
@@ -54,6 +55,7 @@ const EmployeeDetailSidebar = ({ employee, activeTab, onTabChange, isOpen, setIs
         { id: 'education', icon: GraduationCap, label: t('employeeSidebar.education') },
         { id: 'formations', icon: BookOpen, label: t('employeeSidebar.formations') },
         { id: 'transfers', icon: Repeat, label: t('employeeSidebar.transfers') },
+        { id: 'promotions', icon: TrendingUp, label: t('employeeSidebar.promotions', 'Promotions') },
     ];
 
     return (

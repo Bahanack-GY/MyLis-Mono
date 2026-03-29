@@ -63,6 +63,7 @@ const CommercialDashboard = lazy(() => import("./pages/commercial/CommercialDash
 const LeadsDatabase = lazy(() => import("./pages/commercial/LeadsDatabase"))
 const SalesPipeline = lazy(() => import("./pages/commercial/SalesPipeline"))
 const ClientFollowUp = lazy(() => import("./pages/commercial/ClientFollowUp"))
+const LeadFollowUp = lazy(() => import("./pages/commercial/LeadFollowUp"))
 
 // Accounting pages (MANAGER + ACCOUNTANT)
 const AccountantDashboard = lazy(() => import("./pages/accounting/AccountantDashboard"))
@@ -170,6 +171,7 @@ function App() {
             <Route path="/commercial" element={<CommercialDashboard />} />
             <Route path="/commercial/leads" element={<LeadsDatabase />} />
             <Route path="/commercial/pipeline" element={<SalesPipeline />} />
+            <Route path="/commercial/suivi" element={<LeadFollowUp />} />
           </Route>
         </Route>
 

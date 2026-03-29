@@ -11,6 +11,7 @@ export const departmentKeys = {
     goalsByDept: (deptId: string) => ['department-goals', deptId] as const,
     services: ['department-services'] as const,
     servicesByDept: (deptId: string) => ['department-services', deptId] as const,
+    serviceStats: (from?: string, to?: string, departmentId?: string) => ['department-services', 'stats', from, to, departmentId] as const,
 };
 
 export const useDepartments = () =>
@@ -154,3 +155,9 @@ export const useDeleteDepartmentService = () => {
         onError: () => toast.error(i18n.t('toast.error')),
     });
 };
+
+export const useServiceStats = (from?: string, to?: string, departmentId?: string) =>
+    useQuery({
+        queryKey: departmentKeys.serviceStats(from, to, departmentId),
+        queryFn: () => departmentServicesApi.getServiceStats(from, to, departmentId),
+    });

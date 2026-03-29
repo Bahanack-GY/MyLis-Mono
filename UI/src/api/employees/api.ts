@@ -1,5 +1,5 @@
 import api from '../config';
-import type { Employee, CreateEmployeeDto, UpdateEmployeeDto, LeaderboardEmployee, BirthdayEmployee, EmployeeTransferHistory, TransferEmployeeDto } from './types';
+import type { Employee, CreateEmployeeDto, UpdateEmployeeDto, LeaderboardEmployee, BirthdayEmployee, EmployeeTransferHistory, TransferEmployeeDto, EmployeePromotionHistory, PromoteEmployeeDto } from './types';
 import type { Report } from '../reports/types';
 export type { BirthdayEmployee } from './types';
 
@@ -56,4 +56,10 @@ export const employeesApi = {
 
     getReports: (id: string) =>
         api.get<Report[]>(`/employees/${id}/reports`).then(r => r.data),
+
+    promote: (id: string, dto: PromoteEmployeeDto) =>
+        api.patch<Employee>(`/employees/${id}/promote`, dto).then(r => r.data),
+
+    getPromotionHistory: (id: string) =>
+        api.get<EmployeePromotionHistory[]>(`/employees/${id}/promotion-history`).then(r => r.data),
 };

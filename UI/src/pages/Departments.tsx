@@ -25,7 +25,6 @@ import {
     Pencil,
     LayoutGrid,
     List,
-    Clock,
     Trash2,
     ToggleLeft,
     ToggleRight,
@@ -83,7 +82,7 @@ interface Department {
 /* ─── Color options ─────────────────────────────────────── */
 
 const COLOR_OPTIONS = [
-    { value: '#33cbcc', label: 'Teal' },
+    { value: '#283852', label: 'Teal' },
     { value: '#8b5cf6', label: 'Purple' },
     { value: '#ec4899', label: 'Pink' },
     { value: '#f59e0b', label: 'Amber' },
@@ -127,7 +126,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
         id: emp.id || '',
         name: `${emp.firstName} ${emp.lastName}`,
         role: emp.position?.title || '',
-        avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=33cbcc&color=fff`,
+        avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=283852&color=fff`,
     })).sort((a, b) => a.name.localeCompare(b.name));
 
     const [form, setForm] = useState<DeptForm>({
@@ -190,7 +189,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
 
     const selectedIcon = ICON_OPTIONS.find(o => o.value === form.iconKey) || ICON_OPTIONS[0];
 
-    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all';
     const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
 
     return (
@@ -212,8 +211,8 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                            <Plus size={18} className="text-[#33cbcc]" />
+                        <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center shrink-0">
+                            <Plus size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('departments.create.title')}</h3>
                     </div>
@@ -294,7 +293,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                                 value={headSearch}
                                                 onChange={e => setHeadSearch(e.target.value)}
                                                 placeholder={t('departments.create.searchEmployee')}
-                                                className="w-full bg-gray-50 rounded-lg border-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30"
+                                                className="w-full bg-gray-50 rounded-lg border-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#283852]/30"
                                                 autoFocus
                                             />
                                         </div>
@@ -310,7 +309,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                                     setHeadSearch('');
                                                 }}
                                                 className={`w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
-                                                    form.headId === emp.id ? 'bg-[#33cbcc]/5' : ''
+                                                    form.headId === emp.id ? 'bg-[#283852]/5' : ''
                                                 }`}
                                             >
                                                 <img src={emp.avatar} alt="" className="w-7 h-7 rounded-full border border-gray-200 shrink-0" />
@@ -318,7 +317,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                                     <p className="text-sm font-medium text-gray-800 truncate">{emp.name}</p>
                                                     <p className="text-[11px] text-gray-400 truncate">{emp.role}</p>
                                                 </div>
-                                                {form.headId === emp.id && <Check size={16} className="text-[#33cbcc] shrink-0" />}
+                                                {form.headId === emp.id && <Check size={16} className="text-[#283852] shrink-0" />}
                                             </button>
                                         ))}
                                         {filteredHeadEmployees.length === 0 && (
@@ -351,7 +350,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                             <Users size={12} />
                             {t('departments.create.members')}
                             {selectedMembers.length > 0 && (
-                                <span className="ml-1 text-[#33cbcc]">({selectedMembers.length})</span>
+                                <span className="ml-1 text-[#283852]">({selectedMembers.length})</span>
                             )}
                         </label>
 
@@ -389,7 +388,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                     value={memberSearch}
                                     onChange={e => setMemberSearch(e.target.value)}
                                     placeholder={t('departments.create.searchEmployee')}
-                                    className="w-full bg-white rounded-lg border border-gray-100 pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30"
+                                    className="w-full bg-white rounded-lg border border-gray-100 pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#283852]/30"
                                 />
                             </div>
                             <div className="max-h-40 overflow-y-auto">
@@ -401,12 +400,12 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                             type="button"
                                             onClick={() => toggleMember(emp.id)}
                                             className={`w-full flex items-center gap-3 px-3 py-2 text-left transition-colors ${
-                                                isSelected ? 'bg-[#33cbcc]/5' : 'hover:bg-white'
+                                                isSelected ? 'bg-[#283852]/5' : 'hover:bg-white'
                                             }`}
                                         >
                                             <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
                                                 isSelected
-                                                    ? 'bg-[#33cbcc] border-[#33cbcc]'
+                                                    ? 'bg-[#283852] border-[#283852]'
                                                     : 'border-gray-300'
                                             }`}>
                                                 {isSelected && <Check size={12} className="text-white" />}
@@ -439,11 +438,11 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                         onClick={() => update('iconKey', opt.value)}
                                         className={`w-10 h-10 rounded-xl flex items-center justify-center border-2 transition-all ${
                                             isActive
-                                                ? 'border-[#33cbcc] bg-[#33cbcc]/10'
+                                                ? 'border-[#283852] bg-[#283852]/10'
                                                 : 'border-gray-200 hover:border-gray-300 bg-white'
                                         }`}
                                     >
-                                        <opt.icon size={18} className={isActive ? 'text-[#33cbcc]' : 'text-gray-400'} />
+                                        <opt.icon size={18} className={isActive ? 'text-[#283852]' : 'text-gray-400'} />
                                     </button>
                                 );
                             })}
@@ -522,9 +521,9 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                             }
                         }}
                         disabled={!isValid || createDepartment.isPending}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#283852]/20 ${
                             isValid
-                                ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
+                                ? 'bg-[#283852] hover:bg-[#1e2d42]'
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
@@ -548,7 +547,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
         id: emp.id || '',
         name: `${emp.firstName} ${emp.lastName}`,
         role: emp.position?.title || '',
-        avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=33cbcc&color=fff`,
+        avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=283852&color=fff`,
     })).sort((a, b) => a.name.localeCompare(b.name));
 
     const [form, setForm] = useState({
@@ -566,7 +565,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
     const updateService = useUpdateDepartmentService();
     const deleteService = useDeleteDepartmentService();
 
-    const blankService = { name: '', description: '', price: '', duration: '', isActive: true };
+    const blankService = { name: '', description: '', isActive: true };
     const [newService, setNewService] = useState(blankService);
     const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
     const [editServiceForm, setEditServiceForm] = useState(blankService);
@@ -577,8 +576,6 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
             departmentId: department.id,
             name: newService.name.trim(),
             description: newService.description || undefined,
-            price: newService.price ? parseFloat(newService.price) : undefined,
-            duration: newService.duration || undefined,
             isActive: newService.isActive,
         }, { onSuccess: () => setNewService(blankService) });
     };
@@ -588,8 +585,6 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
         setEditServiceForm({
             name: svc.name,
             description: svc.description || '',
-            price: svc.price != null ? String(svc.price) : '',
-            duration: svc.duration || '',
             isActive: svc.isActive,
         });
     };
@@ -598,8 +593,6 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
         updateService.mutate({ id, dto: {
             name: editServiceForm.name.trim() || undefined,
             description: editServiceForm.description || undefined,
-            price: editServiceForm.price ? parseFloat(editServiceForm.price) : undefined,
-            duration: editServiceForm.duration || undefined,
             isActive: editServiceForm.isActive,
         }}, { onSuccess: () => setEditingServiceId(null) });
     };
@@ -625,7 +618,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
 
     const isValid = form.name.trim().length > 0;
 
-    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all';
     const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
 
     return (
@@ -647,8 +640,8 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                            <Pencil size={18} className="text-[#33cbcc]" />
+                        <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center shrink-0">
+                            <Pencil size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('departments.edit.title')}</h3>
                     </div>
@@ -729,7 +722,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                 value={headSearch}
                                                 onChange={e => setHeadSearch(e.target.value)}
                                                 placeholder={t('departments.create.searchEmployee')}
-                                                className="w-full bg-gray-50 rounded-lg border-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30"
+                                                className="w-full bg-gray-50 rounded-lg border-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#283852]/30"
                                                 autoFocus
                                             />
                                         </div>
@@ -745,7 +738,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                     setHeadSearch('');
                                                 }}
                                                 className={`w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 transition-colors ${
-                                                    form.headId === emp.id ? 'bg-[#33cbcc]/5' : ''
+                                                    form.headId === emp.id ? 'bg-[#283852]/5' : ''
                                                 }`}
                                             >
                                                 <img src={emp.avatar} alt="" className="w-7 h-7 rounded-full border border-gray-200 shrink-0" />
@@ -753,7 +746,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                     <p className="text-sm font-medium text-gray-800 truncate">{emp.name}</p>
                                                     <p className="text-[11px] text-gray-400 truncate">{emp.role}</p>
                                                 </div>
-                                                {form.headId === emp.id && <Check size={16} className="text-[#33cbcc] shrink-0" />}
+                                                {form.headId === emp.id && <Check size={16} className="text-[#283852] shrink-0" />}
                                             </button>
                                         ))}
                                         {filteredHeadEmployees.length === 0 && (
@@ -782,40 +775,19 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                 <input
                                                     value={editServiceForm.name}
                                                     onChange={e => setEditServiceForm(prev => ({ ...prev, name: e.target.value }))}
-                                                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852]"
                                                     placeholder={t('departments.services.namePlaceholder')}
                                                 />
                                                 <input
                                                     value={editServiceForm.description}
                                                     onChange={e => setEditServiceForm(prev => ({ ...prev, description: e.target.value }))}
-                                                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852]"
                                                     placeholder={t('departments.services.descriptionPlaceholder')}
                                                 />
-                                                <div className="flex gap-2">
-                                                    <div className="relative flex-1">
-                                                        <DollarSign size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                                                        <input
-                                                            type="number"
-                                                            value={editServiceForm.price}
-                                                            onChange={e => setEditServiceForm(prev => ({ ...prev, price: e.target.value }))}
-                                                            placeholder="0 FCFA"
-                                                            className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
-                                                        />
-                                                    </div>
-                                                    <div className="relative flex-1">
-                                                        <Clock size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                                                        <input
-                                                            value={editServiceForm.duration}
-                                                            onChange={e => setEditServiceForm(prev => ({ ...prev, duration: e.target.value }))}
-                                                            placeholder={t('departments.services.durationPlaceholder')}
-                                                            className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
-                                                        />
-                                                    </div>
-                                                </div>
                                                 <div className="flex items-center justify-between">
                                                     <button onClick={() => setEditServiceForm(prev => ({ ...prev, isActive: !prev.isActive }))}>
                                                         {editServiceForm.isActive
-                                                            ? <ToggleRight size={22} className="text-[#33cbcc]" />
+                                                            ? <ToggleRight size={22} className="text-[#283852]" />
                                                             : <ToggleLeft size={22} className="text-gray-300" />
                                                         }
                                                     </button>
@@ -826,7 +798,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                         <button
                                                             onClick={() => handleSaveEdit(svc.id)}
                                                             disabled={!editServiceForm.name.trim() || updateService.isPending}
-                                                            className="flex items-center gap-1 px-3 py-1 text-xs text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-40"
+                                                            className="flex items-center gap-1 px-3 py-1 text-xs text-white bg-[#283852] hover:bg-[#1e2d42] rounded-lg transition-colors disabled:opacity-40"
                                                         >
                                                             {updateService.isPending ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
                                                             {t('common.save')}
@@ -839,22 +811,12 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm font-medium text-gray-800 truncate">{svc.name}</p>
                                                     <div className="flex items-center gap-2 mt-0.5">
-                                                        {svc.price != null && (
-                                                            <span className="text-xs text-gray-400 flex items-center gap-0.5">
-                                                                <DollarSign size={10} />{Number(svc.price).toLocaleString()} FCFA
-                                                            </span>
-                                                        )}
-                                                        {svc.duration && (
-                                                            <span className="text-xs text-gray-400 flex items-center gap-0.5">
-                                                                <Clock size={10} />{svc.duration}
-                                                            </span>
-                                                        )}
                                                         {!svc.isActive && (
                                                             <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-400 rounded-full">{t('departmentDetail.services.inactive')}</span>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <button onClick={() => handleEditService(svc)} className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors">
+                                                <button onClick={() => handleEditService(svc)} className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors">
                                                     <Pencil size={13} />
                                                 </button>
                                                 <button onClick={() => deleteService.mutate(svc.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
@@ -873,46 +835,25 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                 value={newService.name}
                                 onChange={e => setNewService(prev => ({ ...prev, name: e.target.value }))}
                                 placeholder={t('departments.services.namePlaceholder')}
-                                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852]"
                             />
                             <input
                                 value={newService.description}
                                 onChange={e => setNewService(prev => ({ ...prev, description: e.target.value }))}
                                 placeholder={t('departments.services.descriptionPlaceholder')}
-                                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
+                                className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852]"
                             />
-                            <div className="flex gap-2">
-                                <div className="relative flex-1">
-                                    <DollarSign size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        type="number"
-                                        value={newService.price}
-                                        onChange={e => setNewService(prev => ({ ...prev, price: e.target.value }))}
-                                        placeholder="0 FCFA"
-                                        className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
-                                    />
-                                </div>
-                                <div className="relative flex-1">
-                                    <Clock size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                                    <input
-                                        value={newService.duration}
-                                        onChange={e => setNewService(prev => ({ ...prev, duration: e.target.value }))}
-                                        placeholder={t('departments.services.durationPlaceholder')}
-                                        className="w-full border border-gray-200 rounded-lg pl-7 pr-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
-                                    />
-                                </div>
-                            </div>
                             <div className="flex items-center justify-between">
                                 <button onClick={() => setNewService(prev => ({ ...prev, isActive: !prev.isActive }))}>
                                     {newService.isActive
-                                        ? <ToggleRight size={22} className="text-[#33cbcc]" />
+                                        ? <ToggleRight size={22} className="text-[#283852]" />
                                         : <ToggleLeft size={22} className="text-gray-300" />
                                     }
                                 </button>
                                 <button
                                     onClick={handleAddService}
                                     disabled={!newService.name.trim() || createService.isPending}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#283852] hover:bg-[#1e2d42] rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     {createService.isPending ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
                                     {t('departments.services.addService')}
@@ -944,9 +885,9 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                             }
                         }}
                         disabled={!isValid || updateDepartment.isPending}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#283852]/20 ${
                             isValid
-                                ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
+                                ? 'bg-[#283852] hover:bg-[#1e2d42]'
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
@@ -995,7 +936,7 @@ const Departments = () => {
     }, [departmentsQuery.hasNextPage, departmentsQuery.isFetchingNextPage, departmentsQuery.fetchNextPage]);
 
     // UI config for cycling colors and icons
-    const DEPT_COLORS = ['#33cbcc', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#3b82f6'];
+    const DEPT_COLORS = ['#283852'];
     const DEPT_ICONS = [Code, Palette, Megaphone, DollarSign, Heart, PieChartIcon];
 
     // Map API departments to display shape — no mock fallback
@@ -1007,13 +948,13 @@ const Departments = () => {
         color: DEPT_COLORS[i % DEPT_COLORS.length],
         icon: DEPT_ICONS[i % DEPT_ICONS.length],
         head: d.head
-            ? { id: d.head.id, name: `${d.head.firstName} ${d.head.lastName}`, role: '', avatar: d.head.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.head.firstName + '+' + d.head.lastName)}&background=33cbcc&color=fff` }
+            ? { id: d.head.id, name: `${d.head.firstName} ${d.head.lastName}`, role: '', avatar: d.head.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.head.firstName + '+' + d.head.lastName)}&background=283852&color=fff` }
             : { id: '0', name: '\u2014', role: '', avatar: '' },
         employees: d.employees?.map((e) => ({
             id: e.id,
             name: `${e.firstName} ${e.lastName}`,
             role: e.position?.title || '',
-            avatar: e.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.firstName + '+' + e.lastName)}&background=33cbcc&color=fff`,
+            avatar: e.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.firstName + '+' + e.lastName)}&background=283852&color=fff`,
         })) || [],
         projects: d.projects?.map((p, j) => ({
             id: j + 1,
@@ -1033,7 +974,7 @@ const Departments = () => {
     const avgSize = Math.round(totalEmployees / Math.max(DEPARTMENTS.length, 1));
 
     const stats = [
-        { label: t('departments.stats.total'), value: DEPARTMENTS.length, icon: Building, color: '#33cbcc' },
+        { label: t('departments.stats.total'), value: DEPARTMENTS.length, icon: Building, color: '#283852' },
         { label: t('departments.stats.employees'), value: totalEmployees, icon: Users, color: '#3b82f6' },
         { label: t('departments.stats.projects'), value: totalProjects, icon: Briefcase, color: '#8b5cf6' },
         { label: t('departments.stats.avgSize'), value: avgSize, icon: TrendingUp, color: '#f59e0b' },
@@ -1077,7 +1018,7 @@ const Departments = () => {
                     {!isHOD && (
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
+                        className="flex items-center gap-2 bg-[#283852] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20"
                     >
                         <Plus size={16} />
                         {t('departments.addDepartment')}
@@ -1195,13 +1136,13 @@ const Departments = () => {
                 <div className="flex items-center bg-white rounded-2xl border border-gray-100 shadow-sm p-1">
                     <button
                         onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`p-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-[#283852] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                         <LayoutGrid size={16} />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-xl transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                        className={`p-2 rounded-xl transition-colors ${viewMode === 'list' ? 'bg-[#283852] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
                         <List size={16} />
                     </button>
@@ -1217,7 +1158,7 @@ const Departments = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 + i * 0.08 }}
                             onClick={() => navigate(`/departments/${dept.id}`)}
-                            className="bg-white rounded-3xl p-6 border border-gray-100 cursor-pointer hover:border-[#33cbcc]/30 transition-all group"
+                            className="bg-white rounded-3xl p-6 border border-gray-100 cursor-pointer hover:border-[#283852]/30 transition-all group"
                         >
                             {/* Icon + Name */}
                             <div className="flex items-center gap-4 mb-5">
@@ -1237,7 +1178,7 @@ const Departments = () => {
                                 {!isHOD && (
                                     <button
                                         onClick={e => { e.stopPropagation(); setEditingDepartment(dept); }}
-                                        className="p-2 rounded-xl text-gray-300 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
+                                        className="p-2 rounded-xl text-gray-300 hover:text-[#283852] hover:bg-[#283852]/5 transition-colors opacity-0 group-hover:opacity-100"
                                     >
                                         <Pencil size={16} />
                                     </button>
@@ -1277,7 +1218,7 @@ const Departments = () => {
                                         </div>
                                     )}
                                 </div>
-                                <ArrowUpRight size={18} className="text-gray-300 group-hover:text-[#33cbcc] transition-colors" />
+                                <ArrowUpRight size={18} className="text-gray-300 group-hover:text-[#283852] transition-colors" />
                             </div>
                         </motion.div>
                     ))}
@@ -1317,12 +1258,12 @@ const Departments = () => {
                                 {!isHOD && (
                                     <button
                                         onClick={e => { e.stopPropagation(); setEditingDepartment(dept); }}
-                                        className="p-1.5 rounded-lg text-gray-300 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
+                                        className="p-1.5 rounded-lg text-gray-300 hover:text-[#283852] hover:bg-[#283852]/5 transition-colors opacity-0 group-hover:opacity-100"
                                     >
                                         <Pencil size={14} />
                                     </button>
                                 )}
-                                <ArrowUpRight size={16} className="text-gray-300 group-hover:text-[#33cbcc] transition-colors" />
+                                <ArrowUpRight size={16} className="text-gray-300 group-hover:text-[#283852] transition-colors" />
                             </div>
                         </motion.div>
                     ))}
@@ -1333,7 +1274,7 @@ const Departments = () => {
             <div ref={sentinelRef} className="h-1" />
             {departmentsQuery.isFetchingNextPage && (
                 <div className="flex justify-center py-4">
-                    <Loader2 size={20} className="animate-spin text-[#33cbcc]" />
+                    <Loader2 size={20} className="animate-spin text-[#283852]" />
                 </div>
             )}
 

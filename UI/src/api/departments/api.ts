@@ -59,4 +59,15 @@ export const departmentServicesApi = {
 
     delete: (id: string) =>
         api.delete(`/organization/department-services/${id}`).then(r => r.data),
+
+    getServiceStats: (from?: string, to?: string, departmentId?: string) => {
+        const params: Record<string, string> = {};
+        if (from) params.from = from;
+        if (to) params.to = to;
+        if (departmentId) params.departmentId = departmentId;
+        return api.get<{ serviceId: string; name: string; projectCount: number; leadCount: number; total: number }[]>(
+            '/organization/department-services/stats',
+            { params },
+        ).then(r => r.data);
+    },
 };

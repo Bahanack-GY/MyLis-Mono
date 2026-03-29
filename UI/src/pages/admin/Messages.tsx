@@ -465,7 +465,7 @@ const ChannelSidebar = ({
     );
 
     return (
-        <div className="w-64 bg-[#283852] flex flex-col h-full shrink-0 shadow-2xl z-50">
+        <div className="w-full bg-[#283852] flex flex-col h-full shrink-0 shadow-2xl z-50">
             {/* Back button — hidden in embed mode */}
             {!isEmbed && (
                 <div className="px-4 pt-4 pb-2">
@@ -1025,6 +1025,7 @@ const Messages = () => {
     const [activeChannelId, setActiveChannelId] = useState<string | null>(null);
     const [showNewDM, setShowNewDM] = useState(false);
     const [showMembers, setShowMembers] = useState(true);
+    const [mobileShowChat, setMobileShowChat] = useState(false);
     const [messageInput, setMessageInput] = useState('');
     const [typingUsers, setTypingUsers] = useState<Map<string, string>>(new Map());
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -1251,23 +1252,26 @@ const Messages = () => {
     }
 
     return (
-        <div className="flex h-screen bg-blue-100 overflow-hidden">
-            {/* Channel Sidebar — replaces app sidebar */}
-            <ChannelSidebar
-                channels={channels || []}
-                activeChannelId={activeChannelId}
-                onSelect={(id) => {
-                    setActiveChannelId(id);
-                    setIsAtBottom(true);
-                }}
-                onNewDM={() => setShowNewDM(true)}
-                onlineUsers={onlineUsers}
-                isEmbed={isEmbed}
-            />
+        <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-blue-100 overflow-hidden">
+            {/* Channel Sidebar — full width on mobile, fixed w-64 on desktop */}
+            <div className={`${mobileShowChat ? 'hidden' : 'flex'} md:flex w-full md:w-64 shrink-0`}>
+                <ChannelSidebar
+                    channels={channels || []}
+                    activeChannelId={activeChannelId}
+                    onSelect={(id) => {
+                        setActiveChannelId(id);
+                        setIsAtBottom(true);
+                        setMobileShowChat(true);
+                    }}
+                    onNewDM={() => setShowNewDM(true)}
+                    onlineUsers={onlineUsers}
+                    isEmbed={isEmbed}
+                />
+            </div>
 
-            {/* Right side: Header + Chat area */}
-            <div className="flex-1 flex flex-col overflow-hidden relative">
-                {!isEmbed && <Header />}
+            {/* Right side: Header + Chat area — hidden on mobile until channel selected */}
+            <div className={`${!mobileShowChat ? 'hidden' : 'flex'} md:flex flex-1 flex-col overflow-hidden relative`}>
+                {!isEmbed && <Header onMobileMenuOpen={undefined} />}
 
                 <main className="flex-1 flex overflow-hidden bg-white">
                     {/* Main Chat Area */}
@@ -1275,23 +1279,30 @@ const Messages = () => {
                         {activeChannel ? (
                             <>
                                 {/* Channel Header */}
-                                <div className="h-14 flex items-center justify-between px-5 border-b border-gray-200 shrink-0">
-                                    <div className="flex items-center gap-2.5">
+                                <div className="h-14 flex items-center justify-between px-3 md:px-5 border-b border-gray-200 shrink-0">
+                                    <div className="flex items-center gap-2">
+                                        {/* Mobile back button */}
+                                        <button
+                                            onClick={() => setMobileShowChat(false)}
+                                            className="md:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors shrink-0"
+                                        >
+                                            <ArrowLeft size={18} />
+                                        </button>
                                         {activeChannel.type === 'DIRECT' ? (
-                                            <MessageSquare size={18} className="text-[#33cbcc]" />
+                                            <MessageSquare size={18} className="text-[#33cbcc] shrink-0" />
                                         ) : (
-                                            <Hash size={18} className="text-[#33cbcc]" />
+                                            <Hash size={18} className="text-[#33cbcc] shrink-0" />
                                         )}
-                                        <h2 className="font-semibold text-gray-800">{activeChannel.name}</h2>
+                                        <h2 className="font-semibold text-gray-800 truncate">{activeChannel.name}</h2>
                                         {activeChannel.description && (
-                                            <span className="text-xs text-gray-400 hidden md:inline">
+                                            <span className="text-xs text-gray-400 hidden md:inline truncate">
                                                 — {activeChannel.description}
                                             </span>
                                         )}
                                     </div>
                                     <button
                                         onClick={() => setShowMembers(!showMembers)}
-                                        className={`p-2 rounded-lg transition-colors ${
+                                        className={`hidden md:flex p-2 rounded-lg transition-colors ${
                                             showMembers ? 'bg-gray-100 text-[#283852]' : 'text-gray-400 hover:bg-gray-50'
                                         }`}
                                     >
@@ -1504,13 +1515,15 @@ const Messages = () => {
                         )}
                     </div>
 
-                    {/* Members Panel */}
+                    {/* Members Panel — desktop only */}
                     {showMembers && activeChannelId && activeChannel && (
-                        <MembersPanel
-                            channelId={activeChannelId}
-                            onlineUsers={onlineUsers}
-                            onStartDM={handleStartDM}
-                        />
+                        <div className="hidden md:flex">
+                            <MembersPanel
+                                channelId={activeChannelId}
+                                onlineUsers={onlineUsers}
+                                onStartDM={handleStartDM}
+                            />
+                        </div>
                     )}
                 </main>
             </div>
@@ -1533,7 +1546,7 @@ const Messages = () => {
                             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
                             setIsAtBottom(true);
                         }}
-                        className="fixed bottom-24 right-8 w-10 h-10 rounded-full bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/30 flex items-center justify-center hover:bg-[#2bb5b6] transition-colors z-10"
+                        className="fixed bottom-20 md:bottom-8 right-6 w-10 h-10 rounded-full bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/30 flex items-center justify-center hover:bg-[#2bb5b6] transition-colors z-10"
                     >
                         <ChevronDown size={20} />
                     </motion.button>

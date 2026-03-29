@@ -71,6 +71,15 @@ export class TasksController {
         return this.tasksService.getTimeDistribution(employeeId);
     }
 
+    @Get('employee/:employeeId/daily-hours')
+    getDailyHours(
+        @Param('employeeId') employeeId: string,
+        @Query('dateFrom') dateFrom: string,
+        @Query('dateTo') dateTo: string,
+    ) {
+        return this.tasksService.getDailyHours(employeeId, dateFrom, dateTo);
+    }
+
     @Get('week')
     findWeek(
         @Query('start') start: string,

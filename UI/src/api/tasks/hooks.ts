@@ -362,6 +362,13 @@ export const useTimeDistribution = (employeeId: string) =>
         enabled: !!employeeId,
     });
 
+export const useDailyHours = (employeeId: string, dateFrom: string, dateTo: string) =>
+    useQuery({
+        queryKey: ['tasks', 'daily-hours', employeeId, dateFrom, dateTo] as const,
+        queryFn: () => tasksApi.getDailyHours(employeeId, dateFrom, dateTo),
+        enabled: !!employeeId && !!dateFrom && !!dateTo,
+    });
+
 export const useTransferTask = () => {
     const qc = useQueryClient();
     return useMutation({

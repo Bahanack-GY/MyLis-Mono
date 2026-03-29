@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useCommercialKpis, useLeadStats, useMyGoal, useTeamPerformance, useSetGoal } from '../../api/commercial/hooks';
 import { useAuth } from '../../contexts/AuthContext';
+import { useEmployees } from '../../api/employees/hooks';
 import ClientHealthDashboard from '../../components/ClientHealthDashboard';
 import PaymentRemindersDashboard from '../../components/PaymentRemindersDashboard';
 
@@ -113,6 +114,7 @@ export default function CommercialDashboard() {
     const { t } = useTranslation();
     const { role, user } = useAuth();
     const isCommercial = role === 'COMMERCIAL';
+    const isManager = role === 'MANAGER' || role === 'HEAD_OF_DEPARTMENT';
 
     // Goal period (month navigator — independent of the KPI date filter)
     const now = new Date();
@@ -157,6 +159,14 @@ export default function CommercialDashboard() {
         );
     };
 
+    // Employee filter (manager/HOD only)
+    const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
+    const { data: allEmployees = [] } = useEmployees(undefined);
+    const commercialEmployees = useMemo(
+        () => allEmployees.filter(e => e.user?.role === 'COMMERCIAL'),
+        [allEmployees],
+    );
+
     // Date range state
     const [datePreset, setDatePreset] = useState<DatePreset>('this_month');
     const [customFrom, setCustomFrom] = useState('');
@@ -167,15 +177,24 @@ export default function CommercialDashboard() {
         [datePreset, customFrom, customTo],
     );
 
-    const filters = useMemo(() => ({
+    // leadStats needs assignedToId; kpis needs employeeId — keep them separate
+    const leadStatsFilters = useMemo(() => ({
+        dateFrom: from,
+        dateTo: to,
+        ...(isCommercial && user?.employeeId ? { assignedToId: user.employeeId } : {}),
+        ...(isManager && selectedEmployeeId ? { assignedToId: selectedEmployeeId } : {}),
+    }), [from, to, isCommercial, isManager, user?.employeeId, selectedEmployeeId]);
+
+    const kpiFilters = useMemo(() => ({
         dateFrom: from,
         dateTo: to,
         ...(isCommercial && user?.employeeId ? { employeeId: user.employeeId } : {}),
-    }), [from, to, isCommercial, user?.employeeId]);
+        ...(isManager && selectedEmployeeId ? { employeeId: selectedEmployeeId } : {}),
+    }), [from, to, isCommercial, isManager, user?.employeeId, selectedEmployeeId]);
 
     // API data
-    const { data: kpis, isLoading: kpisLoading } = useCommercialKpis(filters);
-    const { data: leadStats, isLoading: statsLoading } = useLeadStats(filters);
+    const { data: kpis, isLoading: kpisLoading } = useCommercialKpis(kpiFilters);
+    const { data: leadStats, isLoading: statsLoading } = useLeadStats(leadStatsFilters);
 
     const isLoading = kpisLoading || statsLoading;
 
@@ -226,6 +245,22 @@ export default function CommercialDashboard() {
                         {t('commercial.dashboard.subtitle', 'Suivi des performances commerciales')}
                     </p>
                 </div>
+
+                {/* Employee filter (manager / HOD only) */}
+                {isManager && commercialEmployees.length > 0 && (
+                    <select
+                        value={selectedEmployeeId}
+                        onChange={e => setSelectedEmployeeId(e.target.value)}
+                        className="px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:border-[#33cbcc] hover:border-[#33cbcc]/40 transition-colors"
+                    >
+                        <option value="">{t('commercial.filter.allCommercials', 'Tous les commerciaux')}</option>
+                        {commercialEmployees.map(emp => (
+                            <option key={emp.id} value={emp.id}>
+                                {emp.firstName} {emp.lastName}
+                            </option>
+                        ))}
+                    </select>
+                )}
 
                 {/* Date range selector */}
                 <div className="flex items-center gap-2 flex-wrap">

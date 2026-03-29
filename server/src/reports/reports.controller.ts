@@ -10,6 +10,7 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { ReportsService } from './reports.service';
@@ -20,6 +21,7 @@ import { ReportsService } from './reports.service';
 export class ReportsController {
     constructor(private readonly reportsService: ReportsService) {}
 
+    @SkipThrottle()
     @Get('lock-status')
     getLockStatus() {
         return this.reportsService.getLockStatus();

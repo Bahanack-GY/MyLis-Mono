@@ -11,6 +11,7 @@ import {
     Briefcase,
     Building,
     ChevronRight,
+    ChevronDown,
     Plus,
     X,
     Search,
@@ -24,7 +25,6 @@ import {
     Check,
     UserCog,
     Pencil,
-    Clock,
     ToggleLeft,
     ToggleRight,
 } from 'lucide-react';
@@ -72,8 +72,8 @@ const STATUS_I18N: Record<string, string> = {
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const ROLE_COLORS = ['#33cbcc', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#22c55e', '#ef4444'];
-const BAR_COLORS = ['#33cbcc', '#3b82f6', '#8b5cf6', '#f59e0b', '#f43f5e'];
+const ROLE_COLORS = ['#283852', '#3d5a7a', '#52789f', '#6895c4', '#83b0d8', '#9dcae6', '#b8dff0'];
+const BAR_COLORS = ['#283852', '#3d5a7a', '#52789f', '#6895c4', '#83b0d8'];
 
 /* ─── Add Member Modal ─────────────────────────────────── */
 
@@ -104,7 +104,7 @@ const AddMemberModal = ({
             id: i + 1,
             name: `${emp.firstName} ${emp.lastName}`,
             role: emp.position?.title || '',
-            avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=33cbcc&color=fff`,
+            avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=283852&color=fff`,
         })).sort((a, b) => a.name.localeCompare(b.name));
     }, [apiEmployees]);
 
@@ -147,7 +147,7 @@ const AddMemberModal = ({
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder={t('departmentDetail.members.searchEmployee')}
-                            className="w-full bg-gray-50 rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+                            className="w-full bg-gray-50 rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all"
                             autoFocus
                         />
                     </div>
@@ -169,7 +169,7 @@ const AddMemberModal = ({
                                 </div>
                                 <span
                                     className="text-xs font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                                    style={{ backgroundColor: `${department.color}15`, color: department.color }}
+                                    style={{ backgroundColor: '#28385215', color: '#283852' }}
                                 >
                                     {t('departmentDetail.members.add')}
                                 </span>
@@ -226,8 +226,8 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
     }, [onClose]);
 
     const isValid = form.name.trim().length > 0;
-    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
-    const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
+    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all';
+    const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all appearance-none cursor-pointer';
     const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
 
     return (
@@ -248,8 +248,8 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
             >
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Users size={18} className="text-[#33cbcc]" />
+                        <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center">
+                            <Users size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('clients.createTitle')}</h3>
                     </div>
@@ -280,7 +280,7 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
                                 onSuccess: () => { onCreated(form.name); onClose(); },
                             });
                         }}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${isValid && !createClient.isPending ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-gray-300 cursor-not-allowed shadow-none'}`}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#283852]/20 ${isValid && !createClient.isPending ? 'bg-[#283852] hover:bg-[#1e2d42]' : 'bg-gray-300 cursor-not-allowed shadow-none'}`}
                     >
                         {createClient.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                         {t('clients.create')}
@@ -348,8 +348,8 @@ const AddProjectModal = ({
 
     const isValid = form.name.trim().length > 0 && form.dueDate.length > 0;
 
-    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
-    const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
+    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all';
+    const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all appearance-none cursor-pointer';
     const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
 
     return (
@@ -371,8 +371,8 @@ const AddProjectModal = ({
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                            <Plus size={18} className="text-[#33cbcc]" />
+                        <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center shrink-0">
+                            <Plus size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('projects.createTitle')}</h3>
                     </div>
@@ -389,7 +389,7 @@ const AddProjectModal = ({
                         <div
                             className="flex items-center gap-3 w-full bg-gray-50 rounded-xl border border-gray-200 px-4 py-2.5"
                         >
-                            <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: department.color }} />
+                            <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: '#283852' }} />
                             <span className="text-sm font-medium text-gray-700">{department.name}</span>
                         </div>
                     </div>
@@ -416,7 +416,7 @@ const AddProjectModal = ({
                                     <option key={c.id} value={c.name}>{c.name}</option>
                                 ))}
                             </select>
-                            <button type="button" onClick={() => setShowCreateClient(true)} className="shrink-0 w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-[#33cbcc] hover:bg-[#33cbcc]/5 hover:border-[#33cbcc]/30 transition-colors" title={t('clients.createTitle')}>
+                            <button type="button" onClick={() => setShowCreateClient(true)} className="shrink-0 w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-[#283852] hover:bg-[#283852]/5 hover:border-[#283852]/30 transition-colors" title={t('clients.createTitle')}>
                                 <Plus size={16} />
                             </button>
                         </div>
@@ -465,14 +465,14 @@ const AddProjectModal = ({
                             {form.contract ? (
                                 <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                                     <div className="flex items-center gap-2 text-sm">
-                                        <FileText size={14} className="text-[#33cbcc]" />
+                                        <FileText size={14} className="text-[#283852]" />
                                         <span className="font-medium text-gray-700">{form.contract.name}</span>
                                         <span className="text-gray-400">{form.contract.size}</span>
                                     </div>
                                     <button onClick={() => update('contract', null)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
                                 </div>
                             ) : (
-                                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-gray-400">
+                                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#283852]/40 hover:bg-[#283852]/5 transition-all text-sm text-gray-400">
                                     <Upload size={16} />{t('projects.formUpload')}
                                     <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={e => handleFileSelect('contract', e)} />
                                 </label>
@@ -485,14 +485,14 @@ const AddProjectModal = ({
                             {form.srs ? (
                                 <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                                     <div className="flex items-center gap-2 text-sm">
-                                        <FileText size={14} className="text-[#33cbcc]" />
+                                        <FileText size={14} className="text-[#283852]" />
                                         <span className="font-medium text-gray-700">{form.srs.name}</span>
                                         <span className="text-gray-400">{form.srs.size}</span>
                                     </div>
                                     <button onClick={() => update('srs', null)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
                                 </div>
                             ) : (
-                                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-gray-400">
+                                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#283852]/40 hover:bg-[#283852]/5 transition-all text-sm text-gray-400">
                                     <Upload size={16} />{t('projects.formUpload')}
                                     <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={e => handleFileSelect('srs', e)} />
                                 </label>
@@ -507,7 +507,7 @@ const AddProjectModal = ({
                                     {form.otherDocs.map((doc, i) => (
                                         <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <FileText size={14} className="text-[#33cbcc]" />
+                                                <FileText size={14} className="text-[#283852]" />
                                                 <span className="font-medium text-gray-700">{doc.name}</span>
                                                 <span className="text-gray-400">{doc.size}</span>
                                             </div>
@@ -516,7 +516,7 @@ const AddProjectModal = ({
                                     ))}
                                 </div>
                             )}
-                            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-gray-400">
+                            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#283852]/40 hover:bg-[#283852]/5 transition-all text-sm text-gray-400">
                                 <Upload size={16} />{t('projects.formUpload')}
                                 <input type="file" className="hidden" multiple onChange={handleOtherDocs} />
                             </label>
@@ -545,7 +545,7 @@ const AddProjectModal = ({
                             }, { onSuccess: () => onClose() });
                         }}
                         disabled={!isValid || createProject.isPending}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${isValid && !createProject.isPending ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-gray-300 cursor-not-allowed shadow-none'}`}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#283852]/20 ${isValid && !createProject.isPending ? 'bg-[#283852] hover:bg-[#1e2d42]' : 'bg-gray-300 cursor-not-allowed shadow-none'}`}
                     >
                         {createProject.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
                         {t('projects.formCreate')}
@@ -591,7 +591,7 @@ const OverviewView = ({ department }: { department: Department }) => {
     const revenue = invoiceStats?.totalRevenue ?? 0;
 
     const stats = [
-        { label: t('departmentDetail.overview.totalMembers'), value: department.employees.length, icon: Users, color: department.color },
+        { label: t('departmentDetail.overview.totalMembers'), value: department.employees.length, icon: Users, color: '#283852' },
         { label: t('departmentDetail.overview.activeProjects'), value: projectCount, icon: FolderKanban, color: '#3b82f6' },
         { label: t('departmentDetail.overview.budget'), value: revenue >= 1000000 ? `${(revenue / 1000000).toFixed(1)}M` : `${(revenue / 1000).toFixed(0)}K`, icon: Wallet, color: '#8b5cf6' },
         { label: t('departmentDetail.overview.avgProgress'), value: projectCount > 0 ? `${avgProgress}%` : 'N/A', icon: TrendingUp, color: '#f59e0b' },
@@ -623,8 +623,8 @@ const OverviewView = ({ department }: { department: Department }) => {
         <div className="space-y-8">
             {/* Header */}
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${department.color}15` }}>
-                    <department.icon size={22} style={{ color: department.color }} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#28385215' }}>
+                    <department.icon size={22} style={{ color: '#283852' }} />
                 </div>
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">{department.name}</h1>
@@ -668,15 +668,15 @@ const OverviewView = ({ department }: { department: Department }) => {
                             <AreaChart data={activityData}>
                                 <defs>
                                     <linearGradient id="colorDeptActivity" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={department.color} stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor={department.color} stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#283852" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#283852" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
                                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                                <Area type="monotone" dataKey="tasks" stroke={department.color} strokeWidth={2} fill="url(#colorDeptActivity)" />
+                                <Area type="monotone" dataKey="tasks" stroke="#283852" strokeWidth={2} fill="url(#colorDeptActivity)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -786,7 +786,7 @@ const MembersView = ({ department }: { department: Department }) => {
                 </h2>
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
+                    className="flex items-center gap-2 bg-[#283852] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20"
                 >
                     <Plus size={16} />
                     {t('departmentDetail.members.addMember')}
@@ -799,12 +799,12 @@ const MembersView = ({ department }: { department: Department }) => {
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => navigate(`/employees/${department.head.id}`)}
                 className="bg-white rounded-3xl p-6 relative overflow-hidden cursor-pointer  transition-shadow"
-                style={{ border: `2px solid ${department.color}20` }}
+                style={{ border: '2px solid #28385220' }}
             >
                 <div className="absolute top-4 right-4">
                     <span
                         className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
-                        style={{ backgroundColor: `${department.color}15`, color: department.color }}
+                        style={{ backgroundColor: '#28385215', color: '#283852' }}
                     >
                         {t('departmentDetail.members.head')}
                     </span>
@@ -909,7 +909,7 @@ const ProjectsView = ({ department }: { department: Department }) => {
                 <h2 className="text-2xl font-bold text-gray-800">{t('departmentDetail.projects.title')}</h2>
                 <button
                     onClick={() => setShowAddModal(true)}
-                    className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
+                    className="flex items-center gap-2 bg-[#283852] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20"
                 >
                     <Plus size={16} />
                     {t('departmentDetail.projects.addProject')}
@@ -961,7 +961,7 @@ const ProjectsView = ({ department }: { department: Department }) => {
                                             animate={{ width: `${proj.progress}%` }}
                                             transition={{ delay: 0.3, duration: 0.8 }}
                                             className="h-full rounded-full"
-                                            style={{ backgroundColor: department.color }}
+                                            style={{ backgroundColor: '#283852' }}
                                         />
                                     </div>
                                     <span className="text-sm font-bold text-gray-800">{proj.progress}%</span>
@@ -1009,7 +1009,7 @@ const BudgetView = ({ department }: { department: Department }) => {
     const formatVal = (v: number) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : `${(v / 1000).toFixed(0)}K`;
 
     const budgetStats = [
-        { label: t('departmentDetail.budget.totalBudget'), value: formatVal(totalBudget), icon: Wallet, color: department.color },
+        { label: t('departmentDetail.budget.totalBudget'), value: formatVal(totalBudget), icon: Wallet, color: '#283852' },
         { label: t('departmentDetail.budget.totalExpenses'), value: formatVal(totalPending), icon: TrendingUp, color: '#f43f5e' },
         { label: t('departmentDetail.budget.remaining'), value: formatVal(totalRevenue), icon: Wallet, color: '#22c55e' },
         { label: t('departmentDetail.budget.perEmployee'), value: formatVal(perEmployee), icon: Users, color: '#3b82f6' },
@@ -1112,8 +1112,8 @@ const BudgetView = ({ department }: { department: Department }) => {
                             <AreaChart data={monthlyData}>
                                 <defs>
                                     <linearGradient id="colorDeptBudgetSpend" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor={department.color} stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor={department.color} stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#283852" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#283852" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -1123,7 +1123,7 @@ const BudgetView = ({ department }: { department: Department }) => {
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                                     formatter={(value: any) => [`${(value || 0).toLocaleString()} FCFA`, 'Amount']}
                                 />
-                                <Area type="monotone" dataKey="spend" stroke={department.color} strokeWidth={2} fill="url(#colorDeptBudgetSpend)" />
+                                <Area type="monotone" dataKey="spend" stroke="#283852" strokeWidth={2} fill="url(#colorDeptBudgetSpend)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -1142,7 +1142,7 @@ const ServiceFormModal = ({
     onClose,
 }: {
     departmentId: string;
-    service?: { id: string; name: string; description?: string; price?: number; duration?: string; isActive: boolean } | null;
+    service?: { id: string; name: string; description?: string; isActive: boolean } | null;
     color: string;
     onClose: () => void;
 }) => {
@@ -1152,8 +1152,6 @@ const ServiceFormModal = ({
 
     const [name, setName] = useState(service?.name || '');
     const [description, setDescription] = useState(service?.description || '');
-    const [price, setPrice] = useState(service?.price !== undefined ? String(service.price) : '');
-    const [duration, setDuration] = useState(service?.duration || '');
     const [isActive, setIsActive] = useState(service?.isActive ?? true);
 
     useEffect(() => {
@@ -1170,8 +1168,6 @@ const ServiceFormModal = ({
         const dto = {
             name: name.trim(),
             description: description || undefined,
-            price: price ? parseFloat(price) : undefined,
-            duration: duration || undefined,
             isActive,
         };
         if (service) {
@@ -1181,7 +1177,7 @@ const ServiceFormModal = ({
         }
     };
 
-    const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+    const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all';
 
     return (
         <motion.div
@@ -1234,35 +1230,6 @@ const ServiceFormModal = ({
                             rows={3}
                             className={`${inputCls} resize-none`}
                         />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="text-xs font-medium text-gray-500 mb-1.5 block">{t('departmentDetail.services.price')}</label>
-                            <div className="relative">
-                                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={price}
-                                    onChange={e => setPrice(e.target.value)}
-                                    placeholder="0"
-                                    className={`${inputCls} pl-8`}
-                                />
-                            </div>
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium text-gray-500 mb-1.5 block">{t('departmentDetail.services.duration')}</label>
-                            <div className="relative">
-                                <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input
-                                    type="text"
-                                    value={duration}
-                                    onChange={e => setDuration(e.target.value)}
-                                    placeholder={t('departmentDetail.services.durationPlaceholder')}
-                                    className={`${inputCls} pl-8`}
-                                />
-                            </div>
-                        </div>
                     </div>
                     <div className="flex items-center justify-between py-2">
                         <div>
@@ -1330,7 +1297,7 @@ const ServicesView = ({ department }: { department: Department }) => {
                 <button
                     onClick={() => { setEditingService(null); setShowModal(true); }}
                     className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-medium rounded-xl shadow-sm hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: department.color }}
+                    style={{ backgroundColor: '#283852' }}
                 >
                     <Plus size={16} />
                     {t('departmentDetail.services.addService')}
@@ -1345,16 +1312,15 @@ const ServicesView = ({ department }: { department: Department }) => {
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder={t('departmentDetail.services.search')}
-                    className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] transition-all bg-white"
+                    className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#283852]/20 focus:border-[#283852] transition-all bg-white"
                 />
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
                 {[
                     { label: t('departmentDetail.services.stats.total'), value: services.length, icon: Briefcase },
                     { label: t('departmentDetail.services.stats.active'), value: services.filter(s => s.isActive).length, icon: ToggleRight },
-                    { label: t('departmentDetail.services.stats.withPrice'), value: services.filter(s => s.price != null).length, icon: DollarSign },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -1363,8 +1329,8 @@ const ServicesView = ({ department }: { department: Department }) => {
                         transition={{ delay: i * 0.05 }}
                         className="bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3"
                     >
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${department.color}15` }}>
-                            <stat.icon size={18} style={{ color: department.color }} />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#28385215' }}>
+                            <stat.icon size={18} style={{ color: '#283852' }} />
                         </div>
                         <div>
                             <p className="text-xl font-bold text-gray-800">{stat.value}</p>
@@ -1377,7 +1343,7 @@ const ServicesView = ({ department }: { department: Department }) => {
             {/* List */}
             {isLoading ? (
                 <div className="flex justify-center py-12">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#33cbcc]" />
+                    <Loader2 className="w-6 h-6 animate-spin text-[#283852]" />
                 </div>
             ) : filtered.length === 0 ? (
                 <motion.div
@@ -1385,8 +1351,8 @@ const ServicesView = ({ department }: { department: Department }) => {
                     animate={{ opacity: 1 }}
                     className="bg-white rounded-2xl border border-gray-100 p-12 text-center"
                 >
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${department.color}15` }}>
-                        <Briefcase size={24} style={{ color: department.color }} />
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#28385215' }}>
+                        <Briefcase size={24} style={{ color: '#283852' }} />
                     </div>
                     <p className="font-semibold text-gray-700">{t('departmentDetail.services.empty')}</p>
                     <p className="text-sm text-gray-400 mt-1">{t('departmentDetail.services.emptyDesc')}</p>
@@ -1403,8 +1369,8 @@ const ServicesView = ({ department }: { department: Department }) => {
                         >
                             <div className="flex items-start justify-between gap-3">
                                 <div className="flex items-start gap-3 min-w-0">
-                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: `${department.color}15` }}>
-                                        <Briefcase size={17} style={{ color: department.color }} />
+                                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: '#28385215' }}>
+                                        <Briefcase size={17} style={{ color: '#283852' }} />
                                     </div>
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
@@ -1421,7 +1387,7 @@ const ServicesView = ({ department }: { department: Department }) => {
                                 <div className="flex items-center gap-1 shrink-0">
                                     <button
                                         onClick={() => { setEditingService(service); setShowModal(true); }}
-                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors"
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
                                     >
                                         <Pencil size={14} />
                                     </button>
@@ -1435,24 +1401,12 @@ const ServicesView = ({ department }: { department: Department }) => {
                             </div>
 
                             <div className="flex items-center gap-3 mt-4 pt-3 border-t border-gray-50">
-                                {service.price != null && (
-                                    <span className="flex items-center gap-1 text-xs text-gray-600 font-medium">
-                                        <DollarSign size={12} className="text-gray-400" />
-                                        {Number(service.price).toLocaleString()} FCFA
-                                    </span>
-                                )}
-                                {service.duration && (
-                                    <span className="flex items-center gap-1 text-xs text-gray-500">
-                                        <Clock size={12} className="text-gray-400" />
-                                        {service.duration}
-                                    </span>
-                                )}
                                 <button
                                     onClick={() => handleToggleActive(service)}
                                     className="ml-auto transition-colors"
                                 >
                                     {service.isActive
-                                        ? <ToggleRight size={22} style={{ color: department.color }} />
+                                        ? <ToggleRight size={22} style={{ color: '#283852' }} />
                                         : <ToggleLeft size={22} className="text-gray-300" />
                                     }
                                 </button>
@@ -1467,7 +1421,7 @@ const ServicesView = ({ department }: { department: Department }) => {
                     <ServiceFormModal
                         departmentId={String(department.id)}
                         service={editingService}
-                        color={department.color}
+                        color="#283852"
                         onClose={() => { setShowModal(false); setEditingService(null); }}
                     />
                 )}
@@ -1493,22 +1447,33 @@ const SettingsView = ({ department }: { department: Department }) => {
     };
 
     /* ── HOD picker ── */
-    const [hodSearch, setHodSearch] = useState('');
-    const [pendingHodId, setPendingHodId] = useState<string | null>(null);
+    const [headDropdownOpen, setHeadDropdownOpen] = useState(false);
+    const [headSearch, setHeadSearch] = useState('');
+    const deptScope = useDepartmentScope();
+    const { data: allEmployeesRaw = [] } = useEmployees(deptScope);
+    const ALL_EMPLOYEES = (allEmployeesRaw as any[]).map((emp: any) => ({
+        id: String(emp.id),
+        name: `${emp.firstName} ${emp.lastName}`,
+        role: emp.position?.title || '',
+        avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=283852&color=fff`,
+    })).sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-    const filteredMembers = useMemo(() =>
-        department.employees.filter(e =>
-            String(e.id) !== String(department.head?.id) &&
-            e.name.toLowerCase().includes(hodSearch.toLowerCase())
+    const headEmployee = department.head?.id && String(department.head.id) !== '0'
+        ? ALL_EMPLOYEES.find((e: any) => e.id === String(department.head!.id))
+        : null;
+
+    const filteredHeadEmployees = useMemo(() =>
+        ALL_EMPLOYEES.filter((e: any) =>
+            e.name.toLowerCase().includes(headSearch.toLowerCase()) ||
+            e.role.toLowerCase().includes(headSearch.toLowerCase())
         ),
-        [department.employees, department.head?.id, hodSearch]
+        [ALL_EMPLOYEES, headSearch]
     );
 
     const handleAppoint = (empId: string) => {
-        setPendingHodId(empId);
         updateDept.mutate(
             { id: String(department.id), dto: { headId: empId } },
-            { onSettled: () => setPendingHodId(null) }
+            { onSuccess: () => { setHeadDropdownOpen(false); setHeadSearch(''); } }
         );
     };
 
@@ -1516,7 +1481,7 @@ const SettingsView = ({ department }: { department: Department }) => {
         updateDept.mutate({ id: String(department.id), dto: { headId: null } });
     };
 
-    const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] bg-white';
+    const inputCls = 'w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#283852]/20 focus:border-[#283852] bg-white';
 
     return (
         <div className="max-w-2xl space-y-6">
@@ -1529,8 +1494,8 @@ const SettingsView = ({ department }: { department: Department }) => {
                 className="bg-white rounded-2xl border border-gray-100 p-5"
             >
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${department.color}15` }}>
-                        <Building size={18} style={{ color: department.color }} />
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#28385215' }}>
+                        <Building size={18} style={{ color: '#283852' }} />
                     </div>
                     <div>
                         <p className="font-semibold text-gray-800 text-sm">{t('departmentDetail.settings.general')}</p>
@@ -1582,8 +1547,8 @@ const SettingsView = ({ department }: { department: Department }) => {
                 className="bg-white rounded-2xl border border-gray-100 p-5"
             >
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${department.color}15` }}>
-                        <UserCog size={18} style={{ color: department.color }} />
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#28385215' }}>
+                        <UserCog size={18} style={{ color: '#283852' }} />
                     </div>
                     <div>
                         <p className="font-semibold text-gray-800 text-sm">{t('departmentDetail.settings.hod')}</p>
@@ -1591,73 +1556,95 @@ const SettingsView = ({ department }: { department: Department }) => {
                     </div>
                 </div>
 
-                {/* Current HOD */}
-                {department.head?.id && String(department.head.id) !== '0' ? (
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-4">
-                        {department.head.avatar
-                            ? <img src={department.head.avatar} alt="" className="w-10 h-10 rounded-xl object-cover" />
-                            : <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/20 flex items-center justify-center text-[#33cbcc] font-bold text-sm">{department.head.name[0]}</div>
-                        }
-                        <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-800 text-sm">{department.head.name}</p>
-                            <p className="text-xs text-gray-400 flex items-center gap-1">
-                                <Crown size={10} className="text-amber-400" />
-                                {t('departmentDetail.members.head')}
-                            </p>
-                        </div>
-                        <button
-                            onClick={handleRemoveHod}
-                            disabled={updateDept.isPending}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
-                            title={t('departmentDetail.settings.removeHod')}
-                        >
-                            <X size={15} />
-                        </button>
-                    </div>
-                ) : (
-                    <p className="text-sm text-gray-400 mb-4">{t('departmentDetail.settings.noHod')}</p>
-                )}
+                {/* HOD dropdown picker */}
+                <div className="relative">
+                    <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1">
+                        <Crown size={11} className="text-amber-400" />
+                        {t('departmentDetail.settings.hod')}
+                    </label>
+                    <button
+                        type="button"
+                        onClick={() => setHeadDropdownOpen(prev => !prev)}
+                        className={`${inputCls} text-left flex items-center gap-3 cursor-pointer`}
+                    >
+                        {headEmployee ? (
+                            <>
+                                {headEmployee.avatar
+                                    ? <img src={headEmployee.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200 shrink-0" />
+                                    : <div className="w-6 h-6 rounded-full bg-[#283852]/20 flex items-center justify-center text-[#283852] font-bold text-xs shrink-0">{headEmployee.name[0]}</div>
+                                }
+                                <span className="flex-1 truncate text-gray-800">{headEmployee.name}</span>
+                                <span className="text-xs text-gray-400 truncate">{headEmployee.role}</span>
+                                <button
+                                    type="button"
+                                    onClick={e => { e.stopPropagation(); handleRemoveHod(); }}
+                                    disabled={updateDept.isPending}
+                                    className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </>
+                        ) : (
+                            <span className="flex-1 text-gray-400">{t('departmentDetail.settings.noHod')}</span>
+                        )}
+                        <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform ${headDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
 
-                {/* Member picker */}
-                {department.employees.length > 0 && (
-                    <div>
-                        <p className="text-xs font-medium text-gray-500 mb-2">{t('departmentDetail.settings.appointFrom')}</p>
-                        <div className="relative mb-2">
-                            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                value={hodSearch}
-                                onChange={e => setHodSearch(e.target.value)}
-                                placeholder={t('employees.searchPlaceholder')}
-                                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc]"
-                            />
-                        </div>
-                        <div className="space-y-1 max-h-52 overflow-y-auto">
-                            {filteredMembers.length === 0 ? (
-                                <p className="text-xs text-gray-400 py-2 text-center">{t('common.noResults')}</p>
-                            ) : filteredMembers.map(emp => (
-                                <div key={emp.id} className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors">
-                                    {emp.avatar
-                                        ? <img src={emp.avatar} alt="" className="w-8 h-8 rounded-lg object-cover" />
-                                        : <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold">{emp.name[0]}</div>
-                                    }
-                                    <span className="flex-1 text-sm text-gray-700">{emp.name}</span>
-                                    <button
-                                        onClick={() => handleAppoint(String(emp.id))}
-                                        disabled={updateDept.isPending}
-                                        className="px-3 py-1 text-xs font-medium bg-[#283852] text-white rounded-lg hover:bg-[#1e2d42] transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
-                                    >
-                                        {pendingHodId === String(emp.id)
-                                            ? <Loader2 size={11} className="animate-spin" />
-                                            : <Crown size={11} />
-                                        }
-                                        {t('departmentDetail.settings.appoint')}
-                                    </button>
+                    <AnimatePresence>
+                        {headDropdownOpen && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                transition={{ duration: 0.15 }}
+                                className="absolute z-20 left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden"
+                            >
+                                <div className="p-2 border-b border-gray-100">
+                                    <div className="relative">
+                                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        <input
+                                            type="text"
+                                            value={headSearch}
+                                            onChange={e => setHeadSearch(e.target.value)}
+                                            placeholder={t('departments.create.searchEmployee')}
+                                            className="w-full bg-gray-50 rounded-lg border-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#283852]/30"
+                                            autoFocus
+                                        />
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
+                                <div className="max-h-48 overflow-y-auto py-1">
+                                    {filteredHeadEmployees.map((emp: any) => (
+                                        <button
+                                            key={emp.id}
+                                            type="button"
+                                            onClick={() => handleAppoint(String(emp.id))}
+                                            disabled={updateDept.isPending}
+                                            className={`w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-gray-50 transition-colors disabled:opacity-40 ${
+                                                String(department.head?.id) === String(emp.id) ? 'bg-[#283852]/5' : ''
+                                            }`}
+                                        >
+                                            {emp.avatar
+                                                ? <img src={emp.avatar} alt="" className="w-7 h-7 rounded-full border border-gray-200 shrink-0" />
+                                                : <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-bold shrink-0">{emp.name[0]}</div>
+                                            }
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-800 truncate">{emp.name}</p>
+                                                <p className="text-[11px] text-gray-400 truncate">{emp.role}</p>
+                                            </div>
+                                            {updateDept.isPending
+                                                ? <Loader2 size={14} className="animate-spin text-gray-400 shrink-0" />
+                                                : String(department.head?.id) === String(emp.id) && <Check size={16} className="text-[#283852] shrink-0" />
+                                            }
+                                        </button>
+                                    ))}
+                                    {filteredHeadEmployees.length === 0 && (
+                                        <p className="text-sm text-gray-400 text-center py-3">{t('departments.create.noResults')}</p>
+                                    )}
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
             </motion.div>
         </div>
     );

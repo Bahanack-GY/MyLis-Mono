@@ -4,6 +4,7 @@ import { InjectModel, InjectConnection } from '@nestjs/sequelize';
 import { Employee } from '../models/employee.model';
 import { EmployeeBadge } from '../models/employee-badge.model';
 import { EmployeeTransferHistory } from '../models/employee-transfer-history.model';
+import { EmployeePromotionHistory } from '../models/employee-promotion-history.model';
 import { User } from '../models/user.model';
 import { Department } from '../models/department.model';
 import { Position } from '../models/position.model';
@@ -23,6 +24,8 @@ export class EmployeesService {
         private employeeBadgeModel: typeof EmployeeBadge,
         @InjectModel(EmployeeTransferHistory)
         private employeeTransferHistoryModel: typeof EmployeeTransferHistory,
+        @InjectModel(EmployeePromotionHistory)
+        private promotionHistoryModel: typeof EmployeePromotionHistory,
         @InjectModel(Task)
         private taskModel: typeof Task,
         @InjectModel(Department)
@@ -383,6 +386,47 @@ export class EmployeesService {
             include: [
                 { model: Department, as: 'fromDepartment', attributes: ['id', 'name'] },
                 { model: Department, as: 'toDepartment', attributes: ['id', 'name'] },
+            ],
+            order: [['createdAt', 'DESC']],
+        });
+    }
+
+    async promoteEmployee(
+        employeeId: string,
+        toPositionId: string,
+        promotedByUserId: string,
+        reason?: string,
+    ): Promise<Employee> {
+        const employee = await this.employeeModel.findByPk(employeeId);
+        if (!employee) throw new NotFoundException('Employee not found');
+
+        const fromPositionId = employee.getDataValue('positionId') || null;
+
+        const promoter = await this.userModel.findByPk(promotedByUserId);
+        const promotedByName = promoter
+            ? `${promoter.getDataValue('firstName') || ''} ${promoter.getDataValue('lastName') || ''}`.trim() || promoter.email
+            : 'System';
+
+        await employee.update({ positionId: toPositionId });
+
+        await this.promotionHistoryModel.create({
+            employeeId,
+            fromPositionId,
+            toPositionId,
+            promotedByUserId,
+            promotedByName,
+            reason: reason || null,
+        });
+
+        return employee.reload({ include: [User, Department, Position] });
+    }
+
+    async getPromotionHistory(employeeId: string): Promise<EmployeePromotionHistory[]> {
+        return this.promotionHistoryModel.findAll({
+            where: { employeeId },
+            include: [
+                { model: Position, as: 'fromPosition', attributes: ['id', 'title'] },
+                { model: Position, as: 'toPosition', attributes: ['id', 'title'] },
             ],
             order: [['createdAt', 'DESC']],
         });

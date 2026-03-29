@@ -4,6 +4,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Employee } from '../models/employee.model';
 import { EmployeeBadge } from '../models/employee-badge.model';
 import { EmployeeTransferHistory } from '../models/employee-transfer-history.model';
+import { EmployeePromotionHistory } from '../models/employee-promotion-history.model';
 import { Department } from '../models/department.model';
 import { User } from '../models/user.model';
 import { Task } from '../models/task.model';
@@ -15,7 +16,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([Employee, EmployeeBadge, EmployeeTransferHistory, Department, User, Task, Report]),
+        SequelizeModule.forFeature([Employee, EmployeeBadge, EmployeeTransferHistory, EmployeePromotionHistory, Department, User, Task, Report]),
         UsersModule,
         NotificationsModule
     ],

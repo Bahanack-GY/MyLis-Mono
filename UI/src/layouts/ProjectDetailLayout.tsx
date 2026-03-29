@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { Loader2, Pencil, X, Briefcase, AlignLeft, Building, Users, DollarSign, TrendingUp, Calendar } from 'lucide-react';
+import { Loader2, Pencil, X, Briefcase, AlignLeft, Building, Users, DollarSign, TrendingUp, Calendar, Wrench } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import ProjectDetailSidebar, { type ProjectTab } from '../components/ProjectDetailSidebar';
 import Header from '../components/Header';
 import ProjectDetail from '../pages/ProjectDetail';
 import { useProject, useUpdateProject } from '../api/projects/hooks';
-import { useDepartments } from '../api/departments/hooks';
+import { useDepartments, useDepartmentServices } from '../api/departments/hooks';
 import { useClients } from '../api/clients/hooks';
 import type { Project } from '../api/projects/types';
 
@@ -27,6 +27,7 @@ export interface ProjectData {
     tasksDone: number;
     budget: number;
     revenue: number;
+    services: { id: string; name: string; price?: number; duration?: string }[];
     members: { id: string; firstName: string; lastName: string; avatarUrl: string }[];
     tasks: {
         id: string;
@@ -62,11 +63,14 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
         description: project.description || '',
         departmentId: project.departmentId || '',
         clientId: project.clientId || '',
+        serviceIds: (project.services || []).map(s => s.id),
         cost: project.budget ? String(project.budget) : '',
         revenue: project.revenue ? String(project.revenue) : '',
         startDate: project.startDate ? project.startDate.slice(0, 10) : '',
         dueDate: project.endDate ? project.endDate.slice(0, 10) : '',
     });
+
+    const { data: departmentServices } = useDepartmentServices(form.departmentId || undefined);
 
     useEffect(() => {
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -142,13 +146,45 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                     {/* Department */}
                     <div>
                         <label className={labelCls}><Building size={12} />{t('projects.formDepartment')}</label>
-                        <select value={form.departmentId} onChange={e => update('departmentId', e.target.value)} className={selectCls}>
+                        <select value={form.departmentId} onChange={e => { update('departmentId', e.target.value); update('serviceIds', []); }} className={selectCls}>
                             <option value="">{t('projects.formDepartmentPlaceholder')}</option>
                             {(apiDepartments || []).map(d => (
                                 <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
                         </select>
                     </div>
+
+                    {/* Services */}
+                    {form.departmentId && (
+                        <div>
+                            <label className={labelCls}><Wrench size={12} />{t('projects.formServices', 'Services')}</label>
+                            {(departmentServices || []).filter(s => s.isActive).length === 0 ? (
+                                <p className="text-xs text-gray-400 py-2">{t('projects.noServices', 'No active services for this department')}</p>
+                            ) : (
+                                <div className="space-y-2">
+                                    {(departmentServices || []).filter(s => s.isActive).map(s => (
+                                        <label key={s.id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-gray-200 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all">
+                                            <input
+                                                type="checkbox"
+                                                checked={form.serviceIds.includes(s.id)}
+                                                onChange={e => {
+                                                    const next = e.target.checked
+                                                        ? [...form.serviceIds, s.id]
+                                                        : form.serviceIds.filter(id => id !== s.id);
+                                                    update('serviceIds', next);
+                                                }}
+                                                className="accent-[#33cbcc] w-4 h-4 shrink-0"
+                                            />
+                                            <span className="text-sm text-gray-700 flex-1">{s.name}</span>
+                                            {s.price != null && (
+                                                <span className="text-xs text-gray-400">{new Intl.NumberFormat('fr-FR').format(s.price)} FCFA</span>
+                                            )}
+                                        </label>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Client */}
                     <div>
@@ -226,6 +262,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                                         description: form.description || undefined,
                                         departmentId: form.departmentId || undefined,
                                         clientId: form.clientId || undefined,
+                                        serviceIds: form.serviceIds,
                                         budget: form.cost ? parseFloat(form.cost) : undefined,
                                         revenue: form.revenue ? parseFloat(form.revenue) : undefined,
                                         startDate: form.startDate || undefined,
@@ -287,6 +324,7 @@ const ProjectDetailLayout = () => {
         tasksDone,
         budget: apiProject.budget || 0,
         revenue: apiProject.revenue || 0,
+        services: apiProject.services || [],
         members: apiProject.members || [],
         tasks,
     };

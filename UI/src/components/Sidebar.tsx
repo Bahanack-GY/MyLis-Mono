@@ -21,7 +21,6 @@ import {
     Wallet,
     GraduationCap,
     AlertTriangle,
-    MoreHorizontal,
     X,
     BookOpen,
     FileSpreadsheet,
@@ -48,6 +47,8 @@ import logo from '../assets/Logo.png';
 interface SidebarProps {
     isSidebarOpen: boolean;
     setIsSidebarOpen: (isOpen: boolean) => void;
+    mobileMenuOpen?: boolean;
+    setMobileMenuOpen?: (open: boolean) => void;
 }
 
 type MenuItem = {
@@ -112,6 +113,7 @@ const ALL_SECTIONS: Section[] = [
             { icon: Target, label: 'commercialDashboard', path: '/commercial' },
             { icon: Database, label: 'leadsDatabase', path: '/commercial/leads' },
             { icon: TrendingUp, label: 'salesPipeline', path: '/commercial/pipeline' },
+            { icon: ListChecks, label: 'leadFollowUp', path: '/commercial/suivi' },
             { icon: BookOpen, label: 'clientFollowUp', path: '/commercial/follow-up', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
         ],
     },
@@ -154,13 +156,14 @@ function filterSections(sections: Section[], role: Role | null): Section[] {
         .filter(section => section.items.length > 0);
 }
 
-const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
+const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setMobileMenuOpen }: SidebarProps) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const logout = useLogout();
     const { role, viewMode, setViewMode } = useAuth();
-    const [moreOpen, setMoreOpen] = useState(false);
+    const moreOpen = mobileMenuOpen;
+    const setMoreOpen = (v: boolean) => setMobileMenuOpen?.(v);
 
     const canToggleView = role !== null && TOGGLEABLE_ROLES.includes(role);
     const effectiveRole: Role | null = canToggleView && viewMode === 'employee' ? 'EMPLOYEE' : role;
@@ -174,9 +177,9 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
 
     const allItems = useMemo(() => sections.flatMap(s => s.items), [sections]);
 
-    // Mobile bottom nav: first 4 items + "More" button
-    const mobileMainItems = allItems.slice(0, 4);
-    const mobileMoreItems = allItems.slice(4);
+    // Mobile bottom nav: first 5 items + hamburger for the rest
+    const mobileMainItems = allItems.slice(0, 5);
+    const mobileMoreItems = allItems.slice(5);
 
     const isActive = (path: string) => location.pathname.startsWith(path);
     const isMoreActive = mobileMoreItems.some(item => isActive(item.path));
@@ -362,96 +365,100 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
     // ── Mobile Bottom Nav (< md) ──
     const MobileBottomNav = (
         <div className="md:hidden fixed bottom-0 left-0 right-0 z-50">
-            {/* "More" overlay menu */}
+            {/* Slide-in sidebar */}
             <AnimatePresence>
                 {moreOpen && (
                     <>
-                        {/* Backdrop */}
+                        {/* Sidebar panel — slides from right */}
                         <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/40 z-40"
-                            onClick={() => setMoreOpen(false)}
-                        />
-                        {/* More panel */}
-                        <motion.div
-                            initial={{ y: '100%' }}
-                            animate={{ y: 0 }}
-                            exit={{ y: '100%' }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className="absolute bottom-full left-0 right-0 bg-white rounded-t-2xl shadow-2xl z-50 pb-2"
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 16 }}
+                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                            className="fixed inset-0 bg-[#283852] text-white z-50 flex flex-col"
                         >
-                            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-                                <span className="text-sm font-semibold text-[#283852]">{t('sidebar.more')}</span>
+                            {/* Sidebar header */}
+                            <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <img src={logo} alt="Logo" className="w-7 h-7 object-contain" />
+                                    <span className="font-bold text-lg tracking-tight">MyLIS</span>
+                                </div>
                                 <button
                                     onClick={() => setMoreOpen(false)}
                                     aria-label={t('common.close', 'Close')}
-                                    className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                                    className="p-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
                                 >
-                                    <X size={18} aria-hidden="true" className="text-gray-500" />
+                                    <X size={18} aria-hidden="true" />
                                 </button>
                             </div>
-                            <div className="px-3 py-2 space-y-1">
-                                {mobileMoreItems.map((item) => {
-                                    const active = isActive(item.path);
-                                    return (
-                                        <button
-                                            key={item.path}
-                                            onClick={() => {
-                                                navigate(item.path);
-                                                setMoreOpen(false);
-                                            }}
-                                            aria-current={active ? 'page' : undefined}
-                                            className={`
-                                                w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200
-                                                ${active
-                                                    ? 'bg-[#33cbcc]/10 text-[#283852]'
-                                                    : 'text-gray-600 hover:bg-gray-50'
-                                                }
-                                            `}
-                                        >
-                                            <item.icon
-                                                size={20}
-                                                aria-hidden="true"
-                                                className={active ? 'text-[#33cbcc]' : 'text-gray-400'}
-                                            />
-                                            <span className="text-sm font-medium">{t(`sidebar.${item.label}`)}</span>
-                                        </button>
-                                    );
-                                })}
-                                {/* View toggle in more menu — admin roles only */}
+
+                            {/* Nav items — all items grouped by section */}
+                            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+                                {sections.map((section, si) => (
+                                    <div key={section.key}>
+                                        {si > 0 && (
+                                            <div className="pt-4 pb-1 px-1">
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                                    {t(`sidebar.sections.${section.key}`)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {si === 0 && (
+                                            <div className="pb-1 px-1">
+                                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                                                    {t(`sidebar.sections.${section.key}`)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="space-y-0.5">
+                                            {section.items.map((item) => {
+                                                const active = isActive(item.path);
+                                                return (
+                                                    <button
+                                                        key={item.path}
+                                                        onClick={() => { navigate(item.path); setMoreOpen(false); }}
+                                                        aria-current={active ? 'page' : undefined}
+                                                        className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                                                            active
+                                                                ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
+                                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                                        }`}
+                                                    >
+                                                        <item.icon size={19} aria-hidden="true" className="shrink-0" />
+                                                        <span className="text-sm font-medium">{t(`sidebar.${item.label}`)}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </nav>
+
+                            {/* Footer */}
+                            <div className="p-3 border-t border-white/5 space-y-0.5 shrink-0">
                                 {canToggleView && (
                                     <button
-                                        onClick={() => {
-                                            setViewMode(viewMode === 'admin' ? 'employee' : 'admin');
-                                            setMoreOpen(false);
-                                        }}
-                                        className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 border-t border-gray-100 mt-1 pt-3 text-[#283852] hover:bg-[#33cbcc]/10"
+                                        onClick={() => { setViewMode(viewMode === 'admin' ? 'employee' : 'admin'); setMoreOpen(false); }}
+                                        className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-white/5 hover:text-[#33cbcc] transition-colors"
                                     >
-                                        <ArrowLeftRight size={20} aria-hidden="true" className="text-[#33cbcc]" />
+                                        <ArrowLeftRight size={19} aria-hidden="true" className="shrink-0" />
                                         <div>
-                                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                            <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                                                 {t('sidebar.viewMode', 'Vue active')}
                                             </p>
-                                            <p className="text-sm font-medium">
+                                            <p className="text-sm font-medium text-white">
                                                 {viewMode === 'admin'
-                                                    ? t('sidebar.switchToEmployeeView', 'Passer en vue employé')
-                                                    : t('sidebar.switchToMgmtView', 'Passer en vue gestion')}
+                                                    ? mgmtViewLabel
+                                                    : t('sidebar.employeeView', 'Employé')}
                                             </p>
                                         </div>
                                     </button>
                                 )}
-
-                                {/* Logout in more menu */}
                                 <button
-                                    onClick={() => {
-                                        setMoreOpen(false);
-                                        logout();
-                                    }}
-                                    className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer text-gray-600 hover:bg-gray-50 transition-all duration-200 border-t border-gray-100 mt-1 pt-3"
+                                    onClick={() => { setMoreOpen(false); logout(); }}
+                                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-red-400/10 hover:text-red-400 transition-colors"
                                 >
-                                    <LogOut size={20} aria-hidden="true" className="text-gray-400" />
+                                    <LogOut size={19} aria-hidden="true" className="shrink-0" />
                                     <span className="text-sm font-medium">{t('sidebar.logout')}</span>
                                 </button>
                             </div>
@@ -461,7 +468,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
             </AnimatePresence>
 
             {/* Bottom bar */}
-            <nav aria-label={t('sidebar.mainNav', 'Main navigation')} className="bg-white border-t border-gray-200 px-2 py-2 flex items-center justify-around safe-bottom">
+            <nav aria-label={t('sidebar.mainNav', 'Main navigation')} className="bg-white border-t border-gray-200 px-2 py-2 flex items-center justify-around">
                 {mobileMainItems.map((item) => {
                     const active = isActive(item.path);
                     return (
@@ -469,10 +476,9 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
                             key={item.path}
                             onClick={() => navigate(item.path)}
                             aria-current={active ? 'page' : undefined}
-                            className={`
-                                flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-[56px]
-                                ${active ? 'text-[#33cbcc]' : 'text-gray-400'}
-                            `}
+                            className={`flex flex-col items-center gap-1 px-2 py-1.5 rounded-xl transition-all duration-200 min-w-[48px] ${
+                                active ? 'text-[#33cbcc]' : 'text-gray-400'
+                            }`}
                         >
                             <item.icon size={22} aria-hidden="true" />
                             <span className="text-[10px] font-medium leading-tight">
@@ -481,23 +487,6 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }: SidebarProps) => {
                         </button>
                     );
                 })}
-                {/* More button */}
-                {mobileMoreItems.length > 0 && (
-                    <button
-                        onClick={() => setMoreOpen(!moreOpen)}
-                        aria-expanded={moreOpen}
-                        aria-haspopup="menu"
-                        className={`
-                            flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-[56px]
-                            ${isMoreActive || moreOpen ? 'text-[#33cbcc]' : 'text-gray-400'}
-                        `}
-                    >
-                        <MoreHorizontal size={22} aria-hidden="true" />
-                        <span className="text-[10px] font-medium leading-tight">
-                            {t('sidebar.more')}
-                        </span>
-                    </button>
-                )}
             </nav>
         </div>
     );

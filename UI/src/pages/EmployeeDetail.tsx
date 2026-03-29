@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { useProjectsByDepartment } from '../api/projects';
 import { useCreateTask, useTasksByEmployee, useUpdateTask, useDeleteTask, useTaskHistory, type Task, type TaskHistoryEntry } from '../api/tasks';
-import { useTimeDistribution } from '../api/tasks/hooks';
+import TaskTimeChart from '../components/TaskTimeChart';
 import {
     FileText,
     Clock,
@@ -60,7 +61,7 @@ import {
     Star,
     ArrowRight,
 } from 'lucide-react';
-import { useEmployee, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword, useEmployeeTransferHistory, useEmployeeReports } from '../api/employees/hooks';
+import { useEmployee, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword, useEmployeeTransferHistory, useEmployeeReports, usePromoteEmployee, useEmployeePromotionHistory } from '../api/employees/hooks';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextDisplay from '../components/RichTextDisplay';
 import TransferEmployeeModal from '../components/modals/TransferEmployeeModal';
@@ -111,8 +112,6 @@ import {
     AreaChart,
     Area,
     CartesianGrid,
-    PieChart,
-    Pie
 } from 'recharts';
 import type { EmployeeTab } from '../components/EmployeeDetailSidebar';
 import type { Employee } from '../api/employees/types';
@@ -613,7 +612,6 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
     const { data: employeeTasks = [] } = useTasksByEmployee(employee.id);
     const { data: departmentProjects = [] } = useProjectsByDepartment(employee.departmentId);
     const { data: employeeBadges = [] } = useEmployeeBadges(String(employee.id));
-    const { data: timeDistribution = [] } = useTimeDistribution(employee.id);
 
     const trophies: { id: number; title: string; date: string; icon: string }[] = [];
     const badges = employeeBadges.map(b => ({
@@ -975,54 +973,12 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                     </div>
                 </motion.div>
 
-                {/* Time Distribution Donut Chart */}
-                {timeDistribution.length > 0 && (
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="bg-white rounded-2xl p-5 border border-gray-100">
-                        <h3 className="font-semibold text-gray-800 text-sm mb-0.5">{t('employeeDetail.tasks.timeDistribution')}</h3>
-                        <p className="text-[11px] text-gray-400 mb-4">{t('employeeDetail.tasks.timeDistributionDesc')}</p>
-                        <div className="relative w-full h-[180px] mb-4">
-                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                                <PieChart>
-                                    <Pie
-                                        data={timeDistribution}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={50}
-                                        outerRadius={72}
-                                        paddingAngle={3}
-                                        dataKey="hours"
-                                        nameKey="name"
-                                    >
-                                        {timeDistribution.map((item, index) => (
-                                            <Cell key={index} fill={item.color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: '12px' }}
-                                        formatter={(value: number, name: string) => [`${value}h (${timeDistribution.find(d => d.name === name)?.percentage ?? 0}%)`, name === '__uncategorized__' ? t('employeeDetail.tasks.uncategorized') : name]}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="text-center">
-                                    <p className="text-lg font-bold text-gray-800">{Math.round(timeDistribution.reduce((s, d) => s + d.hours, 0))}h</p>
-                                    <p className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">{t('employeeDetail.tasks.total')}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="space-y-1.5">
-                            {timeDistribution.map((item, index) => (
-                                <div key={index} className="flex items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2 min-w-0">
-                                        <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                                        <span className="text-xs text-gray-600 truncate">{item.name === '__uncategorized__' ? t('employeeDetail.tasks.uncategorized') : item.name}</span>
-                                    </div>
-                                    <span className="text-xs font-semibold text-gray-700 shrink-0">{item.percentage}%</span>
-                                </div>
-                            ))}
-                        </div>
-                    </motion.div>
-                )}
+                {/* Time Distribution Chart */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="bg-white rounded-2xl p-5 border border-gray-100">
+                    <h3 className="font-semibold text-gray-800 text-sm mb-0.5">{t('employeeDetail.tasks.timeDistribution')}</h3>
+                    <p className="text-[11px] text-gray-400 mb-3">{t('employeeDetail.tasks.timeDistributionDesc')}</p>
+                    <TaskTimeChart employeeId={employee.id} />
+                </motion.div>
 
                 {/* Trophies Card */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} onClick={() => setShowTrophiesModal(true)} className="bg-white rounded-2xl p-5 border border-gray-100 cursor-pointer hover:border-[#33cbcc]/30 transition-colors">
@@ -1403,7 +1359,6 @@ const TasksView = ({ employee }: { employee: Employee }) => {
     // Fetch department projects and employee tasks
     const { data: departmentProjects } = useProjectsByDepartment(employee.departmentId);
     const { data: apiTasks = [] } = useTasksByEmployee(employee.id);
-    const { data: timeDistribution = [] } = useTimeDistribution(employee.id);
     const createTaskMutation = useCreateTask();
     const updateTaskMutation = useUpdateTask();
     const deleteTaskMutation = useDeleteTask();
@@ -1522,59 +1477,12 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                 </div>
             </div>
 
-            {/* Time Distribution Donut Chart */}
-            {timeDistribution.length > 0 && (
-                <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                    <h3 className="text-base font-bold text-gray-800 mb-1">{t('employeeDetail.tasks.timeDistribution')}</h3>
-                    <p className="text-xs text-gray-400 mb-4">{t('employeeDetail.tasks.timeDistributionDesc')}</p>
-                    <div className="flex flex-col md:flex-row items-center gap-6">
-                        <div className="relative w-[200px] h-[200px] shrink-0">
-                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                                <PieChart>
-                                    <Pie
-                                        data={timeDistribution}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={55}
-                                        outerRadius={80}
-                                        paddingAngle={3}
-                                        dataKey="hours"
-                                        nameKey="name"
-                                    >
-                                        {timeDistribution.map((item, index) => (
-                                            <Cell key={index} fill={item.color} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.08)', fontSize: '13px' }}
-                                        formatter={(value: number, name: string) => [`${value}h (${timeDistribution.find(d => d.name === name)?.percentage ?? 0}%)`, name === '__uncategorized__' ? t('employeeDetail.tasks.uncategorized') : name]}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="text-center">
-                                    <p className="text-lg font-bold text-gray-800">{Math.round(timeDistribution.reduce((s, d) => s + d.hours, 0))}h</p>
-                                    <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{t('employeeDetail.tasks.total')}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="flex-1 w-full space-y-2">
-                            {timeDistribution.map((item, index) => (
-                                <div key={index} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-center gap-2.5 min-w-0">
-                                        <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                                        <span className="text-sm text-gray-700 truncate">{item.name === '__uncategorized__' ? t('employeeDetail.tasks.uncategorized') : item.name}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 shrink-0">
-                                        <span className="text-xs text-gray-400">{item.hours}h</span>
-                                        <span className="text-sm font-semibold text-gray-800 w-12 text-right">{item.percentage}%</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Time Distribution Chart */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <h3 className="text-base font-bold text-gray-800 mb-1">{t('employeeDetail.tasks.timeDistribution')}</h3>
+                <p className="text-xs text-gray-400 mb-3">{t('employeeDetail.tasks.timeDistributionDesc')}</p>
+                <TaskTimeChart employeeId={employee.id} />
+            </div>
 
             {/* Calendar sub-header */}
             {viewMode === 'calendar' && (
@@ -3043,11 +2951,163 @@ const ReportsView = ({ employee }: { employee: Employee }) => {
     );
 };
 
+/* ─── Promotions View ────────────────────────────────── */
+const PromotionsView = ({ employee }: { employee: Employee }) => {
+    const { t } = useTranslation();
+    const { role } = useAuth();
+    const isManager = role === 'MANAGER';
+    const { data: positions = [] } = usePositions();
+    const { data: history = [], isLoading } = useEmployeePromotionHistory(String(employee.id));
+    const promote = usePromoteEmployee();
+    const [showForm, setShowForm] = useState(false);
+    const [toPositionId, setToPositionId] = useState('');
+    const [reason, setReason] = useState('');
+
+    const handleSubmit = () => {
+        if (!toPositionId) return;
+        promote.mutate(
+            { id: String(employee.id), dto: { toPositionId, reason: reason.trim() || undefined } },
+            {
+                onSuccess: () => {
+                    setShowForm(false);
+                    setToPositionId('');
+                    setReason('');
+                },
+            },
+        );
+    };
+
+    return (
+        <div className="space-y-4">
+            {isManager && (
+                <div>
+                    {!showForm ? (
+                        <button
+                            onClick={() => setShowForm(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb8b9] transition-colors"
+                        >
+                            <Plus size={15} />
+                            {t('promotions.create', 'Créer une promotion')}
+                        </button>
+                    ) : (
+                        <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
+                            <h4 className="font-semibold text-gray-900 text-sm">{t('promotions.newPromotion', 'Nouvelle promotion')}</h4>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                    {t('promotions.newRole', 'Nouveau poste')} <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    value={toPositionId}
+                                    onChange={e => setToPositionId(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#33cbcc]"
+                                >
+                                    <option value="">{t('promotions.selectPosition', 'Sélectionner un poste')}</option>
+                                    {positions.map(p => (
+                                        <option key={p.id} value={p.id}>{p.title}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-600 mb-1">
+                                    {t('promotions.reason', 'Motif (optionnel)')}
+                                </label>
+                                <textarea
+                                    value={reason}
+                                    onChange={e => setReason(e.target.value)}
+                                    rows={3}
+                                    className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#33cbcc] resize-none"
+                                    placeholder={t('promotions.reasonPlaceholder', 'Raison de la promotion...')}
+                                />
+                            </div>
+                            <div className="flex gap-2 justify-end">
+                                <button
+                                    onClick={() => { setShowForm(false); setToPositionId(''); setReason(''); }}
+                                    className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                                >
+                                    {t('common.cancel', 'Annuler')}
+                                </button>
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={!toPositionId || promote.isPending}
+                                    className="px-4 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb8b9] transition-colors disabled:opacity-50"
+                                >
+                                    {promote.isPending ? t('common.saving', 'Enregistrement...') : t('promotions.confirm', 'Confirmer')}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {isLoading ? (
+                <div className="flex items-center justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                </div>
+            ) : history.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16">
+                    <TrendingUp className="w-16 h-16 text-gray-300 mb-4" />
+                    <p className="text-gray-500 text-sm">{t('promotions.noHistory', 'Aucune promotion enregistrée')}</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {history.map((entry, index) => (
+                        <motion.div
+                            key={entry.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="relative"
+                        >
+                            {index < history.length - 1 && (
+                                <div className="absolute left-5 top-12 bottom-0 w-0.5 bg-gray-200" />
+                            )}
+                            <div className="flex gap-4">
+                                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                                    <TrendingUp className="w-5 h-5 text-[#33cbcc]" />
+                                </div>
+                                <div className="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <span className="text-sm text-gray-500">
+                                            {entry.fromPosition?.title || t('promotions.noPosition', 'Aucun poste')}
+                                        </span>
+                                        <ArrowRight className="w-4 h-4 text-gray-400" />
+                                        <span className="text-sm font-semibold text-gray-900">
+                                            {entry.toPosition.title}
+                                        </span>
+                                    </div>
+                                    <div className="space-y-1 text-sm text-gray-600">
+                                        <div className="flex items-center gap-2">
+                                            <User className="w-4 h-4" />
+                                            <span>{t('promotions.promotedBy', 'Par')} {entry.promotedByName}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-4 h-4" />
+                                            <span>{format(new Date(entry.createdAt), 'PPp')}</span>
+                                        </div>
+                                        {entry.reason && (
+                                            <div className="flex items-start gap-2 mt-2">
+                                                <FileText className="w-4 h-4 mt-0.5" />
+                                                <span className="text-gray-700">{entry.reason}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
+
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
 const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetailProps) => {
     const { t } = useTranslation();
+    const { role } = useAuth();
+    const isManager = role === 'MANAGER';
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDismissConfirm, setShowDismissConfirm] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
@@ -3092,6 +3152,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
         education: <EducationView employee={employee} />,
         formations: <FormationsView employee={employee} />,
         transfers: <TransferHistoryView employee={employee} />,
+        promotions: <PromotionsView employee={employee} />,
     };
 
     return (
@@ -3119,22 +3180,24 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-gray-800">{employee.name}</h1>
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setShowDismissConfirm(true)}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                            isDismissed
-                                ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                                : 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20'
-                        }`}
-                    >
-                        {isDismissed ? <UserCheck size={15} /> : <UserX size={15} />}
-                        {isDismissed ? t('employees.reinstate', 'Reinstate') : t('employees.dismiss', 'Dismiss')}
-                    </button>
+                    {isManager && (
+                        <button
+                            onClick={() => setShowDismissConfirm(true)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                                isDismissed
+                                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                                    : 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20'
+                            }`}
+                        >
+                            {isDismissed ? <UserCheck size={15} /> : <UserX size={15} />}
+                            {isDismissed ? t('employees.reinstate', 'Reinstate') : t('employees.dismiss', 'Dismiss')}
+                        </button>
+                    )}
                     {!isDismissed && (
                         <>
                             <button
                                 onClick={() => setShowTransferModal(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                                className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-lg hover:bg-[#2bb8b9]"
                             >
                                 <Repeat className="w-4 h-4" />
                                 {t('employees.transfer.button')}

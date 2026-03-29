@@ -167,3 +167,25 @@ export const useEmployeeReports = (id: string) =>
         queryFn: () => employeesApi.getReports(id),
         enabled: !!id,
     });
+
+export const usePromoteEmployee = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, dto }: { id: string; dto: { toPositionId: string; reason?: string } }) =>
+            employeesApi.promote(id, dto),
+        onSuccess: (_, { id }) => {
+            toast.success(i18n.t('toast.employeePromoted', 'Employé promu avec succès'));
+            qc.invalidateQueries({ queryKey: employeeKeys.all });
+            qc.invalidateQueries({ queryKey: employeeKeys.detail(id) });
+            qc.invalidateQueries({ queryKey: ['employee-promotion-history', id] });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useEmployeePromotionHistory = (id: string) =>
+    useQuery({
+        queryKey: ['employee-promotion-history', id],
+        queryFn: () => employeesApi.getPromotionHistory(id),
+        enabled: !!id,
+    });

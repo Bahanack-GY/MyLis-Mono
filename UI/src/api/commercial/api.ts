@@ -14,6 +14,7 @@ export const leadsApi = {
         page?: number; limit?: number; search?: string;
         saleStage?: string; leadStatus?: string; priority?: string;
         leadType?: string; assignedToId?: string;
+        dateFrom?: string; dateTo?: string;
     }) =>
         api.get<PaginatedResponse<Lead>>('/leads', { params }).then(r => r.data),
 

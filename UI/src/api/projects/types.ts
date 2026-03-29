@@ -10,6 +10,7 @@ export interface Project {
     endDate?: string;
     client?: { id: string; name: string };
     department?: { id: string; name: string };
+    services?: { id: string; name: string; price?: number; duration?: string }[];
     members?: { id: string; firstName: string; lastName: string; avatarUrl: string }[];
     tasks?: {
         id: string;
@@ -29,6 +30,7 @@ export interface CreateProjectDto {
     description?: string;
     clientId?: string;
     departmentId?: string;
+    serviceIds?: string[];
     budget?: number;
     revenue?: number;
     startDate?: string;

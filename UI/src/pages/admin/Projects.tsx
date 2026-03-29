@@ -21,11 +21,12 @@ import {
   FileText,
   Trash2,
   Loader2,
-  Pencil
+  Pencil,
+  Wrench
 } from 'lucide-react';
 import { useProjects, useCreateProject, useProject, useUpdateProject } from '../../api/projects/hooks';
 import { ProjectsSkeleton } from '../../components/Skeleton';
-import { useDepartments } from '../../api/departments/hooks';
+import { useDepartments, useDepartmentServices } from '../../api/departments/hooks';
 import { useClients, useCreateClient } from '../../api/clients/hooks';
 import { useAuth, useDepartmentScope } from '../../contexts/AuthContext';
 import {
@@ -698,11 +699,14 @@ const EditProjectModal = ({ projectId, onClose }: { projectId: string; onClose: 
     description: '',
     departmentId: '',
     clientId: '',
+    serviceIds: [] as string[],
     cost: '',
     revenue: '',
     startDate: '',
     dueDate: '',
   });
+
+  const { data: departmentServices } = useDepartmentServices(form.departmentId || undefined);
 
   useEffect(() => {
     if (apiProject) {
@@ -711,6 +715,7 @@ const EditProjectModal = ({ projectId, onClose }: { projectId: string; onClose: 
         description: apiProject.description || '',
         departmentId: apiProject.departmentId || '',
         clientId: apiProject.clientId || '',
+        serviceIds: (apiProject.services || []).map(s => s.id),
         cost: apiProject.budget ? String(apiProject.budget) : '',
         revenue: apiProject.revenue ? String(apiProject.revenue) : '',
         startDate: apiProject.startDate ? apiProject.startDate.slice(0, 10) : '',
@@ -781,11 +786,41 @@ const EditProjectModal = ({ projectId, onClose }: { projectId: string; onClose: 
             </div>
             <div>
               <label className={labelCls}><Building size={12} />{t('projects.formDepartment')}</label>
-              <select value={form.departmentId} onChange={e => update('departmentId', e.target.value)} className={selectCls}>
+              <select value={form.departmentId} onChange={e => { update('departmentId', e.target.value); update('serviceIds', []); }} className={selectCls}>
                 <option value="">{t('projects.formDepartmentPlaceholder')}</option>
                 {(apiDepartments || []).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
               </select>
             </div>
+            {form.departmentId && (
+              <div>
+                <label className={labelCls}><Wrench size={12} />{t('projects.formServices', 'Services')}</label>
+                {(departmentServices || []).filter(s => s.isActive).length === 0 ? (
+                  <p className="text-xs text-gray-400 py-2">{t('projects.noServices', 'No active services for this department')}</p>
+                ) : (
+                  <div className="space-y-2">
+                    {(departmentServices || []).filter(s => s.isActive).map(s => (
+                      <label key={s.id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-gray-200 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all">
+                        <input
+                          type="checkbox"
+                          checked={form.serviceIds.includes(s.id)}
+                          onChange={e => {
+                            const next = e.target.checked
+                              ? [...form.serviceIds, s.id]
+                              : form.serviceIds.filter(id => id !== s.id);
+                            update('serviceIds', next);
+                          }}
+                          className="accent-[#33cbcc] w-4 h-4 shrink-0"
+                        />
+                        <span className="text-sm text-gray-700 flex-1">{s.name}</span>
+                        {s.price != null && (
+                          <span className="text-xs text-gray-400">{new Intl.NumberFormat('fr-FR').format(s.price)} FCFA</span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div>
               <label className={labelCls}><Users size={12} />{t('projects.formClient')}</label>
               <select value={form.clientId} onChange={e => update('clientId', e.target.value)} className={selectCls}>
@@ -825,6 +860,7 @@ const EditProjectModal = ({ projectId, onClose }: { projectId: string; onClose: 
                     description: form.description || undefined,
                     departmentId: form.departmentId || undefined,
                     clientId: form.clientId || undefined,
+                    serviceIds: form.serviceIds,
                     budget: form.cost ? parseFloat(form.cost) : undefined,
                     revenue: form.revenue ? parseFloat(form.revenue) : undefined,
                     startDate: form.startDate || undefined,

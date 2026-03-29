@@ -48,7 +48,7 @@ const DepartmentDetailLayout = () => {
 
     const { data: apiDepartments, isLoading } = useDepartments();
 
-    const DEPT_COLORS = ['#33cbcc', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#3b82f6'];
+    const DEPT_COLORS = ['#283852'];
     const DEPT_ICONS = [Code, Palette, Megaphone, DollarSign, Heart, PieChartIcon];
 
     const DEPARTMENTS: Department[] = (apiDepartments || []).map((d, i) => ({
@@ -58,13 +58,13 @@ const DepartmentDetailLayout = () => {
         color: DEPT_COLORS[i % DEPT_COLORS.length],
         icon: DEPT_ICONS[i % DEPT_ICONS.length],
         head: d.head
-            ? { id: d.head.id, name: `${d.head.firstName} ${d.head.lastName}`, role: '', avatar: d.head.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.head.firstName + '+' + d.head.lastName)}&background=33cbcc&color=fff` }
+            ? { id: d.head.id, name: `${d.head.firstName} ${d.head.lastName}`, role: '', avatar: d.head.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(d.head.firstName + '+' + d.head.lastName)}&background=283852&color=fff` }
             : { id: 0, name: '\u2014', role: '', avatar: '' },
         employees: d.employees?.map((e) => ({
             id: e.id,
             name: `${e.firstName} ${e.lastName}`,
             role: e.position?.title || '',
-            avatar: e.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.firstName + '+' + e.lastName)}&background=33cbcc&color=fff`,
+            avatar: e.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(e.firstName + '+' + e.lastName)}&background=283852&color=fff`,
         })) || [],
         projects: d.projects?.map((p) => ({
             id: p.id,
@@ -86,7 +86,7 @@ const DepartmentDetailLayout = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#283852]" />
             </div>
         );
     }

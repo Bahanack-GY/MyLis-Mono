@@ -496,6 +496,7 @@
     "commercialDashboard": "Commercial",
     "leadsDatabase": "Leads",
     "salesPipeline": "Pipeline",
+    "leadFollowUp": "Suivi Leads",
     "clientFollowUp": "Suivi Client",
     "businessExpenses": "Frais de vie",
     "sections": {
@@ -2574,7 +2575,40 @@
         "PARTENAIRE": "Partenaire"
       },
       "linkedTasks": "Tâches Liées",
-      "noLinkedTasks": "Aucune tâche liée"
+      "noLinkedTasks": "Aucune tâche liée",
+      "contactName": "Nom",
+      "contactRole": "Poste",
+      "contactPhone": "Téléphone",
+      "contactEmail": "Email",
+      "wizard": {
+        "title": "Nouveau lead",
+        "subtitle": "Étape",
+        "steps": {
+          "company": "Entreprise",
+          "location": "Localisation",
+          "contacts": "Contacts",
+          "needs": "Besoins",
+          "commercial": "Commercial"
+        },
+        "addContact": "Ajouter un contact",
+        "removeContact": "Supprimer",
+        "contact": "Contact",
+        "primary": "Principal",
+        "setPrimary": "Définir comme principal",
+        "addNeed": "Ajouter un besoin",
+        "need": "Besoin",
+        "needDescription": "Description",
+        "needPlaceholder": "Décrivez le besoin...",
+        "assignedService": "Service associé",
+        "noService": "— Aucun service —",
+        "defaultCold": "par défaut",
+        "summary": "Récapitulatif",
+        "contactCount": "Contacts",
+        "needCount": "Besoins",
+        "createLead": "Créer le lead",
+        "next": "Suivant",
+        "previous": "Précédent"
+      }
     },
     "pipeline": {
       "title": "Pipeline des Ventes",

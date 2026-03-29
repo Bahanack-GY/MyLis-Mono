@@ -671,8 +671,8 @@ ${headingInstruction}
                     think: false,
                     options: {
                         temperature: 0.4,
-                        num_predict: 8000,
-                        num_ctx: 16384,
+                        num_predict: 4096,
+                        num_ctx: 8192,
                         top_p: 0.9,
                         top_k: 40,
                     },
@@ -687,10 +687,15 @@ ${headingInstruction}
             }
 
             const data: any = await response.json();
-            // Strip any thinking tags that qwen3 may emit
-            const result = (data.response || '')
-                .replace(/<think>[\s\S]*?<\/think>/gi, '')
-                .trim();
+            // qwen3 thinking: template prepends <think> internally so the response field
+            // may start with raw thinking text and end with </think>\n\nactual content.
+            // Handle both cases: paired tags, or orphan </think> (opening tag in template).
+            let result = (data.response || '').trim();
+            result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+            const closeIdx = result.indexOf('</think>');
+            if (closeIdx !== -1) {
+                result = result.slice(closeIdx + 8).trim();
+            }
 
             if (!result) {
                 this.logger.warn('Ollama returned empty response');

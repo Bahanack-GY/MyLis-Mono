@@ -119,3 +119,8 @@ export interface TimeDistributionItem {
     hours: number;
     percentage: number;
 }
+
+export interface DailyHoursItem {
+    date: string;
+    hours: number;
+}

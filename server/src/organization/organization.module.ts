@@ -8,6 +8,9 @@ import { Position } from '../models/position.model';
 import { Team } from '../models/team.model';
 import { Employee } from '../models/employee.model';
 import { User } from '../models/user.model';
+import { Project } from '../models/project.model';
+import { ProjectService } from '../models/project-service.model';
+import { LeadNeed } from '../models/lead-need.model';
 import { DepartmentsService } from './departments.service';
 import { DepartmentsController } from './departments.controller';
 import { DepartmentGoalsService } from './department-goals.service';
@@ -20,7 +23,7 @@ import { TeamsService } from './teams.service';
 import { TeamsController } from './teams.controller';
 
 @Module({
-    imports: [SequelizeModule.forFeature([Department, DepartmentGoal, DepartmentService, Position, Team, Employee, User])],
+    imports: [SequelizeModule.forFeature([Department, DepartmentGoal, DepartmentService, Position, Team, Employee, User, Project, ProjectService, LeadNeed])],
     controllers: [DepartmentsController, DepartmentGoalsController, DepartmentServicesController, PositionsController, TeamsController],
     providers: [DepartmentsService, DepartmentGoalsService, DepartmentServicesService, PositionsService, TeamsService],
     exports: [DepartmentsService, DepartmentGoalsService, DepartmentServicesService, PositionsService, TeamsService],

@@ -4,6 +4,8 @@ import { Project } from '../models/project.model';
 import { ProjectMember } from '../models/project-member.model';
 import { Client } from '../models/client.model';
 import { Department } from '../models/department.model';
+import { DepartmentService } from '../models/department-service.model';
+import { ProjectService } from '../models/project-service.model';
 import { Employee } from '../models/employee.model';
 import { User } from '../models/user.model';
 import { Task } from '../models/task.model';
@@ -26,6 +28,7 @@ export class ProjectsService {
             include: [
                 Client,
                 Department,
+                { model: DepartmentService, through: { attributes: [] } },
                 { model: Task, attributes: ['id', 'state'] },
             ],
         });
@@ -36,6 +39,7 @@ export class ProjectsService {
             include: [
                 Client,
                 Department,
+                { model: DepartmentService, through: { attributes: [] } },
                 { model: Employee, through: { attributes: [] }, attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
                 {
                     model: Task,
@@ -46,7 +50,12 @@ export class ProjectsService {
     }
 
     async create(createProjectDto: any): Promise<Project> {
-        const project = await this.projectModel.create(createProjectDto);
+        const { serviceIds, ...projectData } = createProjectDto;
+        const project = await this.projectModel.create(projectData);
+
+        if (serviceIds?.length) {
+            await (project as any).$set('services', serviceIds);
+        }
 
         // Notify department employees about new project
         if (createProjectDto.departmentId) {
@@ -74,7 +83,15 @@ export class ProjectsService {
     }
 
     async update(id: string, updateProjectDto: any): Promise<[number, Project[]]> {
-        const result = await this.projectModel.update(updateProjectDto, { where: { id }, returning: true });
+        const { serviceIds, ...projectData } = updateProjectDto;
+        const result = await this.projectModel.update(projectData, { where: { id }, returning: true });
+
+        if (serviceIds !== undefined) {
+            const project = await this.projectModel.findByPk(id);
+            if (project) {
+                await (project as any).$set('services', serviceIds);
+            }
+        }
 
         // Notify on project completion
         if (updateProjectDto.status === 'COMPLETED') {
@@ -117,14 +134,14 @@ export class ProjectsService {
     async findByClient(clientId: string): Promise<Project[]> {
         return this.projectModel.findAll({
             where: { clientId },
-            include: [Client, Department, { model: Task, attributes: ['id', 'state'] }],
+            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }],
         });
     }
 
     async findByDepartment(departmentId: string): Promise<Project[]> {
         return this.projectModel.findAll({
             where: { departmentId },
-            include: [Client, Department, { model: Task, attributes: ['id', 'state'] }],
+            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }],
         });
     }
 

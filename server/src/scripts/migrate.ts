@@ -28,6 +28,7 @@ import { Ticket } from '../models/ticket.model';
 import { Client } from '../models/client.model';
 import { Project } from '../models/project.model';
 import { ProjectMember } from '../models/project-member.model';
+import { ProjectService } from '../models/project-service.model';
 import { Log } from '../models/log.model';
 import { Entretien } from '../models/entretien.model';
 import { Formation } from '../models/formation.model';
@@ -68,6 +69,8 @@ import { DeductionType } from '../models/deduction-type.model';
 // Commercial models
 import { Lead } from '../models/lead.model';
 import { LeadActivity } from '../models/lead-activity.model';
+import { LeadContact } from '../models/lead-contact.model';
+import { LeadNeed } from '../models/lead-need.model';
 import { ClientPayment } from '../models/client-payment.model';
 import { CommercialGoal } from '../models/commercial-goal.model';
 
@@ -103,6 +106,7 @@ async function migrate() {
             Client,
             Project,
             ProjectMember,
+            ProjectService,
             Log,
             Entretien,
             Formation,
@@ -143,6 +147,8 @@ async function migrate() {
             // Commercial (Lead depends on Employee + Client, LeadActivity depends on Lead)
             Lead,
             LeadActivity,
+            LeadContact,       // depends on Lead
+            LeadNeed,          // depends on Lead + DepartmentService
             ClientPayment,
             CommercialGoal,   // depends on Employee
 
@@ -168,6 +174,9 @@ async function migrate() {
         const stubTables = [
             '"leads"',
             '"lead_activities"',
+            '"lead_contacts"',
+            '"lead_needs"',
+            '"project_services"',
             '"EmployeeTransferHistories"',
             '"Subtasks"',
             '"task_attachments"',

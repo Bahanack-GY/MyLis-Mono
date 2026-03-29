@@ -1,4 +1,4 @@
-import { Search, Bell, Mail, ChevronDown } from 'lucide-react';
+import { Search, Bell, Mail, ChevronDown, Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,7 +6,7 @@ import { useNotifications } from '../api/notifications/hooks';
 import { useChannels } from '../api/chat/hooks';
 import logo from '../assets/Logo.png';
 
-const Header = () => {
+const Header = ({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) => {
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const { user: profile } = useAuth();
@@ -26,11 +26,19 @@ const Header = () => {
     const initials = (profile?.firstName || profile?.email?.split('@')[0] || '?').charAt(0).toUpperCase();
 
     return (
-        <div className="bg-white h-14 md:h-20 px-4 md:px-8 flex items-center justify-between shadow-sm sticky top-0 z-40">
-            {/* Left: Logo on mobile, empty on desktop (sidebar has logo) */}
-            <div className="flex items-center gap-2 md:hidden">
+        <div className="bg-white h-14 md:h-20 px-4 md:px-8 flex items-center justify-between shadow-sm sticky top-0 z-40 relative">
+            {/* Mobile: hamburger on the left */}
+            <button
+                onClick={onMobileMenuOpen}
+                aria-label="Open menu"
+                className="md:hidden p-1.5 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
+            >
+                <Menu size={22} aria-hidden="true" />
+            </button>
+
+            {/* Mobile: logo centered absolutely */}
+            <div className="md:hidden absolute left-1/2 -translate-x-1/2">
                 <img src={logo} alt="Logo" className="w-8 h-8 object-contain" />
-                <span className="font-bold text-base text-[#283852]">MyLIS</span>
             </div>
 
             {/* Empty spacer on desktop left */}

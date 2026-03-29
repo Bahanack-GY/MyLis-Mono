@@ -1,6 +1,8 @@
 import { Table, Column, Model, DataType, BelongsTo, ForeignKey, BelongsToMany, HasMany } from 'sequelize-typescript';
 import { Client } from './client.model';
 import { Department } from './department.model';
+import { DepartmentService } from './department-service.model';
+import { ProjectService } from './project-service.model';
 import { Employee } from './employee.model';
 import { ProjectMember } from './project-member.model';
 import { Task } from './task.model';
@@ -48,6 +50,9 @@ export class Project extends Model {
 
     @BelongsTo(() => Department)
     declare department: Department;
+
+    @BelongsToMany(() => DepartmentService, () => ProjectService)
+    declare services: DepartmentService[];
 
     @BelongsToMany(() => Employee, () => ProjectMember)
     declare members: Employee[];

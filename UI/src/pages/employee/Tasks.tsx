@@ -51,8 +51,11 @@ import { useTaskNatures } from '../../api/task-natures/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { leadsApi } from '../../api/commercial/api';
+import { useCreateLeadActivity } from '../../api/commercial/hooks';
+import type { ActivityType } from '../../api/commercial/types';
 import PointsEarnedModal from '../../components/PointsEarnedModal';
 import BadgeEarnedModal from '../../components/BadgeEarnedModal';
+import TaskTimeChart from '../../components/TaskTimeChart';
 import { UserTasksSkeleton } from '../../components/Skeleton';
 import RichTextEditor from '../../components/RichTextEditor';
 import RichTextDisplay, { stripHtml } from '../../components/RichTextDisplay';
@@ -1313,6 +1316,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
     const { role } = useAuth();
     const isCommercial = role === 'COMMERCIAL';
     const selfAssign = useSelfAssignTask();
+    const createActivity = useCreateLeadActivity();
     const { data: projects } = useMyProjects();
     const { data: taskNatures } = useTaskNatures();
     const { data: leadsData } = useQuery({
@@ -1329,6 +1333,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
         projectId: '',
         natureId: '',
         leadId: '',
+        activityType: '' as ActivityType | '',
         startDate: '',
         endDate: '',
         startTime: '',
@@ -1346,7 +1351,8 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
     const update = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
         setForm(prev => ({ ...prev, [key]: value }));
 
-    const isValid = form.title.trim().length > 0;
+    const isValid = form.title.trim().length > 0 &&
+        (!isCommercial || (!!form.activityType && !!form.natureId));
 
     const difficultyColors: Record<TaskDifficulty, string> = {
         EASY: 'border-[#33cbcc] bg-[#33cbcc]/10 text-[#33cbcc]',
@@ -1408,7 +1414,8 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                         <RichTextEditor value={form.description} onChange={html => update('description', html)} placeholder={t('tasks.selfAssign.descriptionPlaceholder')} />
                     </div>
 
-                    {/* Difficulty */}
+                    {/* Difficulty (non-commercial only) */}
+                    {!isCommercial && (
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
                             {t('tasks.selfAssign.difficultyLabel')}
@@ -1430,8 +1437,10 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                             ))}
                         </div>
                     </div>
+                    )}
 
-                    {/* Project */}
+                    {/* Project (non-commercial only) */}
+                    {!isCommercial && (
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
                             <Briefcase size={10} />
@@ -1448,6 +1457,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                             ))}
                         </select>
                     </div>
+                    )}
 
                     {/* Nature */}
                     <div>
@@ -1467,24 +1477,42 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                         </select>
                     </div>
 
-                    {/* Lead (COMMERCIAL only) */}
-                    {isCommercial && leads.length > 0 && (
-                        <div>
-                            <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                                <Target size={10} />
-                                {t('tasks.selfAssign.leadLabel', 'Lead')}
-                            </label>
-                            <select
-                                value={form.leadId}
-                                onChange={e => update('leadId', e.target.value)}
-                                className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
-                            >
-                                <option value="">{t('tasks.selfAssign.leadNone', 'Aucun lead')}</option>
-                                {leads.map((lead: any) => (
-                                    <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>
-                                ))}
-                            </select>
-                        </div>
+                    {/* Lead + Activity type (COMMERCIAL only) */}
+                    {isCommercial && (
+                        <>
+                            <div>
+                                <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                                    <Target size={10} />
+                                    {t('tasks.selfAssign.leadLabel', 'Lead')}
+                                </label>
+                                <select
+                                    value={form.leadId}
+                                    onChange={e => update('leadId', e.target.value)}
+                                    className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
+                                >
+                                    <option value="">{t('tasks.selfAssign.leadNone', 'Aucun lead')}</option>
+                                    {leads.map((lead: any) => (
+                                        <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                                    <Target size={10} />
+                                    {t('tasks.selfAssign.activityTypeLabel', "Type d'activité")}
+                                </label>
+                                <select
+                                    value={form.activityType}
+                                    onChange={e => update('activityType', e.target.value as ActivityType | '')}
+                                    className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
+                                >
+                                    <option value="">{t('tasks.selfAssign.activityTypeNone', 'Aucune activité')}</option>
+                                    {(['VISITE_CLIENT','VISITE_PROSPECT','APPEL','EMAIL','REUNION','DEMO','RELANCE','AUTRE'] as ActivityType[]).map(at => (
+                                        <option key={at} value={at}>{at.replace('_', ' ')}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </>
                     )}
 
                     {/* Urgent and Important checkboxes */}
@@ -1554,6 +1582,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                     <button
                         onClick={() => {
                             if (!isValid) return;
+                            const hasActivity = isCommercial && !!form.activityType;
                             selfAssign.mutate({
                                 title: form.title.trim(),
                                 description: form.description.trim() || undefined,
@@ -1567,7 +1596,18 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                                 startTime: form.startTime || undefined,
                                 urgent: form.urgent,
                                 important: form.important,
-                            }, { onSuccess: () => onClose() });
+                            }, {
+                                onSuccess: () => {
+                                    if (hasActivity) {
+                                        createActivity.mutate({
+                                            type: form.activityType as ActivityType,
+                                            date: form.startDate || new Date().toISOString().split('T')[0],
+                                            leadId: form.leadId || undefined,
+                                        });
+                                    }
+                                    onClose();
+                                },
+                            });
                         }}
                         disabled={!isValid || selfAssign.isPending}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${
@@ -1607,6 +1647,9 @@ const Tasks = () => {
     const [showBadgeModal, setShowBadgeModal] = useState(false);
     const [editingTask, setEditingTask] = useState<MappedTask | null>(null);
     const [historyTaskId, setHistoryTaskId] = useState<string | null>(null);
+
+    const { user } = useAuth();
+    const employeeId = user?.employeeId ?? '';
 
     /* ── API data ── */
     const { data: apiTasks, isLoading } = useMyTasks();
@@ -1811,6 +1854,15 @@ const Tasks = () => {
                     </motion.div>
                 ))}
             </div>
+
+            {/* ═══ Répartition du temps ═══ */}
+            {employeeId && (
+                <div className="bg-white rounded-2xl p-5 border border-gray-100">
+                    <h3 className="text-sm font-bold text-gray-800 mb-0.5">{t('employeeDetail.tasks.timeDistribution', 'Répartition du temps')}</h3>
+                    <p className="text-[11px] text-gray-400 mb-3">{t('employeeDetail.tasks.timeDistributionDesc', 'Temps consacré aux différentes tâches')}</p>
+                    <TaskTimeChart employeeId={employeeId} />
+                </div>
+            )}
 
             {/* ═══ Search + Filters ═══ */}
             <div className="space-y-4">

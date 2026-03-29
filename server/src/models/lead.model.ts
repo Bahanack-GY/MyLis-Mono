@@ -5,6 +5,8 @@ import {
 import { Employee } from './employee.model';
 import { Client } from './client.model';
 import { LeadActivity } from './lead-activity.model';
+import { LeadContact } from './lead-contact.model';
+import { LeadNeed } from './lead-need.model';
 import { Task } from './task.model';
 
 export enum SaleStage {
@@ -240,6 +242,12 @@ export class Lead extends Model {
     // ── Associations ──
     @HasMany(() => LeadActivity)
     declare activities: LeadActivity[];
+
+    @HasMany(() => LeadContact, { onDelete: 'CASCADE' })
+    declare contacts: LeadContact[];
+
+    @HasMany(() => LeadNeed, { onDelete: 'CASCADE' })
+    declare needs: LeadNeed[];
 
     @HasMany(() => Task)
     declare tasks: Task[];

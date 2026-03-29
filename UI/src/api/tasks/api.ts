@@ -1,5 +1,5 @@
 import api from '../config';
-import type { Task, CreateTaskDto, UpdateTaskDto, TaskUpdateResponse, SelfAssignTaskDto, WeeklyComplianceResult, Subtask, TaskAttachment, TimeDistributionItem } from './types';
+import type { Task, CreateTaskDto, UpdateTaskDto, TaskUpdateResponse, SelfAssignTaskDto, WeeklyComplianceResult, Subtask, TaskAttachment, TimeDistributionItem, DailyHoursItem } from './types';
 
 export const tasksApi = {
     getAll: (departmentId?: string, from?: string, to?: string) => {
@@ -115,4 +115,7 @@ export const tasksApi = {
 
     getTimeDistribution: (employeeId: string) =>
         api.get<TimeDistributionItem[]>(`/tasks/employee/${employeeId}/time-distribution`).then(r => r.data),
+
+    getDailyHours: (employeeId: string, dateFrom: string, dateTo: string) =>
+        api.get<DailyHoursItem[]>(`/tasks/employee/${employeeId}/daily-hours`, { params: { dateFrom, dateTo } }).then(r => r.data),
 };

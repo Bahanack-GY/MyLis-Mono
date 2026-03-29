@@ -2,6 +2,9 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Lead } from '../models/lead.model';
 import { LeadActivity } from '../models/lead-activity.model';
+import { LeadContact } from '../models/lead-contact.model';
+import { LeadNeed } from '../models/lead-need.model';
+import { DepartmentService } from '../models/department-service.model';
 import { ClientPayment } from '../models/client-payment.model';
 import { CommercialGoal } from '../models/commercial-goal.model';
 import { Invoice } from '../models/invoice.model';
@@ -27,6 +30,9 @@ import { NotificationsModule } from '../notifications/notifications.module';
         SequelizeModule.forFeature([
             Lead,
             LeadActivity,
+            LeadContact,
+            LeadNeed,
+            DepartmentService,
             ClientPayment,
             CommercialGoal,
             Invoice,

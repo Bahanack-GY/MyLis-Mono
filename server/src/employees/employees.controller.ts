@@ -119,6 +119,21 @@ export class EmployeesController {
         return this.employeesService.getTransferHistory(id);
     }
 
+    @Roles('MANAGER')
+    @Patch(':id/promote')
+    async promote(
+        @Param('id') id: string,
+        @Body() dto: { toPositionId: string; reason?: string },
+        @Request() req,
+    ) {
+        return this.employeesService.promoteEmployee(id, dto.toPositionId, req.user.userId, dto.reason);
+    }
+
+    @Get(':id/promotion-history')
+    getPromotionHistory(@Param('id') id: string) {
+        return this.employeesService.getPromotionHistory(id);
+    }
+
     @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
     @Get(':id/reports')
     getEmployeeReports(@Param('id') id: string, @Request() req) {
