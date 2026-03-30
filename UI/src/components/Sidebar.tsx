@@ -37,6 +37,7 @@ import {
     FileBarChart,
     Truck,
     Waves,
+    Trophy,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -85,6 +86,7 @@ const ALL_SECTIONS: Section[] = [
         items: [
             { icon: Users, label: 'employees', path: '/employees', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
             { icon: Building, label: 'departments', path: '/departments', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
+            { icon: Trophy, label: 'monthlyRankings', path: '/employees/rankings', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
             { icon: UserCircle, label: 'clients', path: '/clients', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
         ],
     },

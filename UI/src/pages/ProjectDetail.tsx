@@ -69,7 +69,7 @@ const fmtCurrency = (n: number) => `${new Intl.NumberFormat('fr-FR').format(n)} 
    OVERVIEW TAB
    ═══════════════════════════════════════════════════════════ */
 
-const DONUT_COLORS = ['#f59e0b', '#33cbcc', '#3b82f6'];
+const DONUT_COLORS = ['#283852', '#33cbcc', '#283852'];
 
 const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () => void }) => {
     const { t } = useTranslation();
@@ -99,12 +99,12 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
         REVIEWED: 'Reviewed',
     };
     const STATE_COLORS: Record<string, string> = {
-        CREATED: '#6B7280',
-        ASSIGNED: '#8B5CF6',
+        CREATED: '#283852',
+        ASSIGNED: '#283852',
         IN_PROGRESS: '#33cbcc',
-        BLOCKED: '#F59E0B',
-        COMPLETED: '#3B82F6',
-        REVIEWED: '#10B981',
+        BLOCKED: '#283852',
+        COMPLETED: '#283852',
+        REVIEWED: '#33cbcc',
     };
     const statusBarData = Object.keys(STATE_LABELS).map(state => ({
         name: STATE_LABELS[state],
@@ -115,10 +115,10 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
     const profit = project.revenue - project.budget;
     const stats = [
         { label: t('projectDetail.overview.progress'), value: `${project.progress}%`, icon: TrendingUp, color: '#33cbcc' },
-        { label: t('projectDetail.overview.tasksDone'), value: `${project.tasksDone}/${project.tasksTotal}`, icon: CheckCircle, color: '#3b82f6' },
-        { label: t('projects.formCost'), value: project.budget > 0 ? fmtCurrency(project.budget) : '—', icon: Wallet, color: '#8b5cf6' },
-        { label: t('projects.formRevenue'), value: project.revenue > 0 ? fmtCurrency(project.revenue) : '—', icon: TrendingUp, color: profit >= 0 ? '#22c55e' : '#f43f5e' },
-        { label: t('projectDetail.overview.daysLeft'), value: `${daysRemaining}`, icon: Clock, color: project.status === 'overdue' ? '#f43f5e' : '#f59e0b' },
+        { label: t('projectDetail.overview.tasksDone'), value: `${project.tasksDone}/${project.tasksTotal}`, icon: CheckCircle, color: '#33cbcc' },
+        { label: t('projects.formCost'), value: project.budget > 0 ? fmtCurrency(project.budget) : '—', icon: Wallet, color: '#283852' },
+        { label: t('projects.formRevenue'), value: project.revenue > 0 ? fmtCurrency(project.revenue) : '—', icon: TrendingUp, color: profit >= 0 ? '#33cbcc' : '#283852' },
+        { label: t('projectDetail.overview.daysLeft'), value: `${daysRemaining}`, icon: Clock, color: project.status === 'overdue' ? '#283852' : '#283852' },
     ];
 
     const style = STATUS_STYLES[project.status] || STATUS_STYLES.active;
@@ -364,9 +364,9 @@ const TasksView = ({ project }: { project: ProjectData }) => {
     const { t } = useTranslation();
 
     const columns: { key: KanbanStatus; label: string; icon: typeof Circle; color: string }[] = [
-        { key: 'todo',        label: t('projectDetail.tasks.todo'),       icon: Circle,      color: '#f59e0b' },
+        { key: 'todo',        label: t('projectDetail.tasks.todo'),       icon: Circle,      color: '#283852' },
         { key: 'in_progress', label: t('projectDetail.tasks.inProgress'), icon: CircleDot,   color: '#33cbcc' },
-        { key: 'done',        label: t('projectDetail.tasks.done'),       icon: CheckCircle, color: '#3b82f6' },
+        { key: 'done',        label: t('projectDetail.tasks.done'),       icon: CheckCircle, color: '#283852' },
     ];
 
     return (
@@ -465,15 +465,15 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
 
     const summaryStats = [
         { label: t('projects.formRevenue'), value: revenue > 0 ? fmtCurrency(revenue) : '—', color: '#33cbcc', icon: TrendingUp },
-        { label: t('projectDetail.budget.expenses'), value: totalExpenses > 0 ? fmtCurrency(totalExpenses) : '—', color: '#f43f5e', icon: Wallet },
-        { label: t('projectDetail.budget.profit'), value: (revenue > 0 || totalExpenses > 0) ? fmtCurrency(profit) : '—', color: profit >= 0 ? '#22c55e' : '#f43f5e', icon: TrendingUp },
+        { label: t('projectDetail.budget.expenses'), value: totalExpenses > 0 ? fmtCurrency(totalExpenses) : '—', color: '#283852', icon: Wallet },
+        { label: t('projectDetail.budget.profit'), value: (revenue > 0 || totalExpenses > 0) ? fmtCurrency(profit) : '—', color: profit >= 0 ? '#33cbcc' : '#283852', icon: TrendingUp },
     ];
 
     const donutData = [
         { name: t('projectDetail.budget.expenses'), value: totalExpenses },
         { name: t('projects.formRevenue'), value: Math.max(0, revenue - totalExpenses) },
     ];
-    const PIE_COLORS = ['#f43f5e', '#33cbcc'];
+    const PIE_COLORS = ['#283852', '#33cbcc'];
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -678,12 +678,12 @@ interface DocItem {
 
 const DOC_COLORS: Record<string, string> = {
     Contract: '#33cbcc',
-    SRS: '#3b82f6',
-    Design: '#8b5cf6',
-    Technical: '#f59e0b',
-    Notes: '#6b7280',
-    Brief: '#ec4899',
-    Planning: '#22c55e',
+    SRS: '#283852',
+    Design: '#283852',
+    Technical: '#283852',
+    Notes: '#283852',
+    Brief: '#283852',
+    Planning: '#33cbcc',
 };
 
 const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
@@ -712,9 +712,9 @@ const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
                     >
                         <div
                             className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: `${DOC_COLORS[doc.type] || '#6b7280'}15` }}
+                            style={{ backgroundColor: `${DOC_COLORS[doc.type] || '#283852'}15` }}
                         >
-                            <FileText size={22} style={{ color: DOC_COLORS[doc.type] || '#6b7280' }} />
+                            <FileText size={22} style={{ color: DOC_COLORS[doc.type] || '#283852' }} />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-800 text-sm truncate">{doc.name}</p>
@@ -725,8 +725,8 @@ const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
                                 <span
                                     className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
                                     style={{
-                                        backgroundColor: `${DOC_COLORS[doc.type] || '#6b7280'}15`,
-                                        color: DOC_COLORS[doc.type] || '#6b7280',
+                                        backgroundColor: `${DOC_COLORS[doc.type] || '#283852'}15`,
+                                        color: DOC_COLORS[doc.type] || '#283852',
                                     }}
                                 >
                                     {doc.type}

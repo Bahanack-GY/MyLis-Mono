@@ -232,7 +232,7 @@ const PayslipDetailModal = ({
                     </div>
 
                     {/* Net salary box */}
-                    <div className="bg-gradient-to-r from-[#33cbcc] to-[#2aa5a6] rounded-xl p-5 flex items-center justify-between">
+                    <div className="bg-gradient-to-r from-[#33cbcc] to-[#33cbcc] rounded-xl p-5 flex items-center justify-between">
                         <div>
                             <p className="text-xs font-semibold text-white/70 uppercase tracking-wider">Net a payer</p>
                             <p className="text-2xl font-bold text-white mt-1">{formatXAF(Number(payslip.netSalary) || 0)}</p>
@@ -301,7 +301,7 @@ const PayslipCard = ({
                     </div>
                     <div className="bg-[#33cbcc]/5 rounded-xl p-3">
                         <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider">Net</p>
-                        <p className="text-sm font-bold text-[#2aa5a6] mt-0.5">{formatXAF(Number(payslip.netSalary) || 0)}</p>
+                        <p className="text-sm font-bold text-[#33cbcc] mt-0.5">{formatXAF(Number(payslip.netSalary) || 0)}</p>
                     </div>
                 </div>
 

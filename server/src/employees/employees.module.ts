@@ -11,19 +11,22 @@ import { Task } from '../models/task.model';
 import { Report } from '../models/report.model';
 import { EmployeesService } from './employees.service';
 import { EmployeesController } from './employees.controller';
+import { MonthlyRankingsService } from './monthly-rankings.service';
 import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { ChatModule } from '../chat/chat.module';
+import { EmployeeMonthlyRanking } from '../models/employee-monthly-ranking.model';
+import { Position } from '../models/position.model';
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([Employee, EmployeeBadge, EmployeeTransferHistory, EmployeePromotionHistory, Department, User, Task, Report]),
+        SequelizeModule.forFeature([Employee, EmployeeBadge, EmployeeTransferHistory, EmployeePromotionHistory, Department, User, Task, Report, EmployeeMonthlyRanking, Position]),
         UsersModule,
         NotificationsModule,
         ChatModule,
     ],
     controllers: [EmployeesController],
-    providers: [EmployeesService],
-    exports: [EmployeesService],
+    providers: [EmployeesService, MonthlyRankingsService],
+    exports: [EmployeesService, MonthlyRankingsService],
 })
 export class EmployeesModule { }

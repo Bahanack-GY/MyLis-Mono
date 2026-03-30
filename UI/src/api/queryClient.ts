@@ -7,7 +7,7 @@ export const queryClient = new QueryClient({
             gcTime: 10 * 60 * 1000,             // keep cache 10 min
             refetchOnWindowFocus: true,          // refetch when tab regains focus
             refetchOnReconnect: true,            // refetch after network reconnect
-            refetchInterval: 15 * 1000,           // poll every 15 s as baseline
+            refetchInterval: 30 * 1000,           // poll every 30 s as baseline
             refetchIntervalInBackground: false,  // pause polling when tab is hidden
             retry: 1,
         },

@@ -88,12 +88,14 @@ const MeetingDetailModal = ({
     onClose,
     onAttend,
     alreadyAttended,
+    isAttending,
     isSecretary,
 }: {
     meeting: MeetingItem;
     onClose: () => void;
     onAttend?: () => void;
     alreadyAttended?: boolean;
+    isAttending?: boolean;
     isSecretary?: boolean;
 }) => {
     const { t } = useTranslation();
@@ -312,12 +314,22 @@ const MeetingDetailModal = ({
                     )}
                     {meeting.status === 'in_progress' && onAttend && (
                         <button
-                            disabled={alreadyAttended}
+                            disabled={alreadyAttended || isAttending}
                             onClick={onAttend}
-                            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${alreadyAttended ? 'bg-[#33cbcc]/10 text-[#33cbcc] cursor-default' : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'}`}
+                            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                                alreadyAttended
+                                    ? 'bg-[#33cbcc]/10 text-[#33cbcc] cursor-default'
+                                    : isAttending
+                                        ? 'bg-[#33cbcc]/50 text-white cursor-not-allowed'
+                                        : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'
+                            }`}
                         >
-                            <CheckCircle size={15} />
-                            {alreadyAttended ? t('meetings.attend.attended') : t('meetings.attend.button')}
+                            <CheckCircle size={15} className={isAttending ? 'animate-pulse' : ''} />
+                            {alreadyAttended
+                                ? t('meetings.attend.attended')
+                                : isAttending
+                                    ? '...'
+                                    : t('meetings.attend.button')}
                         </button>
                     )}
                     <div className="flex justify-end">
@@ -581,6 +593,7 @@ const Meetings = () => {
                         onClose={() => setSelectedMeetingId(null)}
                         isSecretary={!!user?.employeeId && selectedMeeting.secretaryId === user.employeeId}
                         alreadyAttended={selectedMeeting.participants.find(p => p.id === user?.employeeId)?.attended ?? false}
+                        isAttending={attendMeeting.isPending}
                         onAttend={() => {
                             attendMeeting.mutate(selectedMeeting.id, {
                                 onSuccess: () => setSelectedMeetingId(null),

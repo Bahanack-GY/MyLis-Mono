@@ -41,7 +41,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     ConfigModule.forRoot(),
     SseModule,
     ScheduleModule.forRoot(),
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 30 }]),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 300 }]),
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: process.env.DB_HOST || 'localhost',

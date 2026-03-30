@@ -17,7 +17,7 @@ import { ReportsService } from './reports.service';
 
 @Controller('reports')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
 export class ReportsController {
     constructor(private readonly reportsService: ReportsService) {}
 
@@ -37,6 +37,7 @@ export class ReportsController {
         );
     }
 
+    @SkipThrottle()
     @Get()
     findAll(@Query('page') page: string, @Query('limit') limit: string, @Request() req) {
         if (page && limit) {

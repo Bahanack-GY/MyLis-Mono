@@ -568,8 +568,8 @@ const PayConfirmModal = ({
  className="bg-white rounded-2xl p-6 w-full max-w-sm"
  >
  <div className="flex items-center gap-3 mb-4">
- <div className="p-2.5 rounded-xl bg-emerald-50">
- <CreditCard size={20} className="text-emerald-500"/>
+ <div className="p-2.5 rounded-xl bg-[#33cbcc]/10">
+ <CreditCard size={20} className="text-[#33cbcc]"/>
  </div>
  <h3 className="text-base font-semibold text-gray-800">Confirmer le paiement</h3>
  </div>
@@ -586,7 +586,7 @@ const PayConfirmModal = ({
  <button
  onClick={onConfirm}
  disabled={isPending}
- className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors disabled:opacity-50"
+ className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
  >
  {isPending && <Loader2 size={14} className="animate-spin"/>}
  Payer
@@ -715,7 +715,7 @@ const BulkActionBar = ({
  </button>
  <button
  onClick={() => setSelectedIds(new Set())}
- className="text-xs text-gray-500 hover:text-red-500 transition-colors"
+ className="text-xs text-gray-500 hover:text-[#283852] transition-colors"
  >
  Aucun
  </button>
@@ -763,7 +763,7 @@ const BulkActionBar = ({
  });
  }}
  disabled={bulkMut.isPending}
- className="px-3 py-1.5 text-xs font-bold bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors disabled:opacity-50"
+ className="px-3 py-1.5 text-xs font-bold bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors disabled:opacity-50"
  >
  TOUT ON
  </button>
@@ -783,7 +783,7 @@ const BulkActionBar = ({
  });
  }}
  disabled={bulkMut.isPending}
- className="px-3 py-1.5 text-xs font-bold bg-red-100 text-red-800 hover:bg-red-200 transition-colors disabled:opacity-50"
+ className="px-3 py-1.5 text-xs font-bold bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
  >
  TOUT OFF
  </button>
@@ -801,14 +801,14 @@ const BulkActionBar = ({
  <button
  onClick={() => applyToggle(key, true)}
  disabled={bulkMut.isPending}
- className="px-2.5 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+ className="px-2.5 py-1.5 text-xs font-medium bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors disabled:opacity-50"
  >
  {label} ON
  </button>
  <button
  onClick={() => applyToggle(key, false)}
  disabled={bulkMut.isPending}
- className="px-2.5 py-1.5 text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 transition-colors disabled:opacity-50"
+ className="px-2.5 py-1.5 text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
  >
  OFF
  </button>
@@ -822,7 +822,7 @@ const BulkActionBar = ({
  <button
  onClick={() => setShowAddDeduction(!showAddDeduction)}
  disabled={bulkMut.isPending}
- className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors border border-purple-200 disabled:opacity-50"
+ className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors border border-gray-200 disabled:opacity-50"
  >
  <Plus size={12} />
  Retenue
@@ -862,7 +862,7 @@ const BulkActionBar = ({
  <button
  onClick={addCustomDeduction}
  disabled={!selectedType || !customAmount || bulkMut.isPending}
- className="flex-1 px-2 py-1.5 text-xs font-semibold rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition-colors disabled:opacity-50"
+ className="flex-1 px-2 py-1.5 text-xs font-semibold rounded-lg bg-[#283852] text-white hover:bg-[#283852] transition-colors disabled:opacity-50"
  >
  Ajouter
  </button>
@@ -878,7 +878,7 @@ const BulkActionBar = ({
  if (e.target.value) removeCustomDeduction(e.target.value);
  e.target.value = '';
  }}
- className="text-xs border rounded-lg px-2 py-1.5 text-red-600 bg-red-50 focus:outline-none focus:ring-1 focus:ring-red-300 cursor-pointer"
+ className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-[#283852] bg-[#283852]/10 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30 cursor-pointer"
  defaultValue=""
  >
  <option value=""disabled>Retirer retenue...</option>
@@ -939,8 +939,8 @@ const PayOneModal = ({
  className="bg-white rounded-2xl w-full max-w-sm p-6"
  >
  <div className="flex items-center gap-3 mb-5">
- <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
- <CreditCard size={18} className="text-emerald-600"/>
+ <div className="w-10 h-10 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
+ <CreditCard size={18} className="text-[#33cbcc]"/>
  </div>
  <div>
  <h3 className="font-bold text-gray-800">Payer le salaire</h3>
@@ -950,7 +950,7 @@ const PayOneModal = ({
 
  <div className="bg-gray-50 rounded-xl p-3 mb-4 flex justify-between items-center">
  <span className="text-sm text-gray-600">Net a payer</span>
- <span className="text-lg font-bold text-emerald-600">{formatXAF(payslip.netSalary)}</span>
+ <span className="text-lg font-bold text-[#33cbcc]">{formatXAF(payslip.netSalary)}</span>
  </div>
 
  <div className="mb-5">
@@ -970,7 +970,7 @@ const PayOneModal = ({
  <button
  onClick={handleConfirm}
  disabled={payOneMut.isPending || !date}
- className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
  >
  {payOneMut.isPending ? <Loader2 size={14} className="animate-spin"/> : <Check size={14}/>}
  Confirmer
@@ -1075,7 +1075,7 @@ const PayrollDetail = ({
  <button
  onClick={() => calculateMut.mutate(run.id)}
  disabled={calculateMut.isPending}
- className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 transition-colors disabled:opacity-50"
+ className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors disabled:opacity-50"
  >
  {calculateMut.isPending ? (
  <Loader2 size={16} className="animate-spin"/>
@@ -1089,7 +1089,7 @@ const PayrollDetail = ({
  <button
  onClick={() => validateMut.mutate(run.id)}
  disabled={validateMut.isPending}
- className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 transition-colors disabled:opacity-50"
+ className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
  >
  {validateMut.isPending ? (
  <Loader2 size={16} className="animate-spin"/>
@@ -1102,7 +1102,7 @@ const PayrollDetail = ({
  {run.status === 'VALIDATED' && (
  <button
  onClick={() => setShowPayConfirm(true)}
- className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
+ className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors"
  >
  <CreditCard size={16} />
  {hasPartialPayments ? `Payer le reste (${unpaidCount})` : 'Payer tout'}
@@ -1119,11 +1119,11 @@ const PayrollDetail = ({
  </div>
  <div className="bg-white rounded-2xl p-6">
  <p className="text-sm text-gray-500 mb-1">Total Net</p>
- <p className="text-xl font-bold text-emerald-600">{formatXAF(run.totalNet)}</p>
+ <p className="text-xl font-bold text-[#33cbcc]">{formatXAF(run.totalNet)}</p>
  </div>
  <div className="bg-white rounded-2xl p-6">
  <p className="text-sm text-gray-500 mb-1">Charges Patronales</p>
- <p className="text-xl font-bold text-amber-600">{formatXAF(run.totalEmployerCharges)}</p>
+ <p className="text-xl font-bold text-[#283852]">{formatXAF(run.totalEmployerCharges)}</p>
  </div>
  </div>
 
@@ -1133,11 +1133,11 @@ const PayrollDetail = ({
  <div className="flex-1">
  <div className="flex items-center justify-between mb-1.5">
  <span className="text-sm font-semibold text-gray-700">Progression des paiements</span>
- <span className="text-sm font-bold text-emerald-600">{paidCount} / {payslips.length} payes</span>
+ <span className="text-sm font-bold text-[#33cbcc]">{paidCount} / {payslips.length} payes</span>
  </div>
  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
  <div
- className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+ className="h-full bg-[#33cbcc] rounded-full transition-all duration-500"
  style={{ width: `${payslips.length > 0 ? (paidCount / payslips.length) * 100 : 0}%` }}
  />
  </div>
@@ -1261,14 +1261,14 @@ const PayrollDetail = ({
  <td className="px-4 py-2.5 text-right text-gray-600 text-xs">
  {formatXAF(ps.communalTax)}
  </td>
- <td className="px-4 py-2.5 text-right font-medium text-red-600 text-xs">
+ <td className="px-4 py-2.5 text-right font-medium text-[#283852] text-xs">
  {formatXAF(ps.totalDeductions)}
  </td>
  <td className="px-4 py-2.5 text-right text-xs"
  title={(ps.customDeductions || []).map((d: { name: string; amount: number }) => `${d.name}: ${formatXAF(d.amount)}`).join(', ') || undefined}
  >
  {(ps.customDeductions?.length || 0) > 0 ? (
- <span className="font-medium text-purple-600">
+ <span className="font-medium text-[#283852]">
  {formatXAF((ps.customDeductions || []).reduce((s: number, d: { amount: number }) => s + d.amount, 0))}
  </span>
  ) : (
@@ -1277,7 +1277,7 @@ const PayrollDetail = ({
  </td>
  <td className="px-4 py-2.5 text-right text-xs">
  <div className="flex items-center justify-end gap-1">
- <span className={`font-medium ${(ps.manualDeductions || 0) > 0 ? 'text-orange-600' : 'text-gray-400'}`}
+ <span className={`font-medium ${(ps.manualDeductions || 0) > 0 ? 'text-[#283852]' : 'text-gray-400'}`}
  title={ps.manualDeductionNote || undefined}
  >
  {(ps.manualDeductions || 0) > 0 ? formatXAF(ps.manualDeductions) : '\u2014'}
@@ -1285,7 +1285,7 @@ const PayrollDetail = ({
  {canEditDeductions && (
  <button
  onClick={() => setEditingDeduction(ps)}
- className="p-1 rounded-md text-gray-400 hover:text-orange-600 hover:bg-orange-50 opacity-0 group-hover/row:opacity-100 transition-all"
+ className="p-1 rounded-md text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 opacity-0 group-hover/row:opacity-100 transition-all"
  title="Modifier retenue manuelle"
  >
  <Pencil size={12} />
@@ -1293,20 +1293,20 @@ const PayrollDetail = ({
  )}
  </div>
  </td>
- <td className="px-4 py-2.5 text-right font-bold text-emerald-600">
+ <td className="px-4 py-2.5 text-right font-bold text-[#33cbcc]">
  {formatXAF(ps.netSalary)}
  </td>
  {run.status === 'VALIDATED' && (
  <td className="px-4 py-2.5 text-center">
  {ps.paymentDate ? (
- <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold">
+ <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] text-[11px] font-semibold">
  <Check size={10}/>
  {new Date(ps.paymentDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
  </span>
  ) : (
  <button
  onClick={() => setPayingPayslip(ps)}
- className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
+ className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors"
  >
  <CreditCard size={11}/>
  Payer
@@ -1362,16 +1362,16 @@ const PayrollDetail = ({
  <td className="px-4 py-3 text-right text-gray-600 text-xs">
  {formatXAF(totals.communal)}
  </td>
- <td className="px-4 py-3 text-right text-red-600 text-xs">
+ <td className="px-4 py-3 text-right text-[#283852] text-xs">
  {formatXAF(totals.deductions)}
  </td>
- <td className="px-4 py-3 text-right text-purple-600 text-xs">
+ <td className="px-4 py-3 text-right text-[#283852] text-xs">
  {totals.custom > 0 ? formatXAF(totals.custom) : '\u2014'}
  </td>
- <td className="px-4 py-3 text-right text-orange-600 text-xs">
+ <td className="px-4 py-3 text-right text-[#283852] text-xs">
  {totals.manual > 0 ? formatXAF(totals.manual) : '\u2014'}
  </td>
- <td className="px-4 py-3 text-right text-emerald-600">
+ <td className="px-4 py-3 text-right text-[#33cbcc]">
  {formatXAF(totals.net)}
  </td>
  {run.status === 'VALIDATED' && <td className="px-4 py-3"></td>}
@@ -1467,8 +1467,8 @@ const ManualDeductionModal = ({
  className="bg-white rounded-2xl w-full max-w-sm p-6"
  >
  <div className="flex items-center gap-3 mb-5">
- <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
- <Pencil size={18} className="text-orange-600"/>
+ <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center">
+ <Pencil size={18} className="text-[#283852]"/>
  </div>
  <div>
  <h3 className="font-bold text-gray-800">Retenue manuelle</h3>
@@ -1503,7 +1503,7 @@ const ManualDeductionModal = ({
  <button
  onClick={() => onSave(parseFloat(amount) || 0, note || undefined)}
  disabled={isPending}
- className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors disabled:opacity-60"
+ className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors disabled:opacity-60"
  >
  {isPending ? 'En cours...' : 'Enregistrer'}
  </button>
@@ -1643,11 +1643,11 @@ const PayslipEditModal = ({
  <div key={i} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-xl group">
  <div className="flex items-center gap-2">
  <span className="text-sm text-gray-700">{d.name}</span>
- <span className="text-xs font-semibold text-red-500">-{formatXAF(d.amount)}</span>
+ <span className="text-xs font-semibold text-[#283852]">-{formatXAF(d.amount)}</span>
  </div>
  <button
  onClick={() => removeCustomDeduction(i)}
- className="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+ className="p-1 rounded-md text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 opacity-0 group-hover:opacity-100 transition-all"
  >
  <Trash2 size={13} />
  </button>
@@ -1807,7 +1807,7 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
  %
  </label>
  <button onClick={saveEdit} disabled={updateMut.isPending}
- className="p-1.5 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition-colors">
+ className="p-1.5 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors">
  <Check size={14} />
  </button>
  <button onClick={() => setEditingId(null)}
@@ -1829,7 +1829,7 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
  <Pencil size={14} />
  </button>
  <button onClick={() => deleteMut.mutate(dt.id)} disabled={deleteMut.isPending}
- className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all">
+ className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-all">
  <Trash2 size={14} />
  </button>
  </div>
@@ -1936,7 +1936,7 @@ const PreviewCalculator = () => {
  item.bold
  ? 'font-bold text-gray-800'
  : item.value < 0
- ? 'text-red-500'
+ ? 'text-[#283852]'
  : 'text-gray-800'
  }
  >
@@ -1948,11 +1948,11 @@ const PreviewCalculator = () => {
  </div>
  <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between">
  <span className="font-semibold text-gray-700">Total Retenues</span>
- <span className="font-bold text-red-600">- {formatXAF(preview.totalDeductions)}</span>
+ <span className="font-bold text-[#283852]">- {formatXAF(preview.totalDeductions)}</span>
  </div>
  <div className="border-t-2 border-gray-300 pt-3 mt-3 flex justify-between">
  <span className="font-bold text-gray-800">Salaire Net</span>
- <span className="text-lg font-bold text-emerald-600">{formatXAF(preview.netSalary)}</span>
+ <span className="text-lg font-bold text-[#33cbcc]">{formatXAF(preview.netSalary)}</span>
  </div>
 
  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mt-4 mb-2">
@@ -1964,12 +1964,12 @@ const PreviewCalculator = () => {
  ].map((item, i) => (
  <div key={i} className="flex justify-between text-sm">
  <span className="text-gray-500">{item.label}</span>
- <span className="text-amber-600">{formatXAF(item.value)}</span>
+ <span className="text-[#283852]">{formatXAF(item.value)}</span>
  </div>
  ))}
  <div className="border-t border-gray-200 pt-2 flex justify-between">
  <span className="font-semibold text-gray-700">Total Charges Patronales</span>
- <span className="font-bold text-amber-600">
+ <span className="font-bold text-[#283852]">
  {formatXAF(preview.totalEmployerCharges)}
  </span>
  </div>
@@ -2002,8 +2002,8 @@ const AdvanceModal = ({ emp, onClose }: { emp: SalaryEmployee; onClose: () => vo
  className="bg-white rounded-2xl w-full max-w-sm p-6"
  >
  <div className="flex items-center gap-3 mb-5">
- <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
- <HandCoins size={18} className="text-amber-600"/>
+ <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center">
+ <HandCoins size={18} className="text-[#283852]"/>
  </div>
  <div>
  <h3 className="font-bold text-gray-800">Avance sur salaire</h3>
@@ -2036,7 +2036,7 @@ const AdvanceModal = ({ emp, onClose }: { emp: SalaryEmployee; onClose: () => vo
  <button
  onClick={() => payAdvance.mutate({ id: emp.id, amount: parseFloat(amount), note: note || undefined }, { onSuccess: () => onClose() })}
  disabled={!isValid || payAdvance.isPending}
- className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 transition-colors disabled:opacity-60"
+ className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors disabled:opacity-60"
  >
  {payAdvance.isPending ? 'En cours...' : 'Payer l\'avance'}
  </button>
@@ -2078,9 +2078,9 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  <td className="px-6 py-4 text-sm text-gray-500">{emp.departmentName || '\u2014'}</td>
  <td className="px-6 py-4">
  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
- emp.role === 'MANAGER' ? 'bg-purple-100 text-purple-700' :
- emp.role === 'ACCOUNTANT' ? 'bg-blue-100 text-blue-700' :
- emp.role === 'HEAD_OF_DEPARTMENT' ? 'bg-orange-100 text-orange-700' :
+ emp.role === 'MANAGER' ? 'bg-[#283852]/10 text-[#283852]' :
+ emp.role === 'ACCOUNTANT' ? 'bg-[#283852]/10 text-[#283852]' :
+ emp.role === 'HEAD_OF_DEPARTMENT' ? 'bg-[#283852]/10 text-[#283852]' :
  'bg-gray-100 text-gray-600'
  }`}>
  {emp.role}
@@ -2095,7 +2095,7 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  autoFocus
  className="w-36 px-3 py-1.5 text-sm border border-[#33cbcc] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30"
  />
- <button onClick={save} disabled={updateSalary.isPending} className="p-1.5 rounded-lg bg-green-100 text-green-600 hover:bg-green-200 transition-colors">
+ <button onClick={save} disabled={updateSalary.isPending} className="p-1.5 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors">
  <Check size={14} />
  </button>
  <button onClick={cancel} className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
@@ -2118,7 +2118,7 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
  <button
  onClick={() => setShowAdvanceModal(true)}
- className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-amber-500 hover:bg-amber-600 transition-colors"
+ className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors"
  >
  <HandCoins size={13} />
  Avance
@@ -2340,10 +2340,10 @@ export default function Payroll() {
  <div className="col-span-2 text-sm font-medium text-gray-800 text-right">
  {formatXAF(run.totalGross)}
  </div>
- <div className="col-span-2 text-sm font-medium text-emerald-600 text-right">
+ <div className="col-span-2 text-sm font-medium text-[#33cbcc] text-right">
  {formatXAF(run.totalNet)}
  </div>
- <div className="col-span-2 text-sm font-medium text-amber-600 text-right">
+ <div className="col-span-2 text-sm font-medium text-[#283852] text-right">
  {formatXAF(run.totalEmployerCharges)}
  </div>
  <div className="col-span-2 flex justify-end gap-1">
@@ -2355,7 +2355,7 @@ export default function Payroll() {
  }}
  disabled={calculateMut.isPending}
  title="Calculer"
- className="p-1.5 rounded-lg text-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5 rounded-lg text-[#283852] hover:text-[#283852] hover:bg-[#283852]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <Calculator size={14} />
  </button>
@@ -2368,7 +2368,7 @@ export default function Payroll() {
  }}
  disabled={validateMut.isPending}
  title="Valider"
- className="p-1.5 rounded-lg text-amber-400 hover:text-amber-600 hover:bg-amber-50 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <CheckCircle size={14} />
  </button>
@@ -2380,7 +2380,7 @@ export default function Payroll() {
  setPayingRunId(run.id);
  }}
  title="Payer"
- className="p-1.5 rounded-lg text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <CreditCard size={14} />
  </button>

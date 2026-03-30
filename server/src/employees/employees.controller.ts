@@ -1,6 +1,7 @@
 
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Request, BadRequestException } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
+import { MonthlyRankingsService } from './monthly-rankings.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 
@@ -10,7 +11,10 @@ import { RolesGuard } from '../auth/roles.guard';
 @Controller('employees')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class EmployeesController {
-    constructor(private readonly employeesService: EmployeesService) { }
+    constructor(
+        private readonly employeesService: EmployeesService,
+        private readonly monthlyRankingsService: MonthlyRankingsService,
+    ) { }
 
     @Post()
     create(@Body() createEmployeeDto: any, @Request() req) {
@@ -138,5 +142,36 @@ export class EmployeesController {
     @Get(':id/reports')
     getEmployeeReports(@Param('id') id: string, @Request() req) {
         return this.employeesService.getEmployeeReports(id, req.user.role, req.user.departmentId);
+    }
+
+    // ── Monthly Rankings ──────────────────────────────────────────────────
+
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+    @Get('rankings/years')
+    getRankingYears() {
+        return this.monthlyRankingsService.getAvailableYears();
+    }
+
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+    @Get('rankings/monthly')
+    getMonthlyRankings(@Query('year') year?: string) {
+        const y = year ? parseInt(year, 10) : new Date().getFullYear();
+        return this.monthlyRankingsService.getMonthlyRankings(y);
+    }
+
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+    @Get('rankings/yearly')
+    getYearlyRanking(@Query('year') year?: string) {
+        const y = year ? parseInt(year, 10) : new Date().getFullYear();
+        return this.monthlyRankingsService.getYearlyRanking(y);
+    }
+
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+    @Post('rankings/snapshot')
+    triggerSnapshot(@Body() body: { year?: number; month?: number }) {
+        const now = new Date();
+        const y = body.year || now.getFullYear();
+        const m = body.month || now.getMonth() + 1;
+        return this.monthlyRankingsService.snapshotMonthlyRankings(y, m);
     }
 }

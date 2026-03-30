@@ -5,6 +5,7 @@ import { X, PartyPopper, Cake, Sparkles, Quote } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import MeetingRecordingPrompt from '../components/MeetingRecordingPrompt';
+import MeetingPopupModal from '../components/MeetingPopupModal';
 import { useAuth } from '../contexts/AuthContext';
 import { authApi } from '../api/auth/api';
 import { employeesApi, type BirthdayEmployee } from '../api/employees/api';
@@ -403,6 +404,9 @@ const DashboardLayout = () => {
 
             {/* Meeting Recording Prompt — floats for the designated secretary */}
             <MeetingRecordingPrompt />
+
+            {/* Meeting Popup — invite & attendance modal for all participants */}
+            <MeetingPopupModal />
         </div>
     );
 };

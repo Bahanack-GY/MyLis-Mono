@@ -52,6 +52,20 @@ export class MeetingsService {
                     userId: e.getDataValue('userId'),
                 }));
             if (notifications.length) await this.notificationsService.createMany(notifications);
+
+            // Emit real-time popup to each participant
+            for (const e of employees) {
+                const uid = e.getDataValue('userId');
+                if (uid) {
+                    this.notificationsService.emitToUser(uid, 'meeting:invite', {
+                        meetingId: meeting.id,
+                        meetingTitle: meetingData.title,
+                        date: meetingData.date,
+                        startTime: meetingData.startTime,
+                        location: meetingData.location,
+                    });
+                }
+            }
         }
 
         return this.findOne(meeting.id);
@@ -149,13 +163,36 @@ export class MeetingsService {
 
         await meeting.update({ status: 'in_progress', secretaryId });
 
-        // Notify secretary via socket
+        // Notify secretary via socket (for recording prompt)
         const secretaryEmployee = await this.employeeModel.findByPk(secretaryId, { attributes: ['id', 'userId'] });
         if (secretaryEmployee?.getDataValue('userId')) {
             this.notificationsService.emitToUser(secretaryEmployee.getDataValue('userId'), 'meeting:started', {
                 meetingId: id,
                 meetingTitle: meeting.title,
             });
+        }
+
+        // Notify all participants via socket (for attendance popup)
+        const participantRows = await this.meetingParticipantModel.findAll({
+            where: { meetingId: id },
+            attributes: ['employeeId'],
+        });
+        const employeeIds = participantRows.map(r => r.getDataValue('employeeId'));
+        if (employeeIds.length) {
+            const participantEmployees = await this.employeeModel.findAll({
+                where: { id: employeeIds },
+                attributes: ['userId'],
+            });
+            for (const emp of participantEmployees) {
+                const uid = emp.getDataValue('userId');
+                // Skip secretary (already notified above with the recording event)
+                if (uid && uid !== secretaryEmployee?.getDataValue('userId')) {
+                    this.notificationsService.emitToUser(uid, 'meeting:started', {
+                        meetingId: id,
+                        meetingTitle: meeting.title,
+                    });
+                }
+            }
         }
 
         return this.findOne(id);

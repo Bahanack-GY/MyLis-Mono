@@ -66,7 +66,7 @@ const Dashboard = () => {
             title: t('dashboard.stats.myTickets'),
             value: String(totalTickets),
             icon: Ticket,
-            color: '#314463',
+            color: '#283852',
             link: '/tickets',
         },
         {
@@ -80,7 +80,7 @@ const Dashboard = () => {
             title: t('dashboard.stats.myFormations'),
             value: String(totalFormations),
             icon: GraduationCap,
-            color: '#445d86',
+            color: '#283852',
             link: '/formations',
         },
     ];

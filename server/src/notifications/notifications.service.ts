@@ -52,11 +52,12 @@ export class NotificationsService {
             }
             const employee = await this.employeeModel.findOne({
                 where: { userId: data.userId },
-                attributes: ['phoneNumber'],
+                attributes: ['phoneNumber', 'firstName'],
             });
             const phone = employee?.getDataValue('phoneNumber');
+            const name = employee?.getDataValue('firstName');
             if (phone) {
-                this.whatsAppService.enqueue(phone, this.buildWhatsAppText(data.title, data.body, data.titleFr, data.bodyFr));
+                this.whatsAppService.enqueue(phone, this.buildWhatsAppText(data.title, data.body, data.titleFr, data.bodyFr, name));
             }
         });
 
@@ -74,19 +75,25 @@ export class NotificationsService {
         const userIds = [...new Set(notifications.map(n => n.userId))];
         Promise.all([
             this.userModel.findAll({ where: { id: userIds } }),
-            this.employeeModel.findAll({ where: { userId: userIds }, attributes: ['userId', 'phoneNumber'] }),
+            this.employeeModel.findAll({ where: { userId: userIds }, attributes: ['userId', 'phoneNumber', 'firstName'] }),
         ]).then(([users, employees]) => {
             const emailByUserId = Object.fromEntries(users.map(u => [u.id, u.email]));
             const phoneByUserId = Object.fromEntries(
                 employees.map(e => [e.getDataValue('userId'), e.getDataValue('phoneNumber')]),
+            );
+            const nameByUserId = Object.fromEntries(
+                employees.map(e => [e.getDataValue('userId'), e.getDataValue('firstName')]),
             );
             for (const n of notifications) {
                 const email = emailByUserId[n.userId];
                 if (email) this.mailService.sendNotification(email, n.title, n.body, n.titleFr, n.bodyFr);
 
                 const phone = phoneByUserId[n.userId];
-                if (phone) this.whatsAppService.enqueue(phone, this.buildWhatsAppText(n.title, n.body, n.titleFr, n.bodyFr));
+                const name = nameByUserId[n.userId];
+                if (phone) this.whatsAppService.enqueue(phone, this.buildWhatsAppText(n.title, n.body, n.titleFr, n.bodyFr, name));
             }
+        }).catch(err => {
+            console.error('[NotificationsService] Failed to send WhatsApp/email for batch:', err?.message);
         });
 
         return result;
@@ -115,13 +122,56 @@ export class NotificationsService {
     }
 
     /**
-     * Build a clean WhatsApp message.
+     * Build a clean WhatsApp message with a personalized, time-sensitive greeting.
      * Uses French first (Cameroon primary), English fallback.
-     * Bold title + body + signature — no HTML, no headers, just readable text.
      */
-    private buildWhatsAppText(titleEn: string, bodyEn: string, titleFr?: string, bodyFr?: string): string {
+    private buildWhatsAppText(titleEn: string, bodyEn: string, titleFr?: string, bodyFr?: string, name?: string): string {
         const title = titleFr || titleEn;
         const body = bodyFr || bodyEn;
-        return `*${title}*\n\n${body}\n\n_— MyLIS_`;
+        const greeting = this.buildGreeting(name);
+        return `${greeting}\n\n*${title}*\n\n${body}\n\n_— MyLIS_`;
+    }
+
+    /**
+     * Generate a time-sensitive, randomly selected greeting in French.
+     * Cameroon time = UTC+1 (WAT).
+     */
+    private buildGreeting(name?: string): string {
+        const hour = new Date(Date.now() + 60 * 60 * 1000).getUTCHours(); // WAT = UTC+1
+        const first = name?.trim().split(' ')[0] || '';
+        const salut = first ? ` ${first}` : '';
+
+        let pool: string[];
+
+        if (hour >= 5 && hour < 12) {
+            // Morning
+            pool = [
+                `Bonjour${salut} 👋`,
+                `Bonjour${salut}, j'espère que vous allez bien 😊`,
+                `Bonne matinée${salut} ☀️`,
+                `Hello${salut}, bonne journée qui commence ! 🌅`,
+                `Bonjour${salut} ! Prêt(e) pour cette nouvelle journée ? 💪`,
+            ];
+        } else if (hour >= 12 && hour < 18) {
+            // Afternoon
+            pool = [
+                `Bon après-midi${salut} 👋`,
+                `Bonjour${salut}, bonne continuation ! 😊`,
+                `Salut${salut} ! 🙂`,
+                `Bonne journée${salut} ! J'espère que tout se passe bien 😊`,
+                `Hey${salut} 👋 Bonne après-midi !`,
+            ];
+        } else {
+            // Evening / night
+            pool = [
+                `Bonsoir${salut} 👋`,
+                `Bonsoir${salut}, j'espère que votre journée s'est bien passée ! 🌙`,
+                `Bonsoir${salut} ! 😊`,
+                `Salut${salut}, bonne soirée ! 🌆`,
+                `Hey${salut} 👋 Bonsoir !`,
+            ];
+        }
+
+        return pool[Math.floor(Math.random() * pool.length)];
     }
 }

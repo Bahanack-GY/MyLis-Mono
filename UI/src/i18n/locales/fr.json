@@ -494,6 +494,7 @@
     "taxDeclarations": "Fiscalité",
     "suppliers": "Fournisseurs",
     "cashFlow": "Flux de Trésorerie",
+    "monthlyRankings": "Palmarès",
     "aiReports": "Rapports IA",
     "commercialDashboard": "Commercial",
     "leadsDatabase": "Leads",
@@ -1477,7 +1478,7 @@
     },
     "attend": {
       "button": "Marquer présent",
-      "attended": "Présent"
+      "attended": "Vous avez déjà marqué votre présence"
     }
   },
   "notifications": {

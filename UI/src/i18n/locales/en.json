@@ -494,6 +494,7 @@
     "taxDeclarations": "Tax",
     "suppliers": "Suppliers",
     "cashFlow": "Cash Flow",
+    "monthlyRankings": "Rankings",
     "aiReports": "AI Reports",
     "commercialDashboard": "Commercial",
     "leadsDatabase": "Leads",
@@ -1477,7 +1478,7 @@
     },
     "attend": {
       "button": "Mark Present",
-      "attended": "Present"
+      "attended": "You have already marked your attendance"
     }
   },
   "notifications": {

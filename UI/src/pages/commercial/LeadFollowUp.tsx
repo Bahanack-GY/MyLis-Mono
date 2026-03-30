@@ -16,12 +16,12 @@ import { STAGE_COLORS } from '../../components/commercial/StageChangeModal';
 
 const ACTIVITY_TYPE_META: Record<ActivityType, { icon: any; label: string; color: string }> = {
     VISITE_PROSPECT: { icon: MapPin,       label: 'Visite Prospect',  color: '#33cbcc' },
-    VISITE_CLIENT:   { icon: Users,        label: 'Visite Client',    color: '#22a0a1' },
+    VISITE_CLIENT:   { icon: Users,        label: 'Visite Client',    color: '#33cbcc' },
     APPEL:           { icon: Phone,        label: 'Appel',            color: '#283852' },
     EMAIL:           { icon: Mail,         label: 'Email',            color: '#283852' },
     REUNION:         { icon: Users,        label: 'Réunion',          color: '#283852' },
     DEMO:            { icon: Monitor,      label: 'Démo',             color: '#33cbcc' },
-    RELANCE:         { icon: RefreshCw,    label: 'Relance',          color: '#f97316' },
+    RELANCE:         { icon: RefreshCw,    label: 'Relance',          color: '#283852' },
     AUTRE:           { icon: Activity,     label: 'Autre',            color: '#6b7280' },
 };
 

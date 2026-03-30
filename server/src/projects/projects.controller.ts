@@ -22,7 +22,7 @@ export class ProjectsController {
         return this.projectsService.create(createProjectDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
     @Get('my-projects')
     async findMyProjects(@Request() req) {
         if (req.user.role === 'MANAGER' || req.user.role === 'ACCOUNTANT') {
@@ -34,7 +34,7 @@ export class ProjectsController {
         return this.projectsService.findByDepartmentForEmployee(deptId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
     @Get('my-projects/:id')
     async findMyProjectDetail(@Param('id') id: string) {
         return this.projectsService.findOneForEmployee(id);

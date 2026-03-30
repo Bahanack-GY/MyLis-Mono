@@ -13,7 +13,7 @@ export class PayrollController {
     /* ── My payslips (all roles) ── */
 
     @Get('my-payslips')
-    @Roles('MANAGER', 'ACCOUNTANT', 'EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL')
+    @Roles('MANAGER', 'ACCOUNTANT', 'EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE')
     findMyPayslips(@Request() req: any) {
         return this.payrollService.findMyPayslips(req.user.userId);
     }

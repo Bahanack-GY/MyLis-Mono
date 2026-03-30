@@ -200,7 +200,7 @@ const DemandCardBubble = ({
                     {/* Status badge */}
                     <div className="px-4 pb-3">
                         {isPending ? (
-                            <div className="text-center text-xs font-bold py-1.5 rounded-lg text-[#f59e0b] bg-[#f59e0b]/15">
+                            <div className="text-center text-xs font-bold py-1.5 rounded-lg text-[#283852] bg-[#283852]/10">
                                 • {t('demands.status.pending')}
                             </div>
                         ) : (

@@ -666,7 +666,7 @@ const TaskDetailModal = ({
     };
     const st = statusStyles[task.status];
 
-    const dotColor = task.state === 'BLOCKED' ? '#ef4444' : task.difficulty === 'EASY' ? '#33cbcc' : '#283852';
+    const dotColor = task.state === 'BLOCKED' ? '#283852' : task.difficulty === 'EASY' ? '#33cbcc' : '#283852';
 
     const duration =
         task.startDate && task.endDate

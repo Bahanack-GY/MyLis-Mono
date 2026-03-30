@@ -70,10 +70,10 @@ interface EmployeeRow {
 /* ─── 4-Color palette ────────────────────────────────────── */
 
 const TASK_COLORS = {
-    teal:  { bg: '#CCFBF1', text: '#134E4A', border: '#5EEAD4' },
-    blue:  { bg: '#DBEAFE', text: '#1E3A8A', border: '#93C5FD' },
-    amber: { bg: '#FEF3C7', text: '#78350F', border: '#FCD34D' },
-    rose:  { bg: '#FFE4E6', text: '#881337', border: '#FDA4AF' },
+    teal:  { bg: '#33cbcc1A', text: '#33cbcc', border: '#33cbcc' },
+    blue:  { bg: '#2838521A', text: '#283852', border: '#283852' },
+    amber: { bg: '#2838521A', text: '#283852', border: '#283852' },
+    rose:  { bg: '#2838521A', text: '#283852', border: '#283852' },
 };
 
 /* ─── Date helpers ────────────────────────────────────────── */
@@ -615,7 +615,7 @@ const EditGanttTaskModal = ({
                                             <a href={att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"><Download size={14} /></a>
                                             <button
                                                 onClick={() => { if (window.confirm(t('tasksPage.deleteAttachmentConfirm', 'Delete this attachment?'))) deleteAttachment.mutate({ taskId: task.apiId!, attachmentId: att.id }); }}
-                                                className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                                                className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
                                             ><Trash2 size={14} /></button>
                                         </div>
                                     ))}

@@ -15,7 +15,7 @@ export class TaskNaturesController {
         return this.taskNaturesService.create(dto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
     @Get()
     findAll() {
         return this.taskNaturesService.findAll();

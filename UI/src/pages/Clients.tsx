@@ -332,15 +332,15 @@ const Clients = () => {
 
     const stats = [
         { label: t('clients.stats.total'), value: clients.length, icon: UserCircle, color: '#33cbcc' },
-        { label: t('clients.stats.subscription'), value: subscriptionCount, icon: RefreshCw, color: '#8b5cf6' },
-        { label: t('clients.stats.oneTime'), value: oneTimeCount, icon: Briefcase, color: '#3b82f6' },
-        { label: t('clients.stats.revenue'), value: fmtCurrency(totalRevenue), icon: DollarSign, color: '#22c55e' },
+        { label: t('clients.stats.subscription'), value: subscriptionCount, icon: RefreshCw, color: '#33cbcc' },
+        { label: t('clients.stats.oneTime'), value: oneTimeCount, icon: Briefcase, color: '#283852' },
+        { label: t('clients.stats.revenue'), value: fmtCurrency(totalRevenue), icon: DollarSign, color: '#33cbcc' },
     ];
 
     /* Chart data */
     const typeChartData = [
-        { name: t('clients.typeOneTime'), value: oneTimeCount, color: '#3b82f6' },
-        { name: t('clients.typeSubscription'), value: subscriptionCount, color: '#8b5cf6' },
+        { name: t('clients.typeOneTime'), value: oneTimeCount, color: '#283852' },
+        { name: t('clients.typeSubscription'), value: subscriptionCount, color: '#33cbcc' },
     ];
 
     /* Type filters */

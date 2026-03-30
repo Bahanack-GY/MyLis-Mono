@@ -69,10 +69,10 @@ import {
 /* ─── Constants ─────────────────────────────────────────── */
 
 const STATUS_COLORS: Record<InvoiceStatus, string> = {
-    CREATED: '#6B7280',
-    SENT: '#3B82F6',
-    PAID: '#10B981',
-    REJECTED: '#EF4444',
+    CREATED: '#283852',
+    SENT: '#283852',
+    PAID: '#33cbcc',
+    REJECTED: '#283852',
 };
 
 const STATUS_KEYS: InvoiceStatus[] = ['CREATED', 'SENT', 'PAID', 'REJECTED'];
@@ -478,9 +478,9 @@ const Invoices = () => {
 
     const statCards = [
         { label: t('invoices.stats.total'), value: stats?.total || 0, icon: FileText, color: '#33cbcc', isCurrency: false },
-        { label: t('invoices.stats.revenue'), value: stats?.totalRevenue || 0, icon: TrendingUp, color: '#10B981', isCurrency: true },
-        { label: t('invoices.stats.pending'), value: stats?.totalPending || 0, icon: Clock, color: '#F59E0B', isCurrency: true },
-        { label: t('invoices.stats.overdue'), value: stats?.overdue || 0, icon: AlertTriangle, color: '#EF4444', isCurrency: false },
+        { label: t('invoices.stats.revenue'), value: stats?.totalRevenue || 0, icon: TrendingUp, color: '#33cbcc', isCurrency: true },
+        { label: t('invoices.stats.pending'), value: stats?.totalPending || 0, icon: Clock, color: '#283852', isCurrency: true },
+        { label: t('invoices.stats.overdue'), value: stats?.overdue || 0, icon: AlertTriangle, color: '#283852', isCurrency: false },
     ];
 
     const statusFilters: { key: InvoiceStatus | 'all'; label: string }[] = [

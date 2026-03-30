@@ -2,6 +2,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/sequelize';
+import { Op } from 'sequelize';
 import { Employee } from '../models/employee.model';
 import { NotificationsService } from '../notifications/notifications.service';
 
@@ -47,7 +48,7 @@ export class TaskFillRemindersService {
         slot: string,
     ) {
         const employees = await this.employeeModel.findAll({
-            where: { dismissed: false },
+            where: { dismissed: false, phoneNumber: { [Op.not]: null } },
             attributes: ['userId'],
         });
 

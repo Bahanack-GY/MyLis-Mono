@@ -76,6 +76,7 @@ const TaxDeclarations = lazy(() => import("./pages/accounting/TaxDeclarations"))
 const AIReports = lazy(() => import("./pages/accounting/AIReports"))
 const Suppliers = lazy(() => import("./pages/accounting/Suppliers"))
 const CashFlow = lazy(() => import("./pages/accounting/CashFlow"))
+const MonthlyRankings = lazy(() => import("./pages/admin/MonthlyRankings"))
 
 function App() {
   return (
@@ -143,6 +144,7 @@ function App() {
           <Route element={<DashboardLayout />}>
             <Route path="/employees" element={<Employees />} />
             <Route path="/departments" element={<Departments />} />
+            <Route path="/employees/rankings" element={<MonthlyRankings />} />
           </Route>
           <Route path="/employees/:id" element={<EmployeeDetailLayout />} />
           <Route path="/departments/:id" element={<DepartmentDetailLayout />} />
