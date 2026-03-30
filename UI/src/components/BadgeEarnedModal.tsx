@@ -67,7 +67,7 @@ const BadgeEarnedModal = ({ badgeNumber, title, milestone, onClose }: BadgeEarne
                 onClick={(e) => e.stopPropagation()}
                 className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden text-center"
             >
-                <div className="h-2 bg-gradient-to-r from-amber-400 to-amber-600" />
+                <div className="h-2 bg-gradient-to-r from-[#33cbcc] to-[#283852]" />
                 <div className="p-8 space-y-4">
                     {/* Confetti-like decorative dots */}
                     <div className="relative">
@@ -78,7 +78,7 @@ const BadgeEarnedModal = ({ badgeNumber, title, milestone, onClose }: BadgeEarne
                                 animate={{ opacity: [0, 1, 0], scale: [0, 1, 0.5], x: Math.cos(i * 45 * Math.PI / 180) * 60, y: Math.sin(i * 45 * Math.PI / 180) * 60 }}
                                 transition={{ delay: 0.4 + i * 0.05, duration: 0.8 }}
                                 className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full"
-                                style={{ backgroundColor: ['#33cbcc', '#f59e0b', '#ec4899', '#8b5cf6', '#22c55e', '#3b82f6', '#f43f5e', '#6366f1'][i] }}
+                                style={{ backgroundColor: ['#33cbcc', '#283852', '#33cbcc99', '#28385280', '#33cbcc', '#283852', '#33cbcc50', '#283852'][i] }}
                             />
                         ))}
                         <motion.div
@@ -90,11 +90,11 @@ const BadgeEarnedModal = ({ badgeNumber, title, milestone, onClose }: BadgeEarne
                                 <img
                                     src={badgeImage}
                                     alt={title}
-                                    className="w-28 h-28 mx-auto rounded-full object-cover border-4 border-amber-200 shadow-lg"
+                                    className="w-28 h-28 mx-auto rounded-full object-cover border-4 border-[#33cbcc]/30 shadow-lg"
                                 />
                             ) : (
-                                <div className="w-28 h-28 mx-auto rounded-full bg-amber-100 flex items-center justify-center">
-                                    <Award size={56} className="text-amber-500" />
+                                <div className="w-28 h-28 mx-auto rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
+                                    <Award size={56} className="text-[#33cbcc]" />
                                 </div>
                             )}
                         </motion.div>
@@ -112,7 +112,7 @@ const BadgeEarnedModal = ({ badgeNumber, title, milestone, onClose }: BadgeEarne
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.6 }}
-                        className="text-lg font-semibold text-amber-600"
+                        className="text-lg font-semibold text-[#33cbcc]"
                     >
                         {title}
                     </motion.p>
@@ -130,7 +130,7 @@ const BadgeEarnedModal = ({ badgeNumber, title, milestone, onClose }: BadgeEarne
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.8 }}
                         onClick={onClose}
-                        className="mt-4 w-full px-6 py-3 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 transition-colors cursor-pointer"
+                        className="mt-4 w-full px-6 py-3 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors cursor-pointer"
                     >
                         {t('gamification.badgeEarned.awesome')}
                     </motion.button>

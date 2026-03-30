@@ -13,12 +13,14 @@ import { EmployeesService } from './employees.service';
 import { EmployeesController } from './employees.controller';
 import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
     imports: [
         SequelizeModule.forFeature([Employee, EmployeeBadge, EmployeeTransferHistory, EmployeePromotionHistory, Department, User, Task, Report]),
         UsersModule,
-        NotificationsModule
+        NotificationsModule,
+        ChatModule,
     ],
     controllers: [EmployeesController],
     providers: [EmployeesService],

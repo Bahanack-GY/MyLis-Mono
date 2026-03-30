@@ -19,21 +19,21 @@ import StageChangeModal, { isForwardMove, STAGE_ORDER } from '../../components/c
 /* ── Constants ─────────────────────────────────────────────── */
 
 const STAGE_COLORS: Record<string, { bg: string; text: string; border: string; ring: string }> = {
-    PROSPECTION: { bg: 'bg-indigo-500',  text: 'text-indigo-700',  border: 'border-indigo-300',  ring: 'ring-indigo-200'  },
-    QUALIFICATION:{ bg: 'bg-purple-500', text: 'text-purple-700',  border: 'border-purple-300',  ring: 'ring-purple-200'  },
-    PROPOSITION:  { bg: 'bg-amber-500',  text: 'text-amber-700',   border: 'border-amber-300',   ring: 'ring-amber-200'   },
-    NEGOCIATION:  { bg: 'bg-blue-500',   text: 'text-blue-700',    border: 'border-blue-300',    ring: 'ring-blue-200'    },
-    CLOSING:      { bg: 'bg-emerald-500',text: 'text-emerald-700', border: 'border-emerald-300', ring: 'ring-emerald-200' },
-    GAGNE:        { bg: 'bg-green-500',  text: 'text-green-700',   border: 'border-green-300',   ring: 'ring-green-200'   },
-    PERDU:        { bg: 'bg-red-500',    text: 'text-red-700',     border: 'border-red-300',     ring: 'ring-red-200'     },
+    PROSPECTION:  { bg: 'bg-[#283852]',    text: 'text-[#283852]',    border: 'border-gray-300',  ring: 'ring-gray-200'  },
+    QUALIFICATION:{ bg: 'bg-[#283852]',    text: 'text-[#283852]',    border: 'border-gray-300',  ring: 'ring-gray-200'  },
+    PROPOSITION:  { bg: 'bg-[#283852]',    text: 'text-[#283852]',    border: 'border-gray-300',  ring: 'ring-gray-200'  },
+    NEGOCIATION:  { bg: 'bg-[#33cbcc]',    text: 'text-[#33cbcc]',    border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
+    CLOSING:      { bg: 'bg-[#33cbcc]',    text: 'text-[#33cbcc]',    border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
+    GAGNE:        { bg: 'bg-[#33cbcc]',    text: 'text-[#33cbcc]',    border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
+    PERDU:        { bg: 'bg-gray-400',     text: 'text-gray-500',     border: 'border-gray-300',  ring: 'ring-gray-200'  },
 };
 
 const PIPELINE_STAGES: SaleStage[] = ['PROSPECTION', 'QUALIFICATION', 'PROPOSITION', 'NEGOCIATION', 'CLOSING'];
 
 const priorityColors: Record<string, string> = {
-    HOT: 'bg-red-100 text-red-700',
-    WARM: 'bg-orange-100 text-orange-700',
-    COLD: 'bg-blue-100 text-blue-700',
+    HOT: 'bg-[#283852]/10 text-[#283852]',
+    WARM: 'bg-[#283852]/10 text-[#283852]',
+    COLD: 'bg-[#283852]/10 text-[#283852]',
 };
 
 const ACTIVITY_TYPES: ActivityType[] = [
@@ -129,8 +129,8 @@ const StageRoadmap = ({
             {isTerminal ? (
                 <div className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold ${
                     currentStage === 'GAGNE'
-                        ? 'bg-green-50 text-green-700 border border-green-200'
-                        : 'bg-red-50 text-red-700 border border-red-200'
+                        ? 'bg-[#33cbcc]/10 text-[#33cbcc] border border-[#33cbcc]/20'
+                        : 'bg-gray-100 text-gray-500 border border-gray-200'
                 }`}>
                     {currentStage === 'GAGNE'
                         ? <><Trophy size={15} /> {t('commercial.pipeline.stages.GAGNE')} — {t('commercial.convert.stageLocked', 'Verrouillé')}</>
@@ -154,7 +154,7 @@ const StageRoadmap = ({
                         <button
                             onClick={() => onStageClick('GAGNE')}
                             disabled={isPending}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition-colors border border-green-200"
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold hover:bg-[#33cbcc]/20 transition-colors border border-[#33cbcc]/20"
                         >
                             <Trophy size={13} />
                             {t('commercial.pipeline.stages.GAGNE')}
@@ -164,7 +164,7 @@ const StageRoadmap = ({
                     <button
                         onClick={() => onStageClick('PERDU')}
                         disabled={isPending}
-                        className="flex items-center justify-center gap-1 py-2 px-3 rounded-xl text-xs font-medium text-red-400 hover:bg-red-50 transition-colors border border-red-100"
+                        className="flex items-center justify-center gap-1 py-2 px-3 rounded-xl text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors border border-gray-200"
                     >
                         <Frown size={13} />
                         <span className="hidden sm:inline">{t('commercial.pipeline.stages.PERDU')}</span>
@@ -297,7 +297,7 @@ export default function LeadProfileSidebar({
                                             {t(`commercial.leads.priorities.${lead.priority}`)}
                                         </span>
                                         {lead.clientId && (
-                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-700">
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#33cbcc]/10 text-[#33cbcc]">
                                                 <CheckCircle2 size={10} /> {t('commercial.leads.converted', 'Converti')}
                                             </span>
                                         )}
@@ -398,7 +398,7 @@ export default function LeadProfileSidebar({
                                         <div className="space-y-2">
                                             <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('commercial.leads.clientNeeds', 'Besoins')}</h3>
                                             {lead.needs.map(n => (
-                                                <div key={n.id} className="bg-amber-50 border border-amber-100 rounded-xl p-3 flex items-start gap-3">
+                                                <div key={n.id} className="bg-[#283852]/5 border border-gray-100 rounded-xl p-3 flex items-start gap-3">
                                                     <p className="text-sm text-gray-700 flex-1">{n.description}</p>
                                                     {n.service && (
                                                         <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#33cbcc]/10 text-[#33cbcc] whitespace-nowrap">
@@ -409,8 +409,8 @@ export default function LeadProfileSidebar({
                                             ))}
                                         </div>
                                     ) : lead.clientNeeds ? (
-                                        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
-                                            <p className="text-[10px] font-semibold text-amber-600 uppercase tracking-wider mb-1.5">{t('commercial.leads.clientNeeds')}</p>
+                                        <div className="bg-[#283852]/5 border border-gray-100 rounded-xl p-4">
+                                            <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider mb-1.5">{t('commercial.leads.clientNeeds')}</p>
                                             <p className="text-sm text-gray-700">{lead.clientNeeds}</p>
                                         </div>
                                     ) : null}
@@ -495,10 +495,10 @@ export default function LeadProfileSidebar({
 
                                     {/* Competitor */}
                                     {lead.competitor && (
-                                        <div className="bg-red-50 border border-red-100 rounded-xl p-3">
-                                            <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-1">{t('commercial.pipeline.competitor')}</p>
-                                            <p className="text-sm font-medium text-red-800">{lead.competitor}</p>
-                                            {lead.competitorOffer && <p className="text-xs text-red-600 mt-1">{lead.competitorOffer}</p>}
+                                        <div className="bg-[#283852]/5 border border-gray-100 rounded-xl p-3">
+                                            <p className="text-[10px] font-semibold text-[#283852]/60 uppercase tracking-wider mb-1">{t('commercial.pipeline.competitor')}</p>
+                                            <p className="text-sm font-medium text-[#283852]">{lead.competitor}</p>
+                                            {lead.competitorOffer && <p className="text-xs text-[#283852]/70 mt-1">{lead.competitorOffer}</p>}
                                         </div>
                                     )}
 
@@ -598,9 +598,9 @@ export default function LeadProfileSidebar({
                                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
                                     {linkedTasks && linkedTasks.length > 0 ? linkedTasks.map((task: any) => {
                                         const stateColors: Record<string, string> = {
-                                            CREATED: 'bg-gray-100 text-gray-600', ASSIGNED: 'bg-blue-50 text-blue-600',
-                                            IN_PROGRESS: 'bg-amber-50 text-amber-600', BLOCKED: 'bg-red-50 text-red-600',
-                                            COMPLETED: 'bg-green-50 text-green-600', REVIEWED: 'bg-indigo-50 text-indigo-600',
+                                            CREATED: 'bg-gray-100 text-gray-600', ASSIGNED: 'bg-[#283852]/10 text-[#283852]',
+                                            IN_PROGRESS: 'bg-[#283852]/10 text-[#283852]', BLOCKED: 'bg-[#283852]/10 text-[#283852]',
+                                            COMPLETED: 'bg-[#283852] text-white', REVIEWED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
                                         };
                                         return (
                                             <div key={task.id} className="flex items-center justify-between p-3 bg-white border border-gray-100 rounded-xl">
@@ -633,7 +633,7 @@ export default function LeadProfileSidebar({
                             <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50 shrink-0">
                                 <button
                                     onClick={() => setShowConvertModal(true)}
-                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20"
+                                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20"
                                 >
                                     <CheckCircle2 size={16} />
                                     {t('commercial.leads.convert')}

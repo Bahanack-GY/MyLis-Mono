@@ -457,7 +457,7 @@
   },
   "sidebar": {
     "dashboard": "Tableau de bord",
-    "employees": "Employés",
+    "employees": "Equipe",
     "projects": "Projets",
     "departments": "Départements",
     "tasks": "Tâches",
@@ -467,7 +467,7 @@
     "activity": "Activité",
     "meetings": "Réunions",
     "invoices": "Factures",
-    "expenses": "Dépenses",
+    "expenses": "Charges",
     "clients": "Clients",
     "settings": "Paramètres",
     "messages": "Messages",
@@ -492,6 +492,8 @@
     "payroll": "Paie",
     "myPayslips": "Mes Fiches de Paie",
     "taxDeclarations": "Fiscalité",
+    "suppliers": "Fournisseurs",
+    "cashFlow": "Flux de Trésorerie",
     "aiReports": "Rapports IA",
     "commercialDashboard": "Commercial",
     "leadsDatabase": "Leads",
@@ -944,7 +946,8 @@
     "tasks": "Tâches",
     "budget": "Budget",
     "documents": "Documents",
-    "timeline": "Chronologie"
+    "timeline": "Chronologie",
+    "milestones": "Jalons"
   },
   "projectDetail": {
     "overview": {
@@ -994,6 +997,21 @@
       "inProgress": "En cours",
       "upcoming": "À venir",
       "empty": "Aucun jalon"
+    },
+    "milestones": {
+      "title": "Jalons du projet",
+      "add": "Ajouter un jalon",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "completed": "Terminé",
+      "inProgress": "En cours",
+      "upcoming": "À venir",
+      "empty": "Aucun jalon défini",
+      "namePlaceholder": "Titre du jalon",
+      "descPlaceholder": "Description (optionnel)",
+      "dueDate": "Échéance",
+      "save": "Enregistrer",
+      "cancel": "Annuler"
     }
   },
   "departments": {

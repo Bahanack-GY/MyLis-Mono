@@ -14,6 +14,7 @@ import {
  Database,
  Layers,
  AlertTriangle,
+ Building2,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -27,17 +28,18 @@ import {
  deleteAccount,
 } from '../../api/accounting/api';
 import type { Account, AccountCategory, AccountTreeCategory } from '../../api/accounting/types';
+import { useDepartments } from '../../api/departments/hooks';
 
 /* ------------------------------------------------------------------ */
 /* Constants */
 /* ------------------------------------------------------------------ */
 
 const TYPE_COLORS: Record<string, { text: string }> = {
- ASSET: { text: 'text-blue-700' },
- LIABILITY: { text: 'text-orange-700' },
- EQUITY: { text: 'text-purple-700' },
- REVENUE: { text: 'text-emerald-700' },
- EXPENSE: { text: 'text-red-700' },
+ ASSET: { text: 'text-[#283852]' },
+ LIABILITY: { text: 'text-[#283852]' },
+ EQUITY: { text: 'text-[#283852]' },
+ REVENUE: { text: 'text-[#33cbcc]' },
+ EXPENSE: { text: 'text-[#283852]' },
 };
 
 const ACCOUNT_TYPES = ['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE'] as const;
@@ -137,12 +139,14 @@ interface AccountFormModalProps {
  account?: Account | null;
  categories: AccountCategory[];
  accounts: Account[];
+ defaultDepartmentId?: string;
 }
 
-const AccountFormModal = ({ onClose, account, categories, accounts }: AccountFormModalProps) => {
+const AccountFormModal = ({ onClose, account, categories, accounts, defaultDepartmentId }: AccountFormModalProps) => {
  const { t } = useTranslation();
  const createMut = useCreateAccount();
  const updateMut = useUpdateAccount();
+ const { data: departments = [] } = useDepartments();
  const isEdit = !!account;
 
  const [form, setForm] = useState({
@@ -152,6 +156,7 @@ const AccountFormModal = ({ onClose, account, categories, accounts }: AccountFor
  categoryId: account?.categoryId || '',
  parentId: account?.parentId || '',
  description: account?.description || '',
+ departmentId: account?.departmentId || defaultDepartmentId || '',
  });
 
  useEffect(() => {
@@ -178,6 +183,7 @@ const AccountFormModal = ({ onClose, account, categories, accounts }: AccountFor
  categoryId: form.categoryId,
  parentId: form.parentId || null,
  description: form.description.trim() || null,
+ departmentId: form.departmentId || null,
  };
  if (isEdit && account) {
  updateMut.mutate({ id: account.id, data: payload }, { onSuccess: onClose });
@@ -295,6 +301,20 @@ const AccountFormModal = ({ onClose, account, categories, accounts }: AccountFor
  </div>
 
  <div>
+ <label className={labelCls}>Département (optionnel)</label>
+ <select
+ value={form.departmentId}
+ onChange={(e) => setForm((p) => ({ ...p, departmentId: e.target.value }))}
+ className={inputCls + ' appearance-none cursor-pointer'}
+ >
+ <option value="">Aucun (compte général)</option>
+ {departments.map((d) => (
+ <option key={d.id} value={d.id}>{d.name}</option>
+ ))}
+ </select>
+ </div>
+
+ <div>
  <label className={labelCls}>Description</label>
  <textarea
  value={form.description}
@@ -377,8 +397,8 @@ const DeleteConfirmModal = ({
  className="bg-white rounded-2xl p-6 w-full max-w-sm"
  >
  <div className="flex items-center gap-3 mb-4">
- <div className="p-2.5 rounded-xl bg-red-50">
- <AlertTriangle size={20} className="text-red-500"/>
+ <div className="p-2.5 rounded-xl bg-[#283852]/10">
+ <AlertTriangle size={20} className="text-[#283852]"/>
  </div>
  <h3 className="text-base font-semibold text-gray-800">Supprimer le compte</h3>
  </div>
@@ -389,7 +409,7 @@ const DeleteConfirmModal = ({
  </strong>{' '}
  ?
  </p>
- <p className="text-xs text-red-500 mb-6">Cette action est irreversible.</p>
+ <p className="text-xs text-[#283852] mb-6">Cette action est irreversible.</p>
  <div className="flex gap-3 justify-end">
  <button
  onClick={onClose}
@@ -400,7 +420,7 @@ const DeleteConfirmModal = ({
  <button
  onClick={onConfirm}
  disabled={isPending}
- className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
+ className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852]/90 transition-colors disabled:opacity-50"
  >
  {isPending ? <Loader2 size={14} className="animate-spin"/> : <Trash2 size={14} />}
  Supprimer
@@ -418,6 +438,7 @@ const DeleteConfirmModal = ({
 interface CategoryRowProps {
  category: AccountTreeCategory;
  search: string;
+ selectedDeptId: string;
  onEdit: (account: Account) => void;
  onDelete: (account: Account) => void;
 }
@@ -428,19 +449,21 @@ const AccountRow = ({
  search,
  onEdit,
  onDelete,
+ selectedDeptId,
 }: {
  account: Account & { children?: Account[] };
  depth: number;
  search: string;
  onEdit: (a: Account) => void;
  onDelete: (a: Account) => void;
+ selectedDeptId: string;
 }) => {
  const colors = TYPE_COLORS[account.type] || { text: 'text-gray-500' };
 
  return (
  <>
  <tr className="hover:bg-gray-50/50 transition-colors group">
- <td className="px-6 py-3 text-sm font-mono font-semibold text-gray-800"style={{ paddingLeft: `${24 + depth * 24}px` }}>
+ <td className="px-6 py-3 text-sm font-mono font-semibold text-gray-800" style={{ paddingLeft: `${24 + depth * 24}px` }}>
  {account.code}
  </td>
  <td className="px-6 py-3 text-sm text-gray-700">{account.name}</td>
@@ -449,8 +472,17 @@ const AccountRow = ({
  {formatType(account.type)}
  </span>
  </td>
+ <td className="px-6 py-3">
+ {account.department ? (
+ <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] text-[10px] font-semibold">
+ <Building2 size={9} />
+ {account.department.name}
+ </span>
+ ) : (
+ <span className="text-[10px] text-gray-300">—</span>
+ )}
+ </td>
  <td className="px-6 py-3 text-right">
- {!account.isSystem && (
  <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
  <button
  onClick={() => onEdit(account)}
@@ -459,15 +491,16 @@ const AccountRow = ({
  >
  <Edit3 size={14} />
  </button>
+ {!account.isSystem && (
  <button
  onClick={() => onDelete(account)}
- className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+ className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
  title="Supprimer"
  >
  <Trash2 size={14} />
  </button>
- </div>
  )}
+ </div>
  </td>
  </tr>
  {account.children?.map((child) => (
@@ -478,24 +511,34 @@ const AccountRow = ({
  search={search}
  onEdit={onEdit}
  onDelete={onDelete}
+ selectedDeptId={selectedDeptId}
  />
  ))}
  </>
  );
 };
 
-const CategorySection = ({ category, search, onEdit, onDelete }: CategoryRowProps) => {
+const matchesDept = (acc: Account & { children?: Account[] }, deptId: string): boolean => {
+ if (acc.departmentId === deptId) return true;
+ return acc.children?.some((c) => matchesDept(c as Account & { children?: Account[] }, deptId)) || false;
+};
+
+const CategorySection = ({ category, search, selectedDeptId, onEdit, onDelete }: CategoryRowProps) => {
  const [expanded, setExpanded] = useState(true);
 
  const filteredAccounts = useMemo(() => {
- if (!search) return category.accounts;
+ let accounts = category.accounts as (Account & { children?: Account[] })[];
+ if (selectedDeptId) {
+ accounts = accounts.filter((acc) => matchesDept(acc, selectedDeptId));
+ }
+ if (!search) return accounts;
  const q = search.toLowerCase();
- const matchesAccount = (acc: Account & { children?: Account[] }): boolean => {
+ const matchesSearch = (acc: Account & { children?: Account[] }): boolean => {
  if (acc.code.toLowerCase().includes(q) || acc.name.toLowerCase().includes(q)) return true;
- return acc.children?.some(matchesAccount) || false;
+ return acc.children?.some(matchesSearch) || false;
  };
- return category.accounts.filter(matchesAccount);
- }, [category.accounts, search]);
+ return accounts.filter(matchesSearch);
+ }, [category.accounts, search, selectedDeptId]);
 
  if (search && filteredAccounts.length === 0) return null;
 
@@ -534,6 +577,7 @@ const CategorySection = ({ category, search, onEdit, onDelete }: CategoryRowProp
  search={search}
  onEdit={onEdit}
  onDelete={onDelete}
+ selectedDeptId={selectedDeptId}
  />
  ))}
  </tbody>
@@ -551,6 +595,7 @@ const CategorySection = ({ category, search, onEdit, onDelete }: CategoryRowProp
 export default function ChartOfAccounts() {
  const { t } = useTranslation();
  const [search, setSearch] = useState('');
+ const [selectedDeptId, setSelectedDeptId] = useState('');
  const [showCreateModal, setShowCreateModal] = useState(false);
  const [editingAccount, setEditingAccount] = useState<Account | null>(null);
  const [deletingAccount, setDeletingAccount] = useState<Account | null>(null);
@@ -558,10 +603,24 @@ export default function ChartOfAccounts() {
  const { data: tree, isLoading: treeLoading } = useAccountsTree();
  const { data: allAccounts } = useAllAccounts();
  const { data: categories } = useCategoriesList();
+ const { data: departments = [] } = useDepartments();
  const seed = useSeedAccounting();
  const deleteMut = useDeleteAccount();
 
  const isEmpty = !treeLoading && (!tree || tree.length === 0);
+
+ // Count accounts per department (from flat list)
+ const deptAccountCounts = useMemo(() => {
+ const counts: Record<string, number> = {};
+ if (!allAccounts) return counts;
+ for (const acc of allAccounts) {
+ if (acc.departmentId) {
+ counts[acc.departmentId] = (counts[acc.departmentId] || 0) + 1;
+ }
+ }
+ return counts;
+ }, [allAccounts]);
+
  const totalAccounts = useMemo(() => {
  if (!tree) return 0;
  let count = 0;
@@ -607,7 +666,7 @@ export default function ChartOfAccounts() {
  <button
  onClick={() => seed.mutate()}
  disabled={seed.isPending}
- className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-xl text-sm font-semibold hover:bg-amber-600 transition-colors disabled:opacity-50"
+ className="flex items-center gap-2 px-4 py-2.5 bg-[#283852] text-white rounded-xl text-sm font-semibold hover:bg-[#283852]/90 transition-colors disabled:opacity-50"
  >
  {seed.isPending ? (
  <Loader2 size={16} className="animate-spin"/>
@@ -632,7 +691,7 @@ export default function ChartOfAccounts() {
 
  {/* Search */}
  <div className="bg-white rounded-2xl p-2 flex items-center border border-gray-100 focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
- <Search className="text-gray-400 ml-3"size={20} />
+ <Search className="text-gray-400 ml-3" size={20} />
  <input
  type="text"
  placeholder="Rechercher par code ou nom de compte..."
@@ -641,6 +700,43 @@ export default function ChartOfAccounts() {
  className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
  />
  </div>
+
+ {/* Department tabs */}
+ {departments.length > 0 && (
+ <div className="flex items-center gap-2 flex-wrap">
+ <button
+ onClick={() => setSelectedDeptId('')}
+ className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
+ selectedDeptId === ''
+ ? 'bg-[#33cbcc] text-white shadow-sm'
+ : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+ }`}
+ >
+ Tous
+ </button>
+ {departments.map((dept) => (
+ <button
+ key={dept.id}
+ onClick={() => setSelectedDeptId(dept.id)}
+ className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
+ selectedDeptId === dept.id
+ ? 'bg-[#33cbcc] text-white shadow-sm'
+ : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
+ }`}
+ >
+ <Building2 size={13} />
+ {dept.name}
+ {deptAccountCounts[dept.id] ? (
+ <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+ selectedDeptId === dept.id ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'
+ }`}>
+ {deptAccountCounts[dept.id]}
+ </span>
+ ) : null}
+ </button>
+ ))}
+ </div>
+ )}
 
  {/* Empty state */}
  {isEmpty && (
@@ -659,9 +755,10 @@ export default function ChartOfAccounts() {
  {/* Table header */}
  <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100">
  <div className="col-span-3">Code</div>
- <div className="col-span-5">Nom du compte</div>
+ <div className="col-span-4">Nom du compte</div>
  <div className="col-span-2">Type</div>
- <div className="col-span-2 text-right">Actions</div>
+ <div className="col-span-2">Département</div>
+ <div className="col-span-1 text-right">Actions</div>
  </div>
 
  <div className="p-3">
@@ -670,6 +767,7 @@ export default function ChartOfAccounts() {
  key={category.id}
  category={category}
  search={search}
+ selectedDeptId={selectedDeptId}
  onEdit={(account) => {
  setEditingAccount(account);
  setShowCreateModal(true);
@@ -692,6 +790,7 @@ export default function ChartOfAccounts() {
  account={editingAccount}
  categories={categories || []}
  accounts={allAccounts || []}
+ defaultDepartmentId={selectedDeptId || undefined}
  />
  )}
  {deletingAccount && (

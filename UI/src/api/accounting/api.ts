@@ -53,6 +53,9 @@ export const getCreditNotes = (invoiceId?: string) =>
 export const createCreditNote = (data: any) => api.post('/accounting/credit-notes', data).then(r => r.data);
 export const validateCreditNote = (id: string) => api.post(`/accounting/credit-notes/${id}/validate`).then(r => r.data);
 
+export const getCashFlow = (fiscalYearId: string) =>
+    api.get(`/accounting/reports/cash-flow/${fiscalYearId}`).then(r => r.data);
+
 // Budgets
 export const getBudgets = (fiscalYearId: string) =>
     api.get('/accounting/budgets', { params: { fiscalYearId } }).then(r => r.data);

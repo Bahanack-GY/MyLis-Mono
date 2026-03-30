@@ -73,6 +73,7 @@ interface Payslip {
  includeIrpp: boolean;
  includeCommunalTax: boolean;
  customDeductions: { name: string; amount: number }[];
+ paymentDate: string | null;
  employee?: {
  id: string;
  firstName: string;
@@ -127,9 +128,9 @@ const MONTHS = [
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; label: string }> = {
  DRAFT: { bg: 'bg-gray-100', text: 'text-gray-600', label: 'Brouillon' },
- CALCULATED: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'Calcule' },
- VALIDATED: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Valide' },
- PAID: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Paye' },
+ CALCULATED: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', label: 'Calcule' },
+ VALIDATED: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', label: 'Valide' },
+ PAID: { bg: 'bg-[#283852]', text: 'text-white', label: 'Paye' },
 };
 
 const inputCls =
@@ -214,6 +215,8 @@ const payrollApi = {
  deleteDeductionType: (id: string) => api.delete(`/payroll/deduction-types/${id}`).then((r) => r.data),
  bulkUpdateToggles: (runId: string, data: any) =>
  api.patch(`/payroll/runs/${runId}/bulk-toggles`, data).then((r) => r.data),
+ payOne: (payslipId: string, date: string) =>
+ api.post(`/payroll/payslips/${payslipId}/pay`, { date }).then((r) => r.data),
 };
 
 /* ------------------------------------------------------------------ */
@@ -275,6 +278,19 @@ const usePayPayrollRun = () => {
  mutationFn: (id: string) => payrollApi.pay(id),
  onSuccess: () => {
  toast.success('Paiement effectue avec succes');
+ qc.invalidateQueries({ queryKey: ['accounting', 'payroll'] });
+ },
+ onError: () => toast.error('Erreur lors du paiement'),
+ });
+};
+
+const usePayOnePayslip = () => {
+ const qc = useQueryClient();
+ return useMutation({
+ mutationFn: ({ id, date }: { id: string; date: string }) =>
+ payrollApi.payOne(id, date),
+ onSuccess: () => {
+ toast.success('Salaire verse');
  qc.invalidateQueries({ queryKey: ['accounting', 'payroll'] });
  },
  onError: () => toast.error('Erreur lors du paiement'),
@@ -884,6 +900,88 @@ const BulkActionBar = ({
 };
 
 /* ------------------------------------------------------------------ */
+/* Pay One Modal */
+/* ------------------------------------------------------------------ */
+
+const PayOneModal = ({
+ payslip,
+ onClose,
+}: {
+ payslip: Payslip;
+ onClose: () => void;
+}) => {
+ const payOneMut = usePayOnePayslip();
+ const today = new Date().toISOString().split('T')[0];
+ const [date, setDate] = useState(today);
+ const empName = payslip.employee
+ ? `${payslip.employee.firstName} ${payslip.employee.lastName}`
+ : '';
+
+ useEffect(() => {
+ const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+ document.addEventListener('keydown', handleKey);
+ return () => document.removeEventListener('keydown', handleKey);
+ }, [onClose]);
+
+ const handleConfirm = () => {
+ payOneMut.mutate({ id: payslip.id, date }, { onSuccess: onClose });
+ };
+
+ return (
+ <motion.div
+ initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+ onClick={onClose}
+ className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+ >
+ <motion.div
+ initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+ onClick={(e) => e.stopPropagation()}
+ className="bg-white rounded-2xl w-full max-w-sm p-6"
+ >
+ <div className="flex items-center gap-3 mb-5">
+ <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center">
+ <CreditCard size={18} className="text-emerald-600"/>
+ </div>
+ <div>
+ <h3 className="font-bold text-gray-800">Payer le salaire</h3>
+ <p className="text-xs text-gray-500">{empName}</p>
+ </div>
+ </div>
+
+ <div className="bg-gray-50 rounded-xl p-3 mb-4 flex justify-between items-center">
+ <span className="text-sm text-gray-600">Net a payer</span>
+ <span className="text-lg font-bold text-emerald-600">{formatXAF(payslip.netSalary)}</span>
+ </div>
+
+ <div className="mb-5">
+ <label className={labelCls}>Date de paiement</label>
+ <input
+ type="date"
+ value={date}
+ onChange={(e) => setDate(e.target.value)}
+ className={inputCls}
+ />
+ </div>
+
+ <div className="flex gap-3">
+ <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+ Annuler
+ </button>
+ <button
+ onClick={handleConfirm}
+ disabled={payOneMut.isPending || !date}
+ className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors disabled:opacity-50"
+ >
+ {payOneMut.isPending ? <Loader2 size={14} className="animate-spin"/> : <Check size={14}/>}
+ Confirmer
+ </button>
+ </div>
+ </motion.div>
+ </motion.div>
+ );
+};
+
+/* ------------------------------------------------------------------ */
 /* Payroll Detail View */
 /* ------------------------------------------------------------------ */
 
@@ -902,6 +1000,7 @@ const PayrollDetail = ({
  const [showPayConfirm, setShowPayConfirm] = useState(false);
  const [editingDeduction, setEditingDeduction] = useState<Payslip | null>(null);
  const [editingPayslip, setEditingPayslip] = useState<Payslip | null>(null);
+ const [payingPayslip, setPayingPayslip] = useState<Payslip | null>(null);
  const [showDeductionTypes, setShowDeductionTypes] = useState(false);
  const [downloadingId, setDownloadingId] = useState<string | null>(null);
  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -923,6 +1022,9 @@ const PayrollDetail = ({
 
  const status = STATUS_COLORS[run.status] || STATUS_COLORS.DRAFT;
  const payslips = run.payslips || [];
+ const paidCount = payslips.filter(ps => ps.paymentDate).length;
+ const unpaidCount = payslips.length - paidCount;
+ const hasPartialPayments = paidCount > 0 && unpaidCount > 0;
 
  const totals = payslips.reduce(
  (acc, ps) => ({
@@ -1003,7 +1105,7 @@ const PayrollDetail = ({
  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
  >
  <CreditCard size={16} />
- Payer
+ {hasPartialPayments ? `Payer le reste (${unpaidCount})` : 'Payer tout'}
  </button>
  )}
  </div>
@@ -1024,6 +1126,29 @@ const PayrollDetail = ({
  <p className="text-xl font-bold text-amber-600">{formatXAF(run.totalEmployerCharges)}</p>
  </div>
  </div>
+
+ {/* Payment progress (VALIDATED with partial payments) */}
+ {run.status === 'VALIDATED' && payslips.length > 0 && (
+ <div className="bg-white rounded-2xl p-4 flex items-center gap-4">
+ <div className="flex-1">
+ <div className="flex items-center justify-between mb-1.5">
+ <span className="text-sm font-semibold text-gray-700">Progression des paiements</span>
+ <span className="text-sm font-bold text-emerald-600">{paidCount} / {payslips.length} payes</span>
+ </div>
+ <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+ <div
+ className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+ style={{ width: `${payslips.length > 0 ? (paidCount / payslips.length) * 100 : 0}%` }}
+ />
+ </div>
+ </div>
+ {paidCount > 0 && (
+ <span className="text-xs text-gray-400 shrink-0">
+ {Math.round((paidCount / payslips.length) * 100)}%
+ </span>
+ )}
+ </div>
+ )}
 
  {/* Bulk action bar */}
  {canEditDeductions && (
@@ -1082,6 +1207,7 @@ const PayrollDetail = ({
  <th className="px-4 py-3 text-right">Ret. Perso.</th>
  <th className="px-4 py-3 text-right">Ret. Man.</th>
  <th className="px-4 py-3 text-right">Net</th>
+ {run.status === 'VALIDATED' && <th className="px-4 py-3 text-center">Paiement</th>}
  <th className="px-3 py-3 text-center w-20"></th>
  </tr>
  </thead>
@@ -1170,6 +1296,24 @@ const PayrollDetail = ({
  <td className="px-4 py-2.5 text-right font-bold text-emerald-600">
  {formatXAF(ps.netSalary)}
  </td>
+ {run.status === 'VALIDATED' && (
+ <td className="px-4 py-2.5 text-center">
+ {ps.paymentDate ? (
+ <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold">
+ <Check size={10}/>
+ {new Date(ps.paymentDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+ </span>
+ ) : (
+ <button
+ onClick={() => setPayingPayslip(ps)}
+ className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
+ >
+ <CreditCard size={11}/>
+ Payer
+ </button>
+ )}
+ </td>
+ )}
  <td className="px-3 py-2.5 text-center">
  <div className="flex items-center gap-0.5 justify-center">
  {canEditDeductions && (
@@ -1230,6 +1374,7 @@ const PayrollDetail = ({
  <td className="px-4 py-3 text-right text-emerald-600">
  {formatXAF(totals.net)}
  </td>
+ {run.status === 'VALIDATED' && <td className="px-4 py-3"></td>}
  <td className="px-3 py-3"></td>
  </tr>
  </tfoot>
@@ -1254,6 +1399,12 @@ const PayrollDetail = ({
  payMut.mutate(run.id, { onSuccess: () => setShowPayConfirm(false) });
  }}
  isPending={payMut.isPending}
+ />
+ )}
+ {payingPayslip && (
+ <PayOneModal
+ payslip={payingPayslip}
+ onClose={() => setPayingPayslip(null)}
  />
  )}
  {editingDeduction && (

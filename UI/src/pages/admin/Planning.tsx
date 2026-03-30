@@ -135,7 +135,7 @@ const AddTaskModal = ({
     const difficultyColors: Record<TaskDifficulty, string> = {
         EASY: 'border-[#33cbcc] bg-[#33cbcc]/10 text-[#33cbcc]',
         MEDIUM: 'border-[#283852] bg-[#283852]/10 text-[#283852]',
-        HARD: 'border-red-400 bg-red-50 text-red-500',
+        HARD: 'border-[#283852] bg-[#283852]/10 text-[#283852]',
     };
 
     return (
@@ -213,14 +213,14 @@ const AddTaskModal = ({
                         </div>
                     )}
                     {isNonCompliant && (
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+                        <div className="bg-[#283852]/10 border border-gray-200 rounded-xl p-4 space-y-3">
                             <div className="flex items-center gap-2">
-                                <AlertCircle size={14} className="text-red-500 shrink-0" />
-                                <p className="text-sm font-semibold text-red-700">
+                                <AlertCircle size={14} className="text-[#283852] shrink-0" />
+                                <p className="text-sm font-semibold text-[#283852]">
                                     {t('tasks.weeklyCompliance.adminWarningTitle')}
                                 </p>
                             </div>
-                            <p className="text-xs text-red-600">
+                            <p className="text-xs text-[#283852]">
                                 {t('tasks.weeklyCompliance.adminWarningMessage', {
                                     name: `${selectedEmp?.firstName} ${selectedEmp?.lastName}` || '',
                                 })}
@@ -229,12 +229,12 @@ const AddTaskModal = ({
                                 {compliance!.pendingTasks.map(pt => (
                                     <div
                                         key={pt.id}
-                                        className="flex items-center justify-between bg-white border border-red-100 rounded-lg px-3 py-2"
+                                        className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2"
                                     >
                                         <span className="text-xs font-medium text-gray-700 truncate">
                                             {pt.title}
                                         </span>
-                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 shrink-0">
+                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
                                             {pt.state}
                                         </span>
                                     </div>
@@ -402,9 +402,9 @@ const AddTaskModal = ({
                                 type="checkbox"
                                 checked={form.urgent}
                                 onChange={e => update('urgent', e.target.checked)}
-                                className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400"
+                                className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30"
                             />
-                            <AlertCircle size={14} className="text-red-400" />
+                            <AlertCircle size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -412,9 +412,9 @@ const AddTaskModal = ({
                                 type="checkbox"
                                 checked={form.important}
                                 onChange={e => update('important', e.target.checked)}
-                                className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400"
+                                className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30"
                             />
-                            <Flag size={14} className="text-amber-400" />
+                            <Flag size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
                         </label>
                     </div>
@@ -449,7 +449,7 @@ const AddTaskModal = ({
                                         <button
                                             type="button"
                                             onClick={() => setFiles(prev => prev.filter((_, i) => i !== fi))}
-                                            className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                                            className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
                                         >
                                             <X size={14} />
                                         </button>
@@ -520,11 +520,11 @@ const AddTaskModal = ({
 
 const STATE_COLORS: Record<string, string> = {
     CREATED: 'bg-gray-100 text-gray-600',
-    ASSIGNED: 'bg-blue-100 text-blue-700',
-    IN_PROGRESS: 'bg-amber-100 text-amber-700',
-    BLOCKED: 'bg-red-100 text-red-600',
-    COMPLETED: 'bg-green-100 text-green-700',
-    REVIEWED: 'bg-purple-100 text-purple-700',
+    ASSIGNED: 'bg-[#283852]/10 text-[#283852]',
+    IN_PROGRESS: 'bg-[#283852]/10 text-[#283852]',
+    BLOCKED: 'bg-[#283852]/10 text-[#283852]',
+    COMPLETED: 'bg-[#283852] text-white',
+    REVIEWED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
 };
 
 const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void }) => {
@@ -533,7 +533,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
     const difficultyColors: Record<TaskDifficulty, string> = {
         EASY: 'bg-[#33cbcc]/10 text-[#33cbcc] border-[#33cbcc]/20',
         MEDIUM: 'bg-[#283852]/10 text-[#283852] border-[#283852]/20',
-        HARD: 'bg-red-50 text-red-500 border-red-200',
+        HARD: 'bg-[#283852]/10 text-[#283852] border-[#283852]/20',
     };
 
     useEffect(() => {
@@ -568,12 +568,12 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                     <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5 mb-1">
                             {task.urgent && (
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-100 text-red-600 uppercase tracking-wide">
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#283852]/10 text-[#283852] uppercase tracking-wide">
                                     {t('tasks.urgent')}
                                 </span>
                             )}
                             {task.important && (
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 uppercase tracking-wide flex items-center gap-0.5">
+                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#283852]/10 text-[#283852] uppercase tracking-wide flex items-center gap-0.5">
                                     <Flag size={8} />
                                     {t('tasks.important')}
                                 </span>
@@ -600,7 +600,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                             {task.difficulty}
                         </span>
                         {task.transferredFromWeek && (
-                            <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                            <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
                                 <RotateCcw size={8} />
                                 {t('planning.transferred', 'Transferred')}
                             </span>
@@ -715,7 +715,7 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
     const difficultyColors: Record<TaskDifficulty, string> = {
         EASY: 'bg-[#33cbcc]/10 text-[#33cbcc] border-[#33cbcc]/20',
         MEDIUM: 'bg-[#283852]/10 text-[#283852] border-[#283852]/20',
-        HARD: 'bg-red-50 text-red-500 border-red-200',
+        HARD: 'bg-[#283852]/10 text-[#283852] border-[#283852]/20',
     };
 
     return (
@@ -745,7 +745,7 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                 <div className="flex-1 min-w-0">
                     <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{task.title}</h4>
                     {task.transferredFromWeek && (
-                        <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 mt-1">
+                        <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] mt-1">
                             <RotateCcw size={8} />
                             TR
                         </span>
@@ -879,6 +879,7 @@ export default function Planning() {
     const deptScope = useDepartmentScope();
     const [currentMonday, setCurrentMonday] = useState(() => getMonday(new Date()));
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
+    const [selectedStatus, setSelectedStatus] = useState<string>('');
     const [showModal, setShowModal] = useState(false);
     const [selectedDate, setSelectedDate] = useState<string | undefined>();
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -894,7 +895,8 @@ export default function Planning() {
         weekStartISO
     );
 
-    const tasks = selectedEmployeeId ? employeeTasks : allTasks;
+    const rawTasks = selectedEmployeeId ? employeeTasks : allTasks;
+    const tasks = selectedStatus ? rawTasks.filter(t => t.state === selectedStatus) : rawTasks;
     const isLoading = selectedEmployeeId ? isLoadingEmployee : isLoadingAll;
 
     // Group tasks by day
@@ -964,12 +966,12 @@ export default function Planning() {
                             <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">{t('planning.subtitle')}</p>
                         </div>
 
-                        {/* Employee Filter */}
-                        <div className="w-full sm:w-64">
+                        {/* Filters */}
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <select
                                 value={selectedEmployeeId}
                                 onChange={e => setSelectedEmployeeId(e.target.value)}
-                                className="w-full bg-white rounded-xl border border-gray-200 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
+                                className="w-full sm:w-52 bg-white rounded-xl border border-gray-200 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
                             >
                                 <option value="">{t('planning.allEmployees')}</option>
                                 {employees.map(emp => (
@@ -977,6 +979,19 @@ export default function Planning() {
                                         {emp.firstName} {emp.lastName}
                                     </option>
                                 ))}
+                            </select>
+                            <select
+                                value={selectedStatus}
+                                onChange={e => setSelectedStatus(e.target.value)}
+                                className="w-full sm:w-44 bg-white rounded-xl border border-gray-200 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
+                            >
+                                <option value="">{t('planning.allStatuses', 'All statuses')}</option>
+                                <option value="CREATED">{t('tasks.states.created', 'Created')}</option>
+                                <option value="ASSIGNED">{t('tasks.states.assigned', 'Assigned')}</option>
+                                <option value="IN_PROGRESS">{t('tasks.states.in_progress', 'In Progress')}</option>
+                                <option value="BLOCKED">{t('tasks.states.blocked', 'Blocked')}</option>
+                                <option value="COMPLETED">{t('tasks.states.completed', 'Completed')}</option>
+                                <option value="REVIEWED">{t('tasks.states.reviewed', 'Reviewed')}</option>
                             </select>
                         </div>
                     </div>

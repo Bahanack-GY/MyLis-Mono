@@ -55,25 +55,25 @@ interface TicketDisplay {
 
 const STATUS_STYLES: Record<DisplayStatus, string> = {
     open: 'bg-[#283852]/10 text-[#283852]',
-    accepted: 'bg-amber-100 text-amber-700',
+    accepted: 'bg-[#283852]/10 text-[#283852]',
     in_progress: 'bg-[#33cbcc]/10 text-[#33cbcc]',
-    completed: 'bg-emerald-100 text-emerald-700',
+    completed: 'bg-[#283852] text-white',
     closed: 'bg-gray-100 text-gray-500',
 };
 
 const STATUS_ICON_STYLES: Record<DisplayStatus, string> = {
     open: 'bg-[#283852]/10',
-    accepted: 'bg-amber-50',
+    accepted: 'bg-[#283852]/10',
     in_progress: 'bg-[#33cbcc]/10',
-    completed: 'bg-emerald-50',
+    completed: 'bg-[#283852]',
     closed: 'bg-gray-100',
 };
 
 const STATUS_ICON_TEXT: Record<DisplayStatus, string> = {
     open: 'text-[#283852]',
-    accepted: 'text-amber-600',
+    accepted: 'text-[#283852]',
     in_progress: 'text-[#33cbcc]',
-    completed: 'text-emerald-600',
+    completed: 'text-white',
     closed: 'text-gray-400',
 };
 
@@ -594,10 +594,10 @@ const TicketDetailModal = ({
                         {ticket.dueDateRaw && (
                             <div className={rowCls}>
                                 <span className={labelCls}>{t('tickets.detail.dueDate')}</span>
-                                <span className={`text-sm font-medium ${ticket.isOverdue ? 'text-red-500' : 'text-gray-700'}`}>
+                                <span className={`text-sm font-medium ${ticket.isOverdue ? 'text-[#283852]' : 'text-gray-700'}`}>
                                     {formatDateFull(ticket.dueDateRaw)}
                                     {ticket.isOverdue && (
-                                        <span className="ml-2 text-[10px] bg-red-100 text-red-500 px-2 py-0.5 rounded-full font-semibold">
+                                        <span className="ml-2 text-[10px] bg-[#283852]/10 text-[#283852] px-2 py-0.5 rounded-full font-semibold">
                                             {t('tickets.overdue')}
                                         </span>
                                     )}

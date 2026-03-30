@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { X, Plus, Pencil, Trash2, Check, Loader2, Wallet } from 'lucide-react';
 import { useBusinessExpenseTypes, useCreateBusinessExpenseType, useUpdateBusinessExpenseType, useDeleteBusinessExpenseType } from '../api/business-expenses/hooks';
 
-const PRESET_COLORS = ['#33cbcc', '#283852', '#ef4444', '#f59e0b', '#22c55e', '#8b5cf6', '#ec4899', '#6366f1'];
+const PRESET_COLORS = ['#33cbcc', '#283852', '#33cbcc99', '#28385280', '#33cbcc50', '#283852', '#33cbcc', '#283852'];
 
 const BusinessExpenseTypeManager = ({ onClose }: { onClose: () => void }) => {
     const { t } = useTranslation();
@@ -153,7 +153,7 @@ const BusinessExpenseTypeManager = ({ onClose }: { onClose: () => void }) => {
                                             <button
                                                 onClick={() => deleteType.mutate(type.id)}
                                                 disabled={deleteType.isPending}
-                                                className="p-1.5 rounded-lg hover:bg-white text-gray-400 hover:text-red-500 transition-colors"
+                                                className="p-1.5 rounded-lg hover:bg-white text-gray-400 hover:text-[#283852] transition-colors"
                                             >
                                                 <Trash2 size={13} />
                                             </button>

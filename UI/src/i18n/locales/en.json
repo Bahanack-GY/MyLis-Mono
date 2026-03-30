@@ -457,7 +457,7 @@
   },
   "sidebar": {
     "dashboard": "Dashboard",
-    "employees": "Employees",
+    "employees": "Equipe",
     "projects": "Projects",
     "departments": "Departments",
     "tasks": "Tasks",
@@ -467,7 +467,7 @@
     "activity": "Activity",
     "meetings": "Meetings",
     "invoices": "Invoices",
-    "expenses": "Expenses",
+    "expenses": "Charges",
     "clients": "Clients",
     "settings": "Settings",
     "messages": "Messages",
@@ -492,6 +492,8 @@
     "payroll": "Payroll",
     "myPayslips": "My Payslips",
     "taxDeclarations": "Tax",
+    "suppliers": "Suppliers",
+    "cashFlow": "Cash Flow",
     "aiReports": "AI Reports",
     "commercialDashboard": "Commercial",
     "leadsDatabase": "Leads",
@@ -944,7 +946,8 @@
     "tasks": "Tasks",
     "budget": "Budget",
     "documents": "Documents",
-    "timeline": "Timeline"
+    "timeline": "Timeline",
+    "milestones": "Milestones"
   },
   "projectDetail": {
     "overview": {
@@ -994,6 +997,21 @@
       "inProgress": "In Progress",
       "upcoming": "Upcoming",
       "empty": "No milestones yet"
+    },
+    "milestones": {
+      "title": "Project Milestones",
+      "add": "Add Milestone",
+      "edit": "Edit",
+      "delete": "Delete",
+      "completed": "Completed",
+      "inProgress": "In Progress",
+      "upcoming": "Upcoming",
+      "empty": "No milestones defined yet",
+      "namePlaceholder": "Milestone title",
+      "descPlaceholder": "Description (optional)",
+      "dueDate": "Due date",
+      "save": "Save",
+      "cancel": "Cancel"
     }
   },
   "departments": {

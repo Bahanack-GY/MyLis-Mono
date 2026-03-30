@@ -6,6 +6,7 @@ import { ProjectService } from './project-service.model';
 import { Employee } from './employee.model';
 import { ProjectMember } from './project-member.model';
 import { Task } from './task.model';
+import { ProjectMilestone } from './project-milestone.model';
 
 @Table
 export class Project extends Model {
@@ -59,4 +60,7 @@ export class Project extends Model {
 
     @HasMany(() => Task)
     declare tasks: Task[];
+
+    @HasMany(() => ProjectMilestone)
+    declare milestones: ProjectMilestone[];
 }

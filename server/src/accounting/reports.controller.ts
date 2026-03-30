@@ -42,4 +42,9 @@ export class ReportsController {
     monthlySummary(@Param('fiscalYearId') fiscalYearId: string) {
         return this.reportsService.monthlySummary(fiscalYearId);
     }
+
+    @Get('cash-flow/:fiscalYearId')
+    cashFlow(@Param('fiscalYearId') fiscalYearId: string) {
+        return this.reportsService.cashFlow(fiscalYearId);
+    }
 }

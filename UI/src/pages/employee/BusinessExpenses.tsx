@@ -25,9 +25,9 @@ const formatFCFA = (amount: number) =>
     new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
 
 const STATUS_BG: Record<string, string> = {
-    PENDING: 'bg-amber-50 text-amber-600',
-    VALIDATED: 'bg-green-50 text-green-600',
-    REJECTED: 'bg-red-50 text-red-600',
+    PENDING: 'bg-[#283852]/10 text-[#283852]/70',
+    VALIDATED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
+    REJECTED: 'bg-gray-100 text-gray-400',
 };
 
 /* ─── Create Modal ───────────────────────────────────────── */
@@ -201,7 +201,7 @@ const CreateExpenseModal = ({ onClose }: { onClose: () => void }) => {
                                     <button
                                         type="button"
                                         onClick={() => handleFileChange(null)}
-                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors shrink-0"
                                     >
                                         <X size={14} />
                                     </button>
@@ -284,20 +284,20 @@ const BusinessExpenses = () => {
 
             {/* Stats Badges */}
             <div className="flex gap-3 flex-wrap">
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-100">
-                    <div className="w-2 h-2 rounded-full bg-amber-400" />
-                    <span className="text-sm font-semibold text-amber-600">{pendingCount}</span>
-                    <span className="text-xs text-amber-500">{t('businessExpenses.status.pending')}</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#283852]/10 border border-gray-200">
+                    <div className="w-2 h-2 rounded-full bg-[#283852]" />
+                    <span className="text-sm font-semibold text-[#283852]">{pendingCount}</span>
+                    <span className="text-xs text-[#283852]/60">{t('businessExpenses.status.pending')}</span>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 border border-green-100">
-                    <div className="w-2 h-2 rounded-full bg-green-400" />
-                    <span className="text-sm font-semibold text-green-600">{validatedCount}</span>
-                    <span className="text-xs text-green-500">{t('businessExpenses.status.validated')}</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#33cbcc]/10 border border-gray-200">
+                    <div className="w-2 h-2 rounded-full bg-[#33cbcc]" />
+                    <span className="text-sm font-semibold text-[#33cbcc]">{validatedCount}</span>
+                    <span className="text-xs text-[#33cbcc]/60">{t('businessExpenses.status.validated')}</span>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 border border-red-100">
-                    <div className="w-2 h-2 rounded-full bg-red-400" />
-                    <span className="text-sm font-semibold text-red-600">{rejectedCount}</span>
-                    <span className="text-xs text-red-500">{t('businessExpenses.status.rejected')}</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 border border-gray-200">
+                    <div className="w-2 h-2 rounded-full bg-gray-400" />
+                    <span className="text-sm font-semibold text-gray-500">{rejectedCount}</span>
+                    <span className="text-xs text-gray-400">{t('businessExpenses.status.rejected')}</span>
                 </div>
             </div>
 
@@ -399,7 +399,7 @@ const BusinessExpenses = () => {
                                         <button
                                             onClick={() => handleDelete(expense.id)}
                                             disabled={deleteExpense.isPending}
-                                            className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                                            className="p-2 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors disabled:opacity-50"
                                         >
                                             {deleteExpense.isPending ? (
                                                 <Loader2 size={14} className="animate-spin" />
@@ -412,11 +412,11 @@ const BusinessExpenses = () => {
 
                                 {/* Rejection reason */}
                                 {expense.status === 'REJECTED' && expense.rejectionReason && (
-                                    <div className="mt-3 bg-red-50 border border-red-100 rounded-lg p-3">
-                                        <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-1">
+                                    <div className="mt-3 bg-[#283852]/10 border border-gray-200 rounded-lg p-3">
+                                        <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider mb-1">
                                             {t('businessExpenses.rejectionReason')}
                                         </p>
-                                        <p className="text-xs text-red-600">{expense.rejectionReason}</p>
+                                        <p className="text-xs text-[#283852]">{expense.rejectionReason}</p>
                                     </div>
                                 )}
                             </div>

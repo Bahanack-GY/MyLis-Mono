@@ -15,9 +15,9 @@ import type { Sanction, SanctionSeverity } from '../api/sanctions/types';
 /* ─── Helpers ──────────────────────────────────────────── */
 
 const SEVERITY_STYLES: Record<SanctionSeverity, { bg: string; text: string; border: string }> = {
-    LEGER: { bg: 'bg-yellow-50', text: 'text-yellow-600', border: 'border-yellow-200' },
-    MOYEN: { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-200' },
-    GRAVE: { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-200' },
+    LEGER: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    MOYEN: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    GRAVE: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
 };
 
 const TYPE_ICONS: Record<string, string> = {

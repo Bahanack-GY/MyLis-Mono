@@ -57,11 +57,11 @@ const fmtDate = (d: string | undefined) => {
 /* ─── Project Detail Modal ───────────────────────────────── */
 
 const TASK_STATE_STYLES: Record<string, { dot: string; text: string }> = {
-    COMPLETED: { dot: 'bg-green-400', text: 'text-green-600' },
-    REVIEWED: { dot: 'bg-green-400', text: 'text-green-600' },
+    COMPLETED: { dot: 'bg-[#283852]', text: 'text-[#283852]' },
+    REVIEWED: { dot: 'bg-[#283852]', text: 'text-[#283852]' },
     IN_PROGRESS: { dot: 'bg-[#33cbcc]', text: 'text-[#33cbcc]' },
     TODO: { dot: 'bg-gray-300', text: 'text-gray-500' },
-    BLOCKED: { dot: 'bg-red-400', text: 'text-red-500' },
+    BLOCKED: { dot: 'bg-[#283852]', text: 'text-[#283852]' },
 };
 
 const ProjectDetailModal = ({
@@ -378,29 +378,30 @@ const Projects = () => {
             (apiProjects || []).map((p: ApiProject) => {
                 const tasks = p.tasks || [];
                 const tasksDone = tasks.filter(
-                    (t) =>
-                        t.state === 'COMPLETED' || t.state === 'REVIEWED',
+                    (t) => t.state === 'COMPLETED' || t.state === 'REVIEWED',
                 ).length;
-                const allDone = tasks.length > 0 && tasksDone === tasks.length;
+                const milestones = p.milestones || [];
+                const milestonesDone = milestones.filter(m => m.completedAt != null).length;
+                const progress = milestones.length > 0
+                    ? Math.round((milestonesDone / milestones.length) * 100)
+                    : (tasks.length > 0 ? Math.round((tasksDone / tasks.length) * 100) : 0);
 
                 let status: ProjectStatus = 'active';
-                if (allDone && tasks.length > 0) status = 'completed';
-                else if (
-                    p.endDate &&
-                    new Date(p.endDate) < new Date() &&
-                    !allDone
-                )
-                    status = 'overdue';
+                if (milestones.length > 0) {
+                    if (milestones.every(m => m.completedAt != null)) status = 'completed';
+                    else if (p.endDate && new Date(p.endDate) < new Date()) status = 'overdue';
+                } else {
+                    const allDone = tasks.length > 0 && tasksDone === tasks.length;
+                    if (allDone && tasks.length > 0) status = 'completed';
+                    else if (p.endDate && new Date(p.endDate) < new Date() && !allDone) status = 'overdue';
+                }
 
                 return {
                     id: p.id,
                     name: p.name,
                     description: p.description || '',
                     status,
-                    progress:
-                        tasks.length > 0
-                            ? Math.round((tasksDone / tasks.length) * 100)
-                            : 0,
+                    progress,
                     startDate: p.startDate || '',
                     endDate: p.endDate || '',
                     department: p.department?.name || '',

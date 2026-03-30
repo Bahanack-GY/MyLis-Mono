@@ -16,13 +16,13 @@ export const STAGE_ORDER: Record<SaleStage, number> = {
 };
 
 export const STAGE_COLORS: Record<SaleStage, { bg: string; text: string; border: string }> = {
-    PROSPECTION: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-300' },
-    QUALIFICATION: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-300' },
-    PROPOSITION: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-300' },
-    NEGOCIATION: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' },
-    CLOSING: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-300' },
-    GAGNE: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-300' },
-    PERDU: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-300' },
+    PROSPECTION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    QUALIFICATION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    PROPOSITION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    NEGOCIATION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    CLOSING: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-200' },
+    GAGNE: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-200' },
+    PERDU: { bg: 'bg-gray-100', text: 'text-gray-400', border: 'border-gray-200' },
 };
 
 /**
@@ -74,7 +74,7 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
                 className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm bg-white rounded-2xl shadow-2xl z-[70] overflow-hidden"
             >
                 {/* Header stripe */}
-                <div className={`h-1.5 ${isLost ? 'bg-red-400' : isWon ? 'bg-green-400' : 'bg-[#33cbcc]'}`} />
+                <div className={`h-1.5 ${isLost ? 'bg-[#283852]' : isWon ? 'bg-[#33cbcc]' : 'bg-[#33cbcc]'}`} />
 
                 <div className="p-6">
                     {/* Title */}
@@ -97,7 +97,7 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
                         <div className={`flex-1 text-center px-3 py-2.5 rounded-xl border text-xs font-semibold ${fromColors.bg} ${fromColors.text} ${fromColors.border}`}>
                             {t(`commercial.pipeline.stages.${from}`)}
                         </div>
-                        <ArrowRight size={18} className={allowed ? 'text-gray-400 shrink-0' : 'text-red-300 shrink-0'} />
+                        <ArrowRight size={18} className={allowed ? 'text-gray-400 shrink-0' : 'text-gray-300 shrink-0'} />
                         <div className={`flex-1 text-center px-3 py-2.5 rounded-xl border text-xs font-semibold ${toColors.bg} ${toColors.text} ${toColors.border} ${!allowed ? 'opacity-40' : ''}`}>
                             {t(`commercial.pipeline.stages.${to}`)}
                         </div>
@@ -105,25 +105,25 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
 
                     {/* Message */}
                     {!allowed ? (
-                        <div className="flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-xl p-3 mb-5">
-                            <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
-                            <p className="text-xs text-red-600">
+                        <div className="flex items-start gap-2.5 bg-[#283852]/10 border border-gray-200 rounded-xl p-3 mb-5">
+                            <AlertTriangle size={16} className="text-[#283852] shrink-0 mt-0.5" />
+                            <p className="text-xs text-[#283852]">
                                 {from === 'GAGNE' || from === 'PERDU'
                                     ? t('commercial.stageModal.lockedMsg', 'Ce lead est verrouillé et ne peut plus être modifié.')
                                     : t('commercial.stageModal.backwardMsg', 'Il n\'est pas possible de revenir à un stade précédent.')}
                             </p>
                         </div>
                     ) : isLost ? (
-                        <div className="flex items-start gap-2.5 bg-red-50 border border-red-100 rounded-xl p-3 mb-5">
-                            <AlertTriangle size={16} className="text-red-400 shrink-0 mt-0.5" />
-                            <p className="text-xs text-red-600">
+                        <div className="flex items-start gap-2.5 bg-[#283852]/10 border border-gray-200 rounded-xl p-3 mb-5">
+                            <AlertTriangle size={16} className="text-[#283852] shrink-0 mt-0.5" />
+                            <p className="text-xs text-[#283852]">
                                 {t('commercial.stageModal.lostWarning', 'Vous êtes sur le point de marquer ce lead comme perdu. Cette action peut être irréversible.')}
                             </p>
                         </div>
                     ) : isWon ? (
-                        <div className="flex items-start gap-2.5 bg-green-50 border border-green-100 rounded-xl p-3 mb-5">
-                            <CheckCircle2 size={16} className="text-green-500 shrink-0 mt-0.5" />
-                            <p className="text-xs text-green-700">
+                        <div className="flex items-start gap-2.5 bg-[#33cbcc]/10 border border-gray-200 rounded-xl p-3 mb-5">
+                            <CheckCircle2 size={16} className="text-[#33cbcc] shrink-0 mt-0.5" />
+                            <p className="text-xs text-[#33cbcc]">
                                 {t('commercial.stageModal.wonInfo', 'Le lead sera converti en client. Une fois gagné, le stade sera verrouillé.')}
                             </p>
                         </div>
@@ -147,9 +147,9 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
                                 disabled={isPending}
                                 className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors ${
                                     isLost
-                                        ? 'bg-red-500 hover:bg-red-600'
+                                        ? 'bg-[#283852] hover:bg-[#283852]/90'
                                         : isWon
-                                        ? 'bg-green-500 hover:bg-green-600'
+                                        ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
                                         : 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
                                 } disabled:opacity-50`}
                             >

@@ -17,6 +17,9 @@ export interface Employee {
     recruitmentDocs?: { name: string; type: string; filePath?: string }[];
     dismissed?: boolean;
     dismissedAt?: string;
+    encadreurId?: string | null;
+    encadreur?: { id: string; firstName: string; lastName: string; avatarUrl?: string } | null;
+    stagiaires?: { id: string; firstName: string; lastName: string; avatarUrl?: string }[];
     user?: { id: string; email: string; role: string };
     department?: { id: string; name: string };
     position?: { id: string; title: string };
@@ -41,6 +44,8 @@ export interface CreateEmployeeDto {
     skills?: string[];
     educationDocs?: { name: string; type: string; filePath?: string }[];
     recruitmentDocs?: { name: string; type: string; filePath?: string }[];
+    userRole?: string;
+    encadreurId?: string | null;
 }
 
 export type UpdateEmployeeDto = Partial<CreateEmployeeDto>;
@@ -86,10 +91,8 @@ export interface TransferEmployeeDto {
 export interface EmployeePromotionHistory {
     id: string;
     employeeId: string;
-    fromPositionId: string | null;
-    toPositionId: string;
-    fromPosition?: { id: string; title: string } | null;
-    toPosition: { id: string; title: string };
+    fromRole: string | null;
+    toRole: string;
     promotedByUserId: string | null;
     promotedByName: string;
     reason: string | null;
@@ -97,6 +100,6 @@ export interface EmployeePromotionHistory {
 }
 
 export interface PromoteEmployeeDto {
-    toPositionId: string;
+    toRole: string;
     reason?: string;
 }

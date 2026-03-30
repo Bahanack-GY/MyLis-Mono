@@ -41,8 +41,8 @@ import {
 /* ─── Constants ─────────────────────────────────────────── */
 
 const TYPE_COLORS: Record<string, string> = {
-    one_time: '#3b82f6',
-    subscription: '#8b5cf6',
+    one_time: '#283852',
+    subscription: '#33cbcc',
 };
 
 /* ─── Create/Edit Client Modal ──────────────────────────── */
@@ -575,7 +575,7 @@ const Clients = () => {
                                             <button
                                                 onClick={e => handleDelete(e, client.id)}
                                                 disabled={deleteClient.isPending}
-                                                className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#283852] transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
                                                 {deleteClient.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                                             </button>
@@ -607,13 +607,13 @@ const Clients = () => {
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {rev.paid > 0 && (
-                                            <span className="text-xs text-emerald-500 font-medium flex items-center gap-1">
+                                            <span className="text-xs text-[#33cbcc] font-medium flex items-center gap-1">
                                                 <TrendingUp size={10} />
                                                 {fmtCurrency(rev.paid)}
                                             </span>
                                         )}
                                         {rev.pending > 0 && (
-                                            <span className="text-xs text-amber-500 font-medium">
+                                            <span className="text-xs text-[#283852] font-medium">
                                                 {fmtCurrency(rev.pending)} pending
                                             </span>
                                         )}
@@ -671,10 +671,10 @@ const Clients = () => {
                                 <div className="col-span-1 text-sm text-gray-600 font-medium">{client.price || '—'}</div>
                                 <div className="col-span-2 flex items-center gap-3">
                                     {rev.paid > 0 && (
-                                        <span className="text-xs text-emerald-500 font-medium">{fmtCurrency(rev.paid)} paid</span>
+                                        <span className="text-xs text-[#33cbcc] font-medium">{fmtCurrency(rev.paid)} paid</span>
                                     )}
                                     {rev.pending > 0 && (
-                                        <span className="text-xs text-amber-500 font-medium">{fmtCurrency(rev.pending)} pending</span>
+                                        <span className="text-xs text-[#283852] font-medium">{fmtCurrency(rev.pending)} pending</span>
                                     )}
                                     {!rev.paid && !rev.pending && <span className="text-xs text-gray-300">—</span>}
                                 </div>
@@ -689,7 +689,7 @@ const Clients = () => {
                                         <button
                                             onClick={e => handleDelete(e, client.id)}
                                             disabled={deleteClient.isPending}
-                                            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#283852] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             {deleteClient.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                                         </button>

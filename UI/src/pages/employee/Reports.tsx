@@ -56,7 +56,7 @@ function StatusBadge({ status }: { status: string }) {
     const { t } = useTranslation();
     if (status === 'COMPLETED') {
         return (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-green-600">
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-[#33cbcc]">
                 <CheckCircle size={11} />
                 {t('reports.status.completed')}
             </span>
@@ -64,14 +64,14 @@ function StatusBadge({ status }: { status: string }) {
     }
     if (status === 'GENERATING') {
         return (
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-600">
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-[#283852]">
                 <Loader2 size={11} className="animate-spin" />
                 {t('reports.status.generating')}
             </span>
         );
     }
     return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-red-500">
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-400">
             <XCircle size={11} />
             {t('reports.status.failed')}
         </span>
@@ -134,11 +134,11 @@ function ReportCard({ report, onDelete, onExport }: {
                         {report.status === 'GENERATING' && (
                             <div className="mt-3">
                                 <div className="flex items-center justify-between mb-1">
-                                    <span className="text-[10px] text-blue-500 font-medium">{t('reports.status.generating')}…</span>
+                                    <span className="text-[10px] text-[#283852] font-medium">{t('reports.status.generating')}…</span>
                                 </div>
                                 <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                                     <div
-                                        className="h-full bg-blue-400 rounded-full"
+                                        className="h-full bg-[#283852] rounded-full"
                                         style={{
                                             width: '40%',
                                             animation: 'indeterminate 1.4s ease-in-out infinite',
@@ -188,7 +188,7 @@ function ReportCard({ report, onDelete, onExport }: {
                         )}
                         <button
                             onClick={() => onDelete(report.id)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                            className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
                         >
                             <Trash2 size={15} />
                         </button>
@@ -358,7 +358,7 @@ export default function EmployeeReports() {
 
             {/* ── Lock warning ── */}
             {isLocked && !generateReport.isPending && (
-                <div className="flex items-center gap-2 px-4 py-3 border border-amber-200 rounded-xl text-amber-700 text-sm">
+                <div className="flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-xl text-[#283852] text-sm">
                     <Clock size={16} />
                     {t('reports.lockWarning')}
                 </div>

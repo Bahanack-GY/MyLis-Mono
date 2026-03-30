@@ -41,6 +41,8 @@ export interface Task {
     transferredFromWeek?: string | null;
     startedAt?: string | null;
     completedAt?: string | null;
+    blockedAt?: string | null;
+    totalBlockedMs?: number;
     assignedToId: string;
     assignedToTeamId: string;
     projectId: string;
@@ -123,4 +125,9 @@ export interface TimeDistributionItem {
 export interface DailyHoursItem {
     date: string;
     hours: number;
+}
+
+export interface GlobalDistribution {
+    natureDistribution: { name: string; color: string; hours: number; percentage: number }[];
+    activityDistribution: { type: string; count: number; percentage: number }[];
 }

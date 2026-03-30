@@ -17,10 +17,10 @@ export class FormationsController {
         return this.formationsService.create(createFormationDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL', 'ACCOUNTANT', 'STAGIAIRE')
     @Get()
     findAll(@Request() req) {
-        if (req.user.role === 'EMPLOYEE' || req.user.role === 'COMMERCIAL' || req.user.role === 'ACCOUNTANT') {
+        if (req.user.role === 'EMPLOYEE' || req.user.role === 'COMMERCIAL' || req.user.role === 'ACCOUNTANT' || req.user.role === 'STAGIAIRE') {
             return this.formationsService.findByUserId(req.user.userId);
         }
         return this.formationsService.findAll();

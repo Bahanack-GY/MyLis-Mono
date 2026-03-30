@@ -67,7 +67,7 @@ const EmployeeDetailLayout = () => {
     }
 
     return (
-        <div className="flex h-screen bg-blue-100 overflow-hidden">
+        <div className="flex h-screen bg-gray-100 overflow-hidden">
             <EmployeeDetailSidebar
                 employee={currentEmployee}
                 activeTab={activeTab}

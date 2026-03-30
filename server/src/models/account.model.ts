@@ -1,5 +1,6 @@
 import { Column, DataType, Model, Table, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
 import { AccountCategory } from './account-category.model';
+import { Department } from './department.model';
 
 @Table({
     tableName: 'accounts',
@@ -79,4 +80,14 @@ export class Account extends Model {
         allowNull: true,
     })
     declare description: string | null;
+
+    @ForeignKey(() => Department)
+    @Column({
+        type: DataType.UUID,
+        allowNull: true,
+    })
+    declare departmentId: string | null;
+
+    @BelongsTo(() => Department)
+    declare department: Department;
 }

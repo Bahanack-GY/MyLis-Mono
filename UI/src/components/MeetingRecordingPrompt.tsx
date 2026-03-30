@@ -177,12 +177,12 @@ const MeetingRecordingPrompt = () => {
                     {state === 'recording' && (
                         <>
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
-                                    <span className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+                                <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center shrink-0">
+                                    <span className="w-3 h-3 rounded-full bg-[#283852] animate-pulse" />
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-800">Recording…</p>
-                                    <p className="text-xs text-red-500 font-mono tabular-nums">{formatElapsed(elapsed)}</p>
+                                    <p className="text-xs text-[#283852] font-mono tabular-nums">{formatElapsed(elapsed)}</p>
                                 </div>
                                 <div className="ml-auto">
                                     <p className="text-[10px] text-gray-400 text-right truncate max-w-[100px]">{activeMeetingTitle}</p>
@@ -190,7 +190,7 @@ const MeetingRecordingPrompt = () => {
                             </div>
                             <button
                                 onClick={stopRecording}
-                                className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors"
+                                className="w-full flex items-center justify-center gap-2 bg-[#283852] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#283852]/90 transition-colors"
                             >
                                 <Square size={13} />
                                 Stop & Upload
@@ -210,8 +210,8 @@ const MeetingRecordingPrompt = () => {
 
                     {state === 'done' && (
                         <div className="text-center py-3">
-                            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mx-auto mb-3">
-                                <CheckCircle size={20} className="text-emerald-500" />
+                            <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center mx-auto mb-3">
+                                <CheckCircle size={20} className="text-[#33cbcc]" />
                             </div>
                             <p className="text-sm font-semibold text-gray-800">Minutes Generated</p>
                             <p className="text-xs text-gray-500 mt-1">Report saved to the meeting record</p>

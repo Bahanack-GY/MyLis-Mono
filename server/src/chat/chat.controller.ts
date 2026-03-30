@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Query, UseGuards, Request, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Query, UseGuards, Request, UseInterceptors, UploadedFiles, ForbiddenException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -9,7 +9,7 @@ import { Roles } from '../auth/roles.decorator';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
 @Controller('chat')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class ChatController {
@@ -46,6 +46,9 @@ export class ChatController {
         @Param('userId') targetUserId: string,
         @Request() req,
     ) {
+        const allowed = await this.chatService.isAllowedDM(req.user.userId, targetUserId);
+        if (!allowed) throw new ForbiddenException('Stagiaires can only message their encadreur');
+
         const { channel, created } = await this.chatService.getOrCreateDM(
             req.user.userId,
             targetUserId,
@@ -72,7 +75,7 @@ export class ChatController {
 
     @Get('users')
     getUsers(@Request() req) {
-        return this.chatService.getUsers(req.user.userId);
+        return this.chatService.getUsers(req.user.userId, req.user.role);
     }
 
     @Post('upload')

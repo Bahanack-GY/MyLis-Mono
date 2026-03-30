@@ -14,7 +14,7 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
-const COLORS = ['#33cbcc', '#283852', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
+const COLORS = ['#33cbcc', '#283852', '#33cbcc99', '#28385280', '#33cbcc50'];
 
 interface ChartData {
     name: string;
@@ -50,7 +50,7 @@ export const RevenueExpensesChart = ({ data }: { data: MonthlyData[] }) => (
             />
             <Legend wrapperStyle={{ fontSize: '14px' }} />
             <Bar dataKey="revenue" fill="#33cbcc" name="Revenus" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expenses" fill="#ef4444" name="Charges" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="expenses" fill="#283852" name="Charges" radius={[4, 4, 0, 0]} />
         </BarChart>
     </ResponsiveContainer>
 );
@@ -131,8 +131,8 @@ export const BudgetVarianceChart = ({ data }: { data: Array<{ name: string; budg
                 }}
             />
             <Legend wrapperStyle={{ fontSize: '14px' }} />
-            <Bar dataKey="budgeted" fill="#10b981" name="Budgété" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="actual" fill="#f59e0b" name="Réalisé" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="budgeted" fill="#33cbcc" name="Budgété" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="actual" fill="#283852" name="Réalisé" radius={[4, 4, 0, 0]} />
         </BarChart>
     </ResponsiveContainer>
 );

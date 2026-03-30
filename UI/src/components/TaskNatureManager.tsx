@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Pencil, Trash2, Check, Loader2, Tag } from 'lucide-react';
 import { useTaskNatures, useCreateTaskNature, useUpdateTaskNature, useDeleteTaskNature } from '../api/task-natures/hooks';
 
-const PRESET_COLORS = ['#33cbcc', '#283852', '#ef4444', '#f59e0b', '#22c55e', '#8b5cf6', '#ec4899', '#6366f1'];
+const PRESET_COLORS = ['#33cbcc', '#283852', '#33cbcc99', '#28385280', '#33cbcc50', '#283852', '#33cbcc', '#283852'];
 
 const TaskNatureManager = ({ onClose }: { onClose: () => void }) => {
     const { t } = useTranslation();
@@ -179,7 +179,7 @@ const TaskNatureManager = ({ onClose }: { onClose: () => void }) => {
                                                 onClick={() => deleteNature.mutate(nature.id)}
                                                 disabled={deleteNature.isPending}
                                                 aria-label={`${t('common.delete', 'Delete')} ${nature.name}`}
-                                                className="p-1.5 rounded-lg hover:bg-white text-gray-400 hover:text-red-500 transition-colors"
+                                                className="p-1.5 rounded-lg hover:bg-white text-gray-400 hover:text-[#283852] transition-colors"
                                             >
                                                 <Trash2 size={13} aria-hidden="true" />
                                             </button>

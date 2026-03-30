@@ -13,6 +13,15 @@ import type { Project } from '../api/projects/types';
 
 export type ProjectStatus = 'active' | 'completed' | 'on_hold' | 'overdue';
 
+export interface ProjectMilestoneData {
+    id: string;
+    title: string;
+    description?: string;
+    dueDate?: string;
+    completedAt: string | null;
+    order: number;
+}
+
 export interface ProjectData {
     id: string;
     name: string;
@@ -25,10 +34,13 @@ export interface ProjectData {
     client: string;
     tasksTotal: number;
     tasksDone: number;
+    milestonesTotal: number;
+    milestonesDone: number;
     budget: number;
     revenue: number;
     services: { id: string; name: string; price?: number; duration?: string }[];
     members: { id: string; firstName: string; lastName: string; avatarUrl: string }[];
+    milestones: ProjectMilestoneData[];
     tasks: {
         id: string;
         title: string;
@@ -42,7 +54,16 @@ export interface ProjectData {
     }[];
 }
 
-function deriveStatus(endDate?: string, tasks?: { state: string }[]): ProjectStatus {
+function deriveStatus(endDate?: string, milestones?: { completedAt: string | null }[], tasks?: { state: string }[]): ProjectStatus {
+    // Use milestones for status if any are defined
+    const ms = milestones || [];
+    if (ms.length > 0) {
+        const allDone = ms.every(m => m.completedAt != null);
+        if (allDone) return 'completed';
+        if (endDate && new Date(endDate) < new Date()) return 'overdue';
+        return 'active';
+    }
+    // Fall back to task-based status when no milestones
     const t = tasks || [];
     const allDone = t.length > 0 && t.every(tk => tk.state === 'COMPLETED' || tk.state === 'REVIEWED');
     if (allDone && t.length > 0) return 'completed';
@@ -297,7 +318,7 @@ const ProjectDetailLayout = () => {
 
     if (isLoading) {
         return (
-            <div className="flex h-screen bg-blue-100 items-center justify-center">
+            <div className="flex h-screen bg-gray-100 items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
@@ -309,19 +330,27 @@ const ProjectDetailLayout = () => {
 
     const tasks = apiProject.tasks || [];
     const tasksDone = tasks.filter(t => t.state === 'COMPLETED' || t.state === 'REVIEWED').length;
+    const milestones = apiProject.milestones || [];
+    const milestonesDone = milestones.filter(m => m.completedAt != null).length;
+    const progress = milestones.length > 0
+        ? Math.round((milestonesDone / milestones.length) * 100)
+        : (tasks.length > 0 ? Math.round((tasksDone / tasks.length) * 100) : 0);
 
     const project: ProjectData = {
         id: apiProject.id,
         name: apiProject.name,
         description: apiProject.description || '',
-        status: deriveStatus(apiProject.endDate, tasks),
-        progress: tasks.length > 0 ? Math.round((tasksDone / tasks.length) * 100) : 0,
+        status: deriveStatus(apiProject.endDate, milestones, tasks),
+        progress,
         startDate: apiProject.startDate || '',
         endDate: apiProject.endDate || '',
         department: apiProject.department?.name || '',
         client: apiProject.client?.name || '',
         tasksTotal: tasks.length,
         tasksDone,
+        milestonesTotal: milestones.length,
+        milestonesDone,
+        milestones,
         budget: apiProject.budget || 0,
         revenue: apiProject.revenue || 0,
         services: apiProject.services || [],
@@ -330,7 +359,7 @@ const ProjectDetailLayout = () => {
     };
 
     return (
-        <div className="flex h-screen bg-blue-100 overflow-hidden">
+        <div className="flex h-screen bg-gray-100 overflow-hidden">
             <ProjectDetailSidebar
                 project={project}
                 activeTab={activeTab}

@@ -3,6 +3,7 @@ export interface Department {
     name: string;
     description?: string;
     headId?: string | null;
+    defaultTargetRevenue?: number | null;
     head?: { id: string; firstName: string; lastName: string; avatarUrl: string } | null;
     employees?: { id: string; firstName: string; lastName: string; avatarUrl: string; position?: { title: string } }[];
     clients?: { id: string; name: string }[];
@@ -14,6 +15,7 @@ export interface CreateDepartmentDto {
     name: string;
     description?: string;
     headId?: string | null;
+    defaultTargetRevenue?: number | null;
 }
 
 export interface DepartmentGoal {
@@ -34,9 +36,33 @@ export interface UpdateDepartmentDto {
     name?: string;
     description?: string;
     headId?: string | null;
+    defaultTargetRevenue?: number | null;
 }
 
 export type UpdateDepartmentGoalDto = Partial<Omit<CreateDepartmentGoalDto, 'departmentId'>>;
+
+export interface DepartmentMonthlyTarget {
+    id: string;
+    departmentId: string;
+    year: number;
+    month: number;
+    targetRevenue: number;
+}
+
+export interface MonthlyStatRow {
+    month: number;
+    targetRevenue: number;
+    actualRevenue: number;
+    hasExplicitTarget: boolean;
+    usingDefault: boolean;
+}
+
+export interface UpsertMonthlyTargetDto {
+    departmentId: string;
+    year: number;
+    month: number;
+    targetRevenue: number;
+}
 
 export interface DepartmentService {
     id: string;

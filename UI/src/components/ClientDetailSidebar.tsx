@@ -23,8 +23,8 @@ interface ClientDetailSidebarProps {
 }
 
 const TYPE_BADGE: Record<string, { bg: string; text: string; label: string }> = {
-    subscription: { bg: 'bg-violet-500/20', text: 'text-violet-400', label: 'Subscription' },
-    one_time: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'One-time' },
+    subscription: { bg: 'bg-[#33cbcc]/20', text: 'text-[#33cbcc]', label: 'Subscription' },
+    one_time: { bg: 'bg-[#283852]/20', text: 'text-white', label: 'One-time' },
 };
 
 const ClientDetailSidebar = ({ client, activeTab, onTabChange, isOpen, setIsOpen }: ClientDetailSidebarProps) => {

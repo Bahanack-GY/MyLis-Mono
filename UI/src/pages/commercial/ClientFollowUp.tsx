@@ -19,12 +19,12 @@ const LEDGER_MIN_ROWS = 20;
 
 const getHealthBadgeStyles = (status: HealthStatus) => {
     const styles = {
-        HEALTHY: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle2, border: 'border-green-200' },
-        GOOD: { bg: 'bg-blue-100', text: 'text-blue-700', icon: CheckCircle2, border: 'border-blue-200' },
-        NEEDS_FOLLOWUP: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: Clock, border: 'border-yellow-200' },
-        ATTENTION_NEEDED: { bg: 'bg-orange-100', text: 'text-orange-700', icon: AlertCircle, border: 'border-orange-200' },
-        AT_RISK: { bg: 'bg-red-100', text: 'text-red-700', icon: AlertCircle, border: 'border-red-200' },
-        NEW: { bg: 'bg-purple-100', text: 'text-purple-700', icon: TrendingUp, border: 'border-purple-200' },
+        HEALTHY: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: CheckCircle2, border: 'border-gray-200' },
+        GOOD: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: CheckCircle2, border: 'border-gray-200' },
+        NEEDS_FOLLOWUP: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Clock, border: 'border-gray-200' },
+        ATTENTION_NEEDED: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: AlertCircle, border: 'border-gray-200' },
+        AT_RISK: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: AlertCircle, border: 'border-gray-200' },
+        NEW: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: TrendingUp, border: 'border-gray-200' },
     };
     return styles[status] || styles.NEW;
 };
@@ -382,9 +382,9 @@ export default function ClientFollowUp() {
                     ) : (
                         <>
                             {/* Client Info Header */}
-                            <div className="mx-4 mt-4 border border-orange-200 rounded-xl overflow-hidden">
-                                <div className="bg-orange-50 px-4 py-2 flex items-center justify-between">
-                                    <h3 className="text-sm font-semibold text-orange-700 uppercase tracking-wide">
+                            <div className="mx-4 mt-4 border border-gray-200 rounded-xl overflow-hidden">
+                                <div className="bg-[#283852]/10 px-4 py-2 flex items-center justify-between">
+                                    <h3 className="text-sm font-semibold text-[#283852] uppercase tracking-wide">
                                         {t('commercial.followUp.clientInfo')}
                                     </h3>
                                     {clientHealth && (() => {
@@ -472,7 +472,7 @@ export default function ClientFollowUp() {
                                     <div className="mx-4 mt-4 mb-4 overflow-x-auto">
                                 <table className="w-full text-sm border-collapse min-w-[800px]">
                                     <thead>
-                                        <tr className="bg-orange-50 border border-gray-300">
+                                        <tr className="bg-[#283852]/10 border border-gray-300">
                                             <th className="px-2 py-2 border border-gray-300 text-left font-semibold text-gray-700 whitespace-nowrap">
                                                 {t('commercial.followUp.table.dateFacture')}
                                             </th>
@@ -538,7 +538,7 @@ export default function ClientFollowUp() {
                                                         : ''}
                                                 </td>
                                                 <td className={`px-2 py-1.5 border border-gray-200 text-right whitespace-nowrap font-medium ${
-                                                    row.solde < 0 ? 'text-red-600' : 'text-gray-800'
+                                                    row.solde < 0 ? 'text-[#283852]' : 'text-gray-800'
                                                 }`}>
                                                     {formatFCFA(row.solde)}
                                                 </td>
@@ -553,7 +553,7 @@ export default function ClientFollowUp() {
                                             </tr>
                                         ))}
                                         {/* Totals Row */}
-                                        <tr className="bg-orange-50 border-2 border-gray-400 font-bold">
+                                        <tr className="bg-[#283852]/10 border-2 border-gray-400 font-bold">
                                             <td className="px-2 py-2 border border-gray-300" colSpan={6}>
                                                 {t('commercial.followUp.table.total')}
                                             </td>
@@ -564,7 +564,7 @@ export default function ClientFollowUp() {
                                                 {statement ? formatFCFA(statement.totals.paiements) : '0'}
                                             </td>
                                             <td className={`px-2 py-2 border border-gray-300 text-right whitespace-nowrap ${
-                                                (statement?.totals.solde ?? 0) < 0 ? 'text-red-600' : ''
+                                                (statement?.totals.solde ?? 0) < 0 ? 'text-[#283852]' : ''
                                             }`}>
                                                 {statement ? formatFCFA(statement.totals.solde) : '0'}
                                             </td>
@@ -645,7 +645,7 @@ export default function ClientFollowUp() {
                                                 {formatFCFA(item.paiements)}
                                             </td>
                                             <td className={`px-3 py-2 text-right whitespace-nowrap font-medium ${
-                                                item.solde < 0 ? 'text-red-600' : 'text-gray-800'
+                                                item.solde < 0 ? 'text-[#283852]' : 'text-gray-800'
                                             }`}>
                                                 {formatFCFA(item.solde)}
                                             </td>
@@ -673,7 +673,7 @@ export default function ClientFollowUp() {
                                                 {formatFCFA(salesSummary.totals.paiements)}
                                             </td>
                                             <td className={`px-3 py-2 text-right whitespace-nowrap ${
-                                                salesSummary.totals.solde < 0 ? 'text-red-600' : 'text-gray-800'
+                                                salesSummary.totals.solde < 0 ? 'text-[#283852]' : 'text-gray-800'
                                             }`}>
                                                 {formatFCFA(salesSummary.totals.solde)}
                                             </td>

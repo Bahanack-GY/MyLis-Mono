@@ -96,7 +96,7 @@ const DepartmentDetailLayout = () => {
     }
 
     return (
-        <div className="flex h-screen bg-blue-100 overflow-hidden">
+        <div className="flex h-screen bg-gray-100 overflow-hidden">
             <DepartmentDetailSidebar
                 department={department}
                 activeTab={activeTab}

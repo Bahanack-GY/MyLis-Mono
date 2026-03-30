@@ -18,11 +18,13 @@ export class ExpensesController {
     @Get()
     findAll(
         @Query('projectId') projectId?: string,
+        @Query('departmentId') departmentId?: string,
         @Query('page') page?: string,
         @Query('limit') limit?: string,
     ) {
         return this.expensesService.findAll(
             projectId,
+            departmentId,
             page ? parseInt(page) : 1,
             limit ? parseInt(limit) : 10,
         );

@@ -27,9 +27,9 @@ import { UserDemandsSkeleton } from '../../components/Skeleton';
 type DemandStatusKey = 'PENDING' | 'VALIDATED' | 'REJECTED';
 
 const STATUS_BG: Record<DemandStatusKey, string> = {
-    PENDING: 'bg-amber-50 text-amber-600',
-    VALIDATED: 'bg-green-50 text-green-600',
-    REJECTED: 'bg-red-50 text-red-600',
+    PENDING: 'bg-[#283852]/10 text-[#283852]/70',
+    VALIDATED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
+    REJECTED: 'bg-gray-100 text-gray-400',
 };
 
 const STATUS_ICON: Record<DemandStatusKey, typeof Clock> = {
@@ -40,9 +40,9 @@ const STATUS_ICON: Record<DemandStatusKey, typeof Clock> = {
 
 const IMPORTANCE_COLORS: Record<DemandImportance, string> = {
     BARELY: 'bg-gray-100 text-gray-500',
-    IMPORTANT: 'bg-blue-50 text-blue-600',
-    VERY_IMPORTANT: 'bg-orange-50 text-orange-600',
-    URGENT: 'bg-red-50 text-red-600',
+    IMPORTANT: 'bg-[#283852]/10 text-[#283852]',
+    VERY_IMPORTANT: 'bg-[#283852]/10 text-[#283852]',
+    URGENT: 'bg-[#283852]/10 text-[#283852]',
 };
 
 const IMPORTANCE_OPTIONS: DemandImportance[] = ['BARELY', 'IMPORTANT', 'VERY_IMPORTANT', 'URGENT'];
@@ -265,7 +265,7 @@ const CreateDemandModal = ({ onClose }: { onClose: () => void }) => {
                                                 type="button"
                                                 onClick={() => removeItem(index)}
                                                 disabled={items.length === 1}
-                                                className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                                className="p-2 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                             >
                                                 <Trash2 size={14} />
                                             </button>
@@ -280,7 +280,7 @@ const CreateDemandModal = ({ onClose }: { onClose: () => void }) => {
                                                 <button
                                                     type="button"
                                                     onClick={() => handleItemImage(index, null)}
-                                                    className="absolute top-1 right-1 p-1 bg-white/90 rounded text-gray-500 hover:text-red-500 transition-colors shadow-sm"
+                                                    className="absolute top-1 right-1 p-1 bg-white/90 rounded text-gray-500 hover:text-[#283852] transition-colors shadow-sm"
                                                 >
                                                     <X size={12} />
                                                 </button>
@@ -318,13 +318,13 @@ const CreateDemandModal = ({ onClose }: { onClose: () => void }) => {
                     <div>
                         <p className="text-sm font-semibold text-gray-700 mb-2">{t('demands.create.proforma')}</p>
                         {proformaFile ? (
-                            <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-xl">
-                                <FileText size={18} className="text-blue-500" />
-                                <span className="text-sm text-blue-700 font-medium flex-1 truncate">{proformaFile.name}</span>
+                            <div className="flex items-center gap-3 p-3 bg-[#283852]/10 border border-gray-200 rounded-xl">
+                                <FileText size={18} className="text-[#283852]" />
+                                <span className="text-sm text-[#283852] font-medium flex-1 truncate">{proformaFile.name}</span>
                                 <button
                                     type="button"
                                     onClick={() => setProformaFile(null)}
-                                    className="p-1.5 rounded-lg text-blue-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                    className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
                                 >
                                     <X size={14} />
                                 </button>
@@ -462,7 +462,7 @@ const Demands = () => {
                 {(searchQuery || importanceFilter || statusFilter !== 'ALL') && (
                     <button
                         onClick={() => { setSearchQuery(''); setStatusFilter('ALL'); setImportanceFilter(''); }}
-                        className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:bg-red-50 hover:border-red-200 text-gray-400 hover:text-red-500 transition-colors"
+                        className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:bg-[#283852]/10 hover:border-gray-200 text-gray-400 hover:text-[#283852] transition-colors"
                         title={t('demands.clearFilters', 'Clear all filters')}
                     >
                         <X size={20} />
@@ -564,7 +564,7 @@ const Demands = () => {
                                             {itemCount} {t('demands.items')}
                                         </span>
                                         {demand.proformaUrl && (
-                                            <span className="text-xs text-blue-500 flex items-center gap-1">
+                                            <span className="text-xs text-[#283852] flex items-center gap-1">
                                                 <FileText size={10} />
                                                 {t('demands.proforma')}
                                             </span>
@@ -600,8 +600,8 @@ const Demands = () => {
 
                                     {/* Rejection reason */}
                                     {demand.status === 'REJECTED' && demand.rejectionReason && (
-                                        <div className="mt-3 bg-red-50 border border-red-100 rounded-lg p-3">
-                                            <p className="text-xs text-red-600">{demand.rejectionReason}</p>
+                                        <div className="mt-3 bg-[#283852]/10 border border-gray-200 rounded-lg p-3">
+                                            <p className="text-xs text-[#283852]">{demand.rejectionReason}</p>
                                         </div>
                                     )}
                                 </div>

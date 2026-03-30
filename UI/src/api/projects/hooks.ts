@@ -82,3 +82,54 @@ export const useMyProjectDetail = (id: string) =>
         queryFn: () => projectsApi.getMyProjectDetail(id),
         enabled: !!id,
     });
+
+export const useCreateMilestone = (projectId: string) => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (dto: { title: string; description?: string; dueDate?: string; order?: number }) =>
+            projectsApi.createMilestone(projectId, dto),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: projectKeys.detail(projectId) });
+            qc.invalidateQueries({ queryKey: projectKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useUpdateMilestone = (projectId: string) => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ milestoneId, dto }: { milestoneId: string; dto: { title?: string; description?: string; dueDate?: string } }) =>
+            projectsApi.updateMilestone(projectId, milestoneId, dto),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: projectKeys.detail(projectId) });
+            qc.invalidateQueries({ queryKey: projectKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useToggleMilestone = (projectId: string) => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (milestoneId: string) => projectsApi.toggleMilestone(projectId, milestoneId),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: projectKeys.detail(projectId) });
+            qc.invalidateQueries({ queryKey: projectKeys.all });
+            qc.invalidateQueries({ queryKey: projectKeys.myProjects });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useDeleteMilestone = (projectId: string) => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (milestoneId: string) => projectsApi.deleteMilestone(projectId, milestoneId),
+        onSuccess: () => {
+            qc.invalidateQueries({ queryKey: projectKeys.detail(projectId) });
+            qc.invalidateQueries({ queryKey: projectKeys.all });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};

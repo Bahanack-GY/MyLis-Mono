@@ -61,7 +61,7 @@ import {
     Star,
     ArrowRight,
 } from 'lucide-react';
-import { useEmployee, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword, useEmployeeTransferHistory, useEmployeeReports, usePromoteEmployee, useEmployeePromotionHistory } from '../api/employees/hooks';
+import { useEmployee, useEmployees, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword, useEmployeeTransferHistory, useEmployeeReports, usePromoteEmployee, useEmployeePromotionHistory } from '../api/employees/hooks';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextDisplay from '../components/RichTextDisplay';
 import TransferEmployeeModal from '../components/modals/TransferEmployeeModal';
@@ -149,7 +149,9 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
     const changePassword = useChangeEmployeePassword();
     const { data: apiDepartments } = useDepartments();
     const { data: apiPositions } = usePositions();
+    const { data: allEmployees } = useEmployees();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const isStagiaire = employee.user?.role === 'STAGIAIRE';
 
     const [newPassword, setNewPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -168,6 +170,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
         positionId: employee.positionId || '',
         skills: [...(employee.skills || [])],
         avatarUrl: employee.avatarUrl || '',
+        encadreurId: employee.encadreurId || '',
     });
 
     const [skillInput, setSkillInput] = useState('');
@@ -238,6 +241,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                 positionId: form.positionId || undefined,
                 skills: form.skills,
                 avatarUrl: form.avatarUrl || undefined,
+                ...(isStagiaire && { encadreurId: form.encadreurId || null }),
             },
         }, { onSuccess: () => onClose() });
     };
@@ -319,7 +323,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                 <button
                                     type="button"
                                     onClick={() => { setAvatarPreview(''); setForm(prev => ({ ...prev, avatarUrl: '' })); }}
-                                    className="text-xs text-red-400 hover:text-red-500 transition-colors"
+                                    className="text-xs text-[#283852]/60 hover:text-[#283852] transition-colors"
                                 >
                                     {t('employees.edit.removePhoto')}
                                 </button>
@@ -448,7 +452,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                             </label>
                             <select
                                 value={form.departmentId}
-                                onChange={e => setForm(prev => ({ ...prev, departmentId: e.target.value }))}
+                                onChange={e => setForm(prev => ({ ...prev, departmentId: e.target.value, encadreurId: '' }))}
                                 className={inputCls + ' appearance-none cursor-pointer'}
                             >
                                 <option value="">{t('employees.create.departmentPlaceholder')}</option>
@@ -474,6 +478,33 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                             </select>
                         </div>
                     </div>
+
+                    {/* Encadreur selector (STAGIAIRE only) */}
+                    {isStagiaire && (
+                        <div>
+                            <label className={labelCls}>
+                                <User size={12} />
+                                Encadreur
+                            </label>
+                            <select
+                                value={form.encadreurId}
+                                onChange={e => setForm(prev => ({ ...prev, encadreurId: e.target.value }))}
+                                className={inputCls + ' appearance-none cursor-pointer'}
+                            >
+                                <option value="">Sélectionner un encadreur</option>
+                                {(allEmployees || [])
+                                    .filter(e => {
+                                        if (e.dismissed) return false;
+                                        if (e.id === employee.id) return false;
+                                        if (!form.departmentId) return true;
+                                        return e.departmentId === form.departmentId;
+                                    })
+                                    .map(e => (
+                                        <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>
+                                    ))}
+                            </select>
+                        </div>
+                    )}
 
                     {/* Skills */}
                     <div className="border-t border-gray-100 pt-5">
@@ -575,7 +606,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                 {changePassword.isPending ? <Loader2 size={13} className="animate-spin" /> : <KeyRound size={13} />}
                                 {t('employees.edit.setPassword')}
                             </button>
-                            {passwordSuccess && <span className="text-xs text-green-500 font-medium">{t('employees.edit.passwordUpdated')}</span>}
+                            {passwordSuccess && <span className="text-xs text-[#33cbcc] font-medium">{t('employees.edit.passwordUpdated')}</span>}
                         </div>
                     </div>
                 </div>
@@ -722,14 +753,14 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 {/* Personal Info Card */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white rounded-2xl p-5 border border-gray-100 space-y-3.5">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-pink-50 flex items-center justify-center shrink-0"><Cake size={16} className="text-pink-500" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0"><Cake size={16} className="text-[#33cbcc]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.personalInfo.birthDate')}</p>
                             <p className="text-sm font-semibold text-gray-800">{employee.birthDate ? new Date(employee.birthDate).toLocaleDateString() : 'N/A'}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0"><BriefcaseBusiness size={16} className="text-blue-500" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><BriefcaseBusiness size={16} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.personalInfo.hireDate')}</p>
                             <p className="text-sm font-semibold text-gray-800">{employee.hireDate ? new Date(employee.hireDate).toLocaleDateString() : 'N/A'}</p>
@@ -748,21 +779,21 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 }} className="bg-white rounded-2xl p-5 border border-gray-100 space-y-3.5">
                     <h3 className="font-semibold text-gray-800 text-sm mb-1">{t('employeeDetail.contact.title')}</h3>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center shrink-0"><Phone size={16} className="text-green-500" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0"><Phone size={16} className="text-[#33cbcc]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.contact.phone')}</p>
                             <p className="text-sm font-semibold text-gray-800">{contact.phone}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0"><Mail size={16} className="text-blue-500" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><Mail size={16} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.contact.email')}</p>
                             <p className="text-sm font-semibold text-gray-800 truncate">{contact.email}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center shrink-0"><MapPin size={16} className="text-orange-500" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><MapPin size={16} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.contact.address')}</p>
                             <p className="text-sm font-semibold text-gray-800">{contact.address}</p>
@@ -812,6 +843,29 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                         ))}
                     </div>
                 </motion.div>
+
+                {/* Stagiaires Card (shown when employee is an encadreur) */}
+                {employee.stagiaires && employee.stagiaires.length > 0 && (
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="bg-white rounded-2xl p-5 border border-gray-100">
+                        <div className="flex items-center gap-2 mb-4">
+                            <GraduationCap size={16} className="text-[#33cbcc]" />
+                            <h3 className="font-semibold text-gray-800 text-sm">Stagiaires</h3>
+                            <span className="ml-auto text-[10px] font-bold bg-[#33cbcc]/10 text-[#33cbcc] px-2 py-0.5 rounded-full">{employee.stagiaires.length}</span>
+                        </div>
+                        <div className="space-y-2">
+                            {employee.stagiaires.map(s => (
+                                <div key={s.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors">
+                                    <img
+                                        src={s.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(s.firstName + '+' + s.lastName)}&background=33cbcc&color=fff`}
+                                        alt={`${s.firstName} ${s.lastName}`}
+                                        className="w-8 h-8 rounded-full border border-gray-100 object-cover shrink-0"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">{s.firstName} {s.lastName}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* Skills Card */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white rounded-2xl p-5 border border-gray-100">
@@ -917,7 +971,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                     </div>
                     <div className="flex items-baseline gap-2 mb-5">
                         <span className="text-3xl font-bold text-gray-800">{currentProductivity}%</span>
-                        <span className={`text-sm font-semibold ${productivityChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>{productivityChange >= 0 ? '+' : ''}{productivityChange}%</span>
+                        <span className={`text-sm font-semibold ${productivityChange >= 0 ? 'text-[#33cbcc]' : 'text-[#283852]'}`}>{productivityChange >= 0 ? '+' : ''}{productivityChange}%</span>
                         <span className="text-xs text-gray-400 ml-1">{t('employeeDetail.productivity.vsLastMonth')}</span>
                     </div>
                     <div className="h-[200px]">
@@ -984,7 +1038,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} onClick={() => setShowTrophiesModal(true)} className="bg-white rounded-2xl p-5 border border-gray-100 cursor-pointer hover:border-[#33cbcc]/30 transition-colors">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <Trophy size={16} className="text-amber-500" />
+                            <Trophy size={16} className="text-[#33cbcc]" />
                             <h3 className="font-semibold text-gray-800 text-sm">{t('employeeDetail.trophies.title')}</h3>
                         </div>
                         <span className="text-xs text-gray-400">{trophies.length}</span>
@@ -1009,14 +1063,14 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} onClick={() => setShowBadgesModal(true)} className="bg-white rounded-2xl p-5 border border-gray-100 cursor-pointer hover:border-[#33cbcc]/30 transition-colors">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <Award size={16} className="text-indigo-500" />
+                            <Award size={16} className="text-[#283852]" />
                             <h3 className="font-semibold text-gray-800 text-sm">{t('employeeDetail.badges.title')}</h3>
                         </div>
                         <span className="text-xs text-gray-400">{badges.length}</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
                         {badges.slice(0, 4).map(badge => (
-                            <div key={badge.id} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-600">
+                            <div key={badge.id} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium bg-[#283852]/10 text-[#283852]">
                                 {badge.image ? (
                                     <img src={badge.image} alt={badge.title} className="w-5 h-5 rounded-full object-cover" />
                                 ) : (
@@ -1040,14 +1094,14 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={e => e.stopPropagation()} className="relative bg-white rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
                             <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-2">
-                                    <Trophy size={20} className="text-amber-500" />
+                                    <Trophy size={20} className="text-[#33cbcc]" />
                                     <h2 className="text-lg font-bold text-gray-800">{t('employeeDetail.trophies.title')}</h2>
                                 </div>
                                 <button onClick={() => setShowTrophiesModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
                             </div>
                             <div className="space-y-3">
                                 {trophies.map((trophy, i) => (
-                                    <motion.div key={trophy.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center gap-4 p-3.5 rounded-xl bg-gray-50 hover:bg-amber-50/50 transition-colors">
+                                    <motion.div key={trophy.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} className="flex items-center gap-4 p-3.5 rounded-xl bg-gray-50 hover:bg-[#33cbcc]/5 transition-colors">
                                         <span className="text-2xl">{trophy.icon}</span>
                                         <div className="flex-1">
                                             <p className="text-sm font-semibold text-gray-800">{trophy.title}</p>
@@ -1069,7 +1123,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={e => e.stopPropagation()} className="relative bg-white rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
                             <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-2">
-                                    <Award size={20} className="text-indigo-500" />
+                                    <Award size={20} className="text-[#283852]" />
                                     <h2 className="text-lg font-bold text-gray-800">{t('employeeDetail.badges.title')}</h2>
                                 </div>
                                 <button onClick={() => setShowBadgesModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
@@ -1080,9 +1134,9 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                                         {badge.image ? (
                                             <img src={badge.image} alt={badge.title} className="w-12 h-12 rounded-full object-cover" />
                                         ) : (
-                                            <Award size={32} className="text-indigo-500" />
+                                            <Award size={32} className="text-[#283852]" />
                                         )}
-                                        <p className="text-xs font-semibold text-center text-indigo-600">{badge.title}</p>
+                                        <p className="text-xs font-semibold text-center text-[#283852]">{badge.title}</p>
                                     </motion.div>
                                 ))}
                             </div>
@@ -1245,13 +1299,13 @@ const EditTaskModal = ({
                     </div>
                     <div className="flex gap-4">
                         <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
-                            <AlertTriangle size={14} className="text-red-400" />
+                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                            <AlertTriangle size={14} className="text-[#283852]" />
                             <span className="text-sm text-gray-600">{t('tasksPage.urgent')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
-                            <Star size={14} className="text-amber-500" />
+                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                            <Star size={14} className="text-[#283852]" />
                             <span className="text-sm text-gray-600">{t('tasksPage.important')}</span>
                         </label>
                     </div>
@@ -1517,7 +1571,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                         {drafts.length > 1 && (
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('employeeDetail.tasks.taskNumber')} {idx + 1}</span>
-                                                <button onClick={() => removeDraftRow(idx)} className="text-gray-300 hover:text-red-400 transition-colors"><Trash2 size={14} /></button>
+                                                <button onClick={() => removeDraftRow(idx)} className="text-gray-300 hover:text-[#283852] transition-colors"><Trash2 size={14} /></button>
                                             </div>
                                         )}
                                         <input value={draft.title} onChange={e => updateDraft(idx, 'title', e.target.value)} placeholder={t('employeeDetail.tasks.titlePlaceholder')} className={inputClass} />
@@ -1604,13 +1658,13 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                         </div>
                                         <div className="flex gap-4">
                                             <label className="flex items-center gap-2 cursor-pointer">
-                                                <input type="checkbox" checked={draft.urgent} onChange={e => updateDraft(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
-                                                <AlertTriangle size={14} className="text-red-400" />
+                                                <input type="checkbox" checked={draft.urgent} onChange={e => updateDraft(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                                                <AlertTriangle size={14} className="text-[#283852]" />
                                                 <span className="text-sm text-gray-600">{t('tasksPage.urgent')}</span>
                                             </label>
                                             <label className="flex items-center gap-2 cursor-pointer">
-                                                <input type="checkbox" checked={draft.important} onChange={e => updateDraft(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
-                                                <Star size={14} className="text-amber-500" />
+                                                <input type="checkbox" checked={draft.important} onChange={e => updateDraft(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                                                <Star size={14} className="text-[#283852]" />
                                                 <span className="text-sm text-gray-600">{t('tasksPage.important')}</span>
                                             </label>
                                         </div>
@@ -1659,8 +1713,8 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                     <div className="bg-gray-50 rounded-xl p-3"><p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.tasks.time')}</p><p className="text-sm font-semibold text-gray-800 mt-0.5">{selectedTask.time || '—'}</p></div>
                                     <div className="bg-gray-50 rounded-xl p-3"><p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.tasks.assigneePlaceholder')}</p><p className="text-sm font-semibold text-gray-800 mt-0.5">{selectedTask.assignee || '—'}</p></div>
                                     <div className="bg-gray-50 rounded-xl p-3"><p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.tasks.status')}</p><p className="text-sm font-semibold mt-0.5" style={{ color: selectedTask.state === 'COMPLETED' ? '#22c55e' : '#33cbcc' }}>{selectedTask.state === 'COMPLETED' ? t('employeeDetail.tasks.done') : selectedTask.state === 'IN_PROGRESS' ? t('employeeDetail.tasks.inProgress') : t('employeeDetail.tasks.pending')}</p></div>
-                                    <div className="bg-blue-50 rounded-xl p-3 col-span-1"><p className="text-[10px] text-blue-400 uppercase tracking-wider font-medium">{t('employeeDetail.tasks.startedAt')}</p><p className="text-sm font-semibold text-gray-800 mt-0.5">{selectedTask.startedAt ? new Date(selectedTask.startedAt).toLocaleString() : '—'}</p></div>
-                                    <div className="bg-green-50 rounded-xl p-3 col-span-1"><p className="text-[10px] text-green-500 uppercase tracking-wider font-medium">{t('employeeDetail.tasks.completedAt')}</p><p className="text-sm font-semibold text-gray-800 mt-0.5">{selectedTask.completedAt ? new Date(selectedTask.completedAt).toLocaleString() : '—'}</p></div>
+                                    <div className="bg-[#283852]/10 rounded-xl p-3 col-span-1"><p className="text-[10px] text-[#283852] uppercase tracking-wider font-medium">{t('employeeDetail.tasks.startedAt')}</p><p className="text-sm font-semibold text-gray-800 mt-0.5">{selectedTask.startedAt ? new Date(selectedTask.startedAt).toLocaleString() : '—'}</p></div>
+                                    <div className="bg-[#33cbcc]/10 rounded-xl p-3 col-span-1"><p className="text-[10px] text-[#33cbcc] uppercase tracking-wider font-medium">{t('employeeDetail.tasks.completedAt')}</p><p className="text-sm font-semibold text-gray-800 mt-0.5">{selectedTask.completedAt ? new Date(selectedTask.completedAt).toLocaleString() : '—'}</p></div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold px-2 py-1 rounded" style={{ backgroundColor: `${difficultyConfig[(selectedTask.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color}15`, color: difficultyConfig[(selectedTask.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color }}>{difficultyConfig[(selectedTask.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].label}</span>
@@ -1730,17 +1784,17 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                         <span className="text-[11px] text-gray-400 flex items-center gap-1"><Clock size={11} /> {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}</span>
                                         {task.assignedTo && <span className="text-[11px] text-gray-500 font-medium">{task.assignedTo.firstName} {task.assignedTo.lastName}</span>}
                                         {task.projectId && (() => { const proj = (departmentProjects || []).find(p => p.id === task.projectId); return proj ? <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full flex items-center gap-1" style={{ backgroundColor: '#33cbcc15', color: '#33cbcc' }}><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#33cbcc' }} />{proj.name}</span> : null; })()}
-                                        {task.startedAt && <span className="text-[11px] text-blue-400 flex items-center gap-1">▶ {new Date(task.startedAt).toLocaleString()}</span>}
-                                        {task.completedAt && <span className="text-[11px] text-green-500 flex items-center gap-1">✓ {new Date(task.completedAt).toLocaleString()}</span>}
+                                        {task.startedAt && <span className="text-[11px] text-[#283852] flex items-center gap-1">▶ {new Date(task.startedAt).toLocaleString()}</span>}
+                                        {task.completedAt && <span className="text-[11px] text-[#33cbcc] flex items-center gap-1">✓ {new Date(task.completedAt).toLocaleString()}</span>}
                                     </div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 ml-10 sm:ml-0">
                                 <span className="text-[10px] font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: `${difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color}15`, color: difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color }}>{difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].label}</span>
                                 <span className="text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-0.5" style={{ backgroundColor: `${priorityConfig[task.priority || 'medium'].color}15`, color: priorityConfig[task.priority || 'medium'].color }}><Flag size={9} /> {priorityConfig[task.priority || 'medium'].label}</span>
-                                {task.urgent && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-500"><AlertTriangle size={10} />{t('tasksPage.urgent')}</span>}
-                                {task.important && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600"><Star size={10} />{t('tasksPage.important')}</span>}
-                                <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${task.state === 'COMPLETED' ? 'bg-green-50 text-green-500' : task.state === 'IN_PROGRESS' ? 'bg-[#33cbcc]/10 text-[#33cbcc]' : 'bg-gray-100 text-gray-400'}`}>
+                                {task.urgent && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]"><AlertTriangle size={10} />{t('tasksPage.urgent')}</span>}
+                                {task.important && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]"><Star size={10} />{t('tasksPage.important')}</span>}
+                                <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${task.state === 'COMPLETED' ? 'bg-[#283852] text-white' : task.state === 'IN_PROGRESS' ? 'bg-[#33cbcc]/10 text-[#33cbcc]' : 'bg-gray-100 text-gray-400'}`}>
                                     {task.state === 'COMPLETED' ? t('employeeDetail.tasks.done') : task.state === 'IN_PROGRESS' ? t('employeeDetail.tasks.inProgress') : t('employeeDetail.tasks.pending')}
                                 </span>
                                 {!task.selfAssigned && (
@@ -1754,7 +1808,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                         </button>
                                         <button
                                             onClick={e => { e.stopPropagation(); if (window.confirm(t('employeeDetail.tasks.confirmDelete'))) { deleteTaskMutation.mutate(task.id); } }}
-                                            className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                                            className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                             title={t('employeeDetail.tasks.deleteTask')}
                                         >
                                             <Trash2 size={14} />
@@ -2060,7 +2114,7 @@ const DocumentsView = ({ employee: _employee }: { employee: Employee }) => {
                         <div className="flex items-center gap-2">
                             <button className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Eye size={16} /></button>
                             <button className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download size={16} /></button>
-                            <button onClick={() => removeDoc(doc.id)} className="p-2 text-gray-300 hover:text-red-400 transition-colors rounded-lg hover:bg-red-50"><Trash2 size={16} /></button>
+                            <button onClick={() => removeDoc(doc.id)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-[#283852]/10"><Trash2 size={16} /></button>
                         </div>
                     </div>
                 ))}
@@ -2081,17 +2135,17 @@ const SANCTION_TYPE_LABELS: Record<string, string> = {
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-    LEGER: 'bg-yellow-50 text-yellow-600',
-    MOYEN: 'bg-orange-50 text-orange-600',
-    GRAVE: 'bg-red-50 text-red-600',
+    LEGER: 'bg-[#283852]/10 text-[#283852]',
+    MOYEN: 'bg-[#283852]/10 text-[#283852]',
+    GRAVE: 'bg-[#283852]/10 text-[#283852]',
 };
 
 /* ─── Frais de Vie View ──────────────────────────────── */
 
 const STATUS_STYLES: Record<string, string> = {
-    PENDING: 'bg-amber-50 text-amber-600',
-    VALIDATED: 'bg-green-50 text-green-600',
-    REJECTED: 'bg-red-50 text-red-600',
+    PENDING: 'bg-[#283852]/10 text-[#283852]/70',
+    VALIDATED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
+    REJECTED: 'bg-gray-100 text-gray-400',
 };
 
 const FraisDeVieView = ({ employee }: { employee: Employee }) => {
@@ -2113,13 +2167,13 @@ const FraisDeVieView = ({ employee }: { employee: Employee }) => {
                     <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('businessExpenses.stats.total')}</p>
                     <p className="text-2xl font-bold text-gray-800 mt-1">{expenses.length}</p>
                 </div>
-                <div className="bg-amber-50 rounded-2xl border border-amber-100 p-4">
-                    <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider">{t('businessExpenses.stats.pending')}</p>
-                    <p className="text-2xl font-bold text-amber-600 mt-1">{pending}</p>
+                <div className="bg-[#283852]/10 rounded-2xl border border-gray-200 p-4">
+                    <p className="text-[10px] font-semibold text-[#283852]/70 uppercase tracking-wider">{t('businessExpenses.stats.pending')}</p>
+                    <p className="text-2xl font-bold text-[#283852] mt-1">{pending}</p>
                 </div>
-                <div className="bg-green-50 rounded-2xl border border-green-100 p-4">
-                    <p className="text-[10px] font-semibold text-green-500 uppercase tracking-wider">{t('businessExpenses.stats.validated')}</p>
-                    <p className="text-2xl font-bold text-green-600 mt-1">{validated}</p>
+                <div className="bg-[#33cbcc]/10 rounded-2xl border border-gray-200 p-4">
+                    <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider">{t('businessExpenses.stats.validated')}</p>
+                    <p className="text-2xl font-bold text-[#33cbcc] mt-1">{validated}</p>
                 </div>
                 <div className="bg-[#33cbcc]/5 rounded-2xl border border-[#33cbcc]/15 p-4">
                     <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider">{t('businessExpenses.stats.totalAmount')}</p>
@@ -2238,7 +2292,7 @@ const SanctionsView = ({ employee }: { employee: Employee }) => {
             <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
                 {sanctions.map(s => (
                     <div key={s.id} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors group">
-                        <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0"><AlertTriangle size={20} className="text-red-400" /></div>
+                        <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center shrink-0"><AlertTriangle size={20} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-700">{t(SANCTION_TYPE_LABELS[s.type] || s.type)}</p>
                             <p className="text-[11px] text-gray-400 mt-0.5">{s.reason}{s.date ? ` \u00b7 ${new Date(s.date).toLocaleDateString()}` : ''}</p>
@@ -2250,7 +2304,7 @@ const SanctionsView = ({ employee }: { employee: Employee }) => {
                         )}
                         <button
                             onClick={() => deleteSanction.mutate(s.id)}
-                            className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all"
+                            className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#283852] transition-all"
                         >
                             <Trash2 size={16} />
                         </button>
@@ -2274,11 +2328,11 @@ const getFileUrl = (filePath: string) => {
 };
 
 const DOC_TYPE_COLORS: Record<string, string> = {
-    cv: 'bg-blue-50 text-blue-500',
-    coverLetter: 'bg-purple-50 text-purple-500',
-    id: 'bg-amber-50 text-amber-500',
-    references: 'bg-green-50 text-green-500',
-    diploma: 'bg-indigo-50 text-indigo-500',
+    cv: 'bg-[#283852]/10 text-[#283852]',
+    coverLetter: 'bg-[#283852]/10 text-[#283852]',
+    id: 'bg-[#283852]/10 text-[#283852]',
+    references: 'bg-[#33cbcc]/10 text-[#33cbcc]',
+    diploma: 'bg-[#283852]/10 text-[#283852]',
     certificate: 'bg-teal-50 text-teal-500',
     transcript: 'bg-cyan-50 text-cyan-500',
     other: 'bg-gray-100 text-gray-500',
@@ -2345,7 +2399,7 @@ const RecrutementsView = ({ employee }: { employee: Employee }) => {
             <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
                 {docs.map((doc, i) => (
                     <div key={i} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors group">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${DOC_TYPE_COLORS[doc.type] || 'bg-blue-50 text-blue-500'}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${DOC_TYPE_COLORS[doc.type] || 'bg-[#283852]/10 text-[#283852]'}`}>
                             <FileText size={20} />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -2356,12 +2410,12 @@ const RecrutementsView = ({ employee }: { employee: Employee }) => {
                             <div className="flex items-center gap-1">
                                 <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Eye size={16} /></a>
                                 <a href={getFileUrl(doc.filePath)} download className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download size={16} /></a>
-                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-rose-500 transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                             </div>
                         ) : (
                             <div className="flex items-center gap-1">
-                                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-600">{t('employeeDetail.noFile')}</span>
-                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-rose-500 transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-[#283852]/10 text-[#283852]">{t('employeeDetail.noFile')}</span>
+                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                             </div>
                         )}
                     </div>
@@ -2444,12 +2498,12 @@ const EducationView = ({ employee }: { employee: Employee }) => {
                             <div className="flex items-center gap-1">
                                 <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Eye size={16} /></a>
                                 <a href={getFileUrl(doc.filePath)} download className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download size={16} /></a>
-                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-rose-500 transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                             </div>
                         ) : (
                             <div className="flex items-center gap-1">
-                                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-600">{t('employeeDetail.noFile')}</span>
-                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-rose-500 transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                                <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-[#283852]/10 text-[#283852]">{t('employeeDetail.noFile')}</span>
+                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
                             </div>
                         )}
                     </motion.div>
@@ -2510,22 +2564,22 @@ const FormationsView = ({ employee: _employee }: { employee: Employee }) => {
             <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
                 {formations.map(f => (
                     <div key={f.id} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors group">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${f.status === 'completed' ? 'bg-green-50' : 'bg-[#33cbcc]/10'}`}>
-                            <BookOpen size={20} className={f.status === 'completed' ? 'text-green-500' : 'text-[#33cbcc]'} />
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${f.status === 'completed' ? 'bg-[#283852]' : 'bg-[#33cbcc]/10'}`}>
+                            <BookOpen size={20} className={f.status === 'completed' ? 'text-white' : 'text-[#33cbcc]'} />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-700">{f.title}</p>
                             <p className="text-[11px] text-gray-400 mt-0.5">{f.date} &middot; {f.duration}</p>
                         </div>
-                        <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${f.status === 'completed' ? 'bg-green-50 text-green-500' : 'bg-[#33cbcc]/10 text-[#33cbcc]'}`}>
+                        <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${f.status === 'completed' ? 'bg-[#283852] text-white' : 'bg-[#33cbcc]/10 text-[#33cbcc]'}`}>
                             {f.status === 'completed' ? t('employeeDetail.formations.completed') : t('employeeDetail.formations.upcoming')}
                         </span>
                         {f.status === 'upcoming' && (
-                            <button onClick={() => markCompleted(f.id)} className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-green-500 transition-all rounded-lg hover:bg-green-50" title={t('employeeDetail.formations.markComplete')}>
+                            <button onClick={() => markCompleted(f.id)} className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-[#33cbcc] transition-all rounded-lg hover:bg-[#33cbcc]/10" title={t('employeeDetail.formations.markComplete')}>
                                 <Check size={16} />
                             </button>
                         )}
-                        <button onClick={() => setFormations(prev => prev.filter(x => x.id !== f.id))} className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-red-400 transition-all rounded-lg hover:bg-red-50"><Trash2 size={16} /></button>
+                        <button onClick={() => setFormations(prev => prev.filter(x => x.id !== f.id))} className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-[#283852] transition-all rounded-lg hover:bg-[#283852]/10"><Trash2 size={16} /></button>
                     </div>
                 ))}
                 {formations.length === 0 && <p className="p-8 text-center text-gray-400 text-sm">{t('employeeDetail.emptyState')}</p>}
@@ -2830,8 +2884,8 @@ const TransferHistoryView = ({ employee }: { employee: Employee }) => {
                     )}
 
                     <div className="flex gap-4">
-                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <Repeat className="w-5 h-5 text-blue-600" />
+                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center">
+                            <Repeat className="w-5 h-5 text-[#283852]" />
                         </div>
 
                         <div className="flex-1 bg-white rounded-lg p-4 shadow-sm">
@@ -2911,9 +2965,9 @@ const ReportsView = ({ employee }: { employee: Employee }) => {
                             <div className="flex items-center gap-3 mb-2">
                                 <h3 className="font-semibold text-gray-900">{report.title}</h3>
                                 <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                                    report.status === 'COMPLETED' ? 'bg-green-50 text-green-600' :
-                                    report.status === 'GENERATING' ? 'bg-blue-50 text-blue-600' :
-                                    'bg-red-50 text-red-600'
+                                    report.status === 'COMPLETED' ? 'bg-[#283852] text-white' :
+                                    report.status === 'GENERATING' ? 'bg-[#283852]/10 text-[#283852]' :
+                                    'bg-gray-100 text-gray-400'
                                 }`}>
                                     {report.status === 'COMPLETED' ? t('employeeDetail.reports.completed') :
                                      report.status === 'GENERATING' ? t('employeeDetail.reports.generating') :
@@ -2952,25 +3006,42 @@ const ReportsView = ({ employee }: { employee: Employee }) => {
 };
 
 /* ─── Promotions View ────────────────────────────────── */
+const ROLE_LABELS: Record<string, string> = {
+    EMPLOYEE: 'Employé',
+    HEAD_OF_DEPARTMENT: 'Chef de département',
+    COMMERCIAL: 'Commercial',
+    ACCOUNTANT: 'Comptable',
+    MANAGER: 'Manager',
+};
+
+const ROLE_COLORS: Record<string, string> = {
+    EMPLOYEE: 'bg-gray-100 text-gray-700',
+    HEAD_OF_DEPARTMENT: 'bg-[#283852]/10 text-[#283852]',
+    COMMERCIAL: 'bg-[#283852]/10 text-[#283852]',
+    ACCOUNTANT: 'bg-[#283852]/10 text-[#283852]',
+    MANAGER: 'bg-teal-100 text-[#33cbcc]',
+};
+
 const PromotionsView = ({ employee }: { employee: Employee }) => {
     const { t } = useTranslation();
     const { role } = useAuth();
     const isManager = role === 'MANAGER';
-    const { data: positions = [] } = usePositions();
     const { data: history = [], isLoading } = useEmployeePromotionHistory(String(employee.id));
     const promote = usePromoteEmployee();
     const [showForm, setShowForm] = useState(false);
-    const [toPositionId, setToPositionId] = useState('');
+    const [toRole, setToRole] = useState('');
     const [reason, setReason] = useState('');
 
+    const AVAILABLE_ROLES = ['EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'ACCOUNTANT', 'MANAGER'];
+
     const handleSubmit = () => {
-        if (!toPositionId) return;
+        if (!toRole) return;
         promote.mutate(
-            { id: String(employee.id), dto: { toPositionId, reason: reason.trim() || undefined } },
+            { id: String(employee.id), dto: { toRole, reason: reason.trim() || undefined } },
             {
                 onSuccess: () => {
                     setShowForm(false);
-                    setToPositionId('');
+                    setToRole('');
                     setReason('');
                 },
             },
@@ -2987,51 +3058,51 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
                             className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb8b9] transition-colors"
                         >
                             <Plus size={15} />
-                            {t('promotions.create', 'Créer une promotion')}
+                            Promouvoir
                         </button>
                     ) : (
                         <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4">
-                            <h4 className="font-semibold text-gray-900 text-sm">{t('promotions.newPromotion', 'Nouvelle promotion')}</h4>
+                            <h4 className="font-semibold text-gray-900 text-sm">Nouvelle promotion</h4>
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                                    {t('promotions.newRole', 'Nouveau poste')} <span className="text-red-500">*</span>
+                                    Nouveau rôle <span className="text-[#283852]">*</span>
                                 </label>
                                 <select
-                                    value={toPositionId}
-                                    onChange={e => setToPositionId(e.target.value)}
+                                    value={toRole}
+                                    onChange={e => setToRole(e.target.value)}
                                     className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#33cbcc]"
                                 >
-                                    <option value="">{t('promotions.selectPosition', 'Sélectionner un poste')}</option>
-                                    {positions.map(p => (
-                                        <option key={p.id} value={p.id}>{p.title}</option>
+                                    <option value="">Sélectionner un rôle</option>
+                                    {AVAILABLE_ROLES.map(r => (
+                                        <option key={r} value={r}>{ROLE_LABELS[r]}</option>
                                     ))}
                                 </select>
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-600 mb-1">
-                                    {t('promotions.reason', 'Motif (optionnel)')}
+                                    Motif (optionnel)
                                 </label>
                                 <textarea
                                     value={reason}
                                     onChange={e => setReason(e.target.value)}
                                     rows={3}
                                     className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#33cbcc] resize-none"
-                                    placeholder={t('promotions.reasonPlaceholder', 'Raison de la promotion...')}
+                                    placeholder="Raison de la promotion..."
                                 />
                             </div>
                             <div className="flex gap-2 justify-end">
                                 <button
-                                    onClick={() => { setShowForm(false); setToPositionId(''); setReason(''); }}
+                                    onClick={() => { setShowForm(false); setToRole(''); setReason(''); }}
                                     className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                                 >
-                                    {t('common.cancel', 'Annuler')}
+                                    Annuler
                                 </button>
                                 <button
                                     onClick={handleSubmit}
-                                    disabled={!toPositionId || promote.isPending}
+                                    disabled={!toRole || promote.isPending}
                                     className="px-4 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb8b9] transition-colors disabled:opacity-50"
                                 >
-                                    {promote.isPending ? t('common.saving', 'Enregistrement...') : t('promotions.confirm', 'Confirmer')}
+                                    {promote.isPending ? 'Enregistrement...' : 'Confirmer'}
                                 </button>
                             </div>
                         </div>
@@ -3046,7 +3117,7 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
             ) : history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16">
                     <TrendingUp className="w-16 h-16 text-gray-300 mb-4" />
-                    <p className="text-gray-500 text-sm">{t('promotions.noHistory', 'Aucune promotion enregistrée')}</p>
+                    <p className="text-gray-500 text-sm">Aucune promotion enregistrée</p>
                 </div>
             ) : (
                 <div className="space-y-4">
@@ -3067,18 +3138,20 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
                                 </div>
                                 <div className="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                                     <div className="flex items-center gap-2 mb-3">
-                                        <span className="text-sm text-gray-500">
-                                            {entry.fromPosition?.title || t('promotions.noPosition', 'Aucun poste')}
-                                        </span>
-                                        <ArrowRight className="w-4 h-4 text-gray-400" />
-                                        <span className="text-sm font-semibold text-gray-900">
-                                            {entry.toPosition.title}
+                                        {entry.fromRole && (
+                                            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLORS[entry.fromRole] || 'bg-gray-100 text-gray-700'}`}>
+                                                {ROLE_LABELS[entry.fromRole] || entry.fromRole}
+                                            </span>
+                                        )}
+                                        {entry.fromRole && <ArrowRight className="w-4 h-4 text-gray-400" />}
+                                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLORS[entry.toRole] || 'bg-gray-100 text-gray-700'}`}>
+                                            {ROLE_LABELS[entry.toRole] || entry.toRole}
                                         </span>
                                     </div>
                                     <div className="space-y-1 text-sm text-gray-600">
                                         <div className="flex items-center gap-2">
                                             <User className="w-4 h-4" />
-                                            <span>{t('promotions.promotedBy', 'Par')} {entry.promotedByName}</span>
+                                            <span>Par {entry.promotedByName}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Clock className="w-4 h-4" />
@@ -3117,7 +3190,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
     const reinstateEmployee = useReinstateEmployee();
 
     // API data - fetch employee detail by id (stringified) for enrichment
-    const { data: _apiEmployee, isLoading: loadingEmployee } = useEmployee(String(employee.id));
+    const { data: apiEmployee, isLoading: loadingEmployee } = useEmployee(String(employee.id));
     const { data: _apiFormations, isLoading: loadingFormations } = useFormations();
     const { data: _apiEntretiens, isLoading: loadingEntretiens } = useEntretiens();
     const { data: _apiDocuments, isLoading: loadingDocuments } = useDocuments();
@@ -3127,6 +3200,11 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
     if (isApiLoading) {
         return <DetailPageSkeleton />;
     }
+
+    // Merge fresh detail data (stagiaires, encadreur) into the employee prop from the list
+    const enrichedEmployee: EmployeeUI = apiEmployee
+        ? { ...employee, stagiaires: apiEmployee.stagiaires, encadreur: apiEmployee.encadreur, encadreurId: apiEmployee.encadreurId }
+        : employee;
 
     const isDismissed = !!employee.dismissed;
 
@@ -3141,7 +3219,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
     const isCommercial = employee.user?.role === 'COMMERCIAL' || (employee.role || '').toLowerCase().includes('commercial');
 
     const views: Record<EmployeeTab, React.ReactNode> = {
-        infos: <InfosView employee={employee} teamMembers={teamMembers} />,
+        infos: <InfosView employee={enrichedEmployee} teamMembers={teamMembers} />,
         tasks: <TasksView employee={employee} />,
         commercial: isCommercial ? <ProspectsView employee={employee} /> : null,
         fraisDeVie: <FraisDeVieView employee={employee} />,
@@ -3162,13 +3240,13 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 px-5 py-3 mb-4 rounded-xl bg-red-50 border border-red-200"
+                    className="flex items-center gap-3 px-5 py-3 mb-4 rounded-xl bg-[#283852]/10 border border-gray-200"
                 >
-                    <ShieldAlert size={18} className="text-red-500" />
-                    <span className="text-sm font-medium text-red-700">
+                    <ShieldAlert size={18} className="text-[#283852]" />
+                    <span className="text-sm font-medium text-[#283852]">
                         {t('employees.dismissedBanner', 'This employee has been dismissed and can no longer access the system.')}
                         {employee.dismissedAt && (
-                            <span className="text-red-400 ml-2">
+                            <span className="text-[#283852]/60 ml-2">
                                 ({new Date(employee.dismissedAt).toLocaleDateString()})
                             </span>
                         )}
@@ -3185,8 +3263,8 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                             onClick={() => setShowDismissConfirm(true)}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                                 isDismissed
-                                    ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
-                                    : 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20'
+                                    ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] text-white shadow-lg shadow-[#33cbcc]/20'
+                                    : 'bg-[#283852] hover:bg-[#283852]/80 text-white shadow-lg shadow-[#283852]/20'
                             }`}
                         >
                             {isDismissed ? <UserCheck size={15} /> : <UserX size={15} />}
@@ -3249,8 +3327,8 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                             onClick={e => e.stopPropagation()}
                             className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
                         >
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isDismissed ? 'bg-emerald-50' : 'bg-red-50'}`}>
-                                {isDismissed ? <UserCheck size={24} className="text-emerald-500" /> : <UserX size={24} className="text-red-500" />}
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isDismissed ? 'bg-[#33cbcc]/10' : 'bg-[#283852]/10'}`}>
+                                {isDismissed ? <UserCheck size={24} className="text-[#33cbcc]" /> : <UserX size={24} className="text-[#283852]" />}
                             </div>
                             <h3 className="text-lg font-bold text-gray-800 mb-2">
                                 {isDismissed
@@ -3274,8 +3352,8 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                     disabled={dismissEmployee.isPending || reinstateEmployee.isPending}
                                     className={`flex-1 px-4 py-2.5 rounded-xl text-white text-sm font-semibold transition-colors disabled:opacity-50 ${
                                         isDismissed
-                                            ? 'bg-emerald-500 hover:bg-emerald-600'
-                                            : 'bg-red-500 hover:bg-red-600'
+                                            ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
+                                            : 'bg-[#283852] hover:bg-[#283852]/80'
                                     }`}
                                 >
                                     {(dismissEmployee.isPending || reinstateEmployee.isPending)

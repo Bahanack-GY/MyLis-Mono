@@ -61,6 +61,16 @@ export class PayrollController {
         return this.payrollService.pay(id, req.user.userId);
     }
 
+    @Post('payslips/:id/pay')
+    payOne(
+        @Param('id') id: string,
+        @Body() body: { date?: string },
+        @Request() req: any,
+    ) {
+        const date = body.date || new Date().toISOString().split('T')[0];
+        return this.payrollService.payOne(id, date, req.user.userId);
+    }
+
     @Post('preview')
     preview(@Body() dto: any) {
         return this.payrollService.preview(dto.grossSalary);

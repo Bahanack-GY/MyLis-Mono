@@ -22,13 +22,13 @@ const PIPELINE_STAGES: SaleStage[] = ['PROSPECTION', 'QUALIFICATION', 'PROPOSITI
 const ALL_STAGES: SaleStage[] = [...PIPELINE_STAGES, 'GAGNE', 'PERDU'];
 
 const STAGE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-    PROSPECTION: { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-400' },
-    QUALIFICATION: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-400' },
-    PROPOSITION: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-400' },
-    NEGOCIATION: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-400' },
-    CLOSING: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-400' },
-    GAGNE: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-400' },
-    PERDU: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-400' },
+    PROSPECTION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-300' },
+    QUALIFICATION: { bg: 'bg-[#283852]/15', text: 'text-[#283852]', border: 'border-gray-300' },
+    PROPOSITION: { bg: 'bg-[#283852]/20', text: 'text-[#283852]', border: 'border-gray-300' },
+    NEGOCIATION: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-300' },
+    CLOSING: { bg: 'bg-[#33cbcc]/20', text: 'text-[#33cbcc]', border: 'border-gray-300' },
+    GAGNE: { bg: 'bg-[#33cbcc]', text: 'text-white', border: 'border-gray-300' },
+    PERDU: { bg: 'bg-gray-200', text: 'text-gray-500', border: 'border-gray-300' },
 };
 
 const ACTIVITY_TYPES: ActivityType[] = [
@@ -398,11 +398,11 @@ const PipelineEditModal = ({
                                 {linkedTasks.map((task: any) => {
                                     const stateColors: Record<string, string> = {
                                         CREATED: 'bg-gray-100 text-gray-600',
-                                        ASSIGNED: 'bg-blue-50 text-blue-600',
-                                        IN_PROGRESS: 'bg-amber-50 text-amber-600',
-                                        BLOCKED: 'bg-red-50 text-red-600',
-                                        COMPLETED: 'bg-green-50 text-green-600',
-                                        REVIEWED: 'bg-indigo-50 text-indigo-600',
+                                        ASSIGNED: 'bg-[#283852]/10 text-[#283852]',
+                                        IN_PROGRESS: 'bg-[#283852]/10 text-[#283852]',
+                                        BLOCKED: 'bg-[#283852]/10 text-[#283852]',
+                                        COMPLETED: 'bg-[#283852] text-white',
+                                        REVIEWED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
                                     };
                                     return (
                                         <div key={task.id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl">
@@ -640,30 +640,30 @@ const PipelineDashboard = ({
             label: t('commercial.pipeline.dashboard.pipelineValue'),
             value: formatFCFA(stats.totalPipelineValue || 0),
             icon: DollarSign,
-            bgLight: 'bg-blue-50',
-            textColor: 'text-blue-600',
+            bgLight: 'bg-[#283852]/10',
+            textColor: 'text-[#283852]',
         },
         {
             label: t('commercial.pipeline.dashboard.weightedValue'),
             value: formatFCFA(stats.weightedPipelineValue || 0),
             icon: Target,
-            bgLight: 'bg-violet-50',
-            textColor: 'text-violet-600',
+            bgLight: 'bg-[#283852]/10',
+            textColor: 'text-[#283852]',
         },
         {
             label: t('commercial.pipeline.dashboard.winRate'),
             value: `${stats.winRate || 0}%`,
             icon: Award,
-            bgLight: 'bg-emerald-50',
-            textColor: 'text-emerald-600',
+            bgLight: 'bg-[#33cbcc]/10',
+            textColor: 'text-[#33cbcc]',
             sub: `${stats.wonCount || 0} / ${(stats.wonCount || 0) + (stats.lostCount || 0)}`,
         },
         {
             label: t('commercial.pipeline.dashboard.avgDealSize'),
             value: formatFCFA(stats.averageDealSize || 0),
             icon: TrendingUp,
-            bgLight: 'bg-amber-50',
-            textColor: 'text-amber-600',
+            bgLight: 'bg-[#283852]/10',
+            textColor: 'text-[#283852]',
         },
     ];
 
@@ -688,7 +688,7 @@ const PipelineDashboard = ({
     const totalSourceCount = sourceEntries.reduce((sum: number, [, count]: any) => sum + count, 0) || 1;
 
     const sourceColors = [
-        'bg-blue-500', 'bg-violet-500', 'bg-amber-500', 'bg-emerald-500', 'bg-rose-500', 'bg-cyan-500',
+        'bg-[#33cbcc]', 'bg-[#283852]', 'bg-[#33cbcc99]', 'bg-[#28385280]', 'bg-[#33cbcc50]', 'bg-gray-400',
     ];
 
     const periodLabels: Record<TimePeriod, string> = {
@@ -783,12 +783,12 @@ const PipelineDashboard = ({
                     transition={{ delay: 0.4 }}
                     className="bg-white rounded-2xl sm border border-gray-100 p-5 flex items-center gap-4"
                 >
-                    <div className="p-3 rounded-xl bg-green-50">
-                        <CheckCircle2 size={20} className="text-green-500" />
+                    <div className="p-3 rounded-xl bg-[#33cbcc]/10">
+                        <CheckCircle2 size={20} className="text-[#33cbcc]" />
                     </div>
                     <div>
                         <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('commercial.pipeline.dashboard.wonDeals')}</p>
-                        <p className="text-2xl font-bold text-green-600">{stats.wonCount || 0}</p>
+                        <p className="text-2xl font-bold text-[#33cbcc]">{stats.wonCount || 0}</p>
                     </div>
                 </motion.div>
                 <motion.div
@@ -797,12 +797,12 @@ const PipelineDashboard = ({
                     transition={{ delay: 0.45 }}
                     className="bg-white rounded-2xl sm border border-gray-100 p-5 flex items-center gap-4"
                 >
-                    <div className="p-3 rounded-xl bg-red-50">
-                        <X size={20} className="text-red-500" />
+                    <div className="p-3 rounded-xl bg-gray-100">
+                        <X size={20} className="text-gray-500" />
                     </div>
                     <div>
                         <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('commercial.pipeline.dashboard.lostDeals')}</p>
-                        <p className="text-2xl font-bold text-red-600">{stats.lostCount || 0}</p>
+                        <p className="text-2xl font-bold text-gray-500">{stats.lostCount || 0}</p>
                     </div>
                 </motion.div>
             </div>
@@ -876,7 +876,7 @@ const PipelineDashboard = ({
                                         <div className="flex-1 flex items-center gap-2 pl-1">
                                             <div className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
                                                 <ChevronRightIcon size={10} className="rotate-90" />
-                                                <span className={fs.conversionRate >= 50 ? 'text-emerald-500' : fs.conversionRate >= 25 ? 'text-amber-500' : 'text-red-400'}>
+                                                <span className={fs.conversionRate >= 50 ? 'text-[#33cbcc]' : fs.conversionRate >= 25 ? 'text-[#283852]' : 'text-gray-400'}>
                                                     {t('commercial.pipeline.dashboard.conversionToNext', { rate: fs.conversionRate })}
                                                 </span>
                                             </div>
@@ -890,7 +890,7 @@ const PipelineDashboard = ({
                     {/* Won stage at the bottom */}
                     <div className="flex items-center gap-4 pt-2 border-t border-gray-100 mt-2">
                         <div className="w-32 shrink-0 text-right">
-                            <span className="text-xs font-semibold uppercase tracking-wider text-green-600">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-[#33cbcc]">
                                 {t('commercial.pipeline.stages.GAGNE')}
                             </span>
                         </div>
@@ -901,9 +901,9 @@ const PipelineDashboard = ({
                                         initial={{ width: 0 }}
                                         animate={{ width: `${Math.max(((stats.wonCount || 0) / maxCount) * 100, 2)}%` }}
                                         transition={{ duration: 0.8, delay: 0.5 }}
-                                        className="h-full rounded-full flex items-center px-3 bg-green-50 border border-green-400"
+                                        className="h-full rounded-full flex items-center px-3 bg-[#33cbcc]/10 border border-gray-200"
                                     >
-                                        <span className="text-xs font-bold text-green-600 whitespace-nowrap">{stats.wonCount || 0}</span>
+                                        <span className="text-xs font-bold text-[#33cbcc] whitespace-nowrap">{stats.wonCount || 0}</span>
                                     </motion.div>
                                 </div>
                                 <span className="text-xs text-gray-400 w-24 shrink-0 text-right">
@@ -1159,9 +1159,9 @@ const SalesPipeline = () => {
                                     const colors = STAGE_COLORS[lead.saleStage] || STAGE_COLORS.PROSPECTION;
                                     const overdue = isOverdue(lead);
                                     const successColor =
-                                        lead.successRate > 70 ? 'text-green-600' :
-                                        lead.successRate >= 30 ? 'text-orange-500' :
-                                        'text-red-500';
+                                        lead.successRate > 70 ? 'text-[#33cbcc]' :
+                                        lead.successRate >= 30 ? 'text-[#283852]' :
+                                        'text-gray-400';
 
                                     return (
                                         <motion.tr
@@ -1252,11 +1252,11 @@ const SalesPipeline = () => {
                                             {/* Prochaine Action */}
                                             <td className="px-4 py-3">
                                                 <div className="flex flex-col">
-                                                    <span className={`text-sm ${overdue ? 'text-red-600 font-semibold' : 'text-gray-600'}`}>
+                                                    <span className={`text-sm ${overdue ? 'text-[#283852] font-semibold' : 'text-gray-600'}`}>
                                                         {lead.nextAction || '-'}
                                                     </span>
                                                     {lead.nextActionDeadline && (
-                                                        <span className={`text-xs flex items-center gap-1 mt-0.5 ${overdue ? 'text-red-500' : 'text-gray-400'}`}>
+                                                        <span className={`text-xs flex items-center gap-1 mt-0.5 ${overdue ? 'text-[#283852]' : 'text-gray-400'}`}>
                                                             <Clock size={10} />
                                                             {new Date(lead.nextActionDeadline).toLocaleDateString('fr-FR')}
                                                         </span>
@@ -1269,21 +1269,21 @@ const SalesPipeline = () => {
                                                 <div className="flex items-center justify-center gap-1">
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setQuickLog({ lead, type: 'APPEL' }); }}
-                                                        className="p-1.5 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-[#33cbcc]/10 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                                         title={t('commercial.pipeline.activityTypes.APPEL')}
                                                     >
                                                         <Phone size={14} />
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setQuickLog({ lead, type: 'EMAIL' }); }}
-                                                        className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                         title={t('commercial.pipeline.activityTypes.EMAIL')}
                                                     >
                                                         <Mail size={14} />
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setQuickLog({ lead, type: 'REUNION' }); }}
-                                                        className="p-1.5 rounded-lg hover:bg-purple-50 text-gray-400 hover:text-purple-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                         title={t('commercial.pipeline.activityTypes.REUNION')}
                                                     >
                                                         <Calendar size={14} />

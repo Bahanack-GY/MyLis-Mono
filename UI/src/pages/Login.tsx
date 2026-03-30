@@ -114,10 +114,10 @@ const Login = () => {
                             </div>
 
                             {isAccessDenied && (
-                                <p className="text-red-500 text-sm text-center">{t('login.accessDenied')}</p>
+                                <p className="text-[#283852] text-sm text-center">{t('login.accessDenied')}</p>
                             )}
                             {login.isError && !isAccessDenied && (
-                                <p className="text-red-500 text-sm text-center">{t('login.error')}</p>
+                                <p className="text-[#283852] text-sm text-center">{t('login.error')}</p>
                             )}
 
                             <motion.button
@@ -286,7 +286,7 @@ const Login = () => {
                             <motion.p
                                 initial={{ opacity: 0, y: -4 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-red-500 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-3"
+                                className="text-[#283852] text-sm bg-[#283852]/10 border border-gray-200 rounded-xl px-4 py-3"
                             >
                                 {t('login.accessDenied')}
                             </motion.p>
@@ -295,7 +295,7 @@ const Login = () => {
                             <motion.p
                                 initial={{ opacity: 0, y: -4 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="text-red-500 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-3"
+                                className="text-[#283852] text-sm bg-[#283852]/10 border border-gray-200 rounded-xl px-4 py-3"
                             >
                                 {t('login.error')}
                             </motion.p>

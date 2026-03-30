@@ -230,14 +230,14 @@ const Dashboard = () => {
                     className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100"
                 >
                     <h3 className="text-lg md:text-xl font-bold text-gray-800 mb-5 flex items-center gap-2">
-                        <Trophy size={20} className="text-amber-500" />
+                        <Trophy size={20} className="text-[#33cbcc]" />
                         {t('dashboard.topEmployee.title')}
                     </h3>
 
                     {leaderboard && leaderboard.length > 0 ? (
                         <div className="flex flex-col items-center text-center py-4">
                             <div className="relative mb-4">
-                                <div className="w-20 h-20 rounded-full border-4 border-amber-200 shadow-lg overflow-hidden bg-gray-100">
+                                <div className="w-20 h-20 rounded-full border-4 border-[#33cbcc]/30 shadow-lg overflow-hidden bg-gray-100">
                                     {leaderboard[0].avatarUrl ? (
                                         <img
                                             src={leaderboard[0].avatarUrl}
@@ -250,7 +250,7 @@ const Dashboard = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-amber-400 flex items-center justify-center shadow-md">
+                                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-[#33cbcc] flex items-center justify-center shadow-md">
                                     <Crown size={16} className="text-white" />
                                 </div>
                             </div>
@@ -259,9 +259,9 @@ const Dashboard = () => {
                             </h4>
                             <p className="text-xs text-gray-400 mt-0.5">{leaderboard[0].positionTitle}</p>
                             <p className="text-xs text-gray-400">{leaderboard[0].department}</p>
-                            <div className="mt-4 px-5 py-2.5 rounded-xl bg-amber-50 border border-amber-100">
-                                <span className="text-2xl font-black text-amber-500">{leaderboard[0].points}</span>
-                                <span className="text-xs text-amber-400 ml-1.5 font-medium">pts</span>
+                            <div className="mt-4 px-5 py-2.5 rounded-xl bg-[#33cbcc]/10 border border-[#33cbcc]/20">
+                                <span className="text-2xl font-black text-[#33cbcc]">{leaderboard[0].points}</span>
+                                <span className="text-xs text-[#33cbcc]/60 ml-1.5 font-medium">pts</span>
                             </div>
                         </div>
                     ) : (

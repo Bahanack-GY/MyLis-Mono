@@ -27,6 +27,8 @@ import {
     Pencil,
     ToggleLeft,
     ToggleRight,
+    Target,
+    ChevronLeft,
 } from 'lucide-react';
 import {
     AreaChart,
@@ -50,15 +52,15 @@ import { useTasks } from '../api/tasks/hooks';
 import { useInvoices, useInvoiceStats } from '../api/invoices/hooks';
 import { useClients, useCreateClient } from '../api/clients/hooks';
 import { useDepartmentScope } from '../contexts/AuthContext';
-import { useUpdateDepartment, useDepartmentServices, useCreateDepartmentService, useUpdateDepartmentService, useDeleteDepartmentService } from '../api/departments/hooks';
+import { useUpdateDepartment, useDepartmentServices, useCreateDepartmentService, useUpdateDepartmentService, useDeleteDepartmentService, useMonthlyStats, useUpsertMonthlyTarget } from '../api/departments/hooks';
 
 /* ─── Status helpers ────────────────────────────────────── */
 
 const PROJECT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
-    active:    { bg: 'bg-emerald-50',  text: 'text-emerald-600',  dot: 'bg-emerald-500' },
-    completed: { bg: 'bg-blue-50',     text: 'text-blue-600',     dot: 'bg-blue-500' },
-    on_hold:   { bg: 'bg-amber-50',    text: 'text-amber-600',    dot: 'bg-amber-500' },
-    overdue:   { bg: 'bg-rose-50',     text: 'text-rose-600',     dot: 'bg-rose-500' },
+    active:    { bg: 'bg-[#33cbcc]/10',  text: 'text-[#33cbcc]',  dot: 'bg-[#33cbcc]' },
+    completed: { bg: 'bg-[#283852]',     text: 'text-white',       dot: 'bg-white' },
+    on_hold:   { bg: 'bg-[#283852]/10',  text: 'text-[#283852]',   dot: 'bg-[#283852]' },
+    overdue:   { bg: 'bg-[#283852]/10',  text: 'text-[#283852]',   dot: 'bg-[#283852]' },
 };
 
 const STATUS_I18N: Record<string, string> = {
@@ -469,7 +471,7 @@ const AddProjectModal = ({
                                         <span className="font-medium text-gray-700">{form.contract.name}</span>
                                         <span className="text-gray-400">{form.contract.size}</span>
                                     </div>
-                                    <button onClick={() => update('contract', null)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
+                                    <button onClick={() => update('contract', null)} className="text-gray-400 hover:text-[#283852] transition-colors"><Trash2 size={14} /></button>
                                 </div>
                             ) : (
                                 <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#283852]/40 hover:bg-[#283852]/5 transition-all text-sm text-gray-400">
@@ -489,7 +491,7 @@ const AddProjectModal = ({
                                         <span className="font-medium text-gray-700">{form.srs.name}</span>
                                         <span className="text-gray-400">{form.srs.size}</span>
                                     </div>
-                                    <button onClick={() => update('srs', null)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
+                                    <button onClick={() => update('srs', null)} className="text-gray-400 hover:text-[#283852] transition-colors"><Trash2 size={14} /></button>
                                 </div>
                             ) : (
                                 <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#283852]/40 hover:bg-[#283852]/5 transition-all text-sm text-gray-400">
@@ -511,7 +513,7 @@ const AddProjectModal = ({
                                                 <span className="font-medium text-gray-700">{doc.name}</span>
                                                 <span className="text-gray-400">{doc.size}</span>
                                             </div>
-                                            <button onClick={() => removeOtherDoc(i)} className="text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
+                                            <button onClick={() => removeOtherDoc(i)} className="text-gray-400 hover:text-[#283852] transition-colors"><Trash2 size={14} /></button>
                                         </div>
                                     ))}
                                 </div>
@@ -1129,7 +1131,203 @@ const BudgetView = ({ department }: { department: Department }) => {
                     </div>
                 </motion.div>
             </div>
+
+            {/* ─── Monthly CA Objectives ─────────────────── */}
+            <MonthlyObjectivesSection departmentId={deptId} />
         </div>
+    );
+};
+
+/* ─── Monthly CA Objectives ─────────────────────────────── */
+
+const MONTH_SHORT = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun', 'Jul', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+const MonthlyObjectivesSection = ({ departmentId }: { departmentId: string }) => {
+    const { t } = useTranslation();
+    const [year, setYear] = useState(() => new Date().getFullYear());
+    const [editingMonth, setEditingMonth] = useState<number | null>(null);
+    const [editValue, setEditValue] = useState('');
+
+    const { data: rows = [], isLoading } = useMonthlyStats(departmentId, year);
+    const upsert = useUpsertMonthlyTarget();
+
+    const currentMonth = new Date().getMonth() + 1; // 1-based
+
+    const handleEdit = (month: number, current: number) => {
+        setEditingMonth(month);
+        setEditValue(current > 0 ? String(current) : '');
+    };
+
+    const handleSave = (month: number) => {
+        const val = parseFloat(editValue);
+        if (isNaN(val) || val < 0) return;
+        upsert.mutate({ departmentId, year, month, targetRevenue: val });
+        setEditingMonth(null);
+    };
+
+    const formatAmount = (v: number) =>
+        v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : v >= 1_000 ? `${(v / 1_000).toFixed(0)}K` : String(Math.round(v));
+
+    const yearTotal = rows.reduce((s, r) => s + r.actualRevenue, 0);
+    const yearTarget = rows.reduce((s, r) => s + r.targetRevenue, 0);
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white rounded-3xl border border-gray-100 p-6"
+        >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
+                        <Target size={18} className="text-[#33cbcc]" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-800">{t('departmentDetail.budget.monthlyCA', 'Objectifs Chiffre d\'Affaires')}</h3>
+                        <p className="text-xs text-gray-400">{t('departmentDetail.budget.monthlyCASubtitle', 'Objectif mensuel vs réalisé')}</p>
+                    </div>
+                </div>
+
+                {/* Year nav */}
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setYear(y => y - 1)}
+                        className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                        <ChevronLeft size={16} className="text-gray-500" />
+                    </button>
+                    <span className="text-sm font-semibold text-gray-700 w-12 text-center">{year}</span>
+                    <button
+                        onClick={() => setYear(y => y + 1)}
+                        className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    >
+                        <ChevronRight size={16} className="text-gray-500" />
+                    </button>
+                </div>
+            </div>
+
+            {/* Year summary */}
+            <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="bg-gray-50 rounded-2xl p-4">
+                    <p className="text-xs text-gray-400 font-medium mb-1">{t('departmentDetail.budget.yearTarget', 'Objectif annuel')}</p>
+                    <p className="text-xl font-bold text-gray-800">{formatAmount(yearTarget)} <span className="text-xs font-normal text-gray-400">FCFA</span></p>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-4">
+                    <p className="text-xs text-gray-400 font-medium mb-1">{t('departmentDetail.budget.yearActual', 'CA réalisé')}</p>
+                    <p className="text-xl font-bold text-[#33cbcc]">{formatAmount(yearTotal)} <span className="text-xs font-normal text-gray-400">FCFA</span></p>
+                </div>
+                <div className="bg-gray-50 rounded-2xl p-4">
+                    <p className="text-xs text-gray-400 font-medium mb-1">{t('departmentDetail.budget.yearRate', 'Taux de réalisation')}</p>
+                    <p className={`text-xl font-bold ${yearTarget > 0 && yearTotal >= yearTarget ? 'text-[#33cbcc]' : 'text-gray-800'}`}>
+                        {yearTarget > 0 ? `${Math.round((yearTotal / yearTarget) * 100)}%` : '—'}
+                    </p>
+                </div>
+            </div>
+
+            {/* Loading */}
+            {isLoading ? (
+                <div className="flex items-center justify-center h-32">
+                    <Loader2 size={24} className="animate-spin text-[#33cbcc]" />
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {rows.map((row) => {
+                        const pct = row.targetRevenue > 0 ? Math.min((row.actualRevenue / row.targetRevenue) * 100, 100) : 0;
+                        const isOver = row.targetRevenue > 0 && row.actualRevenue >= row.targetRevenue;
+                        const isCurrent = row.month === currentMonth && year === new Date().getFullYear();
+                        const isFuture = year > new Date().getFullYear() || (year === new Date().getFullYear() && row.month > currentMonth);
+                        const isEditing = editingMonth === row.month;
+
+                        return (
+                            <motion.div
+                                key={row.month}
+                                layout
+                                className={`rounded-2xl border p-3 transition-all ${
+                                    isCurrent
+                                        ? 'border-[#33cbcc] bg-[#33cbcc]/5'
+                                        : 'border-gray-100 bg-gray-50/60'
+                                }`}
+                            >
+                                {/* Month label */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <span className={`text-xs font-bold uppercase tracking-wide ${isCurrent ? 'text-[#33cbcc]' : 'text-gray-500'}`}>
+                                        {MONTH_SHORT[row.month - 1]}
+                                    </span>
+                                    {isOver && !isFuture && (
+                                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc]">✓</span>
+                                    )}
+                                    {row.hasExplicitTarget && (
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#33cbcc]" title="Objectif défini" />
+                                    )}
+                                    {!row.hasExplicitTarget && row.usingDefault && (
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#283852]" title="Objectif par défaut" />
+                                    )}
+                                </div>
+
+                                {/* Target edit */}
+                                {isEditing ? (
+                                    <div className="flex items-center gap-1 mb-2">
+                                        <input
+                                            type="number"
+                                            value={editValue}
+                                            onChange={e => setEditValue(e.target.value)}
+                                            onKeyDown={e => { if (e.key === 'Enter') handleSave(row.month); if (e.key === 'Escape') setEditingMonth(null); }}
+                                            autoFocus
+                                            className="w-full text-xs border border-[#33cbcc] rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-[#33cbcc]/40"
+                                            placeholder="0"
+                                        />
+                                        <button onClick={() => handleSave(row.month)} className="p-1 rounded-lg bg-[#33cbcc] text-white hover:bg-[#2bb5b6]">
+                                            <Check size={12} />
+                                        </button>
+                                        <button onClick={() => setEditingMonth(null)} className="p-1 rounded-lg bg-gray-200 text-gray-500 hover:bg-gray-300">
+                                            <X size={12} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => handleEdit(row.month, row.targetRevenue)}
+                                        className="w-full text-left mb-2 group"
+                                    >
+                                        <p className="text-[10px] text-gray-400">{t('departmentDetail.budget.target', 'Objectif')}</p>
+                                        <p className="text-sm font-semibold text-gray-700 group-hover:text-[#33cbcc] transition-colors flex items-center gap-1">
+                                            {row.targetRevenue > 0 ? `${formatAmount(row.targetRevenue)} FCFA` : <span className="text-gray-300 italic text-xs">{t('departmentDetail.budget.setTarget', 'Définir...')}</span>}
+                                            <Pencil size={10} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#33cbcc]" />
+                                        </p>
+                                    </button>
+                                )}
+
+                                {/* Actual */}
+                                <div className="mb-2">
+                                    <p className="text-[10px] text-gray-400">{t('departmentDetail.budget.actual', 'Réalisé')}</p>
+                                    <p className={`text-sm font-bold ${isFuture ? 'text-gray-300' : isOver ? 'text-[#33cbcc]' : 'text-gray-800'}`}>
+                                        {isFuture ? '—' : `${formatAmount(row.actualRevenue)} FCFA`}
+                                    </p>
+                                </div>
+
+                                {/* Progress bar */}
+                                {!isFuture && row.targetRevenue > 0 && (
+                                    <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${pct}%` }}
+                                            transition={{ duration: 0.6, ease: 'easeOut' }}
+                                            className={`h-full rounded-full ${isOver ? 'bg-[#33cbcc]' : 'bg-[#33cbcc]'}`}
+                                        />
+                                    </div>
+                                )}
+                                {!isFuture && row.targetRevenue > 0 && (
+                                    <p className={`text-[9px] font-semibold mt-1 ${isOver ? 'text-[#33cbcc]' : 'text-gray-400'}`}>
+                                        {Math.round(pct)}%
+                                    </p>
+                                )}
+                            </motion.div>
+                        );
+                    })}
+                </div>
+            )}
+        </motion.div>
     );
 };
 
@@ -1393,7 +1591,7 @@ const ServicesView = ({ department }: { department: Department }) => {
                                     </button>
                                     <button
                                         onClick={() => deleteService.mutate(service.id)}
-                                        className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
                                     >
                                         <Trash2 size={14} />
                                     </button>
@@ -1559,7 +1757,7 @@ const SettingsView = ({ department }: { department: Department }) => {
                 {/* HOD dropdown picker */}
                 <div className="relative">
                     <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1">
-                        <Crown size={11} className="text-amber-400" />
+                        <Crown size={11} className="text-[#33cbcc]" />
                         {t('departmentDetail.settings.hod')}
                     </label>
                     <button
@@ -1579,7 +1777,7 @@ const SettingsView = ({ department }: { department: Department }) => {
                                     type="button"
                                     onClick={e => { e.stopPropagation(); handleRemoveHod(); }}
                                     disabled={updateDept.isPending}
-                                    className="p-0.5 rounded text-gray-400 hover:text-red-500 transition-colors disabled:opacity-40"
+                                    className="p-0.5 rounded text-gray-400 hover:text-[#283852] transition-colors disabled:opacity-40"
                                 >
                                     <X size={14} />
                                 </button>

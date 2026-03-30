@@ -29,6 +29,7 @@ import { TaxModule } from './tax/tax.module';
 import { CommercialModule } from './commercial/commercial.module';
 import { BusinessExpensesModule } from './business-expenses/business-expenses.module';
 import { ReportsModule } from './reports/reports.module';
+import { SuppliersModule } from './suppliers/suppliers.module';
 import { SseModule } from './sse/sse.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -83,6 +84,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     CommercialModule,
     BusinessExpensesModule,
     ReportsModule,
+    SuppliersModule,
   ],
   controllers: [AppController],
   providers: [

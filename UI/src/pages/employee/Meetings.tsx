@@ -198,14 +198,14 @@ const MeetingDetailModal = ({
                                 {t('meetings.detail.participants')} ({meeting.participants.length})
                             </div>
                             {meeting.status === 'in_progress' && (
-                                <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                                <span className="text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-2 py-0.5 rounded-full">
                                     {attendedCount}/{meeting.participants.length} {t('meetings.detail.attendance')}
                                 </span>
                             )}
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {meeting.participants.map((p) => (
-                                <div key={p.id} className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${p.attended ? 'bg-emerald-50' : 'bg-gray-50'}`}>
+                                <div key={p.id} className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${p.attended ? 'bg-[#33cbcc]/10' : 'bg-gray-50'}`}>
                                     {p.avatar ? (
                                         <img src={p.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
                                     ) : (
@@ -214,7 +214,7 @@ const MeetingDetailModal = ({
                                         </div>
                                     )}
                                     <span className="text-xs text-gray-600">{p.name}</span>
-                                    {p.attended && <CheckCircle size={11} className="text-emerald-500 shrink-0" />}
+                                    {p.attended && <CheckCircle size={11} className="text-[#33cbcc] shrink-0" />}
                                 </div>
                             ))}
                             {meeting.participants.length === 0 && (
@@ -304,7 +304,7 @@ const MeetingDetailModal = ({
                                 }));
                                 onClose();
                             }}
-                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-red-500 text-white hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#283852] text-white hover:bg-[#283852]/80 transition-colors shadow-lg shadow-[#283852]/20"
                         >
                             <Mic size={15} />
                             {t('meetings.start.record', 'Record Meeting')}
@@ -314,7 +314,7 @@ const MeetingDetailModal = ({
                         <button
                             disabled={alreadyAttended}
                             onClick={onAttend}
-                            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${alreadyAttended ? 'bg-emerald-50 text-emerald-600 cursor-default' : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'}`}
+                            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${alreadyAttended ? 'bg-[#33cbcc]/10 text-[#33cbcc] cursor-default' : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'}`}
                         >
                             <CheckCircle size={15} />
                             {alreadyAttended ? t('meetings.attend.attended') : t('meetings.attend.button')}

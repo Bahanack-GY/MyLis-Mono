@@ -103,7 +103,7 @@ export default function OSStartMenu({ isOpen, onClose, onOpenApp }: OSStartMenuP
               </div>
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs text-gray-400 hover:bg-white/10 hover:text-red-400 transition-colors"
+                className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
               >
                 <LogOut size={14} />
                 Logout

@@ -45,14 +45,17 @@ const formatDate = (dateStr: string | null | undefined) => {
  });
 };
 
-const TABS = [
+const SECTION_RAPPORTS = [
  { key: 'grand-livre', label: 'Grand Livre', icon: BookOpen },
  { key: 'balance', label: 'Balance', icon: Scale },
- { key: 'bilan', label: 'Bilan', icon: PieChart },
- { key: 'resultat', label: 'Compte de Resultat', icon: TrendingUp },
 ] as const;
 
-type TabKey = (typeof TABS)[number]['key'];
+const SECTION_ETATS = [
+ { key: 'bilan', label: 'Bilan', icon: PieChart },
+ { key: 'resultat', label: 'Compte de Résultat', icon: TrendingUp },
+] as const;
+
+type TabKey = 'grand-livre' | 'balance' | 'bilan' | 'resultat';
 
 /* ------------------------------------------------------------------ */
 /* Hooks */
@@ -119,9 +122,9 @@ const GrandLivreTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  return (
  <div className="space-y-6">
  {data.map((accountGroup: any) => {
- let runningBalance = 0;
+ const lines: any[] = accountGroup.lines || [];
  return (
- <div key={accountGroup.accountId || accountGroup.account?.id} className="bg-white rounded-2xl overflow-hidden">
+ <div key={accountGroup.account?.id} className="bg-white rounded-2xl overflow-hidden">
  {/* Account header */}
  <div className="px-6 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
  <div className="flex items-center gap-3">
@@ -133,52 +136,65 @@ const GrandLivreTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  </span>
  </div>
  <span className="text-xs text-gray-400">
- {(accountGroup.entries || []).length} ecritures
+ {lines.length} écriture{lines.length !== 1 ? 's' : ''}
  </span>
  </div>
 
- {/* Entries table */}
+ {/* Lines table */}
  <table className="w-full text-left">
  <thead>
  <tr className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100">
  <th className="px-6 py-2">Date</th>
- <th className="px-6 py-2">Libelle</th>
- <th className="px-6 py-2">Reference</th>
- <th className="px-6 py-2 text-right">Debit</th>
- <th className="px-6 py-2 text-right">Credit</th>
+ <th className="px-6 py-2">N° Pièce</th>
+ <th className="px-6 py-2">Libellé</th>
+ <th className="px-6 py-2">Référence</th>
+ <th className="px-6 py-2 text-right">Débit</th>
+ <th className="px-6 py-2 text-right">Crédit</th>
  <th className="px-6 py-2 text-right">Solde</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-50">
- {(accountGroup.entries || []).map((entry: any, idx: number) => {
- runningBalance += (entry.debit || 0) - (entry.credit || 0);
+ {lines.map((line: any, idx: number) => {
+ const balance = line.runningBalance;
  return (
  <tr key={idx} className="hover:bg-gray-50/50 transition-colors text-sm">
- <td className="px-6 py-2.5 text-gray-500 text-xs">
- {formatDate(entry.date)}
+ <td className="px-6 py-2.5 text-gray-500 text-xs whitespace-nowrap">
+ {formatDate(line.date)}
  </td>
- <td className="px-6 py-2.5 text-gray-700">{entry.description || entry.label || '--'}</td>
+ <td className="px-6 py-2.5 font-mono text-xs text-[#283852]">
+ {line.entryNumber || '--'}
+ </td>
+ <td className="px-6 py-2.5 text-gray-700">
+ {line.label || line.description || '--'}
+ </td>
  <td className="px-6 py-2.5 text-gray-400 text-xs">
- {entry.reference || '--'}
+ {line.reference || '--'}
  </td>
  <td className="px-6 py-2.5 text-right font-medium text-gray-800">
- {entry.debit > 0 ? formatXAF(entry.debit) : ''}
+ {line.debit > 0 ? formatXAF(line.debit) : ''}
  </td>
  <td className="px-6 py-2.5 text-right font-medium text-gray-800">
- {entry.credit > 0 ? formatXAF(entry.credit) : ''}
+ {line.credit > 0 ? formatXAF(line.credit) : ''}
  </td>
- <td
- className={`px-6 py-2.5 text-right font-bold ${
- runningBalance >= 0 ? 'text-emerald-600' : 'text-red-600'
- }`}
- >
- {formatXAF(Math.abs(runningBalance))}
- {runningBalance < 0 && ' (Cr)'}
+ <td className={`px-6 py-2.5 text-right font-bold ${balance >= 0 ? 'text-[#33cbcc]' : 'text-[#283852]'}`}>
+ {formatXAF(Math.abs(balance))}
+ {balance < 0 && <span className="text-xs ml-1">(Cr)</span>}
  </td>
  </tr>
  );
  })}
  </tbody>
+ <tfoot>
+ <tr className="bg-gray-50 border-t-2 border-gray-200 text-sm">
+ <td colSpan={4} className="px-6 py-2.5 font-bold text-gray-700">Total</td>
+ <td className="px-6 py-2.5 text-right font-bold text-gray-800">{formatXAF(accountGroup.totalDebit)}</td>
+ <td className="px-6 py-2.5 text-right font-bold text-gray-800">{formatXAF(accountGroup.totalCredit)}</td>
+ <td className={`px-6 py-2.5 text-right font-bold ${accountGroup.balance >= 0 ? 'text-[#33cbcc]' : 'text-[#283852]'}`}>
+ {formatXAF(Math.abs(accountGroup.balance))}
+ {accountGroup.balance < 0 && <span className="text-xs ml-1">(Cr)</span>}
+ </td>
+ </tr>
+ </tfoot>
  </table>
  </div>
  );
@@ -217,12 +233,12 @@ const BalanceTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between">
  <h3 className="text-sm font-bold text-gray-800">Balance des comptes</h3>
  {data.totals.isBalanced ? (
- <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+ <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-3 py-1 rounded-full">
  <CheckCircle size={12} />
  Equilibree
  </span>
  ) : (
- <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 px-3 py-1 rounded-full">
+ <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#283852] bg-[#283852]/10 px-3 py-1 rounded-full">
  <AlertTriangle size={12} />
  Desequilibree
  </span>
@@ -253,10 +269,10 @@ const BalanceTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  <td className="px-6 py-2.5 text-right font-medium text-gray-800">
  {row.totalCredit > 0 ? formatXAF(row.totalCredit) : ''}
  </td>
- <td className="px-6 py-2.5 text-right font-bold text-emerald-600">
+ <td className="px-6 py-2.5 text-right font-bold text-[#33cbcc]">
  {row.debitBalance > 0 ? formatXAF(row.debitBalance) : ''}
  </td>
- <td className="px-6 py-2.5 text-right font-bold text-blue-600">
+ <td className="px-6 py-2.5 text-right font-bold text-[#283852]">
  {row.creditBalance > 0 ? formatXAF(row.creditBalance) : ''}
  </td>
  </tr>
@@ -273,7 +289,7 @@ const BalanceTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  <td className="px-6 py-3 text-right font-bold text-gray-800">
  {formatXAF(data.totals.totalCredit)}
  </td>
- <td className="px-6 py-3 text-right font-bold text-emerald-600">
+ <td className="px-6 py-3 text-right font-bold text-[#33cbcc]">
  {formatXAF(
  data.accounts.reduce(
  (s: number, r: TrialBalanceAccount) => s + r.debitBalance,
@@ -281,7 +297,7 @@ const BalanceTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  ),
  )}
  </td>
- <td className="px-6 py-3 text-right font-bold text-blue-600">
+ <td className="px-6 py-3 text-right font-bold text-[#283852]">
  {formatXAF(
  data.accounts.reduce(
  (s: number, r: TrialBalanceAccount) => s + r.creditBalance,
@@ -332,7 +348,7 @@ const BilanTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  color: string;
  }) => (
  <div className="bg-white rounded-2xl overflow-hidden">
- <div className={`px-6 py-3 border-b border-gray-100 bg-${color}-50/30`}>
+ <div className="px-6 py-3 border-b border-gray-100 bg-gray-50/50">
  <h3 className="text-sm font-bold text-gray-800">{title}</h3>
  </div>
  <table className="w-full text-left">
@@ -347,20 +363,20 @@ const BilanTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  {items.map((item: any, idx: number) => (
  <tr key={idx} className="hover:bg-gray-50/50 transition-colors text-sm">
  <td className="px-6 py-2.5 font-mono text-xs font-semibold text-gray-600">
- {item.account?.code || item.code || '--'}
+ {item.account?.code || '--'}
  </td>
  <td className="px-6 py-2.5 text-gray-700">
- {item.account?.name || item.name || '--'}
+ {item.account?.name || '--'}
  </td>
  <td className="px-6 py-2.5 text-right font-medium text-gray-800">
- {formatXAF(item.balance || item.amount || 0)}
+ {formatXAF(item.amount || 0)}
  </td>
  </tr>
  ))}
  </tbody>
  <tfoot>
  <tr className="bg-gray-50 border-t-2 border-gray-200">
- <td className="px-6 py-3 font-bold text-gray-800"colSpan={2}>
+ <td className="px-6 py-3 font-bold text-gray-800" colSpan={2}>
  Total {title}
  </td>
  <td className="px-6 py-3 text-right font-bold text-gray-800">{formatXAF(total)}</td>
@@ -375,22 +391,22 @@ const BilanTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  {/* Balanced indicator */}
  <div className="flex justify-center">
  {data.isBalanced ? (
- <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-full">
+ <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-4 py-2 rounded-full">
  <CheckCircle size={16} />
- Bilan equilibre
+ Bilan équilibré
  </span>
  ) : (
- <span className="inline-flex items-center gap-2 text-sm font-semibold text-red-600 bg-red-50 px-4 py-2 rounded-full">
+ <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#283852] bg-[#283852]/10 px-4 py-2 rounded-full">
  <AlertTriangle size={16} />
- Bilan desequilibre (ecart: {formatXAF(Math.abs(data.totalAssets - data.totalLiabilities))})
+ Bilan déséquilibré — écart : {formatXAF(Math.abs(data.totalAssets - data.totalLiabilities))}
  </span>
  )}
  </div>
 
  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
- <SideTable title="Actif"items={data.assets || []} total={data.totalAssets} color="blue"/>
+ <SideTable title="Actif" items={data.assets || []} total={data.totalAssets} color="blue"/>
  <SideTable
- title="Passif"
+ title="Passif & Capitaux propres"
  items={data.liabilities || []}
  total={data.totalLiabilities}
  color="orange"
@@ -441,7 +457,7 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  }) => (
  <div className="bg-white rounded-2xl overflow-hidden">
  <div className="px-6 py-3 border-b border-gray-100 flex items-center gap-2">
- <Icon size={16} className={`text-${color}-500`} />
+ <Icon size={16} className="text-[#33cbcc]" />
  <h3 className="text-sm font-bold text-gray-800">{title}</h3>
  </div>
  <table className="w-full text-left">
@@ -456,20 +472,20 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  {items.map((item: any, idx: number) => (
  <tr key={idx} className="hover:bg-gray-50/50 transition-colors text-sm">
  <td className="px-6 py-2.5 font-mono text-xs font-semibold text-gray-600">
- {item.account?.code || item.code || '--'}
+ {item.account?.code || '--'}
  </td>
  <td className="px-6 py-2.5 text-gray-700">
- {item.account?.name || item.name || '--'}
+ {item.account?.name || '--'}
  </td>
  <td className="px-6 py-2.5 text-right font-medium text-gray-800">
- {formatXAF(item.balance || item.amount || 0)}
+ {formatXAF(item.amount || 0)}
  </td>
  </tr>
  ))}
  </tbody>
  <tfoot>
  <tr className="bg-gray-50 border-t-2 border-gray-200">
- <td className="px-6 py-3 font-bold text-gray-800"colSpan={2}>
+ <td className="px-6 py-3 font-bold text-gray-800" colSpan={2}>
  Total {title}
  </td>
  <td className="px-6 py-3 text-right font-bold text-gray-800">{formatXAF(total)}</td>
@@ -502,20 +518,20 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  className={`rounded-2xl p-6 ${
- isPositive ? 'bg-emerald-50 border-2 ' : 'bg-red-50 border-2 '
+ isPositive ? 'bg-[#33cbcc]/10 border-2 border-gray-200' : 'bg-[#283852]/10 border-2 border-gray-200'
  }`}
  >
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div
  className={`w-12 h-12 rounded-xl flex items-center justify-center ${
- isPositive ? 'bg-emerald-100' : 'bg-red-100'
+ isPositive ? 'bg-[#33cbcc]/20' : 'bg-[#283852]/20'
  }`}
  >
  {isPositive ? (
- <ArrowUp size={24} className="text-emerald-600"/>
+ <ArrowUp size={24} className="text-[#33cbcc]"/>
  ) : (
- <ArrowDown size={24} className="text-red-600"/>
+ <ArrowDown size={24} className="text-[#283852]"/>
  )}
  </div>
  <div>
@@ -526,7 +542,7 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  </div>
  </div>
  <span
- className={`text-2xl font-bold ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}
+ className={`text-2xl font-bold ${isPositive ? 'text-[#33cbcc]' : 'text-[#283852]'}`}
  >
  {isPositive ? '+' : '-'}{formatXAF(Math.abs(data.netIncome))}
  </span>
@@ -594,26 +610,53 @@ export default function Reports() {
  </select>
  </div>
 
- {/* Tabs */}
- <div className="bg-white rounded-2xl p-1.5 flex gap-1">
- {TABS.map((tab) => {
- const isActive = activeTab === tab.key;
- const Icon = tab.icon;
- return (
- <button
- key={tab.key}
- onClick={() => setActiveTab(tab.key)}
- className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
- isActive
- ? 'bg-[#33cbcc] text-white '
- : 'text-gray-500 hover:bg-gray-50'
- }`}
- >
- <Icon size={16} />
- {tab.label}
- </button>
- );
- })}
+ {/* Tab sections */}
+ <div className="flex gap-4">
+  {/* Rapports section */}
+  <div className="flex-1 bg-white rounded-2xl p-3">
+   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Rapports</p>
+   <div className="flex gap-1">
+    {SECTION_RAPPORTS.map((tab) => {
+     const isActive = activeTab === tab.key;
+     const Icon = tab.icon;
+     return (
+      <button
+       key={tab.key}
+       onClick={() => setActiveTab(tab.key)}
+       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+        isActive ? 'bg-[#33cbcc] text-white' : 'text-gray-500 hover:bg-gray-50'
+       }`}
+      >
+       <Icon size={16} />
+       {tab.label}
+      </button>
+     );
+    })}
+   </div>
+  </div>
+
+  {/* Etats section */}
+  <div className="flex-1 bg-white rounded-2xl p-3">
+   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Etats financiers</p>
+   <div className="flex gap-1">
+    {SECTION_ETATS.map((tab) => {
+     const isActive = activeTab === tab.key;
+     const Icon = tab.icon;
+     return (
+      <button
+       key={tab.key}
+       onClick={() => setActiveTab(tab.key)}
+       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+        isActive ? 'bg-[#283852] text-white' : 'text-gray-500 hover:bg-gray-50'
+       }`}
+      >
+       <Icon size={16} />
+       {tab.label}
+      </button>
+     );
+    })}
+   </div>
+  </div>
  </div>
 
  {/* Tab Content */}

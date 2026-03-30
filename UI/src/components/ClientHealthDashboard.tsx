@@ -10,12 +10,12 @@ import type { HealthStatus } from '../api/commercial/types';
 
 const getHealthBadgeConfig = (status: HealthStatus) => {
     const configs = {
-        AT_RISK: { color: 'bg-red-500', textColor: 'text-red-700', bgColor: 'bg-red-50', icon: AlertTriangle, priority: 1 },
-        ATTENTION_NEEDED: { color: 'bg-orange-500', textColor: 'text-orange-700', bgColor: 'bg-orange-50', icon: TrendingDown, priority: 2 },
-        NEEDS_FOLLOWUP: { color: 'bg-yellow-500', textColor: 'text-yellow-700', bgColor: 'bg-yellow-50', icon: Clock, priority: 3 },
-        GOOD: { color: 'bg-blue-500', textColor: 'text-blue-700', bgColor: 'bg-blue-50', icon: CheckCircle2, priority: 4 },
-        HEALTHY: { color: 'bg-green-500', textColor: 'text-green-700', bgColor: 'bg-green-50', icon: CheckCircle2, priority: 5 },
-        NEW: { color: 'bg-purple-500', textColor: 'text-purple-700', bgColor: 'bg-purple-50', icon: TrendingUp, priority: 6 },
+        AT_RISK: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: AlertTriangle, priority: 1 },
+        ATTENTION_NEEDED: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: TrendingDown, priority: 2 },
+        NEEDS_FOLLOWUP: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: Clock, priority: 3 },
+        GOOD: { color: 'bg-[#33cbcc]', textColor: 'text-[#33cbcc]', bgColor: 'bg-[#33cbcc]/10', icon: CheckCircle2, priority: 4 },
+        HEALTHY: { color: 'bg-[#33cbcc]', textColor: 'text-[#33cbcc]', bgColor: 'bg-[#33cbcc]/10', icon: CheckCircle2, priority: 5 },
+        NEW: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: TrendingUp, priority: 6 },
     };
     return configs[status] || configs.NEW;
 };

@@ -17,21 +17,21 @@ import { STAGE_COLORS } from '../../components/commercial/StageChangeModal';
 const ACTIVITY_TYPE_META: Record<ActivityType, { icon: any; label: string; color: string }> = {
     VISITE_PROSPECT: { icon: MapPin,       label: 'Visite Prospect',  color: '#33cbcc' },
     VISITE_CLIENT:   { icon: Users,        label: 'Visite Client',    color: '#22a0a1' },
-    APPEL:           { icon: Phone,        label: 'Appel',            color: '#3b82f6' },
-    EMAIL:           { icon: Mail,         label: 'Email',            color: '#8b5cf6' },
-    REUNION:         { icon: Users,        label: 'Réunion',          color: '#f59e0b' },
-    DEMO:            { icon: Monitor,      label: 'Démo',             color: '#ec4899' },
+    APPEL:           { icon: Phone,        label: 'Appel',            color: '#283852' },
+    EMAIL:           { icon: Mail,         label: 'Email',            color: '#283852' },
+    REUNION:         { icon: Users,        label: 'Réunion',          color: '#283852' },
+    DEMO:            { icon: Monitor,      label: 'Démo',             color: '#33cbcc' },
     RELANCE:         { icon: RefreshCw,    label: 'Relance',          color: '#f97316' },
     AUTRE:           { icon: Activity,     label: 'Autre',            color: '#6b7280' },
 };
 
 const HEALTH_META: Record<HealthStatus, { label: string; color: string; dot: string }> = {
-    HEALTHY:          { label: 'Actif',           color: 'text-green-600',  dot: 'bg-green-500' },
-    GOOD:             { label: 'Bien',            color: 'text-blue-600',   dot: 'bg-blue-400' },
-    NEEDS_FOLLOWUP:   { label: 'À relancer',      color: 'text-yellow-600', dot: 'bg-yellow-400' },
-    ATTENTION_NEEDED: { label: 'Attention',       color: 'text-orange-600', dot: 'bg-orange-500' },
-    AT_RISK:          { label: 'Urgent',          color: 'text-red-600',    dot: 'bg-red-500' },
-    NEW:              { label: 'Nouveau',         color: 'text-purple-600', dot: 'bg-purple-400' },
+    HEALTHY:          { label: 'Actif',           color: 'text-[#33cbcc]',  dot: 'bg-[#33cbcc]' },
+    GOOD:             { label: 'Bien',            color: 'text-[#33cbcc]',  dot: 'bg-[#33cbcc]' },
+    NEEDS_FOLLOWUP:   { label: 'À relancer',      color: 'text-[#283852]',  dot: 'bg-[#283852]' },
+    ATTENTION_NEEDED: { label: 'Attention',       color: 'text-[#283852]',  dot: 'bg-[#283852]' },
+    AT_RISK:          { label: 'Urgent',          color: 'text-[#283852]',  dot: 'bg-[#283852]' },
+    NEW:              { label: 'Nouveau',         color: 'text-[#283852]',  dot: 'bg-[#283852]/60' },
 };
 
 const HEALTH_ORDER: Record<HealthStatus, number> = {
@@ -260,8 +260,8 @@ function ActivityItem({ activity }: { activity: LeadActivity }) {
                     <span className="text-xs font-semibold text-gray-700">{meta.label}</span>
                     <div className="flex items-center gap-1.5 shrink-0">
                         <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                            isCompleted ? 'bg-green-100 text-green-700' :
-                            isPlanned   ? 'bg-blue-100 text-blue-700' :
+                            isCompleted ? 'bg-[#283852] text-white' :
+                            isPlanned   ? 'bg-[#283852]/10 text-[#283852]' :
                                           'bg-gray-100 text-gray-500'
                         }`}>
                             {isCompleted ? 'Réalisé' : isPlanned ? 'Planifié' : 'Annulé'}
@@ -342,7 +342,7 @@ function LeadCard({
             </div>
 
             {lead.nextAction && (
-                <div className={`flex items-center gap-1 mt-2 text-[11px] ${isOverdue ? 'text-red-500' : 'text-gray-500'}`}>
+                <div className={`flex items-center gap-1 mt-2 text-[11px] ${isOverdue ? 'text-[#283852]' : 'text-gray-500'}`}>
                     {isOverdue ? <AlertTriangle size={10} className="shrink-0" /> : <Calendar size={10} className="shrink-0" />}
                     <span className="truncate">{lead.nextAction}</span>
                     {lead.nextActionDeadline && (
@@ -438,7 +438,7 @@ function ActivityPanel({
                 {lead.nextAction && (
                     <div className={`mt-3 flex items-center gap-2 px-3 py-2 rounded-xl text-xs ${
                         lead.nextActionDeadline && new Date(lead.nextActionDeadline) < new Date()
-                            ? 'bg-red-50 text-red-700'
+                            ? 'bg-[#283852]/10 text-[#283852]'
                             : 'bg-[#33cbcc]/10 text-[#33cbcc]'
                     }`}>
                         {lead.nextActionDeadline && new Date(lead.nextActionDeadline) < new Date()
@@ -555,7 +555,7 @@ export default function LeadFollowUp() {
                             {t('commercial.followUp.title', 'Suivi des leads')}
                         </h1>
                         {urgentCount > 0 && (
-                            <p className="text-xs text-red-500 font-medium mt-0.5">
+                            <p className="text-xs text-[#283852] font-medium mt-0.5">
                                 {urgentCount} lead{urgentCount > 1 ? 's' : ''} nécessite{urgentCount > 1 ? 'nt' : ''} attention
                             </p>
                         )}

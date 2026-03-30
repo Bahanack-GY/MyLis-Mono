@@ -46,7 +46,7 @@ const TransferHistoryModal = ({ employeeId, onClose }: TransferHistoryModalProps
                     <div className="overflow-y-auto max-h-[calc(80vh-88px)] p-6">
                         {isLoading ? (
                             <div className="text-center py-12">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#33cbcc] mx-auto" />
                             </div>
                         ) : history.length === 0 ? (
                             <div className="text-center py-12">
@@ -63,8 +63,8 @@ const TransferHistoryModal = ({ employeeId, onClose }: TransferHistoryModalProps
                                         )}
 
                                         <div className="flex gap-4">
-                                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                                                <ArrowRight className="w-5 h-5 text-blue-600" />
+                                            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
+                                                <ArrowRight className="w-5 h-5 text-[#33cbcc]" />
                                             </div>
 
                                             <div className="flex-1 bg-gray-50 rounded-lg p-4">

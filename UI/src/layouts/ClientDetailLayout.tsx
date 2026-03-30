@@ -65,7 +65,7 @@ const ClientDetailLayout = () => {
 
     if (isLoading) {
         return (
-            <div className="flex h-screen bg-blue-100 items-center justify-center">
+            <div className="flex h-screen bg-gray-100 items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
@@ -123,7 +123,7 @@ const ClientDetailLayout = () => {
     };
 
     return (
-        <div className="flex h-screen bg-blue-100 overflow-hidden">
+        <div className="flex h-screen bg-gray-100 overflow-hidden">
             <ClientDetailSidebar
                 client={client}
                 activeTab={activeTab}

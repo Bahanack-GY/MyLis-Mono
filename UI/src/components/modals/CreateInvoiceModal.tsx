@@ -222,7 +222,7 @@ export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
                                         <button
                                             type="button"
                                             onClick={() => removeCustomColumn(col.id)}
-                                            className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all shrink-0"
+                                            className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#283852] transition-all shrink-0"
                                         >
                                             <X size={10} />
                                         </button>
@@ -285,7 +285,7 @@ export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
                                                     <button
                                                         type="button"
                                                         onClick={() => removeItem(idx)}
-                                                        className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+                                                        className="p-1.5 rounded-lg text-gray-400 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
                                                     >
                                                         <Trash2 size={14} />
                                                     </button>

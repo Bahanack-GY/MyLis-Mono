@@ -369,6 +369,14 @@ export const useDailyHours = (employeeId: string, dateFrom: string, dateTo: stri
         enabled: !!employeeId && !!dateFrom && !!dateTo,
     });
 
+export const useGlobalDistribution = (from?: string, to?: string) =>
+    useQuery({
+        queryKey: ['tasks', 'global-distribution', from, to] as const,
+        queryFn: () => tasksApi.getGlobalDistribution(from, to),
+        enabled: !!from && !!to,
+        staleTime: 60_000,
+    });
+
 export const useTransferTask = () => {
     const qc = useQueryClient();
     return useMutation({

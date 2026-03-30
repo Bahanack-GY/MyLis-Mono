@@ -214,9 +214,9 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                         </div>
                         <div>
                             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('invoices.detail.dueOn')}</p>
-                            <p className={`text-sm mt-1 ${isOverdue ? 'text-red-500 font-semibold' : 'text-gray-600'}`}>
+                            <p className={`text-sm mt-1 ${isOverdue ? 'text-[#283852] font-semibold' : 'text-gray-600'}`}>
                                 {formatDate(invoice.dueDate)}
-                                {isOverdue && <span className="ml-2 text-[10px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded-full">Overdue</span>}
+                                {isOverdue && <span className="ml-2 text-[10px] bg-[#283852]/10 text-[#283852] px-1.5 py-0.5 rounded-full">Overdue</span>}
                             </p>
                         </div>
                         {invoice.sentAt && (
@@ -228,7 +228,7 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                         {invoice.paidAt && (
                             <div>
                                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('invoices.detail.paidOn')}</p>
-                                <p className="text-sm text-green-600 font-medium mt-1">{formatDate(invoice.paidAt)}</p>
+                                <p className="text-sm text-[#33cbcc] font-medium mt-1">{formatDate(invoice.paidAt)}</p>
                             </div>
                         )}
                     </div>
@@ -327,7 +327,7 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                                 <button
                                     onClick={handleExportReceipt}
                                     disabled={isExportingReceipt}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
                                 >
                                     {isExportingReceipt ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
                                     {t('invoices.detail.exportReceipt')}
@@ -341,7 +341,7 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                                     <button
                                         onClick={() => deleteInvoice.mutate(invoice.id, { onSuccess: onClose })}
                                         disabled={deleteInvoice.isPending}
-                                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+                                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
                                     >
                                         {deleteInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
                                         {t('invoices.detail.delete')}
@@ -349,7 +349,7 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                                     <button
                                         onClick={() => sendInvoice.mutate(invoice.id, { onSuccess: onClose })}
                                         disabled={sendInvoice.isPending}
-                                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#3B82F6] hover:bg-[#2563EB] transition-colors shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852]/80 transition-colors shadow-lg shadow-[#283852]/20 disabled:opacity-50"
                                     >
                                         {sendInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
                                         {t('invoices.detail.send')}
@@ -361,7 +361,7 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                                     <button
                                         onClick={() => rejectInvoice.mutate(invoice.id, { onSuccess: onClose })}
                                         disabled={rejectInvoice.isPending}
-                                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+                                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
                                     >
                                         {rejectInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
                                         {t('invoices.detail.reject')}
@@ -369,7 +369,7 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                                     <button
                                         onClick={() => setShowConfirmPay(true)}
                                         disabled={payInvoice.isPending}
-                                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#10B981] hover:bg-[#059669] transition-colors shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50"
                                     >
                                         {payInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                                         {t('invoices.detail.pay')}
@@ -399,8 +399,8 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                             className="bg-[#1a1f2e] border border-gray-700/50 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl"
                         >
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2.5 rounded-xl bg-emerald-500/10">
-                                    <CheckCircle size={20} className="text-emerald-400" />
+                                <div className="p-2.5 rounded-xl bg-[#33cbcc]/10">
+                                    <CheckCircle size={20} className="text-[#33cbcc]" />
                                 </div>
                                 <h3 className="text-base font-semibold text-white">{t('invoices.detail.pay')}</h3>
                             </div>
@@ -415,7 +415,7 @@ const InvoiceDetailModal = ({ invoice, onClose }: { invoice: Invoice; onClose: (
                                 <button
                                     onClick={() => { payInvoice.mutate(invoice.id, { onSuccess: onClose }); setShowConfirmPay(false); }}
                                     disabled={payInvoice.isPending}
-                                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#10B981] hover:bg-[#059669] transition-colors shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50"
                                 >
                                     {payInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                                     {t('invoices.detail.pay')}
@@ -683,10 +683,10 @@ const Invoices = () => {
                                     </span>
                                 </div>
                                 {/* Due Date */}
-                                <div className={`col-span-2 flex items-center gap-1.5 text-xs ${isOverdue ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
+                                <div className={`col-span-2 flex items-center gap-1.5 text-xs ${isOverdue ? 'text-[#283852] font-semibold' : 'text-gray-400'}`}>
                                     <Calendar size={12} />
                                     {formatDate(invoice.dueDate)}
-                                    {isOverdue && <AlertTriangle size={12} className="text-red-500" />}
+                                    {isOverdue && <AlertTriangle size={12} className="text-[#283852]" />}
                                 </div>
                                 {/* Actions */}
                                 <div className="col-span-1 flex justify-end gap-1">

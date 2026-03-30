@@ -43,13 +43,13 @@ export class EmployeesController {
         return this.employeesService.findAll(deptId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
     @Get('leaderboard')
     getLeaderboard(@Query('limit') limit?: string) {
         return this.employeesService.getLeaderboard(limit ? parseInt(limit, 10) : 5);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
     @Get('birthdays/today')
     getTodayBirthdays() {
         return this.employeesService.getTodayBirthdays();
@@ -123,10 +123,10 @@ export class EmployeesController {
     @Patch(':id/promote')
     async promote(
         @Param('id') id: string,
-        @Body() dto: { toPositionId: string; reason?: string },
+        @Body() dto: { toRole: string; reason?: string },
         @Request() req,
     ) {
-        return this.employeesService.promoteEmployee(id, dto.toPositionId, req.user.userId, dto.reason);
+        return this.employeesService.promoteEmployee(id, dto.toRole, req.user.userId, dto.reason);
     }
 
     @Get(':id/promotion-history')

@@ -97,8 +97,8 @@ function scrollToMessage(messageId: string) {
     const el = document.getElementById(`msg-${messageId}`);
     if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        el.classList.add('bg-yellow-50');
-        setTimeout(() => el.classList.remove('bg-yellow-50'), 1500);
+        el.classList.add('bg-[#33cbcc]/10');
+        setTimeout(() => el.classList.remove('bg-[#33cbcc]/10'), 1500);
     }
 }
 
@@ -131,9 +131,9 @@ const formatFCFA = (amount: number) =>
 
 const IMPORTANCE_LABELS: Record<string, { label: string; color: string }> = {
     BARELY: { label: 'Faible', color: 'bg-gray-100 text-gray-500' },
-    IMPORTANT: { label: 'Important', color: 'bg-blue-50 text-blue-600' },
-    VERY_IMPORTANT: { label: 'Très important', color: 'bg-orange-50 text-orange-600' },
-    URGENT: { label: 'Urgent', color: 'bg-red-50 text-red-600' },
+    IMPORTANT: { label: 'Important', color: 'bg-[#283852]/10 text-[#283852]' },
+    VERY_IMPORTANT: { label: 'Très important', color: 'bg-[#283852]/10 text-[#283852]' },
+    URGENT: { label: 'Urgent', color: 'bg-[#283852]/10 text-[#283852]' },
 };
 
 /* ─── Demand Card Bubble ───────────────────────────────── */
@@ -232,7 +232,7 @@ const DemandCardBubble = ({
                                 <div className="flex gap-2">
                                     <button
                                         onClick={() => setShowRejectInput(true)}
-                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-red-400 bg-red-500/15 hover:bg-red-500/25 transition-colors"
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-white/70 bg-white/10 hover:bg-white/20 transition-colors"
                                     >
                                         <XCircle size={14} />
                                         {t('demands.reject')}
@@ -240,7 +240,7 @@ const DemandCardBubble = ({
                                     <button
                                         disabled={validateDemand.isPending}
                                         onClick={handleValidate}
-                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-green-400 bg-green-500/15 hover:bg-green-500/25 transition-colors"
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/20 hover:bg-[#33cbcc]/30 transition-colors"
                                     >
                                         {validateDemand.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
                                         {t('demands.validate')}
@@ -253,7 +253,7 @@ const DemandCardBubble = ({
                                         onChange={(e) => setRejectReason(e.target.value)}
                                         placeholder={t('demands.rejectionReasonPlaceholder')}
                                         rows={2}
-                                        className="w-full bg-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-red-400/50 resize-none"
+                                        className="w-full bg-white/10 rounded-lg px-3 py-2 text-xs text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30 resize-none"
                                         autoFocus
                                     />
                                     <div className="flex gap-2">
@@ -266,7 +266,7 @@ const DemandCardBubble = ({
                                         <button
                                             disabled={rejectDemand.isPending}
                                             onClick={handleReject}
-                                            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-semibold text-red-400 bg-red-500/15 hover:bg-red-500/25 transition-colors"
+                                            className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-semibold text-white/70 bg-white/10 hover:bg-white/20 transition-colors"
                                         >
                                             {rejectDemand.isPending ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
                                             {t('demands.confirmReject')}
@@ -279,8 +279,8 @@ const DemandCardBubble = ({
                         <div className="px-4 pb-3">
                             <div className={`text-center text-xs font-bold py-1.5 rounded-lg ${
                                 currentStatus === 'VALIDATED'
-                                    ? 'text-green-400 bg-green-500/15'
-                                    : 'text-red-400 bg-red-500/15'
+                                    ? 'text-[#33cbcc] bg-[#33cbcc]/20'
+                                    : 'text-white/60 bg-white/10'
                             }`}>
                                 {currentStatus === 'VALIDATED' ? '✓ Validée' : '✗ Rejetée'}
                             </div>
@@ -438,7 +438,7 @@ const ChannelSidebar = ({
                             </span>
                         </div>
                         {isOnline && (
-                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-400 border-2 border-[#2b3548]" />
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#33cbcc] border-2 border-[#2b3548]" />
                         )}
                     </div>
                 ) : (
@@ -664,7 +664,7 @@ const AttachmentRenderer = ({
                     if (isPdfType(att.fileType)) {
                         return (
                             <div key={i} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg ${isOwn ? 'bg-white/10' : 'bg-gray-200/60'} max-w-[300px]`}>
-                                <FileText size={20} className="text-red-500 shrink-0" />
+                                <FileText size={20} className="text-[#283852] shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <p className={`text-xs font-medium truncate ${isOwn ? 'text-white' : 'text-gray-700'}`}>{att.fileName}</p>
                                     <p className={`text-[10px] ${isOwn ? 'text-white/50' : 'text-gray-400'}`}>{formatFileSize(att.size)}</p>
@@ -840,7 +840,7 @@ const MessageBubble = ({
                         </button>
                     )}
                     {replyContext}
-                    <div className={`text-white px-4 py-2 rounded-2xl rounded-tr-sm ${message.failed ? 'bg-red-500' : 'bg-[#283852]'}`}>
+                    <div className={`text-white px-4 py-2 rounded-2xl rounded-tr-sm ${message.failed ? 'bg-[#283852]/60' : 'bg-[#283852]'}`}>
                         {hasContent && (
                             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                                 {renderContent(message.content, true)}
@@ -859,11 +859,11 @@ const MessageBubble = ({
                             </span>
                         )}
                         {message.failed && (
-                            <span className="flex items-center gap-1 text-[10px] text-red-500">
+                            <span className="flex items-center gap-1 text-[10px] text-[#283852]">
                                 <AlertCircle size={10} />
                                 Échec
                                 {onRetry && (
-                                    <button onClick={onRetry} className="ml-1 hover:text-red-700 transition-colors">
+                                    <button onClick={onRetry} className="ml-1 hover:text-[#283852]/70 transition-colors">
                                         <RotateCcw size={10} />
                                     </button>
                                 )}
@@ -971,7 +971,7 @@ const MembersPanel = ({
                             </span>
                         </div>
                     )}
-                    <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${isOnline ? 'bg-green-400' : 'bg-gray-300'}`} />
+                    <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${isOnline ? 'bg-[#33cbcc]' : 'bg-gray-300'}`} />
                 </div>
                 <span className={`text-sm truncate ${isOnline ? 'text-gray-700' : 'text-gray-400'}`}>
                     {m.firstName} {m.lastName}
@@ -992,7 +992,7 @@ const MembersPanel = ({
             <div className="flex-1 overflow-y-auto py-2 px-2">
                 {online.length > 0 && (
                     <>
-                        <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-green-500">
+                        <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#33cbcc]">
                             {t('chat.online')} — {online.length}
                         </p>
                         {online.map(m => renderMember(m, true))}
@@ -1252,7 +1252,7 @@ const Messages = () => {
     }
 
     return (
-        <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-blue-100 overflow-hidden">
+        <div className="flex h-[calc(100vh-4rem)] md:h-screen bg-gray-100 overflow-hidden">
             {/* Channel Sidebar — full width on mobile, fixed w-64 on desktop */}
             <div className={`${mobileShowChat ? 'hidden' : 'flex'} md:flex w-full md:w-64 shrink-0`}>
                 <ChannelSidebar
@@ -1446,7 +1446,7 @@ const Messages = () => {
                                                         )}
                                                         <button
                                                             onClick={() => removePendingFile(i)}
-                                                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center opacity-0 group-hover/file:opacity-100 transition-opacity"
+                                                            className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#283852] text-white flex items-center justify-center opacity-0 group-hover/file:opacity-100 transition-opacity"
                                                         >
                                                             <X size={12} />
                                                         </button>

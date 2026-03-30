@@ -160,7 +160,7 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                                     <button
                                         onClick={() => handleRemoveMission(idx)}
                                         aria-label={`${t('common.remove', 'Remove')} ${mission}`}
-                                        className="text-gray-400 hover:text-rose-500 transition-colors p-1"
+                                        className="text-gray-400 hover:text-[#283852] transition-colors p-1"
                                     >
                                         <Trash2 size={14} aria-hidden="true" />
                                     </button>

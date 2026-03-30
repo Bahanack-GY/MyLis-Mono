@@ -29,23 +29,29 @@ import {
 } from '../../api/accounting/api';
 import type { JournalEntry, JournalEntryLine, Journal, Account } from '../../api/accounting/types';
 import { CreateInvoiceModal } from '../../components/modals/CreateInvoiceModal';
+import { useClients } from '../../api/clients/hooks';
+import axios from 'axios';
+
+const API = import.meta.env.VITE_API_URL || '';
+const useSuppliersList = () =>
+ useQuery({ queryKey: ['suppliers'], queryFn: () => axios.get(`${API}/suppliers`).then(r => r.data as { id: string; name: string }[]) });
 
 /* ------------------------------------------------------------------ */
 /* Constants */
 /* ------------------------------------------------------------------ */
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
- DRAFT: { bg: 'bg-yellow-50', text: 'text-yellow-700' },
- VALIDATED: { bg: 'bg-emerald-50', text: 'text-emerald-700' },
+ DRAFT: { bg: 'bg-[#283852]/10', text: 'text-[#283852]/70' },
+ VALIDATED: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]' },
 };
 
 const SOURCE_COLORS: Record<string, { bg: string; text: string }> = {
- MANUAL: { bg: 'bg-blue-50', text: 'text-blue-700' },
- INVOICE: { bg: 'bg-purple-50', text: 'text-purple-700' },
- EXPENSE: { bg: 'bg-orange-50', text: 'text-orange-700' },
- SALARY: { bg: 'bg-red-50', text: 'text-red-700' },
- TAX: { bg: 'bg-teal-50', text: 'text-teal-700' },
- CREDIT_NOTE: { bg: 'bg-pink-50', text: 'text-pink-700' },
+ MANUAL: { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
+ INVOICE: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]' },
+ EXPENSE: { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
+ SALARY: { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
+ TAX: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]' },
+ CREDIT_NOTE: { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
 };
 
 const formatXAF = (amount: number) =>
@@ -140,6 +146,8 @@ const CreateEntryModal = ({
  accounts: Account[];
 }) => {
  const createMut = useCreateJournalEntry();
+ const { data: clients = [] } = useClients();
+ const { data: suppliers = [] } = useSuppliersList();
 
  const [form, setForm] = useState({
  journalId: '',
@@ -147,6 +155,24 @@ const CreateEntryModal = ({
  description: '',
  reference: '',
  });
+ const [thirdPartyId, setThirdPartyId] = useState('');
+
+ const selectedJournal = journals.find(j => j.id === form.journalId);
+ const journalCode = selectedJournal?.code ?? '';
+ const isVente = journalCode === 'VTE';
+ const isAchat = journalCode === 'ACH';
+ const showThirdParty = isVente || isAchat;
+
+ const handleThirdPartyChange = (id: string) => {
+  setThirdPartyId(id);
+  if (!id) return;
+  const name = isVente
+   ? clients.find((c: any) => c.id === id)?.name
+   : suppliers.find((s: any) => s.id === id)?.name;
+  if (name && !form.description.trim()) {
+   setForm(p => ({ ...p, description: isVente ? `Vente - ${name}` : `Achat - ${name}` }));
+  }
+ };
 
  const [lines, setLines] = useState<EntryLine[]>([
  { accountId: '', debit: '', credit: '', label: '' },
@@ -242,7 +268,7 @@ const CreateEntryModal = ({
  <label className={labelCls}>Journal</label>
  <select
  value={form.journalId}
- onChange={(e) => setForm((p) => ({ ...p, journalId: e.target.value }))}
+ onChange={(e) => { setForm((p) => ({ ...p, journalId: e.target.value })); setThirdPartyId(''); }}
  className={inputCls + ' appearance-none cursor-pointer'}
  >
  <option value="">-- Selectionner --</option>
@@ -266,6 +292,25 @@ const CreateEntryModal = ({
  />
  </div>
  </div>
+
+ {showThirdParty && (
+  <div>
+   <label className={labelCls}>
+    {isVente ? '🧑‍💼 Client' : '🏭 Fournisseur'}
+   </label>
+   <select
+    value={thirdPartyId}
+    onChange={(e) => handleThirdPartyChange(e.target.value)}
+    className={inputCls + ' appearance-none cursor-pointer'}
+   >
+    <option value="">-- {isVente ? 'Sélectionner un client' : 'Sélectionner un fournisseur'} --</option>
+    {isVente
+     ? clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)
+     : suppliers.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)
+    }
+   </select>
+  </div>
+ )}
 
  <div className="grid grid-cols-2 gap-4">
  <div>
@@ -367,7 +412,7 @@ const CreateEntryModal = ({
  <button
  type="button"
  onClick={() => removeLine(idx)}
- className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+ className="p-1.5 rounded-lg text-gray-400 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
  >
  <MinusCircle size={14} />
  </button>
@@ -390,12 +435,12 @@ const CreateEntryModal = ({
  <div className="col-span-3">
  {totalDebit > 0 || totalCredit > 0 ? (
  isBalanced ? (
- <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+ <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-2 py-1 rounded-full">
  <CheckCircle size={12} />
  Equilibre
  </span>
  ) : (
- <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">
+ <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#283852] bg-[#283852]/10 px-2 py-1 rounded-full">
  <AlertTriangle size={12} />
  Desequilibre: {formatXAF(Math.abs(totalDebit - totalCredit))}
  </span>
@@ -600,7 +645,7 @@ const EntryDetailModal = ({
  <button
  onClick={() => deleteMut.mutate(entry.id, { onSuccess: onClose })}
  disabled={deleteMut.isPending}
- className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-red-500 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+ className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
  >
  {deleteMut.isPending ? (
  <Loader2 size={14} className="animate-spin"/>
@@ -612,7 +657,7 @@ const EntryDetailModal = ({
  <button
  onClick={() => validateMut.mutate(entry.id, { onSuccess: onClose })}
  disabled={validateMut.isPending}
- className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition-colors disabled:opacity-50"
+ className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  {validateMut.isPending ? (
  <Loader2 size={14} className="animate-spin"/>
@@ -848,7 +893,7 @@ export default function JournalEntries() {
  }}
  disabled={validateMut.isPending}
  title="Valider"
- className="p-1.5 rounded-lg text-emerald-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#2bb5b6] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <CheckCircle size={14} />
  </button>
@@ -859,7 +904,7 @@ export default function JournalEntries() {
  }}
  disabled={deleteMut.isPending}
  title="Supprimer"
- className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <Trash2 size={14} />
  </button>

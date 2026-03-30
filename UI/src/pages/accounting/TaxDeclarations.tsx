@@ -70,9 +70,9 @@ const MONTHS = [
 ];
 
 const STATUS_COLORS: Record<string, { text: string; label: string }> = {
- DRAFT: { text: 'text-yellow-700', label: 'Brouillon' },
- VALIDATED: { text: 'text-blue-700', label: 'Validee' },
- FILED: { text: 'text-emerald-700', label: 'Deposee' },
+ DRAFT: { text: 'text-[#283852]/70', label: 'Brouillon' },
+ VALIDATED: { text: 'text-[#283852]', label: 'Validee' },
+ FILED: { text: 'text-[#33cbcc]', label: 'Deposee' },
 };
 
 const TYPE_CONFIG: Record<string, { text: string; icon: any; label: string; full: string }> = {
@@ -581,7 +581,7 @@ export default function TaxDeclarations() {
  {upcoming && upcoming.length > 0 && (
  <div className="bg-white rounded-2xl p-6">
  <div className="flex items-center gap-2 mb-4">
- <Clock size={18} className="text-amber-500"/>
+ <Clock size={18} className="text-[#283852]"/>
  <h3 className="text-sm font-bold text-gray-800">Prochaines echeances</h3>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -596,9 +596,9 @@ export default function TaxDeclarations() {
  transition={{ delay: i * 0.1 }}
  className={`rounded-xl p-4 border-2 ${
  isUrgent
- ? ' bg-red-50/50'
+ ? 'border-gray-200 bg-[#283852]/5'
  : isWarning
- ? ' bg-amber-50/50'
+ ? 'border-gray-200 bg-[#283852]/5'
  : 'border-gray-100 bg-gray-50/50'
  }`}
  >
@@ -608,14 +608,14 @@ export default function TaxDeclarations() {
  >
  {obl.type}
  </span>
- {isUrgent && <AlertTriangle size={14} className="text-red-500"/>}
+ {isUrgent && <AlertTriangle size={14} className="text-[#283852]"/>}
  </div>
  <p className="text-sm text-gray-700 mb-1">{obl.description}</p>
  <div className="flex items-center justify-between">
  <span className="text-xs text-gray-400">{formatDate(obl.dueDate)}</span>
  <span
  className={`text-xs font-semibold ${
- isUrgent ? 'text-red-600' : isWarning ? 'text-amber-600' : 'text-gray-500'
+ isUrgent ? 'text-[#283852]' : isWarning ? 'text-[#283852]/70' : 'text-gray-500'
  }`}
  >
  {obl.daysUntilDue} jour{obl.daysUntilDue > 1 ? 's' : ''}
@@ -678,12 +678,12 @@ export default function TaxDeclarations() {
  <div className="col-span-2">
  <span
  className={`text-xs ${
- isOverdue ? 'text-red-500 font-semibold' : 'text-gray-500'
+ isOverdue ? 'text-[#283852] font-semibold' : 'text-gray-500'
  }`}
  >
  {formatDate(decl.dueDate)}
  {isOverdue && (
- <AlertTriangle size={10} className="inline ml-1 text-red-500"/>
+ <AlertTriangle size={10} className="inline ml-1 text-[#283852]"/>
  )}
  </span>
  </div>

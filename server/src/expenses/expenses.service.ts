@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Expense } from '../models/expense.model';
 import { Project } from '../models/project.model';
+import { Department } from '../models/department.model';
 import { JournalEngineService } from '../accounting/journal-engine.service';
 import { Op } from 'sequelize';
 
@@ -12,6 +13,8 @@ export class ExpensesService {
         private expenseModel: typeof Expense,
         @InjectModel(Project)
         private projectModel: typeof Project,
+        @InjectModel(Department)
+        private departmentModel: typeof Department,
         private journalEngine: JournalEngineService,
     ) { }
 
@@ -26,13 +29,17 @@ export class ExpensesService {
         return expense;
     }
 
-    async findAll(projectId?: string, page = 1, limit = 10) {
+    async findAll(projectId?: string, departmentId?: string, page = 1, limit = 10) {
         const where: any = {};
         if (projectId) where.projectId = projectId;
+        if (departmentId) where.departmentId = departmentId;
         const offset = (page - 1) * limit;
         const { count, rows } = await this.expenseModel.findAndCountAll({
             where,
-            include: [{ model: Project, attributes: ['id', 'name'], required: false }],
+            include: [
+                { model: Project, attributes: ['id', 'name'], required: false },
+                { model: Department, attributes: ['id', 'name'], required: false },
+            ],
             order: [['date', 'DESC'], ['createdAt', 'DESC']],
             limit,
             offset,
@@ -68,20 +75,12 @@ export class ExpensesService {
         const endDate = `${currentYear}-12-31`;
 
         const expenseWhere: any = { date: { [Op.between]: [startDate, endDate] } };
-        const expenseInclude: any[] = [];
-
         if (departmentId) {
-            expenseInclude.push({
-                model: this.projectModel,
-                attributes: [],
-                where: { departmentId },
-                required: true,
-            });
+            expenseWhere.departmentId = departmentId;
         }
 
         const expenses = await this.expenseModel.findAll({
             where: expenseWhere,
-            include: expenseInclude,
         });
 
         // Sum of salary expenses that were actually paid (category = 'Salaire') in this year

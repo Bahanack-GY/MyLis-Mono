@@ -372,7 +372,7 @@ export default function FiscalYears() {
  <span
  className={`text-xs font-semibold px-3 py-1 rounded-full ${
  isOpen
- ? 'bg-emerald-50 text-emerald-700'
+ ? 'bg-[#33cbcc]/10 text-[#33cbcc]'
  : 'bg-gray-100 text-gray-500'
  }`}
  >
@@ -417,7 +417,7 @@ export default function FiscalYears() {
  {isOpen ? (
  <button
  onClick={() => setClosingId(fy.id)}
- className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-colors"
+ className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors"
  >
  <Lock size={14} />
  Cloturer
@@ -425,7 +425,7 @@ export default function FiscalYears() {
  ) : (
  <button
  onClick={() => setReopeningId(fy.id)}
- className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors"
+ className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
  >
  <Unlock size={14} />
  Reouvrir
@@ -452,10 +452,10 @@ export default function FiscalYears() {
  title="Cloturer l'exercice"
  message="Etes-vous sur de vouloir cloturer cet exercice fiscal ? Les ecritures ne pourront plus etre modifiees."
  icon={Lock}
- iconBg="bg-amber-50"
- iconColor="text-amber-500"
+ iconBg="bg-[#283852]/10"
+ iconColor="text-[#283852]"
  confirmLabel="Cloturer"
- confirmColor="bg-amber-500 hover:bg-amber-600"
+ confirmColor="bg-[#283852] hover:bg-[#283852]/90"
  onClose={() => setClosingId(null)}
  onConfirm={() =>
  closeMut.mutate(closingId, { onSuccess: () => setClosingId(null) })
@@ -468,10 +468,10 @@ export default function FiscalYears() {
  title="Reouvrir l'exercice"
  message="Etes-vous sur de vouloir reouvrir cet exercice fiscal ? Les ecritures pourront a nouveau etre modifiees."
  icon={Unlock}
- iconBg="bg-blue-50"
- iconColor="text-blue-500"
+ iconBg="bg-[#33cbcc]/10"
+ iconColor="text-[#33cbcc]"
  confirmLabel="Reouvrir"
- confirmColor="bg-blue-500 hover:bg-blue-600"
+ confirmColor="bg-[#33cbcc] hover:bg-[#2bb5b6]"
  onClose={() => setReopeningId(null)}
  onConfirm={() =>
  reopenMut.mutate(reopeningId, { onSuccess: () => setReopeningId(null) })

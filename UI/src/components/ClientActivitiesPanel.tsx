@@ -9,12 +9,12 @@ import type { HealthStatus, ActivityType } from '../api/commercial/types';
 
 const getHealthBadgeStyles = (status: HealthStatus) => {
     const styles = {
-        HEALTHY: { bg: 'bg-green-100', text: 'text-green-700', icon: CheckCircle2, border: 'border-green-200' },
-        GOOD: { bg: 'bg-blue-100', text: 'text-blue-700', icon: CheckCircle2, border: 'border-blue-200' },
-        NEEDS_FOLLOWUP: { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: Clock, border: 'border-yellow-200' },
-        ATTENTION_NEEDED: { bg: 'bg-orange-100', text: 'text-orange-700', icon: AlertCircle, border: 'border-orange-200' },
-        AT_RISK: { bg: 'bg-red-100', text: 'text-red-700', icon: AlertCircle, border: 'border-red-200' },
-        NEW: { bg: 'bg-purple-100', text: 'text-purple-700', icon: TrendingUp, border: 'border-purple-200' },
+        HEALTHY: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: CheckCircle2, border: 'border-gray-200' },
+        GOOD: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: CheckCircle2, border: 'border-gray-200' },
+        NEEDS_FOLLOWUP: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Clock, border: 'border-gray-200' },
+        ATTENTION_NEEDED: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: AlertCircle, border: 'border-gray-200' },
+        AT_RISK: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: AlertCircle, border: 'border-gray-200' },
+        NEW: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: TrendingUp, border: 'border-gray-200' },
     };
     return styles[status] || styles.NEW;
 };
@@ -233,9 +233,9 @@ export default function ClientActivitiesPanel({ clientId }: { clientId: string }
                                         className="flex gap-4 pb-4 border-b border-gray-100 last:border-0"
                                     >
                                         <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                                            isCompleted ? 'bg-green-100' : 'bg-gray-100'
+                                            isCompleted ? 'bg-[#33cbcc]/10' : 'bg-gray-100'
                                         }`}>
-                                            <ActivityIcon size={18} className={isCompleted ? 'text-green-600' : 'text-gray-500'} />
+                                            <ActivityIcon size={18} className={isCompleted ? 'text-[#33cbcc]' : 'text-gray-500'} />
                                         </div>
 
                                         <div className="flex-1 min-w-0">
@@ -276,16 +276,16 @@ export default function ClientActivitiesPanel({ clientId }: { clientId: string }
                                             </div>
 
                                             {activity.result && isCompleted && (
-                                                <div className="mt-2 p-2 bg-green-50 rounded-lg">
-                                                    <p className="text-xs text-green-700">
+                                                <div className="mt-2 p-2 bg-[#33cbcc]/10 rounded-lg">
+                                                    <p className="text-xs text-[#33cbcc]">
                                                         <strong>{t('commercial.clientActivities.result', 'Résultat')}:</strong> {activity.result}
                                                     </p>
                                                 </div>
                                             )}
 
                                             {activity.nextAction && (
-                                                <div className="mt-2 p-2 bg-blue-50 rounded-lg">
-                                                    <p className="text-xs text-blue-700">
+                                                <div className="mt-2 p-2 bg-[#283852]/10 rounded-lg">
+                                                    <p className="text-xs text-[#283852]">
                                                         <strong>{t('commercial.clientActivities.nextAction', 'Prochaine action')}:</strong> {activity.nextAction}
                                                     </p>
                                                 </div>

@@ -1,5 +1,5 @@
 import api from '../config';
-import type { Department, CreateDepartmentDto, UpdateDepartmentDto, DepartmentGoal, CreateDepartmentGoalDto, UpdateDepartmentGoalDto, DepartmentService, CreateDepartmentServiceDto, UpdateDepartmentServiceDto } from './types';
+import type { Department, CreateDepartmentDto, UpdateDepartmentDto, DepartmentGoal, CreateDepartmentGoalDto, UpdateDepartmentGoalDto, DepartmentService, CreateDepartmentServiceDto, UpdateDepartmentServiceDto, DepartmentMonthlyTarget, MonthlyStatRow, UpsertMonthlyTargetDto } from './types';
 
 export const departmentsApi = {
     getAll: () =>
@@ -39,6 +39,17 @@ export const departmentGoalsApi = {
 
     delete: (id: string) =>
         api.delete(`/organization/department-goals/${id}`).then(r => r.data),
+};
+
+export const departmentMonthlyTargetsApi = {
+    upsert: (dto: UpsertMonthlyTargetDto) =>
+        api.post<DepartmentMonthlyTarget>('/organization/department-monthly-targets', dto).then(r => r.data),
+
+    getMonthlyStats: (departmentId: string, year: number) =>
+        api.get<MonthlyStatRow[]>(`/organization/department-monthly-targets/${departmentId}/stats`, { params: { year } }).then(r => r.data),
+
+    getByDepartmentAndYear: (departmentId: string, year: number) =>
+        api.get<DepartmentMonthlyTarget[]>(`/organization/department-monthly-targets/${departmentId}`, { params: { year } }).then(r => r.data),
 };
 
 export const departmentServicesApi = {

@@ -131,9 +131,9 @@ function PaymentItem({ invoice, onSelect }: { invoice: Invoice; onSelect: () => 
                 {invoice.status && (
                     <span className={`px-2 py-0.5 rounded-lg font-medium ${
                         invoice.status === 'PAID'
-                            ? 'bg-green-100 text-green-700'
+                            ? 'bg-[#283852] text-white'
                             : invoice.status === 'PENDING'
-                            ? 'bg-yellow-100 text-yellow-700'
+                            ? 'bg-[#283852]/10 text-[#283852]/70'
                             : 'bg-gray-100 text-gray-700'
                     }`}>
                         {invoice.status}

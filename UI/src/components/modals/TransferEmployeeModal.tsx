@@ -66,9 +66,9 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             {t('employees.transfer.currentDepartment')}
                         </label>
-                        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                            <Building2 className="w-5 h-5 text-blue-600" />
-                            <span className="text-blue-900 font-medium">
+                        <div className="flex items-center gap-2 p-3 bg-[#283852]/10 rounded-lg border border-gray-200">
+                            <Building2 className="w-5 h-5 text-[#283852]" />
+                            <span className="text-[#283852] font-medium">
                                 {currentDepartment?.name || t('employees.transfer.noDepartment')}
                             </span>
                         </div>
@@ -87,7 +87,7 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
                             value={toDepartmentId}
                             onChange={(e) => setToDepartmentId(e.target.value)}
                             required
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] outline-none"
                         >
                             <option value="">{t('employees.transfer.selectDepartment')}</option>
                             {availableDepartments.map(dept => (
@@ -100,9 +100,9 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
 
                     {/* Warning for department heads */}
                     {employee.department?.headId === employee.id && (
-                        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                            <div className="text-sm text-amber-800">
+                        <div className="flex items-start gap-3 p-4 bg-[#283852]/10 border border-gray-200 rounded-lg">
+                            <AlertTriangle className="w-5 h-5 text-[#283852] flex-shrink-0 mt-0.5" />
+                            <div className="text-sm text-[#283852]">
                                 <p className="font-semibold mb-1">{t('employees.transfer.headWarning')}</p>
                                 <p>{t('employees.transfer.headWarningDesc')}</p>
                             </div>
@@ -119,7 +119,7 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
                             onChange={(e) => setReason(e.target.value)}
                             placeholder={t('employees.transfer.reasonPlaceholder')}
                             rows={3}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] outline-none"
                         />
                     </div>
 
@@ -135,7 +135,7 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
                         <button
                             type="submit"
                             disabled={!toDepartmentId || transferMutation.isPending}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-4 py-2 bg-[#33cbcc] text-white rounded-lg hover:bg-[#2bb5b6] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {transferMutation.isPending ? t('common.transferring') : t('employees.transfer.submit')}
                         </button>

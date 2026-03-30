@@ -73,7 +73,7 @@ export default function OSContextMenu({ menu, onClose }: OSContextMenuProps) {
                   ${entry.disabled
                     ? 'text-gray-600 cursor-default'
                     : entry.danger
-                      ? 'text-red-400 hover:bg-red-500/15'
+                      ? 'text-[#283852]/70 hover:bg-[#283852]/10'
                       : 'text-gray-300 hover:bg-white/10'
                   }`}
               >

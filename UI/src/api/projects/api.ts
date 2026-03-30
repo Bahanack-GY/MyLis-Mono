@@ -1,5 +1,5 @@
 import api from '../config';
-import type { Project, CreateProjectDto, UpdateProjectDto } from './types';
+import type { Project, CreateProjectDto, UpdateProjectDto, ProjectMilestone } from './types';
 
 export const projectsApi = {
     getAll: (departmentId?: string) =>
@@ -25,4 +25,16 @@ export const projectsApi = {
 
     getMyProjectDetail: (id: string) =>
         api.get<Project>(`/projects/my-projects/${id}`).then(r => r.data),
+
+    createMilestone: (projectId: string, dto: { title: string; description?: string; dueDate?: string; order?: number }) =>
+        api.post<ProjectMilestone>(`/projects/${projectId}/milestones`, dto).then(r => r.data),
+
+    updateMilestone: (projectId: string, milestoneId: string, dto: { title?: string; description?: string; dueDate?: string; order?: number }) =>
+        api.patch<ProjectMilestone>(`/projects/${projectId}/milestones/${milestoneId}`, dto).then(r => r.data),
+
+    toggleMilestone: (projectId: string, milestoneId: string) =>
+        api.patch<ProjectMilestone>(`/projects/${projectId}/milestones/${milestoneId}/toggle`).then(r => r.data),
+
+    deleteMilestone: (projectId: string, milestoneId: string) =>
+        api.delete(`/projects/${projectId}/milestones/${milestoneId}`).then(r => r.data),
 };

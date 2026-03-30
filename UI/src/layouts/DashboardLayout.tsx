@@ -136,7 +136,7 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
                 onClick={e => e.stopPropagation()}
                 className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden"
             >
-                <div className="bg-gradient-to-br from-[#f59e0b] to-[#ec4899] px-8 pt-10 pb-8 text-center relative overflow-hidden">
+                <div className="bg-gradient-to-br from-[#283852] to-[#33cbcc] px-8 pt-10 pb-8 text-center relative overflow-hidden">
                     <button
                         onClick={onClose}
                         aria-label="Fermer"
@@ -164,8 +164,8 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
                 <div className="px-8 py-6">
                     <div className="space-y-3 mb-6">
                         {people.map(p => (
-                            <div key={p.id} className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-pink-400 flex items-center justify-center text-white font-bold text-sm shrink-0" aria-hidden="true">
+                            <div key={p.id} className="flex items-center gap-3 p-3 bg-[#283852]/10 rounded-xl">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#283852] to-[#33cbcc] flex items-center justify-center text-white font-bold text-sm shrink-0" aria-hidden="true">
                                     {p.avatarUrl ? (
                                         <img src={p.avatarUrl} alt="" className="w-full h-full rounded-full object-cover" />
                                     ) : (
@@ -188,7 +188,7 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
 
                     <button
                         onClick={onClose}
-                        className="w-full py-3 rounded-xl bg-gradient-to-r from-[#f59e0b] to-[#ec4899] text-white font-semibold text-sm transition-shadow"
+                        className="w-full py-3 rounded-xl bg-[#283852] text-white font-semibold text-sm transition-shadow"
                     >
                         Super !
                     </button>

@@ -2,19 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2 } from 'lucide-react';
 import { useCreateExpense, useUpdateExpense } from '../api/expenses/hooks';
+import { useDepartments } from '../api/departments/hooks';
 import type { CreateExpenseDto, Expense } from '../api/expenses/types';
 
 interface ExpenseModalProps {
     isOpen: boolean;
     onClose: () => void;
     expense?: Expense | null;
+    defaultDepartmentId?: string;
 }
 
 const CATEGORIES = ['Loyer', 'Salaire', 'Facture', 'Fourniture', 'Licence/Logiciel', 'Demande', 'Autre'];
 
-export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalProps) {
+export default function ExpenseModal({ isOpen, onClose, expense, defaultDepartmentId }: ExpenseModalProps) {
     const createExpense = useCreateExpense();
     const updateExpense = useUpdateExpense();
+    const { data: departments = [] } = useDepartments();
     const isEditing = !!expense;
 
     const [formData, setFormData] = useState<CreateExpenseDto>({
@@ -24,6 +27,7 @@ export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalP
         type: 'ONE_TIME',
         frequency: null,
         date: new Date().toISOString().split('T')[0],
+        departmentId: defaultDepartmentId ?? null,
     });
 
     useEffect(() => {
@@ -36,6 +40,7 @@ export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalP
                     type: expense.type,
                     frequency: expense.type === 'RECURRENT' ? expense.frequency : null,
                     date: expense.date,
+                    departmentId: expense.departmentId ?? null,
                 });
             } else {
                 setFormData({
@@ -45,22 +50,19 @@ export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalP
                     type: 'ONE_TIME',
                     frequency: null,
                     date: new Date().toISOString().split('T')[0],
+                    departmentId: defaultDepartmentId ?? null,
                 });
             }
         }
-    }, [isOpen, expense]);
+    }, [isOpen, expense, defaultDepartmentId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => {
             const next = { ...prev, [name]: name === 'amount' ? Number(value) : value };
-            // Reset frequency when switching to ONE_TIME
-            if (name === 'type' && value === 'ONE_TIME') {
-                next.frequency = null;
-            }
-            if (name === 'type' && value === 'RECURRENT' && !prev.frequency) {
-                next.frequency = 'MONTHLY';
-            }
+            if (name === 'type' && value === 'ONE_TIME') next.frequency = null;
+            if (name === 'type' && value === 'RECURRENT' && !prev.frequency) next.frequency = 'MONTHLY';
+            if (name === 'departmentId') next.departmentId = value || null;
             return next;
         });
     };
@@ -100,7 +102,7 @@ export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalP
                     >
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                             <h2 className="text-xl font-bold text-gray-800">
-                                {isEditing ? 'Modifier la Dépense' : 'Nouvelle Dépense'}
+                                {isEditing ? 'Modifier la Charge' : 'Nouvelle Charge'}
                             </h2>
                             <button
                                 onClick={onClose}
@@ -153,6 +155,21 @@ export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalP
                                 </div>
 
                                 <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Département</label>
+                                    <select
+                                        name="departmentId"
+                                        value={formData.departmentId ?? ''}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] transition-colors outline-none text-gray-800 text-sm appearance-none cursor-pointer"
+                                    >
+                                        <option value="">Général (aucun département)</option>
+                                        {departments.map(dept => (
+                                            <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Catégorie</label>
                                     <select
                                         name="category"
@@ -167,7 +184,7 @@ export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalP
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Type de dépense</label>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Type de charge</label>
                                     <div className="flex gap-4">
                                         <label className="flex items-center gap-2 cursor-pointer">
                                             <input
@@ -232,12 +249,12 @@ export default function ExpenseModal({ isOpen, onClose, expense }: ExpenseModalP
                                 type="submit"
                                 form="expense-form"
                                 disabled={isPending}
-                                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-[#33cbcc] to-[#2bb5b6] hover:from-[#2bb5b6] hover:to-[#2bb5b6] rounded-xl transition-all shadow-md shadow-[#33cbcc]/20  disabled:opacity-50"
+                                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-[#33cbcc] to-[#2bb5b6] hover:from-[#2bb5b6] hover:to-[#2bb5b6] rounded-xl transition-all shadow-md shadow-[#33cbcc]/20 disabled:opacity-50"
                             >
                                 {isPending ? (
                                     <Loader2 className="w-4 h-4 animate-spin inset-0 m-auto" />
                                 ) : (
-                                    isEditing ? 'Enregistrer les modifications' : 'Enregistrer la dépense'
+                                    isEditing ? 'Enregistrer les modifications' : 'Enregistrer la charge'
                                 )}
                             </button>
                         </div>

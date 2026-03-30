@@ -4,13 +4,14 @@ import { Project } from '../models/project.model';
 import { ProjectMember } from '../models/project-member.model';
 import { DepartmentService } from '../models/department-service.model';
 import { ProjectService as ProjectServiceModel } from '../models/project-service.model';
+import { ProjectMilestone } from '../models/project-milestone.model';
 import { Employee } from '../models/employee.model';
 import { ProjectsController } from './projects.controller';
 import { ProjectsService } from './projects.service';
 import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-    imports: [SequelizeModule.forFeature([Project, ProjectMember, ProjectServiceModel, Employee, DepartmentService]), NotificationsModule],
+    imports: [SequelizeModule.forFeature([Project, ProjectMember, ProjectServiceModel, ProjectMilestone, Employee, DepartmentService]), NotificationsModule],
     controllers: [ProjectsController],
     providers: [ProjectsService],
     exports: [ProjectsService],

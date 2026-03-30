@@ -86,7 +86,7 @@ const ConvertToClientModal = ({
 
                 {/* Form */}
                 <div className="px-6 py-5 space-y-4 max-h-[65vh] overflow-y-auto">
-                    <p className="text-sm text-gray-500 bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                    <p className="text-sm text-gray-500 bg-[#33cbcc]/10 border border-gray-200 rounded-xl p-3">
                         {t('commercial.convert.description', 'This lead will be marked as WON and converted to a client. Please fill in any additional client information.')}
                     </p>
 
@@ -149,7 +149,7 @@ const ConvertToClientModal = ({
                     <button
                         onClick={handleSubmit}
                         disabled={!form.name.trim() || convertLead.isPending}
-                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors"
                     >
                         <CheckCircle2 size={14} />
                         {convertLead.isPending

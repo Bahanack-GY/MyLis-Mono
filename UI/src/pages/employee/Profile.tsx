@@ -256,7 +256,7 @@ const EditProfileModal = ({
                                     <button
                                         type="button"
                                         onClick={() => setForm(prev => ({ ...prev, skills: prev.skills.filter((_, idx) => idx !== i) }))}
-                                        className="hover:text-red-500 transition-colors"
+                                        className="hover:text-[#283852] transition-colors"
                                     >
                                         <X size={14} />
                                     </button>
@@ -331,7 +331,7 @@ const EditProfileModal = ({
 /* ─── Education Section ────────────────────────────────── */
 
 const EDU_TYPE_COLORS: Record<string, string> = {
-    diploma: 'bg-indigo-50 text-indigo-500',
+    diploma: 'bg-[#283852]/10 text-[#283852]',
     certificate: 'bg-teal-50 text-teal-500',
     transcript: 'bg-cyan-50 text-cyan-500',
     other: 'bg-gray-100 text-gray-500',
@@ -453,7 +453,7 @@ const EducationSection = ({
                                         <button
                                             type="button"
                                             onClick={() => setSelectedFile(null)}
-                                            className="text-gray-400 hover:text-red-400 transition-colors shrink-0"
+                                            className="text-gray-400 hover:text-[#283852] transition-colors shrink-0"
                                         >
                                             <X size={14} />
                                         </button>
@@ -526,7 +526,7 @@ const EducationSection = ({
                             )}
                             <button
                                 onClick={() => handleRemove(i)}
-                                className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-red-400 transition-all rounded-lg hover:bg-red-50"
+                                className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-[#283852] transition-all rounded-lg hover:bg-[#283852]/10"
                             >
                                 <Trash2 size={14} />
                             </button>
@@ -790,7 +790,7 @@ const Profile = () => {
                         className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Trophy size={18} className="text-amber-500" />
+                            <Trophy size={18} className="text-[#33cbcc]" />
                             {t('profile.leaderboard.title')}
                         </h3>
 
@@ -803,17 +803,17 @@ const Profile = () => {
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: 0.45 + i * 0.06 }}
                                         className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${
-                                            i === 0 ? 'bg-amber-50 border border-amber-100' : 'hover:bg-gray-50'
+                                            i === 0 ? 'bg-[#33cbcc]/10 border border-[#33cbcc]/20' : 'hover:bg-gray-50'
                                         }`}
                                     >
                                         {/* Rank */}
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${
                                             i === 0
-                                                ? 'bg-amber-400 text-white'
+                                                ? 'bg-[#33cbcc] text-white'
                                                 : i === 1
                                                 ? 'bg-gray-300 text-white'
                                                 : i === 2
-                                                ? 'bg-amber-600 text-white'
+                                                ? 'bg-[#283852] text-white'
                                                 : 'bg-gray-100 text-gray-500'
                                         }`}>
                                             {i === 0 ? <Crown size={16} /> : entry.rank}
@@ -840,7 +840,7 @@ const Profile = () => {
 
                                         {/* Points */}
                                         <div className="text-right shrink-0">
-                                            <span className={`text-sm font-bold ${i === 0 ? 'text-amber-500' : 'text-gray-700'}`}>
+                                            <span className={`text-sm font-bold ${i === 0 ? 'text-[#33cbcc]' : 'text-gray-700'}`}>
                                                 {entry.points}
                                             </span>
                                             <span className="text-[10px] text-gray-400 ml-0.5">pts</span>
@@ -864,7 +864,7 @@ const Profile = () => {
                         className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-2 flex items-center gap-2">
-                            <Trophy size={18} className="text-amber-500" />
+                            <Trophy size={18} className="text-[#33cbcc]" />
                             {t('profile.badges.title')}
                         </h3>
                         <p className="text-xs text-gray-400 mb-5">
@@ -885,36 +885,36 @@ const Profile = () => {
                                 : 100;
 
                             return (
-                                <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100">
+                                <div className="mb-6 p-4 rounded-xl bg-[#33cbcc]/5 border border-[#33cbcc]/20">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-semibold text-gray-600">
                                             {t('profile.badges.tasksCompleted', { count: completedCount })}
                                         </span>
                                         {nextBadge ? (
-                                            <span className="text-xs font-medium text-amber-600">
+                                            <span className="text-xs font-medium text-[#33cbcc]">
                                                 {t('profile.badges.nextBadge')}: {nextBadge.title} ({nextBadge.milestone})
                                             </span>
                                         ) : (
-                                            <span className="text-xs font-medium text-amber-600">
+                                            <span className="text-xs font-medium text-[#33cbcc]">
                                                 {t('profile.badges.allEarned')}
                                             </span>
                                         )}
                                     </div>
 
                                     {/* Progress bar */}
-                                    <div className="relative h-3 bg-white rounded-full overflow-hidden border border-amber-200">
+                                    <div className="relative h-3 bg-white rounded-full overflow-hidden border border-[#33cbcc]/20">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${progress}%` }}
                                             transition={{ duration: 1, delay: 0.6, ease: 'easeOut' }}
-                                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full"
+                                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#33cbcc] to-[#2bb5b6] rounded-full"
                                         />
                                     </div>
 
                                     {/* Milestone markers */}
                                     <div className="flex justify-between mt-1.5">
                                         <span className="text-[10px] text-gray-400">{prevMilestone}</span>
-                                        <span className="text-[10px] font-semibold text-amber-500">{nextMilestone}</span>
+                                        <span className="text-[10px] font-semibold text-[#33cbcc]">{nextMilestone}</span>
                                     </div>
                                 </div>
                             );
@@ -934,7 +934,7 @@ const Profile = () => {
                                     >
                                         <div className={`relative w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 transition-all ${
                                             earned
-                                                ? 'border-amber-300 shadow-md shadow-amber-200/50'
+                                                ? 'border-[#33cbcc]/50 shadow-md shadow-[#33cbcc]/20'
                                                 : 'border-gray-200 grayscale opacity-40'
                                         }`}>
                                             <img
@@ -948,7 +948,7 @@ const Profile = () => {
                                         }`}>
                                             {badge.title}
                                         </p>
-                                        <p className={`text-[9px] ${earned ? 'text-amber-500' : 'text-gray-300'}`}>
+                                        <p className={`text-[9px] ${earned ? 'text-[#33cbcc]' : 'text-gray-300'}`}>
                                             {badge.milestone}
                                         </p>
 
@@ -1017,8 +1017,8 @@ const Profile = () => {
                                 placeholder={t('profile.changePassword.confirmPlaceholder')}
                                 className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#33cbcc] focus:ring-1 focus:ring-[#33cbcc]/20"
                             />
-                            {passwordError && <p className="text-xs text-red-500">{passwordError}</p>}
-                            {passwordSuccess && <p className="text-xs text-green-500">{t('profile.changePassword.success')}</p>}
+                            {passwordError && <p className="text-xs text-[#283852]">{passwordError}</p>}
+                            {passwordSuccess && <p className="text-xs text-[#33cbcc]">{t('profile.changePassword.success')}</p>}
                             <button
                                 disabled={!currentPassword || newPassword.length < 6 || newPassword !== confirmPassword || changePassword.isPending}
                                 onClick={() => {

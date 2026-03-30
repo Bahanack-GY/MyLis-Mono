@@ -9,7 +9,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 
-const ALL_ROLES = ['MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL', 'ACCOUNTANT'];
+const ALL_ROLES = ['MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'COMMERCIAL', 'ACCOUNTANT', 'STAGIAIRE'];
 
 // Ensure upload directory exists
 const uploadDir = '/tmp/recordings';
@@ -29,7 +29,7 @@ export class MeetingsController {
     @Roles(...ALL_ROLES)
     @Get()
     findAll(@Query('departmentId') departmentId: string, @Request() req) {
-        if (req.user.role === 'EMPLOYEE' || req.user.role === 'COMMERCIAL' || req.user.role === 'ACCOUNTANT') {
+        if (req.user.role === 'EMPLOYEE' || req.user.role === 'COMMERCIAL' || req.user.role === 'ACCOUNTANT' || req.user.role === 'STAGIAIRE') {
             return this.meetingsService.findByUserId(req.user.userId);
         }
         const deptId = req.user.role === 'HEAD_OF_DEPARTMENT' ? req.user.departmentId : departmentId;

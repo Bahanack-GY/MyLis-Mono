@@ -64,12 +64,12 @@ interface DocItem {
 const DOC_COLORS: Record<string, string> = {
     Contract: '#33cbcc',
     SRS: '#33cbcc',
-    Design: '#3b82f6',
-    Technical: '#3b82f6',
+    Design: '#283852',
+    Technical: '#283852',
     Notes: '#6b7280',
     Brief: '#6b7280',
-    Planning: '#8b5cf6',
-    Education: '#8b5cf6',
+    Planning: '#283852',
+    Education: '#283852',
     Recruitment: '#33cbcc',
 };
 
@@ -172,20 +172,20 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                             dragActive
                                 ? 'border-[#33cbcc] bg-[#33cbcc]/5'
                                 : form.file
-                                    ? 'border-emerald-300 bg-emerald-50'
+                                    ? 'border-[#33cbcc] bg-[#33cbcc]/10'
                                     : 'border-gray-200 hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5'
                         }`}
                     >
                         {form.file ? (
                             <div className="flex items-center justify-center gap-3">
-                                <FileText size={24} className="text-emerald-500" />
+                                <FileText size={24} className="text-[#33cbcc]" />
                                 <div className="text-left">
                                     <p className="text-sm font-medium text-gray-800">{form.file.name}</p>
                                     <p className="text-xs text-gray-400">{t('documents.upload.fileSelected')} — {(form.file.size / 1024 / 1024).toFixed(1)} MB</p>
                                 </div>
                                 <button
                                     onClick={e => { e.stopPropagation(); setForm(prev => ({ ...prev, file: null, name: '' })); }}
-                                    className="text-xs text-rose-500 hover:text-rose-600 font-medium ml-2"
+                                    className="text-xs text-[#283852] hover:text-[#283852]/70 font-medium ml-2"
                                 >
                                     {t('documents.upload.removeFile')}
                                 </button>
@@ -235,8 +235,8 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                     </div>
 
                     {/* Visibility Settings */}
-                    <div className="bg-blue-50 rounded-xl p-4 space-y-4">
-                        <label className="text-xs font-bold text-blue-900 uppercase tracking-wider">
+                    <div className="bg-[#283852]/10 rounded-xl p-4 space-y-4">
+                        <label className="text-xs font-bold text-[#283852] uppercase tracking-wider">
                             {t('documents.visibility.title')}
                         </label>
 
@@ -498,9 +498,9 @@ const Documents = () => {
 
     const stats = [
         { label: t('documents.stats.total'), value: documents.length, icon: FileText, color: '#33cbcc' },
-        { label: t('documents.stats.storage'), value: storageUsed, icon: HardDrive, color: '#3b82f6' },
-        { label: t('documents.stats.recent'), value: recentDocs, icon: Clock, color: '#8b5cf6' },
-        { label: t('documents.stats.categories'), value: categoriesCount, icon: FolderOpen, color: '#f59e0b' },
+        { label: t('documents.stats.storage'), value: storageUsed, icon: HardDrive, color: '#283852' },
+        { label: t('documents.stats.recent'), value: recentDocs, icon: Clock, color: '#283852' },
+        { label: t('documents.stats.categories'), value: categoriesCount, icon: FolderOpen, color: '#283852' },
     ];
 
     /* Chart data */
@@ -811,7 +811,7 @@ const Documents = () => {
                                                                                     deleteDocument.mutate(doc.dbId!);
                                                                                 }
                                                                             }}
-                                                                            className="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                                                                            className="p-2 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                                             title="Delete"
                                                                         >
                                                                             <Trash2 size={16} />

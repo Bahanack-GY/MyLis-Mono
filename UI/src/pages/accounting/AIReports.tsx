@@ -125,11 +125,11 @@ const AIReports = () => {
     const renderReport = (report: Report) => {
         if (report.status === 'GENERATING') {
             return (
-                <div className="flex items-center gap-3 p-6 bg-blue-50 rounded-lg">
-                    <Loader2 className="animate-spin text-blue-600" size={24} />
+                <div className="flex items-center gap-3 p-6 bg-[#283852]/10 rounded-lg">
+                    <Loader2 className="animate-spin text-[#283852]" size={24} />
                     <div>
-                        <p className="font-semibold text-blue-900">{t('reports.generating')}</p>
-                        <p className="text-sm text-blue-700">{t('reports.generatingDesc')}</p>
+                        <p className="font-semibold text-[#283852]">{t('reports.generating')}</p>
+                        <p className="text-sm text-[#283852]">{t('reports.generatingDesc')}</p>
                     </div>
                 </div>
             );
@@ -137,11 +137,11 @@ const AIReports = () => {
 
         if (report.status === 'FAILED') {
             return (
-                <div className="flex items-center gap-3 p-6 bg-red-50 rounded-lg">
-                    <AlertCircle className="text-red-600" size={24} />
+                <div className="flex items-center gap-3 p-6 bg-gray-100 rounded-lg">
+                    <AlertCircle className="text-gray-400" size={24} />
                     <div>
-                        <p className="font-semibold text-red-900">{t('reports.failed')}</p>
-                        <p className="text-sm text-red-700">{t('reports.failedDesc')}</p>
+                        <p className="font-semibold text-gray-400">{t('reports.failed')}</p>
+                        <p className="text-sm text-gray-400">{t('reports.failedDesc')}</p>
                     </div>
                 </div>
             );
@@ -414,9 +414,9 @@ const AIReports = () => {
                                             {new Date(report.createdAt).toLocaleDateString()}
                                         </span>
                                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                            report.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                                            report.status === 'GENERATING' ? 'bg-blue-100 text-blue-800' :
-                                            'bg-red-100 text-red-800'
+                                            report.status === 'COMPLETED' ? 'bg-[#33cbcc]/10 text-[#33cbcc]' :
+                                            report.status === 'GENERATING' ? 'bg-[#283852]/10 text-[#283852]' :
+                                            'bg-gray-100 text-gray-400'
                                         }`}>
                                             {t(`reports.status.${report.status.toLowerCase()}`)}
                                         </span>
@@ -428,7 +428,7 @@ const AIReports = () => {
                                             deleteReport.mutate(report.id);
                                         }
                                     }}
-                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors"
                                 >
                                     <Trash2 size={20} />
                                 </button>

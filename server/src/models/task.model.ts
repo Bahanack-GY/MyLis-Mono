@@ -126,6 +126,12 @@ export class Task extends Model {
     @Column({ type: DataType.DATE, allowNull: true })
     declare completedAt: Date | null;
 
+    @Column({ type: DataType.DATE, allowNull: true })
+    declare blockedAt: Date | null;
+
+    @Column({ type: DataType.BIGINT, defaultValue: 0 })
+    declare totalBlockedMs: number;
+
     @HasMany(() => Subtask)
     declare subtasks: Subtask[];
 

@@ -156,4 +156,12 @@ export class Payslip extends Model {
         defaultValue: [],
     })
     declare customDeductions: { name: string; amount: number }[];
+
+    /* ── Individual payment date (null = not yet paid) ── */
+
+    @Column({
+        type: DataType.DATEONLY,
+        allowNull: true,
+    })
+    declare paymentDate: string | null;
 }

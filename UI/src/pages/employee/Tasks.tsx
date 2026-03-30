@@ -55,7 +55,6 @@ import { useCreateLeadActivity } from '../../api/commercial/hooks';
 import type { ActivityType } from '../../api/commercial/types';
 import PointsEarnedModal from '../../components/PointsEarnedModal';
 import BadgeEarnedModal from '../../components/BadgeEarnedModal';
-import TaskTimeChart from '../../components/TaskTimeChart';
 import { UserTasksSkeleton } from '../../components/Skeleton';
 import RichTextEditor from '../../components/RichTextEditor';
 import RichTextDisplay, { stripHtml } from '../../components/RichTextDisplay';
@@ -265,12 +264,12 @@ const KanbanCard = ({
                             </span>
                         )}
                         {task.urgent && (
-                            <span className="flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-red-50 text-red-400">
+                            <span className="flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
                                 <AlertTriangle size={9} />
                             </span>
                         )}
                         {task.important && (
-                            <span className="flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-400">
+                            <span className="flex items-center text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
                                 <Star size={9} />
                             </span>
                         )}
@@ -297,7 +296,7 @@ const KanbanCard = ({
                     </span>
                 )}
                 {task.leadCode && (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[10px] font-semibold mt-1">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#283852]/10 text-[#283852] rounded-md text-[10px] font-semibold mt-1">
                         <Target size={9} />
                         {task.leadCode}
                     </span>
@@ -420,7 +419,7 @@ const KanbanColumn = ({
 
     let dropClass = '';
     if (isDragging && isOver) {
-        dropClass = canDrop ? `ring-2 ${col.dropRing}` : 'ring-2 ring-red-300 bg-red-50/30';
+        dropClass = canDrop ? `ring-2 ${col.dropRing}` : 'ring-2 ring-[#283852]/30 bg-[#283852]/5';
     }
 
     return (
@@ -564,7 +563,7 @@ const SubtasksSection = ({ task, onAllCompleted }: { task: MappedTask; onAllComp
                         </span>
                         <button
                             onClick={() => deleteSubtask.mutate(subtask.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-all"
                         >
                             <Trash2 size={14} />
                         </button>
@@ -627,7 +626,7 @@ const TaskDetailModal = ({
     const [blockError, setBlockError] = useState(false);
     const [showCompletePrompt, setShowCompletePrompt] = useState(false);
     const totalTimeMs = task.startedAt && task.completedAt
-        ? new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime()
+        ? new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime() - (task.totalBlockedMs ?? 0)
         : null;
 
     useEffect(() => {
@@ -699,13 +698,13 @@ const TaskDetailModal = ({
                                 <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dotColor }} />
                                 <h3 className="text-lg font-bold text-gray-800 break-words">{task.title}</h3>
                                 {task.urgent && (
-                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
                                         <AlertTriangle size={10} />
                                         {t('tasksPage.urgent')}
                                     </span>
                                 )}
                                 {task.important && (
-                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 shrink-0">
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
                                         <Star size={10} />
                                         {t('tasksPage.important')}
                                     </span>
@@ -746,7 +745,7 @@ const TaskDetailModal = ({
                         )}
                         <div className="bg-gray-50 rounded-xl p-3">
                             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('tasks.table.status')}</p>
-                            <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${task.state === 'BLOCKED' ? 'bg-red-100 text-red-600' : st.cls}`}>
+                            <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${task.state === 'BLOCKED' ? 'bg-[#283852]/10 text-[#283852]' : st.cls}`}>
                                 {task.state === 'BLOCKED' ? t('dashboard.taskStatus.blocked') : st.label}
                             </span>
                         </div>
@@ -756,14 +755,14 @@ const TaskDetailModal = ({
                     {(task.startedAt || task.completedAt) && (
                         <div className="grid grid-cols-2 gap-3">
                             {task.startedAt && (
-                                <div className="bg-blue-50 rounded-xl p-3">
-                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-wider mb-1">{t('tasks.detail.startedAt')}</p>
+                                <div className="bg-[#283852]/10 rounded-xl p-3">
+                                    <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider mb-1">{t('tasks.detail.startedAt')}</p>
                                     <p className="text-sm font-semibold text-gray-800">{new Date(task.startedAt).toLocaleString()}</p>
                                 </div>
                             )}
                             {task.completedAt && (
-                                <div className="bg-green-50 rounded-xl p-3">
-                                    <p className="text-[10px] font-semibold text-green-500 uppercase tracking-wider mb-1">{t('tasks.detail.completedAt')}</p>
+                                <div className="bg-[#33cbcc]/10 rounded-xl p-3">
+                                    <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider mb-1">{t('tasks.detail.completedAt')}</p>
                                     <p className="text-sm font-semibold text-gray-800">{new Date(task.completedAt).toLocaleString()}</p>
                                 </div>
                             )}
@@ -779,12 +778,12 @@ const TaskDetailModal = ({
 
                     {/* Block reason display */}
                     {task.state === 'BLOCKED' && task.blockReason && (
-                        <div className="bg-red-50 border border-red-100 rounded-xl p-3">
+                        <div className="bg-[#283852]/10 border border-gray-200 rounded-xl p-3">
                             <div className="flex items-center gap-1.5 mb-1">
-                                <Ban size={11} className="text-red-400" />
-                                <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">{t('tasks.block.blockedReason')}</p>
+                                <Ban size={11} className="text-[#283852]" />
+                                <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider">{t('tasks.block.blockedReason')}</p>
                             </div>
-                            <p className="text-sm text-red-600">{task.blockReason}</p>
+                            <p className="text-sm text-[#283852]">{task.blockReason}</p>
                         </div>
                     )}
 
@@ -820,7 +819,7 @@ const TaskDetailModal = ({
 
                     {task.leadCode && (
                         <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Target size={14} className="text-indigo-500" />
+                            <Target size={14} className="text-[#283852]" />
                             <span className="font-medium">{task.leadCode}</span>
                             <span className="text-gray-400">&mdash;</span>
                             <span>{task.leadCompany}</span>
@@ -911,17 +910,17 @@ const TaskDetailModal = ({
                     {/* Block reason form */}
                     {showBlockForm && (
                         <div className="space-y-3">
-                            <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider">{t('tasks.block.reasonLabel')}</p>
+                            <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider">{t('tasks.block.reasonLabel')}</p>
                             <textarea
                                 value={blockReason}
                                 onChange={(e) => { setBlockReason(e.target.value); setBlockError(false); }}
                                 placeholder={t('tasks.block.reasonPlaceholder')}
-                                className={`w-full rounded-xl border ${blockError ? 'border-red-300 ring-2 ring-red-100' : 'border-gray-200'} p-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300 resize-none`}
+                                className={`w-full rounded-xl border ${blockError ? 'border-[#283852]/30 ring-2 ring-[#283852]/10' : 'border-gray-200'} p-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] resize-none`}
                                 rows={3}
                                 autoFocus
                             />
                             {blockError && (
-                                <p className="text-xs text-red-500">{t('tasks.block.reasonRequired')}</p>
+                                <p className="text-xs text-[#283852]">{t('tasks.block.reasonRequired')}</p>
                             )}
                             <div className="flex justify-end gap-2">
                                 <button
@@ -933,7 +932,7 @@ const TaskDetailModal = ({
                                 <button
                                     onClick={handleBlockSubmit}
                                     disabled={!blockReason.trim() || isUpdating}
-                                    className="px-4 py-2 rounded-xl text-sm font-medium text-white bg-red-500 hover:bg-red-600 disabled:opacity-50 transition-colors flex items-center gap-2"
+                                    className="px-4 py-2 rounded-xl text-sm font-medium text-white bg-[#283852] hover:bg-[#283852]/80 disabled:opacity-50 transition-colors flex items-center gap-2"
                                 >
                                     {isUpdating ? <Loader2 size={14} className="animate-spin" /> : <Ban size={14} />}
                                     {t('tasks.block.confirm')}
@@ -969,7 +968,7 @@ const TaskDetailModal = ({
                         {canBlock && (
                             <button
                                 onClick={() => setShowBlockForm(true)}
-                                className="px-5 py-2.5 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors flex items-center gap-2"
+                                className="px-5 py-2.5 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors flex items-center gap-2"
                             >
                                 <Ban size={14} />
                                 {t('tasks.actions.markBlocked')}
@@ -1042,7 +1041,7 @@ const EditSelfTaskModal = ({
     const difficultyColors: Record<string, string> = {
         EASY: 'border-[#33cbcc] bg-[#33cbcc]/10 text-[#33cbcc]',
         MEDIUM: 'border-[#283852] bg-[#283852]/10 text-[#283852]',
-        HARD: 'border-red-400 bg-red-50 text-red-500',
+        HARD: 'border-[#283852]/30 bg-[#283852]/10 text-[#283852]',
     };
 
     useEffect(() => {
@@ -1121,13 +1120,13 @@ const EditSelfTaskModal = ({
                     )}
                     <div className="flex items-center gap-6 mb-4">
                         <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
-                            <AlertTriangle size={14} className="text-red-400" />
+                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                            <AlertTriangle size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
-                            <Star size={14} className="text-amber-400" />
+                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                            <Star size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
                         </label>
                     </div>
@@ -1255,12 +1254,12 @@ const WeeklyComplianceBlockModal = ({ pendingTasks, onClose }: { pendingTasks: T
                 onClick={e => e.stopPropagation()}
                 className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
             >
-                <div className="h-1.5 bg-red-500 shrink-0" />
+                <div className="h-1.5 bg-[#283852] shrink-0" />
 
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center">
-                            <AlertCircle size={18} className="text-red-500" />
+                        <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center">
+                            <AlertCircle size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('tasks.weeklyCompliance.title')}</h3>
                     </div>
@@ -1274,10 +1273,10 @@ const WeeklyComplianceBlockModal = ({ pendingTasks, onClose }: { pendingTasks: T
 
                     <div className="space-y-2 max-h-60 overflow-y-auto">
                         {pendingTasks.map(task => (
-                            <div key={task.id} className="bg-red-50/50 border border-red-100 rounded-xl p-3">
+                            <div key={task.id} className="bg-[#283852]/5 border border-gray-200 rounded-xl p-3">
                                 <div className="flex items-start justify-between gap-2">
                                     <h4 className="text-sm font-semibold text-gray-800 truncate">{task.title}</h4>
-                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-600 shrink-0">
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
                                         {task.state}
                                     </span>
                                 </div>
@@ -1357,7 +1356,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
     const difficultyColors: Record<TaskDifficulty, string> = {
         EASY: 'border-[#33cbcc] bg-[#33cbcc]/10 text-[#33cbcc]',
         MEDIUM: 'border-[#283852] bg-[#283852]/10 text-[#283852]',
-        HARD: 'border-red-400 bg-red-50 text-red-500',
+        HARD: 'border-[#283852]/30 bg-[#283852]/10 text-[#283852]',
     };
 
     return (
@@ -1518,13 +1517,13 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Urgent and Important checkboxes */}
                     <div className="flex items-center gap-6 mb-4">
                         <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
-                            <AlertTriangle size={14} className="text-red-400" />
+                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                            <AlertTriangle size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
-                            <Star size={14} className="text-amber-400" />
+                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                            <Star size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
                         </label>
                     </div>
@@ -1855,14 +1854,6 @@ const Tasks = () => {
                 ))}
             </div>
 
-            {/* ═══ Répartition du temps ═══ */}
-            {employeeId && (
-                <div className="bg-white rounded-2xl p-5 border border-gray-100">
-                    <h3 className="text-sm font-bold text-gray-800 mb-0.5">{t('employeeDetail.tasks.timeDistribution', 'Répartition du temps')}</h3>
-                    <p className="text-[11px] text-gray-400 mb-3">{t('employeeDetail.tasks.timeDistributionDesc', 'Temps consacré aux différentes tâches')}</p>
-                    <TaskTimeChart employeeId={employeeId} />
-                </div>
-            )}
 
             {/* ═══ Search + Filters ═══ */}
             <div className="space-y-4">

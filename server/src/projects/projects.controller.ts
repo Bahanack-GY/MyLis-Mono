@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Query, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, Patch, UseGuards, Query, Request } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { ProjectsService } from './projects.service';
 import { Project } from '../models/project.model';
@@ -69,5 +69,40 @@ export class ProjectsController {
     @Get('department/:departmentId')
     findByDepartment(@Param('departmentId') departmentId: string): Promise<Project[]> {
         return this.projectsService.findByDepartment(departmentId);
+    }
+
+    /* ── Milestones ─────────────────────────────────────── */
+
+    @Post(':id/milestones')
+    createMilestone(
+        @Param('id') projectId: string,
+        @Body() dto: { title: string; description?: string; dueDate?: string; order?: number },
+    ) {
+        return this.projectsService.createMilestone(projectId, dto);
+    }
+
+    @Patch(':id/milestones/:milestoneId')
+    updateMilestone(
+        @Param('id') projectId: string,
+        @Param('milestoneId') milestoneId: string,
+        @Body() dto: { title?: string; description?: string; dueDate?: string; order?: number },
+    ) {
+        return this.projectsService.updateMilestone(projectId, milestoneId, dto);
+    }
+
+    @Patch(':id/milestones/:milestoneId/toggle')
+    toggleMilestone(
+        @Param('id') projectId: string,
+        @Param('milestoneId') milestoneId: string,
+    ) {
+        return this.projectsService.toggleMilestone(projectId, milestoneId);
+    }
+
+    @Delete(':id/milestones/:milestoneId')
+    deleteMilestone(
+        @Param('id') projectId: string,
+        @Param('milestoneId') milestoneId: string,
+    ) {
+        return this.projectsService.deleteMilestone(projectId, milestoneId);
     }
 }

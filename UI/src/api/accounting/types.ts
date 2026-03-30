@@ -15,6 +15,8 @@ export interface Account {
     isSystem: boolean;
     isActive: boolean;
     description: string | null;
+    departmentId: string | null;
+    department?: { id: string; name: string } | null;
     category?: AccountCategory;
     children?: Account[];
 }

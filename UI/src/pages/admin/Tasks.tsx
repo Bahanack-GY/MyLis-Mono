@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,7 +9,8 @@ import {
     Pencil, Trash2, History, Save, CalendarRange, Columns3, Tag, Settings,
     ListTodo, Target, Paperclip, Download, FileText, AlertTriangle, Star,
 } from 'lucide-react';
-import { useTasks, useInfiniteTasksByStates, useCreateTask, useUpdateTask, useDeleteTask, useTaskHistory, useWeeklyCheckForEmployee, useCreateSubtask, useToggleSubtask, useDeleteSubtask, useUploadTaskAttachment, useDeleteTaskAttachment } from '../../api/tasks/hooks';
+import { useTasks, useInfiniteTasksByStates, useCreateTask, useUpdateTask, useDeleteTask, useTaskHistory, useWeeklyCheckForEmployee, useCreateSubtask, useToggleSubtask, useDeleteSubtask, useUploadTaskAttachment, useDeleteTaskAttachment, useGlobalDistribution } from '../../api/tasks/hooks';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { Task } from '../../api/tasks/types';
 import type { Subtask, TaskAttachment } from '../../api/tasks/types';
 import { TasksAdminSkeleton } from '../../components/Skeleton';
@@ -237,7 +238,7 @@ const SubtasksSection = ({ task }: { task: GanttTask }) => {
                         </span>
                         <button
                             onClick={() => deleteSubtask.mutate(subtask.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all"
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-all"
                         >
                             <Trash2 size={14} />
                         </button>
@@ -287,13 +288,13 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
     const duration = diffDays(task.startDate, task.endDate) + 1;
     const fmt = (d: Date) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
     const totalTimeMs = task.startedAt && task.completedAt
-        ? new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime()
+        ? new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime() - (task.totalBlockedMs ?? 0)
         : null;
 
     const statusMap: Record<string, { label: string; cls: string }> = {
         todo:        { label: t('tasksPage.todo'),       cls: 'bg-gray-100 text-gray-600' },
-        in_progress: { label: t('tasksPage.inProgress'), cls: 'bg-blue-50 text-blue-700' },
-        done:        { label: t('tasksPage.done'),       cls: 'bg-green-50 text-green-700' },
+        in_progress: { label: t('tasksPage.inProgress'), cls: 'bg-[#283852]/10 text-[#283852]' },
+        done:        { label: t('tasksPage.done'),       cls: 'bg-[#283852] text-white' },
     };
     const st = task.status ? statusMap[task.status] : null;
 
@@ -323,7 +324,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: c.border }} />
                                 <h3 className="text-lg font-bold text-gray-800">{task.title}</h3>
-                                {task.hasFlag && <Flag size={14} className="text-amber-500 shrink-0" />}
+                                {task.hasFlag && <Flag size={14} className="text-[#283852] shrink-0" />}
                                 {task.selfAssigned && (
                                     <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] shrink-0">
                                         <Zap size={10} />
@@ -331,13 +332,13 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                                     </span>
                                 )}
                                 {task.urgent && (
-                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-500 shrink-0">
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
                                         <AlertTriangle size={10} />
                                         {t('tasksPage.urgent')}
                                     </span>
                                 )}
                                 {task.important && (
-                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 shrink-0">
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
                                         <Star size={10} />
                                         {t('tasksPage.important')}
                                     </span>
@@ -429,14 +430,14 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                     {(task.startedAt || task.completedAt) && (
                         <div className="grid grid-cols-2 gap-3">
                             {task.startedAt && (
-                                <div className="bg-blue-50 rounded-xl p-3">
-                                    <p className="text-[10px] font-semibold text-blue-400 uppercase tracking-wider mb-1">{t('tasksPage.startedAt')}</p>
+                                <div className="bg-[#283852]/10 rounded-xl p-3">
+                                    <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider mb-1">{t('tasksPage.startedAt')}</p>
                                     <p className="text-sm font-semibold text-gray-800">{new Date(task.startedAt).toLocaleString()}</p>
                                 </div>
                             )}
                             {task.completedAt && (
-                                <div className="bg-green-50 rounded-xl p-3">
-                                    <p className="text-[10px] font-semibold text-green-500 uppercase tracking-wider mb-1">{t('tasksPage.completedAt')}</p>
+                                <div className="bg-[#33cbcc]/10 rounded-xl p-3">
+                                    <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider mb-1">{t('tasksPage.completedAt')}</p>
                                     <p className="text-sm font-semibold text-gray-800">{new Date(task.completedAt).toLocaleString()}</p>
                                 </div>
                             )}
@@ -472,7 +473,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                             {!task.selfAssigned && onDelete && (
                                 <button
                                     onClick={() => { if (window.confirm(t('tasksPage.confirmDelete'))) { onClose(); onDelete(); } }}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors"
                                 >
                                     <Trash2 size={12} /> {t('tasksPage.deleteTask')}
                                 </button>
@@ -577,13 +578,13 @@ const EditGanttTaskModal = ({
                     </div>
                     <div className="flex items-center gap-6 mb-4">
                         <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
-                            <AlertTriangle size={14} className="text-red-400" />
+                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                            <AlertTriangle size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
-                            <Star size={14} className="text-amber-400" />
+                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                            <Star size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
                         </label>
                     </div>
@@ -902,19 +903,19 @@ const AddTaskModal = ({
                         </div>
                     )}
                     {isNonCompliant && (
-                        <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-3">
+                        <div className="bg-[#283852]/10 border border-gray-200 rounded-xl p-4 space-y-3">
                             <div className="flex items-center gap-2">
-                                <AlertCircle size={14} className="text-red-500 shrink-0" />
-                                <p className="text-sm font-semibold text-red-700">{t('tasks.weeklyCompliance.adminWarningTitle')}</p>
+                                <AlertCircle size={14} className="text-[#283852] shrink-0" />
+                                <p className="text-sm font-semibold text-[#283852]">{t('tasks.weeklyCompliance.adminWarningTitle')}</p>
                             </div>
-                            <p className="text-xs text-red-600">
+                            <p className="text-xs text-[#283852]">
                                 {t('tasks.weeklyCompliance.adminWarningMessage', { name: selectedEmp?.name || '' })}
                             </p>
                             <div className="space-y-1.5 max-h-32 overflow-y-auto">
                                 {compliance!.pendingTasks.map(pt => (
-                                    <div key={pt.id} className="flex items-center justify-between bg-white border border-red-100 rounded-lg px-3 py-2">
+                                    <div key={pt.id} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2">
                                         <span className="text-xs font-medium text-gray-700 truncate">{pt.title}</span>
-                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 shrink-0">{pt.state}</span>
+                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">{pt.state}</span>
                                     </div>
                                 ))}
                             </div>
@@ -1100,13 +1101,13 @@ const AddTaskModal = ({
                             {/* Urgent / Important */}
                             <div className="flex items-center gap-6">
                                 <label className="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" checked={task.urgent} onChange={e => update(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-red-500 focus:ring-red-400" />
-                                    <AlertTriangle size={14} className="text-red-400" />
+                                    <input type="checkbox" checked={task.urgent} onChange={e => update(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                                    <AlertTriangle size={14} className="text-[#283852]" />
                                     <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" checked={task.important} onChange={e => update(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400" />
-                                    <Star size={14} className="text-amber-400" />
+                                    <input type="checkbox" checked={task.important} onChange={e => update(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
+                                    <Star size={14} className="text-[#283852]" />
                                     <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
                                 </label>
                             </div>
@@ -1153,7 +1154,7 @@ const AddTaskModal = ({
                                                             return updated;
                                                         });
                                                     }}
-                                                    className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors shrink-0"
+                                                    className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
                                                 >
                                                     <X size={14} />
                                                 </button>
@@ -1270,6 +1271,9 @@ const Tasks = () => {
     const [editingGanttTask, setEditingGanttTask] = useState<{ task: GanttTask; emp: EmployeeRow } | null>(null);
     const [historyTaskId, setHistoryTaskId] = useState<string | null>(null);
     const [showNatureManager, setShowNatureManager] = useState(false);
+    const [distView, setDistView] = useState<'nature' | 'activity'>('nature');
+    const [distPeriod, setDistPeriod] = useState<'day' | 'week' | 'month' | 'year'>('week');
+    const [distOffset, setDistOffset] = useState(0);
     const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
     const toggleRow = (id: number) => setExpandedRows(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
 
@@ -1278,6 +1282,33 @@ const Tasks = () => {
     // Calendar view needs full task list; board view uses its own paginated queries
     const { data: apiTasks, isLoading: loadingTasks } = useTasks(deptScope, undefined, undefined, pageView === 'calendar');
     const { data: apiEmployees, isLoading: loadingEmployees } = useEmployees(deptScope);
+    const distRange = useMemo(() => {
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        const now = new Date();
+        if (distPeriod === 'day') {
+            const d = new Date(now);
+            d.setDate(now.getDate() + distOffset);
+            const s = fmt(d);
+            return { from: s, to: s, label: d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) };
+        }
+        if (distPeriod === 'week') {
+            const day = now.getDay();
+            const toMon = day === 0 ? -6 : 1 - day;
+            const mon = new Date(now); mon.setDate(now.getDate() + toMon + distOffset * 7);
+            const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+            return { from: fmt(mon), to: fmt(sun), label: `${mon.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} – ${sun.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}` };
+        }
+        if (distPeriod === 'month') {
+            const first = new Date(now.getFullYear(), now.getMonth() + distOffset, 1);
+            const last  = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+            return { from: fmt(first), to: fmt(last), label: first.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) };
+        }
+        // year
+        const year = now.getFullYear() + distOffset;
+        return { from: `${year}-01-01`, to: `${year}-12-31`, label: String(year) };
+    }, [distPeriod, distOffset]);
+    const { data: globalDist } = useGlobalDistribution(distRange.from, distRange.to);
     const { data: apiDepartments } = useDepartments();
     const createTaskMutation = useCreateTask();
     const updateTaskMutation = useUpdateTask();
@@ -1774,6 +1805,131 @@ const Tasks = () => {
                 </div>
             </div>
 
+            {/* ═══ Distribution chart ═══ */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 className="text-sm font-bold text-gray-800">Répartition des activités</h3>
+                            <p className="text-[11px] text-gray-400 mt-0.5">Distribution globale du temps et des activités</p>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            {/* Period selector */}
+                            <div className="flex bg-gray-100 rounded-xl p-1">
+                                {(['day', 'week', 'month', 'year'] as const).map(p => (
+                                    <button key={p} onClick={() => { setDistPeriod(p); setDistOffset(0); }}
+                                        className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${distPeriod === p ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                                        {p === 'day' ? 'Jour' : p === 'week' ? 'Semaine' : p === 'month' ? 'Mois' : 'Année'}
+                                    </button>
+                                ))}
+                            </div>
+                            {/* Navigation */}
+                            <div className="flex items-center gap-1">
+                                <button onClick={() => setDistOffset(o => o - 1)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+                                    <ChevronLeft size={15} />
+                                </button>
+                                <span className="text-xs font-semibold text-gray-700 min-w-[120px] text-center capitalize">{distRange.label}</span>
+                                <button onClick={() => setDistOffset(o => o + 1)} disabled={distOffset >= 0}
+                                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors disabled:opacity-30">
+                                    <ChevronRight size={15} />
+                                </button>
+                            </div>
+                            {/* View toggle */}
+                            <div className="flex bg-gray-100 rounded-xl p-1">
+                                <button onClick={() => setDistView('nature')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${distView === 'nature' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                                    Nature
+                                </button>
+                                <button onClick={() => setDistView('activity')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${distView === 'activity' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                                    Activité
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {!globalDist ? (
+                        <div className="flex items-center justify-center h-52">
+                            <div className="w-5 h-5 border-2 border-[#33cbcc] border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    ) :
+
+                    distView === 'nature' ? (() => {
+                        const data = globalDist.natureDistribution;
+                        if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">Aucune donnée</p>;
+                        return (
+                            <div className="flex flex-col md:flex-row items-center gap-6">
+                                <div className="w-full md:w-64 h-52">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie data={data} dataKey="hours" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
+                                                {data.map((entry, i) => (
+                                                    <Cell key={i} fill={entry.color} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip formatter={(v: any) => [`${v}h`, 'Heures']} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {data.map((entry, i) => (
+                                        <div key={i} className="flex items-center gap-2.5">
+                                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-medium text-gray-700 truncate">{entry.name}</p>
+                                                <p className="text-[11px] text-gray-400">{entry.hours}h · {entry.percentage}%</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })() : (() => {
+                        const ACTIVITY_COLORS: Record<string, string> = {
+                            VISITE_CLIENT: '#33cbcc', VISITE_PROSPECT: '#283852', APPEL: '#283852',
+                            EMAIL: '#33cbcc', REUNION: '#283852', DEMO: '#33cbcc99',
+                            RELANCE: '#28385280', AUTRE: '#9ca3af',
+                        };
+                        const ACTIVITY_LABELS: Record<string, string> = {
+                            VISITE_CLIENT: 'Visite client', VISITE_PROSPECT: 'Visite prospect',
+                            APPEL: 'Appel', EMAIL: 'Email', REUNION: 'Réunion',
+                            DEMO: 'Démo', RELANCE: 'Relance', AUTRE: 'Autre',
+                        };
+                        const data = globalDist.activityDistribution.map(d => ({
+                            ...d,
+                            name: ACTIVITY_LABELS[d.type] || d.type,
+                            color: ACTIVITY_COLORS[d.type] || '#9ca3af',
+                        }));
+                        if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">Aucune activité enregistrée</p>;
+                        return (
+                            <div className="flex flex-col md:flex-row items-center gap-6">
+                                <div className="w-full md:w-64 h-52">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie data={data} dataKey="count" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
+                                                {data.map((entry, i) => (
+                                                    <Cell key={i} fill={entry.color} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip formatter={(v: any) => [`${v}`, 'Activités']} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    {data.map((entry, i) => (
+                                        <div key={i} className="flex items-center gap-2.5">
+                                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-medium text-gray-700 truncate">{entry.name}</p>
+                                                <p className="text-[11px] text-gray-400">{entry.count} activité{entry.count > 1 ? 's' : ''} · {entry.percentage}%</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        );
+                    })()}
+                </div>
+
             {/* ═══ Board view ═══ */}
             {pageView === 'board' && (() => {
                 const selectCls = 'bg-white rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
@@ -1794,8 +1950,8 @@ const Tasks = () => {
 
                 const BOARD_COLS = [
                     { key: 'todo' as const,        label: t('tasksPage.todo'),       dot: '#9ca3af', query: todoQuery,       tasks: todoTasks },
-                    { key: 'in_progress' as const, label: t('tasksPage.inProgress'), dot: '#f59e0b', query: inProgressQuery, tasks: inProgressTasks },
-                    { key: 'done' as const,        label: t('tasksPage.done'),        dot: '#22c55e', query: doneQuery,       tasks: doneTasks },
+                    { key: 'in_progress' as const, label: t('tasksPage.inProgress'), dot: '#283852', query: inProgressQuery, tasks: inProgressTasks },
+                    { key: 'done' as const,        label: t('tasksPage.done'),        dot: '#33cbcc', query: doneQuery,       tasks: doneTasks },
                 ];
 
                 const diffLabel: Record<ColorKey, string> = {
@@ -1877,7 +2033,7 @@ const Tasks = () => {
                             {(boardFilterDepartment || boardFilterEmployee) && (
                                 <button
                                     onClick={() => { setBoardFilterDepartment(''); setBoardFilterEmployee(''); }}
-                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-colors"
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-[#283852]/10 hover:border-gray-300 hover:text-[#283852] transition-colors"
                                 >
                                     <X size={14} />
                                     {t('tasksPage.showAll')}
@@ -1910,8 +2066,8 @@ const Tasks = () => {
                                             >
                                                 <div className="flex items-start justify-between gap-2 mb-3">
                                                     <p className="text-sm font-semibold text-gray-800 leading-snug">{task.title}</p>
-                                                    {task.urgent && <AlertTriangle size={13} className="shrink-0 mt-0.5 text-red-400" />}
-                                                    {task.important && <Star size={13} className="shrink-0 mt-0.5 text-amber-400" />}
+                                                    {task.urgent && <AlertTriangle size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
+                                                    {task.important && <Star size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
                                                 </div>
                                                 {task.subtitle && (
                                                     <div className="flex items-center gap-1.5 mb-2">
@@ -2092,12 +2248,12 @@ const Tasks = () => {
                                     </div>
                                 ) : viewMode === 'day' ? (
                                     <div className="flex h-full">
-                                        <div style={{ width: `${dayPx}px` }} className={`shrink-0 flex items-center justify-center gap-3 ${columns[0]?.isToday ? 'bg-red-50/50' : ''}`}>
-                                            <span className={`text-sm font-semibold ${columns[0]?.isToday ? 'text-red-500' : 'text-gray-600'}`}>{DAY_NAMES_FULL[columns[0]?.dow ?? 0]}</span>
+                                        <div style={{ width: `${dayPx}px` }} className={`shrink-0 flex items-center justify-center gap-3 ${columns[0]?.isToday ? 'bg-[#33cbcc]/10' : ''}`}>
+                                            <span className={`text-sm font-semibold ${columns[0]?.isToday ? 'text-[#33cbcc]' : 'text-gray-600'}`}>{DAY_NAMES_FULL[columns[0]?.dow ?? 0]}</span>
                                             {columns[0]?.isToday
-                                                ? <span className="w-8 h-8 rounded-full bg-red-500 text-white text-sm font-bold flex items-center justify-center shadow-sm shadow-red-200">{columns[0]?.date.getDate()}</span>
+                                                ? <span className="w-8 h-8 rounded-full bg-[#33cbcc] text-white text-sm font-bold flex items-center justify-center shadow-sm shadow-[#33cbcc]/20">{columns[0]?.date.getDate()}</span>
                                                 : <span className="text-lg font-bold text-gray-800">{columns[0]?.date.getDate()}</span>}
-                                            <span className={`text-sm font-medium ${columns[0]?.isToday ? 'text-red-400' : 'text-gray-400'}`}>{MONTH_NAMES[columns[0]?.date.getMonth() ?? 0]}</span>
+                                            <span className={`text-sm font-medium ${columns[0]?.isToday ? 'text-[#33cbcc]' : 'text-gray-400'}`}>{MONTH_NAMES[columns[0]?.date.getMonth() ?? 0]}</span>
                                         </div>
                                     </div>
                                 ) : (
@@ -2105,11 +2261,11 @@ const Tasks = () => {
                                         {columns.map(col => (
                                             <div key={col.index} style={{ width: `${dayPx}px` }}
                                                 className={`shrink-0 flex flex-col items-center justify-center border-r border-gray-50 ${col.isWeekend ? 'bg-gray-50/50' : ''}`}>
-                                                <span className={`text-[11px] font-medium ${col.isToday ? 'text-red-500' : col.isWeekend ? 'text-gray-300' : 'text-gray-400'}`}>
+                                                <span className={`text-[11px] font-medium ${col.isToday ? 'text-[#33cbcc]' : col.isWeekend ? 'text-gray-300' : 'text-gray-400'}`}>
                                                     {viewMode === 'week' ? DAY_NAMES_FULL[col.dow] : DAY_NAMES_SHORT[col.dow]}
                                                 </span>
                                                 {col.isToday
-                                                    ? <span className="w-7 h-7 rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center mt-1 shadow-sm shadow-red-200">{col.date.getDate()}</span>
+                                                    ? <span className="w-7 h-7 rounded-full bg-[#33cbcc] text-white text-xs font-bold flex items-center justify-center mt-1 shadow-sm shadow-[#33cbcc]/20">{col.date.getDate()}</span>
                                                     : <span className={`text-sm font-semibold mt-1 ${col.isWeekend ? 'text-gray-300' : 'text-gray-700'}`}>{col.date.getDate()}</span>}
                                             </div>
                                         ))}
@@ -2284,10 +2440,10 @@ const Tasks = () => {
                                                         <Zap size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
                                                     )}
                                                     {!narrow && task.urgent && (
-                                                        <AlertTriangle size={12} className="shrink-0 opacity-70 text-red-500" />
+                                                        <AlertTriangle size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
                                                     )}
                                                     {!narrow && task.important && (
-                                                        <Star size={12} className="shrink-0 opacity-70 text-amber-500" />
+                                                        <Star size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
                                                     )}
                                                     {/* Full title tooltip on hover */}
                                                     {!isDrag && (
@@ -2340,7 +2496,7 @@ const Tasks = () => {
                             {/* Today vertical line */}
                             {showTodayLine && (
                                 <div
-                                    className="absolute top-0 bottom-0 w-0.5 bg-red-400/50 z-5 pointer-events-none"
+                                    className="absolute top-0 bottom-0 w-0.5 bg-[#33cbcc]/50 z-5 pointer-events-none"
                                     style={{ left: `${todayIdx * dayPx + dayPx / 2}px` }}
                                 />
                             )}

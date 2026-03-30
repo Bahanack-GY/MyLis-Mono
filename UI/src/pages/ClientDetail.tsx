@@ -48,9 +48,9 @@ const fmtDate = (d?: string | null) => {
 
 const INVOICE_STATUS_STYLES: Record<string, { bg: string; text: string }> = {
     CREATED: { bg: 'bg-gray-100', text: 'text-gray-600' },
-    SENT: { bg: 'bg-blue-50', text: 'text-blue-600' },
-    PAID: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
-    REJECTED: { bg: 'bg-rose-50', text: 'text-rose-600' },
+    SENT: { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
+    PAID: { bg: 'bg-[#283852]', text: 'text-white' },
+    REJECTED: { bg: 'bg-gray-100', text: 'text-gray-400' },
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -61,10 +61,10 @@ const OverviewView = ({ client }: { client: ClientData }) => {
     const { t } = useTranslation();
 
     const stats = [
-        { label: t('clientDetail.overview.totalPaid'), value: fmtCurrency(client.totalPaid), icon: DollarSign, color: '#22c55e' },
-        { label: t('clientDetail.overview.pendingPayments'), value: fmtCurrency(client.totalPending), icon: Clock, color: '#f59e0b' },
-        { label: t('clientDetail.overview.overdue'), value: client.overdueCount, icon: AlertTriangle, color: '#f43f5e' },
-        { label: t('clientDetail.overview.totalInvoices'), value: client.invoices.length, icon: Receipt, color: '#3b82f6' },
+        { label: t('clientDetail.overview.totalPaid'), value: fmtCurrency(client.totalPaid), icon: DollarSign, color: '#33cbcc' },
+        { label: t('clientDetail.overview.pendingPayments'), value: fmtCurrency(client.totalPending), icon: Clock, color: '#283852' },
+        { label: t('clientDetail.overview.overdue'), value: client.overdueCount, icon: AlertTriangle, color: '#283852' },
+        { label: t('clientDetail.overview.totalInvoices'), value: client.invoices.length, icon: Receipt, color: '#283852' },
     ];
 
     /* Revenue over time */
@@ -130,15 +130,15 @@ const OverviewView = ({ client }: { client: ClientData }) => {
                             <AreaChart data={revenueData}>
                                 <defs>
                                     <linearGradient id="colorClientDetailRev" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#33cbcc" stopOpacity={0.3} />
+                                        <stop offset="95%" stopColor="#33cbcc" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                                 <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
                                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                                <Area type="monotone" dataKey="revenue" stroke="#22c55e" strokeWidth={2} fill="url(#colorClientDetailRev)" />
+                                <Area type="monotone" dataKey="revenue" stroke="#33cbcc" strokeWidth={2} fill="url(#colorClientDetailRev)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
@@ -253,7 +253,7 @@ const InvoicesView = ({ client }: { client: ClientData }) => {
                                             {t(`clientDetail.invoices.status.${inv.status.toLowerCase()}`)}
                                         </span>
                                         {isOverdue && (
-                                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-50 text-rose-600">
+                                            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-400">
                                                 {t('clientDetail.invoices.overdue')}
                                             </span>
                                         )}
@@ -264,7 +264,7 @@ const InvoicesView = ({ client }: { client: ClientData }) => {
                                     <div className="flex items-center gap-6 text-xs text-gray-400">
                                         <span>{t('clientDetail.invoices.issued')}: {fmtDate(inv.issueDate)}</span>
                                         <span>{t('clientDetail.invoices.due')}: {fmtDate(inv.dueDate)}</span>
-                                        {inv.paidAt && <span className="text-emerald-500">{t('clientDetail.invoices.paidOn')}: {fmtDate(inv.paidAt)}</span>}
+                                        {inv.paidAt && <span className="text-[#33cbcc]">{t('clientDetail.invoices.paidOn')}: {fmtDate(inv.paidAt)}</span>}
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <span className="text-lg font-bold text-gray-800">{fmtCurrency(inv.total)}</span>
@@ -272,7 +272,7 @@ const InvoicesView = ({ client }: { client: ClientData }) => {
                                             {inv.status === 'CREATED' && (
                                                 <button
                                                     onClick={() => sendInvoice.mutate(inv.id)}
-                                                    className="p-1.5 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-500 transition-colors"
+                                                    className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                     title={t('clientDetail.invoices.send')}
                                                 >
                                                     <Send size={14} />
@@ -282,14 +282,14 @@ const InvoicesView = ({ client }: { client: ClientData }) => {
                                                 <>
                                                     <button
                                                         onClick={() => payInvoice.mutate(inv.id)}
-                                                        className="p-1.5 rounded-lg hover:bg-emerald-50 text-gray-400 hover:text-emerald-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-[#33cbcc]/10 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                                         title={t('clientDetail.invoices.markPaid')}
                                                     >
                                                         <CheckCircle size={14} />
                                                     </button>
                                                     <button
                                                         onClick={() => rejectInvoice.mutate(inv.id)}
-                                                        className="p-1.5 rounded-lg hover:bg-rose-50 text-gray-400 hover:text-rose-500 transition-colors"
+                                                        className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                         title={t('clientDetail.invoices.reject')}
                                                     >
                                                         <XCircle size={14} />
@@ -353,7 +353,7 @@ const ProjectsView = ({ client }: { client: ClientData }) => {
                                                 <p className="text-xs text-gray-400">{fmtCurrency(project.budget)} coût</p>
                                             )}
                                             {project.revenue > 0 && (
-                                                <p className="text-xs font-semibold text-emerald-600">{fmtCurrency(project.revenue)} rev.</p>
+                                                <p className="text-xs font-semibold text-[#33cbcc]">{fmtCurrency(project.revenue)} rev.</p>
                                             )}
                                         </div>
                                     )}
@@ -370,7 +370,7 @@ const ProjectsView = ({ client }: { client: ClientData }) => {
                                             className="h-full rounded-full transition-all duration-500"
                                             style={{
                                                 width: `${progress}%`,
-                                                backgroundColor: progress === 100 ? '#22c55e' : '#33cbcc',
+                                                backgroundColor: '#33cbcc',
                                             }}
                                         />
                                     </div>

@@ -112,6 +112,7 @@ interface DeptForm {
     description: string;
     headId: string | null;
     budget: string;
+    defaultTargetRevenue: string;
     color: string;
     iconKey: string;
     memberIds: string[];
@@ -134,6 +135,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
         description: '',
         headId: null,
         budget: '',
+        defaultTargetRevenue: '',
         color: COLOR_OPTIONS[0].value,
         iconKey: 'code',
         memberIds: [],
@@ -344,6 +346,26 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                         />
                     </div>
 
+                    {/* Default CA target */}
+                    <div>
+                        <label className={labelCls}>
+                            <TrendingUp size={12} />
+                            {t('departments.create.defaultCA', 'Objectif CA par défaut')}
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                min="0"
+                                value={form.defaultTargetRevenue}
+                                onChange={e => update('defaultTargetRevenue', e.target.value)}
+                                placeholder="0"
+                                className={`${inputCls} pr-16`}
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">FCFA</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400 mt-1">{t('departments.create.defaultCAHint', 'Utilisé chaque mois si aucun objectif spécifique n\'est défini')}</p>
+                    </div>
+
                     {/* Members — multi-select */}
                     <div>
                         <label className={labelCls}>
@@ -370,7 +392,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                         <button
                                             type="button"
                                             onClick={() => removeMember(emp.id)}
-                                            className="text-gray-300 hover:text-rose-500 transition-colors"
+                                            className="text-gray-300 hover:text-[#283852] transition-colors"
                                         >
                                             <X size={12} />
                                         </button>
@@ -517,6 +539,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                     name: form.name,
                                     description: form.description || undefined,
                                     headId: form.headId,
+                                    defaultTargetRevenue: form.defaultTargetRevenue ? parseFloat(form.defaultTargetRevenue) : null,
                                 }, { onSuccess: () => onClose() });
                             }
                         }}
@@ -554,6 +577,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
         name: department.name,
         description: department.description || '',
         headId: department.headId as string | null,
+        defaultTargetRevenue: department.defaultTargetRevenue != null ? String(department.defaultTargetRevenue) : '',
     });
 
     const [headDropdownOpen, setHeadDropdownOpen] = useState(false);
@@ -758,6 +782,26 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                         </AnimatePresence>
                     </div>
 
+                    {/* Default CA target */}
+                    <div>
+                        <label className={labelCls}>
+                            <TrendingUp size={12} />
+                            {t('departments.create.defaultCA', 'Objectif CA par défaut')}
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                min="0"
+                                value={form.defaultTargetRevenue}
+                                onChange={e => setForm(prev => ({ ...prev, defaultTargetRevenue: e.target.value }))}
+                                placeholder="0"
+                                className={`${inputCls} pr-16`}
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">FCFA</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400 mt-1">{t('departments.create.defaultCAHint', 'Utilisé chaque mois si aucun objectif spécifique n\'est défini')}</p>
+                    </div>
+
                     {/* Services */}
                     <div>
                         <label className={labelCls}>
@@ -819,7 +863,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                 <button onClick={() => handleEditService(svc)} className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors">
                                                     <Pencil size={13} />
                                                 </button>
-                                                <button onClick={() => deleteService.mutate(svc.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                                                <button onClick={() => deleteService.mutate(svc.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors">
                                                     <Trash2 size={13} />
                                                 </button>
                                             </div>
@@ -880,6 +924,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                         name: form.name,
                                         description: form.description || undefined,
                                         headId: form.headId,
+                                        defaultTargetRevenue: form.defaultTargetRevenue ? parseFloat(form.defaultTargetRevenue) : null,
                                     },
                                 }, { onSuccess: () => onClose() });
                             }

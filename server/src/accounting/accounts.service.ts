@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Account } from '../models/account.model';
 import { AccountCategory } from '../models/account-category.model';
 import { Journal } from '../models/journal.model';
+import { Department } from '../models/department.model';
 import { SEED_CATEGORIES, SEED_ACCOUNTS, SEED_JOURNALS } from './syscohada-seed';
 
 @Injectable()
@@ -14,20 +15,28 @@ export class AccountsService {
         private categoryModel: typeof AccountCategory,
         @InjectModel(Journal)
         private journalModel: typeof Journal,
+        @InjectModel(Department)
+        private departmentModel: typeof Department,
     ) {}
 
     // ===== CHART OF ACCOUNTS =====
 
     async findAll() {
         return this.accountModel.findAll({
-            include: [{ model: AccountCategory, attributes: ['id', 'code', 'name'] }],
+            include: [
+                { model: AccountCategory, attributes: ['id', 'code', 'name'] },
+                { model: Department, attributes: ['id', 'name'], required: false },
+            ],
             order: [['code', 'ASC']],
         });
     }
 
     async findTree() {
         const accounts = await this.accountModel.findAll({
-            include: [{ model: AccountCategory, attributes: ['id', 'code', 'name'] }],
+            include: [
+                { model: AccountCategory, attributes: ['id', 'code', 'name'] },
+                { model: Department, attributes: ['id', 'name'], required: false },
+            ],
             order: [['code', 'ASC']],
         });
         const categories = await this.categoryModel.findAll({ order: [['code', 'ASC']] });

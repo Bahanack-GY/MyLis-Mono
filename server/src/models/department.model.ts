@@ -24,6 +24,13 @@ export class Department extends Model {
     @Column(DataType.TEXT)
     declare description: string;
 
+    @Column({
+        type: DataType.DECIMAL(15, 2),
+        allowNull: true,
+        defaultValue: null,
+    })
+    declare defaultTargetRevenue: number | null;
+
     @ForeignKey(() => Employee)
     @Column({
         type: DataType.UUID,

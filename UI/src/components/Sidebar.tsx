@@ -35,6 +35,8 @@ import {
     Banknote,
     ArrowLeftRight,
     FileBarChart,
+    Truck,
+    Waves,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -69,8 +71,8 @@ const ALL_SECTIONS: Section[] = [
         key: 'work',
         items: [
             { icon: LayoutDashboard, label: 'dashboard', path: '/dashboard' },
-            { icon: ListChecks, label: 'tasks', path: '/tasks', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL'] },
-            { icon: CalendarRange, label: 'planning', path: '/planning', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL'] },
+            { icon: ListChecks, label: 'tasks', path: '/tasks', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
+            { icon: CalendarRange, label: 'planning', path: '/planning', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
             { icon: Briefcase, label: 'projects', path: '/projects', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL'] },
             { icon: FileText, label: 'documents', path: '/documents', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
             { icon: FileCheck, label: 'myPayslips', path: '/my-payslips' },
@@ -129,13 +131,15 @@ const ALL_SECTIONS: Section[] = [
             { icon: CalendarCheck, label: 'fiscalYears', path: '/accounting/fiscal-years' },
             { icon: Calculator, label: 'payroll', path: '/accounting/payroll' },
             { icon: Receipt, label: 'taxDeclarations', path: '/accounting/tax' },
+            { icon: Truck, label: 'suppliers', path: '/accounting/suppliers' },
+            { icon: Waves, label: 'cashFlow', path: '/accounting/cash-flow' },
         ],
     },
     {
         key: 'comms',
         items: [
             { icon: MessageSquare, label: 'messages', path: '/messages' },
-            { icon: Calendar, label: 'meetings', path: '/meetings' },
+            { icon: Calendar, label: 'meetings', path: '/meetings', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL'] },
             { icon: Ticket, label: 'tickets', path: '/tickets', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
             { icon: FileText, label: 'documents', path: '/documents', roles: ['EMPLOYEE', 'COMMERCIAL'] },
             { icon: AlertTriangle, label: 'sanctions', path: '/sanctions', roles: ['EMPLOYEE', 'COMMERCIAL'] },
@@ -336,7 +340,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                 <button
                     onClick={logout}
                     aria-label={!isSidebarOpen ? t('sidebar.logout') : undefined}
-                    className="w-full text-left flex items-center p-3 rounded-xl cursor-pointer text-gray-500 hover:bg-red-400/10 hover:text-red-400 transition-colors group relative"
+                    className="w-full text-left flex items-center p-3 rounded-xl cursor-pointer text-gray-500 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors group relative"
                 >
                     <LogOut size={20} aria-hidden="true" className="min-w-[20px]" />
                     <AnimatePresence>
@@ -456,7 +460,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                                 )}
                                 <button
                                     onClick={() => { setMoreOpen(false); logout(); }}
-                                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-red-400/10 hover:text-red-400 transition-colors"
+                                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
                                 >
                                     <LogOut size={19} aria-hidden="true" className="shrink-0" />
                                     <span className="text-sm font-medium">{t('sidebar.logout')}</span>

@@ -54,6 +54,13 @@ export class ChatService implements OnModuleInit {
     } catch {
       // Ignore
     }
+    try {
+      await this.sequelize.query(
+        `ALTER TYPE "enum_Users_role" ADD VALUE IF NOT EXISTS 'STAGIAIRE'`,
+      );
+    } catch {
+      // Ignore
+    }
     await this.seedChannels();
   }
 
@@ -93,8 +100,11 @@ export class ChatService implements OnModuleInit {
       this.logger.log('Created General channel');
     }
 
-    // Add all users to General
-    const allUsers = await this.userModel.findAll({ attributes: ['id'] });
+    // Add all non-STAGIAIRE users to General
+    const allUsers = await this.userModel.findAll({
+      where: { role: { [Op.ne]: 'STAGIAIRE' } },
+      attributes: ['id'],
+    });
     for (const user of allUsers) {
       await this.channelMemberModel.findOrCreate({
         where: { channelId: general.id, userId: user.id },
@@ -104,7 +114,12 @@ export class ChatService implements OnModuleInit {
 
     // Create department channels
     const departments = await this.departmentModel.findAll({
-      include: [{ model: Employee, as: 'employees', attributes: ['userId'] }],
+      include: [{
+        model: Employee,
+        as: 'employees',
+        attributes: ['userId'],
+        include: [{ model: User, attributes: ['role'] }],
+      }],
     });
 
     for (const dept of departments) {
@@ -123,11 +138,12 @@ export class ChatService implements OnModuleInit {
         );
       }
 
-      // Add department employees
+      // Add department employees (excluding STAGIAIREs — they only have DMs with their encadreur)
       const employees = dept.employees || [];
       for (const emp of employees) {
         const userId = emp.getDataValue('userId');
-        if (userId) {
+        const role = (emp as any).user?.role;
+        if (userId && role !== 'STAGIAIRE') {
           await this.channelMemberModel.findOrCreate({
             where: { channelId: channel.id, userId },
             defaults: { channelId: channel.id, userId },
@@ -175,6 +191,43 @@ export class ChatService implements OnModuleInit {
       }
     }
 
+    // Remove MANAGERS channel membership from non-MANAGER users (stale records cleanup)
+    if (managersChannel) {
+      const nonManagers = await this.userModel.findAll({
+        where: { role: { [Op.ne]: 'MANAGER' } },
+        attributes: ['id'],
+      });
+      if (nonManagers.length > 0) {
+        const nonManagerIds = nonManagers.map((u) => u.id);
+        await this.channelMemberModel.destroy({
+          where: { channelId: managersChannel.id, userId: { [Op.in]: nonManagerIds } },
+        });
+      }
+    }
+
+    // Remove any DEPARTMENT or GENERAL channel memberships for STAGIAIREs
+    // (they should only have DM channels with their encadreur)
+    const stagiaireUsers = await this.userModel.findAll({
+      where: { role: 'STAGIAIRE' },
+      attributes: ['id'],
+    });
+    if (stagiaireUsers.length > 0) {
+      const stagiaireUserIds = stagiaireUsers.map((u) => u.id);
+      const nonDmChannels = await this.channelModel.findAll({
+        where: { type: { [Op.in]: ['GENERAL', 'DEPARTMENT', 'MANAGERS'] } },
+        attributes: ['id'],
+      });
+      if (nonDmChannels.length > 0) {
+        const nonDmChannelIds = nonDmChannels.map((c) => c.id);
+        await this.channelMemberModel.destroy({
+          where: {
+            userId: { [Op.in]: stagiaireUserIds },
+            channelId: { [Op.in]: nonDmChannelIds },
+          },
+        });
+      }
+    }
+
     this.logger.log('Channel seeding complete');
   }
 
@@ -185,6 +238,9 @@ export class ChatService implements OnModuleInit {
     departmentId?: string | null,
     role?: string,
   ) {
+    // STAGIAIRE: no GENERAL or department channels — only DMs with encadreur
+    if (role === 'STAGIAIRE') return;
+
     // Add to General
     const general = await this.channelModel.findOne({
       where: { type: 'GENERAL' },
@@ -227,6 +283,30 @@ export class ChatService implements OnModuleInit {
         await this.channelMemberModel.findOrCreate({
           where: { channelId: deptChannel.id, userId },
           defaults: { channelId: deptChannel.id, userId },
+        });
+
+        // Remove any stale DEPARTMENT channel memberships from other departments
+        // (can happen if role was previously MANAGER or due to data inconsistency)
+        const allDeptChannels = await this.channelModel.findAll({
+          where: { type: 'DEPARTMENT', id: { [Op.ne]: deptChannel.id } },
+          attributes: ['id'],
+        });
+        const otherDeptChannelIds = allDeptChannels.map((c) => c.id);
+        if (otherDeptChannelIds.length > 0) {
+          await this.channelMemberModel.destroy({
+            where: { userId, channelId: { [Op.in]: otherDeptChannelIds } },
+          });
+        }
+      }
+
+      // Remove stale MANAGERS channel membership for non-managers
+      const managersChannel = await this.channelModel.findOne({
+        where: { type: 'MANAGERS' },
+        attributes: ['id'],
+      });
+      if (managersChannel) {
+        await this.channelMemberModel.destroy({
+          where: { userId, channelId: managersChannel.id },
         });
       }
     }
@@ -578,7 +658,32 @@ export class ChatService implements OnModuleInit {
 
   /* ── Users for DM picker ─────────────────────────────── */
 
-  async getUsers(excludeUserId: string) {
+  async getUsers(excludeUserId: string, requestingRole?: string) {
+    // STAGIAIRE can only see their encadreur in the DM picker
+    if (requestingRole === 'STAGIAIRE') {
+      const stagiaireEmp = await this.employeeModel.findOne({
+        where: { userId: excludeUserId },
+        attributes: ['encadreurId'],
+      });
+      if (!stagiaireEmp?.encadreurId) return [];
+      const encadreur = await this.employeeModel.findByPk(stagiaireEmp.encadreurId, {
+        attributes: ['userId', 'firstName', 'lastName', 'avatarUrl'],
+        include: [
+          { model: User, attributes: ['id', 'email'] },
+          { model: Department, attributes: ['name'] },
+        ],
+      });
+      if (!encadreur) return [];
+      return [{
+        userId: encadreur.getDataValue('userId'),
+        firstName: encadreur.getDataValue('firstName') || '',
+        lastName: encadreur.getDataValue('lastName') || '',
+        avatarUrl: encadreur.getDataValue('avatarUrl') || '',
+        email: (encadreur.user as any)?.email || '',
+        departmentName: (encadreur.department as any)?.name || '',
+      }];
+    }
+
     const employees = await this.employeeModel.findAll({
       where: { userId: { [Op.ne]: excludeUserId } },
       attributes: ['userId', 'firstName', 'lastName', 'avatarUrl'],
@@ -596,6 +701,21 @@ export class ChatService implements OnModuleInit {
       email: (emp.user as any)?.email || '',
       departmentName: (emp.department as any)?.name || '',
     }));
+  }
+
+  /** Returns false if a STAGIAIRE tries to DM someone who is not their encadreur */
+  async isAllowedDM(requestingUserId: string, targetUserId: string): Promise<boolean> {
+    const user = await this.userModel.findByPk(requestingUserId, { attributes: ['role'] });
+    if (!user || user.role !== 'STAGIAIRE') return true;
+
+    const emp = await this.employeeModel.findOne({
+      where: { userId: requestingUserId },
+      attributes: ['encadreurId'],
+    });
+    if (!emp?.encadreurId) return false;
+
+    const encadreur = await this.employeeModel.findByPk(emp.encadreurId, { attributes: ['userId'] });
+    return encadreur?.userId === targetUserId;
   }
 
   /* ── Helpers ──────────────────────────────────────────── */

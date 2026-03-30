@@ -17,9 +17,9 @@ import type { BusinessExpense, BusinessExpenseStatus } from '../../api/business-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3025';
 
 const STATUS_BG: Record<BusinessExpenseStatus, string> = {
-    PENDING: 'bg-amber-50 text-amber-600',
-    VALIDATED: 'bg-green-50 text-green-600',
-    REJECTED: 'bg-red-50 text-red-600',
+    PENDING: 'bg-[#283852]/10 text-[#283852]/70',
+    VALIDATED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
+    REJECTED: 'bg-gray-100 text-gray-400',
 };
 
 const STATUS_ICON: Record<BusinessExpenseStatus, typeof Loader2> = {
@@ -73,8 +73,8 @@ const ValidationModal = ({
             >
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center">
-                            <Check size={18} className="text-green-500" />
+                        <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
+                            <Check size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">
                             {t('businessExpenses.confirmValidate')}
@@ -129,7 +129,7 @@ const ValidationModal = ({
                         <button
                             onClick={onConfirm}
                             disabled={isLoading}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors shadow-lg shadow-green-500/20 disabled:opacity-50"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50"
                         >
                             {isLoading ? (
                                 <Loader2 size={16} className="animate-spin" />
@@ -252,8 +252,8 @@ const DetailModal = ({
                     {/* Rejection reason */}
                     {expense.status === 'REJECTED' && expense.rejectionReason && (
                         <div>
-                            <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wider mb-1.5">{t('businessExpenses.rejectionReason')}</p>
-                            <p className="text-sm text-red-600 leading-relaxed bg-red-50 rounded-xl p-3">{expense.rejectionReason}</p>
+                            <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider mb-1.5">{t('businessExpenses.rejectionReason')}</p>
+                            <p className="text-sm text-[#283852] leading-relaxed bg-[#283852]/10 rounded-xl p-3">{expense.rejectionReason}</p>
                         </div>
                     )}
 
@@ -310,8 +310,8 @@ const RejectionModal = ({
             >
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center">
-                            <Ban size={18} className="text-red-500" />
+                        <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center">
+                            <Ban size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">
                             {t('businessExpenses.reject')}
@@ -335,7 +335,7 @@ const RejectionModal = ({
                             onChange={(e) => setReason(e.target.value)}
                             placeholder={t('businessExpenses.rejectionReasonPlaceholder')}
                             rows={3}
-                            className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-400 transition-all resize-none"
+                            className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all resize-none"
                             autoFocus
                         />
                     </div>
@@ -350,7 +350,7 @@ const RejectionModal = ({
                         <button
                             onClick={() => onConfirm(reason)}
                             disabled={isLoading}
-                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20 disabled:opacity-50"
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20 disabled:opacity-50"
                         >
                             {isLoading ? (
                                 <Loader2 size={16} className="animate-spin" />
@@ -418,22 +418,22 @@ const BusinessExpenses = () => {
             label: t('businessExpenses.stats.pending'),
             value: stats?.totalPending ?? 0,
             icon: Loader2,
-            color: '#f59e0b',
-            bgColor: 'bg-amber-50',
+            color: '#283852',
+            bgColor: 'bg-[#283852]/10',
         },
         {
             label: t('businessExpenses.stats.validated'),
             value: stats?.totalValidated ?? 0,
             icon: Check,
-            color: '#22c55e',
-            bgColor: 'bg-green-50',
+            color: '#33cbcc',
+            bgColor: 'bg-[#33cbcc]/10',
         },
         {
             label: t('businessExpenses.stats.rejected'),
             value: stats?.totalRejected ?? 0,
             icon: Ban,
-            color: '#ef4444',
-            bgColor: 'bg-red-50',
+            color: '#283852',
+            bgColor: 'bg-gray-100',
         },
         {
             label: t('businessExpenses.stats.totalAmount'),
@@ -751,7 +751,7 @@ const BusinessExpenses = () => {
                                                             e.stopPropagation();
                                                             setValidatingExpense(expense);
                                                         }}
-                                                        className="p-2 rounded-lg text-green-600 bg-green-50 hover:bg-green-100 transition-colors"
+                                                        className="p-2 rounded-lg text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
                                                         title={t('businessExpenses.validate')}
                                                     >
                                                         <Check size={15} />
@@ -761,7 +761,7 @@ const BusinessExpenses = () => {
                                                             e.stopPropagation();
                                                             setRejectingId(expense.id);
                                                         }}
-                                                        className="p-2 rounded-lg text-red-500 bg-red-50 hover:bg-red-100 transition-colors"
+                                                        className="p-2 rounded-lg text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors"
                                                         title={t('businessExpenses.reject')}
                                                     >
                                                         <X size={15} />

@@ -12,6 +12,7 @@ import { Task } from '../models/task.model';
 import { Report } from '../models/report.model';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { ChatService } from '../chat/chat.service';
 import { Op, literal } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
@@ -38,6 +39,7 @@ export class EmployeesService {
         private sequelize: Sequelize,
         private usersService: UsersService,
         private notificationsService: NotificationsService,
+        private chatService: ChatService,
     ) { }
 
     async findAll(departmentId?: string): Promise<Employee[]> {
@@ -45,7 +47,11 @@ export class EmployeesService {
         if (departmentId) where.departmentId = departmentId;
         return this.employeeModel.findAll({
             where,
-            include: [User, Department, Position],
+            include: [
+                User, Department, Position,
+                { model: Employee, as: 'encadreur', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
+                { model: Employee, as: 'stagiaires', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
+            ],
         });
     }
 
@@ -67,7 +73,11 @@ export class EmployeesService {
         }
         return this.employeeModel.findAndCountAll({
             where,
-            include: [User, Department, Position],
+            include: [
+                User, Department, Position,
+                { model: Employee, as: 'encadreur', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
+                { model: Employee, as: 'stagiaires', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
+            ],
             limit: params.limit,
             offset: (params.page - 1) * params.limit,
             order: [['firstName', 'ASC'], ['lastName', 'ASC']],
@@ -77,7 +87,11 @@ export class EmployeesService {
 
     async findOne(id: string): Promise<Employee | null> {
         return this.employeeModel.findByPk(id, {
-            include: [User, Department, Position],
+            include: [
+                User, Department, Position,
+                { model: Employee, as: 'encadreur', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
+                { model: Employee, as: 'stagiaires', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
+            ],
         });
     }
 
@@ -105,7 +119,12 @@ export class EmployeesService {
             }, { transaction: t });
         });
 
-        // 3. Notify department members after commit
+        // 3. Create DM between STAGIAIRE and their encadreur
+        if (createEmployeeDto.userRole === 'STAGIAIRE' && createEmployeeDto.encadreurId) {
+            this.createStagiaireDM(employee.userId, createEmployeeDto.encadreurId).catch(() => {});
+        }
+
+        // 4. Notify department members after commit
         if (createEmployeeDto.departmentId) {
             const colleagues = await this.employeeModel.findAll({
                 where: {
@@ -134,6 +153,17 @@ export class EmployeesService {
         return employee;
     }
 
+    /** Create a DM channel between a STAGIAIRE (by userId) and their encadreur (by employeeId) */
+    private async createStagiaireDM(stagiaireUserId: string, encadreurEmployeeId: string): Promise<void> {
+        const encadreur = await this.employeeModel.findByPk(encadreurEmployeeId, { attributes: ['userId'] });
+        if (!encadreur?.userId) return;
+        const { created, channel } = await this.chatService.getOrCreateDM(stagiaireUserId, encadreur.userId);
+        if (created) {
+            // The gateway will join socket rooms on next connection; nothing else needed here
+            void channel;
+        }
+    }
+
     async changeEmployeePassword(id: string, newPassword: string): Promise<void> {
         const employee = await this.employeeModel.findByPk(id);
         if (!employee?.userId) throw new Error('Employee user not found');
@@ -148,10 +178,20 @@ export class EmployeesService {
                 await this.usersService.updateEmail(employee.userId, email);
             }
         }
-        return this.employeeModel.update(employeeFields, {
+        const result = await this.employeeModel.update(employeeFields, {
             where: { id },
             returning: true,
         });
+
+        // If encadreurId was just set, ensure DM channel exists
+        if (employeeFields.encadreurId) {
+            const employee = await this.employeeModel.findByPk(id, { attributes: ['userId'] });
+            if (employee?.userId) {
+                this.createStagiaireDM(employee.userId, employeeFields.encadreurId).catch(() => {});
+            }
+        }
+
+        return result;
     }
 
     async remove(id: string): Promise<void> {
@@ -393,26 +433,34 @@ export class EmployeesService {
 
     async promoteEmployee(
         employeeId: string,
-        toPositionId: string,
+        toRole: string,
         promotedByUserId: string,
         reason?: string,
     ): Promise<Employee> {
-        const employee = await this.employeeModel.findByPk(employeeId);
+        const ALLOWED_ROLES = ['EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'ACCOUNTANT', 'MANAGER', 'STAGIAIRE'];
+        if (!ALLOWED_ROLES.includes(toRole)) {
+            throw new BadRequestException('Invalid role');
+        }
+
+        const employee = await this.employeeModel.findByPk(employeeId, { include: [User] });
         if (!employee) throw new NotFoundException('Employee not found');
 
-        const fromPositionId = employee.getDataValue('positionId') || null;
+        const user = await this.userModel.findByPk(employee.getDataValue('userId'));
+        if (!user) throw new NotFoundException('User not found');
+
+        const fromRole = user.getDataValue('role') || null;
 
         const promoter = await this.userModel.findByPk(promotedByUserId);
         const promotedByName = promoter
             ? `${promoter.getDataValue('firstName') || ''} ${promoter.getDataValue('lastName') || ''}`.trim() || promoter.email
             : 'System';
 
-        await employee.update({ positionId: toPositionId });
+        await user.update({ role: toRole });
 
         await this.promotionHistoryModel.create({
             employeeId,
-            fromPositionId,
-            toPositionId,
+            fromRole,
+            toRole,
             promotedByUserId,
             promotedByName,
             reason: reason || null,
@@ -424,10 +472,6 @@ export class EmployeesService {
     async getPromotionHistory(employeeId: string): Promise<EmployeePromotionHistory[]> {
         return this.promotionHistoryModel.findAll({
             where: { employeeId },
-            include: [
-                { model: Position, as: 'fromPosition', attributes: ['id', 'title'] },
-                { model: Position, as: 'toPosition', attributes: ['id', 'title'] },
-            ],
             order: [['createdAt', 'DESC']],
         });
     }

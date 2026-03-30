@@ -206,12 +206,12 @@ const PayslipDetailModal = ({
                                         <span className="text-gray-700">{row.label}</span>
                                         {row.rate && <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 text-gray-500 font-medium">{row.rate}</span>}
                                     </div>
-                                    <span className="font-medium text-red-500">- {formatXAF(row.amount)}</span>
+                                    <span className="font-medium text-[#283852]">- {formatXAF(row.amount)}</span>
                                 </div>
                             ))}
                             <div className="flex items-center justify-between px-4 py-2.5 bg-gray-100 border-t border-gray-200">
                                 <span className="text-sm font-bold text-gray-700">Total Retenues</span>
-                                <span className="font-bold text-red-600">- {formatXAF((Number(payslip.totalDeductions) || 0) + (Number(payslip.manualDeductions) || 0))}</span>
+                                <span className="font-bold text-[#283852]">- {formatXAF((Number(payslip.totalDeductions) || 0) + (Number(payslip.manualDeductions) || 0))}</span>
                             </div>
                         </div>
                     </div>
@@ -219,14 +219,14 @@ const PayslipDetailModal = ({
                     {/* Employer charges */}
                     <div>
                         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Charges patronales</p>
-                        <div className="bg-amber-50/50 rounded-xl overflow-hidden">
+                        <div className="bg-[#283852]/5 rounded-xl overflow-hidden">
                             <div className="flex items-center justify-between px-4 py-2.5 text-sm">
                                 <span className="text-gray-700">CNPS Employeur</span>
-                                <span className="font-medium text-amber-600">{formatXAF(Number(payslip.cnpsEmployer) || 0)}</span>
+                                <span className="font-medium text-[#283852]">{formatXAF(Number(payslip.cnpsEmployer) || 0)}</span>
                             </div>
-                            <div className="flex items-center justify-between px-4 py-2.5 bg-amber-50 border-t border-amber-100">
+                            <div className="flex items-center justify-between px-4 py-2.5 bg-[#283852]/10 border-t border-gray-200">
                                 <span className="text-sm font-bold text-gray-700">Total Charges Patronales</span>
-                                <span className="font-bold text-amber-600">{formatXAF(Number(payslip.totalEmployerCharges) || 0)}</span>
+                                <span className="font-bold text-[#283852]">{formatXAF(Number(payslip.totalEmployerCharges) || 0)}</span>
                             </div>
                         </div>
                     </div>
@@ -282,7 +282,7 @@ const PayslipCard = ({
                             </p>
                         </div>
                     </div>
-                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700">
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#283852] text-white">
                         Paye
                     </span>
                 </div>
@@ -293,9 +293,9 @@ const PayslipCard = ({
                         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Brut</p>
                         <p className="text-sm font-bold text-gray-800 mt-0.5">{formatXAF(Number(payslip.grossSalary) || 0)}</p>
                     </div>
-                    <div className="bg-red-50/50 rounded-xl p-3">
-                        <p className="text-[10px] font-semibold text-red-300 uppercase tracking-wider">Retenues</p>
-                        <p className="text-sm font-bold text-red-600 mt-0.5">
+                    <div className="bg-[#283852]/10 rounded-xl p-3">
+                        <p className="text-[10px] font-semibold text-[#283852]/60 uppercase tracking-wider">Retenues</p>
+                        <p className="text-sm font-bold text-[#283852] mt-0.5">
                             - {formatXAF((Number(payslip.totalDeductions) || 0) + (Number(payslip.manualDeductions) || 0))}
                         </p>
                     </div>
@@ -432,8 +432,8 @@ export default function MyPayslips() {
                 </div>
                 <div className="bg-white rounded-2xl border border-gray-100 p-5">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
-                            <FileText size={16} className="text-blue-500" />
+                        <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
+                            <FileText size={16} className="text-[#283852]" />
                         </div>
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Brut cumule {currentYear}</p>
                     </div>
@@ -441,8 +441,8 @@ export default function MyPayslips() {
                 </div>
                 <div className="bg-white rounded-2xl border border-gray-100 p-5">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-xl bg-red-50 flex items-center justify-center">
-                            <TrendingDown size={16} className="text-red-400" />
+                        <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
+                            <TrendingDown size={16} className="text-[#283852]" />
                         </div>
                         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Retenues {currentYear}</p>
                     </div>

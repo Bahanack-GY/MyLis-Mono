@@ -293,6 +293,84 @@ export class ReportsService {
     }
 
     /**
+     * Tableau de flux de trésorerie
+     * Based on class 5 (Trésorerie) account movements.
+     * Debits = entrées (cash in), Credits = sorties (cash out)
+     */
+    async cashFlow(fiscalYearId: string) {
+        // Monthly aggregates for chart
+        const [monthRows] = await this.sequelize.query(`
+            SELECT
+                EXTRACT(MONTH FROM je."date")::int AS month,
+                COALESCE(SUM(jel."debit"), 0)  AS entrees,
+                COALESCE(SUM(jel."credit"), 0) AS sorties
+            FROM journal_entry_lines jel
+            JOIN journal_entries je ON je.id = jel."journalEntryId"
+            JOIN accounts a ON a.id = jel."accountId"
+            WHERE je."fiscalYearId" = :fiscalYearId
+              AND je.status = 'VALIDATED'
+              AND a.code LIKE '5%'
+            GROUP BY EXTRACT(MONTH FROM je."date")
+            ORDER BY month
+        `, { replacements: { fiscalYearId } });
+
+        const months = Array.from({ length: 12 }, (_, i) => ({
+            month: i + 1,
+            entrees: 0,
+            sorties: 0,
+            net: 0,
+        }));
+        for (const row of monthRows as any[]) {
+            const idx = Number(row.month) - 1;
+            if (idx >= 0 && idx < 12) {
+                months[idx].entrees = Math.round(Number(row.entrees) || 0);
+                months[idx].sorties = Math.round(Number(row.sorties) || 0);
+                months[idx].net = months[idx].entrees - months[idx].sorties;
+            }
+        }
+
+        // Cumulative running balance
+        let running = 0;
+        for (const m of months) {
+            running += m.net;
+            (m as any).cumulative = Math.round(running);
+        }
+
+        // Detailed lines for the table
+        const [lineRows] = await this.sequelize.query(`
+            SELECT
+                je."date",
+                je."entryNumber",
+                je.description,
+                je.reference,
+                je."sourceType",
+                a.code AS "accountCode",
+                a.name AS "accountName",
+                jel."debit",
+                jel."credit",
+                jel."label"
+            FROM journal_entry_lines jel
+            JOIN journal_entries je ON je.id = jel."journalEntryId"
+            JOIN accounts a ON a.id = jel."accountId"
+            WHERE je."fiscalYearId" = :fiscalYearId
+              AND je.status = 'VALIDATED'
+              AND a.code LIKE '5%'
+            ORDER BY je."date" ASC, je."entryNumber" ASC
+        `, { replacements: { fiscalYearId } });
+
+        const totalEntrees = months.reduce((s, m) => s + m.entrees, 0);
+        const totalSorties = months.reduce((s, m) => s + m.sorties, 0);
+
+        return {
+            months,
+            lines: lineRows,
+            totalEntrees,
+            totalSorties,
+            netCashFlow: totalEntrees - totalSorties,
+        };
+    }
+
+    /**
      * Monthly revenue vs expenses breakdown for the bar chart.
      * Queries journal entry lines grouped by month, with revenue (class 7)
      * and expenses (class 6) separated.

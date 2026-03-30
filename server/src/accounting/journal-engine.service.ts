@@ -435,4 +435,100 @@ export class JournalEngineService {
             this.logger.error(`Failed to create journal entry for credit note: ${error.message}`);
         }
     }
+
+    /**
+     * Called when a supplier invoice is validated (DRAFT → VALIDATED)
+     * Creates: Debit 601000 Achats + Debit 445200 TVA déductible / Credit 401000 Fournisseurs
+     */
+    async onSupplierInvoiceValidated(params: {
+        invoiceId: string;
+        supplierName: string;
+        invoiceNumber: string;
+        totalHT: number;
+        taxAmount: number;
+        totalTTC: number;
+        date: string;
+        userId: string;
+    }): Promise<void> {
+        try {
+            const lines: { accountCode: string; debit: number; credit: number; label?: string }[] = [
+                {
+                    accountCode: '601000',
+                    debit: params.totalHT,
+                    credit: 0,
+                    label: `Achats - ${params.invoiceNumber}`,
+                },
+            ];
+
+            if (params.taxAmount > 0) {
+                lines.push({
+                    accountCode: '445200',
+                    debit: params.taxAmount,
+                    credit: 0,
+                    label: `TVA déductible - ${params.invoiceNumber}`,
+                });
+            }
+
+            lines.push({
+                accountCode: '401000',
+                debit: 0,
+                credit: params.totalTTC,
+                label: `${params.supplierName} - ${params.invoiceNumber}`,
+            });
+
+            await this.createAutoEntry({
+                journalCode: 'ACH',
+                date: params.date,
+                description: `Facture fournisseur ${params.invoiceNumber} - ${params.supplierName}`,
+                reference: params.invoiceNumber,
+                sourceType: 'SUPPLIER_INVOICE',
+                sourceId: params.invoiceId,
+                lines,
+                userId: params.userId,
+            });
+        } catch (error) {
+            this.logger.error(`Failed to create journal entry for supplier invoice validated: ${error.message}`);
+        }
+    }
+
+    /**
+     * Called when a supplier invoice is paid (VALIDATED → PAID)
+     * Creates: Debit 401000 Fournisseurs / Credit 521000 Banque
+     */
+    async onSupplierInvoicePaid(params: {
+        invoiceId: string;
+        supplierName: string;
+        invoiceNumber: string;
+        totalTTC: number;
+        date: string;
+        userId: string;
+    }): Promise<void> {
+        try {
+            await this.createAutoEntry({
+                journalCode: 'BQ',
+                date: params.date,
+                description: `Paiement fournisseur ${params.invoiceNumber} - ${params.supplierName}`,
+                reference: params.invoiceNumber,
+                sourceType: 'SUPPLIER_INVOICE',
+                sourceId: params.invoiceId,
+                lines: [
+                    {
+                        accountCode: '401000',
+                        debit: params.totalTTC,
+                        credit: 0,
+                        label: `${params.supplierName} - ${params.invoiceNumber}`,
+                    },
+                    {
+                        accountCode: '521000',
+                        debit: 0,
+                        credit: params.totalTTC,
+                        label: `Paiement - ${params.invoiceNumber}`,
+                    },
+                ],
+                userId: params.userId,
+            });
+        } catch (error) {
+            this.logger.error(`Failed to create journal entry for supplier invoice paid: ${error.message}`);
+        }
+    }
 }

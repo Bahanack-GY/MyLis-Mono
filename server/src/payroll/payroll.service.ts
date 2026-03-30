@@ -198,7 +198,7 @@ export class PayrollService {
     }
 
     /**
-     * Pay a validated payroll run — creates Expense records + journal entries
+     * Pay a validated payroll run — creates Expense records + journal entries for all unpaid payslips
      */
     async pay(id: string, userId: string) {
         const run = await this.findOne(id);
@@ -206,14 +206,15 @@ export class PayrollService {
             throw new BadRequestException('Can only pay VALIDATED payroll runs');
         }
 
-        const date = `${run.year}-${String(run.month).padStart(2, '0')}-01`;
+        const defaultDate = `${run.year}-${String(run.month).padStart(2, '0')}-01`;
+        const unpaidPayslips = run.payslips.filter(ps => !ps.paymentDate);
 
         return this.sequelize.transaction(async (t) => {
-            for (const payslip of run.payslips) {
+            for (const payslip of unpaidPayslips) {
                 const emp = payslip.employee;
                 const name = `${emp.getDataValue('firstName') || ''} ${emp.getDataValue('lastName') || ''}`.trim();
+                const date = defaultDate;
 
-                // Create Expense record (backward compatibility with existing salary page)
                 const title = `Salaire - ${name}`;
                 const existing = await this.expenseModel.findOne({
                     where: { title, category: 'Salaire', date } as any,
@@ -229,7 +230,6 @@ export class PayrollService {
                     } as any, { transaction: t });
                 }
 
-                // Create journal entries
                 await this.journalEngine.onSalaryPaid({
                     employeeName: name,
                     grossSalary: Number(payslip.grossSalary),
@@ -243,10 +243,88 @@ export class PayrollService {
                     sourceId: payslip.id,
                     userId,
                 });
+
+                await payslip.update({ paymentDate: date }, { transaction: t });
             }
 
             await run.update({ status: 'PAID', paidAt: new Date() }, { transaction: t });
             return this.findOne(id);
+        });
+    }
+
+    /**
+     * Pay a single payslip on a specific date (individual payment)
+     */
+    async payOne(payslipId: string, date: string, userId: string) {
+        const payslip = await this.payslipModel.findByPk(payslipId, {
+            include: [
+                { model: PayrollRun, attributes: ['id', 'status', 'month', 'year'] },
+                {
+                    model: Employee,
+                    attributes: ['id', 'firstName', 'lastName'],
+                    include: [{ model: Department, attributes: ['id', 'name'] }],
+                },
+            ],
+        });
+        if (!payslip) throw new NotFoundException('Payslip not found');
+        if (payslip.payrollRun.status !== 'VALIDATED') {
+            throw new BadRequestException('Payroll run must be VALIDATED to pay individual payslips');
+        }
+        if (payslip.paymentDate) {
+            throw new BadRequestException('This payslip has already been paid');
+        }
+
+        const emp = payslip.employee;
+        const name = `${emp.getDataValue('firstName') || ''} ${emp.getDataValue('lastName') || ''}`.trim();
+
+        return this.sequelize.transaction(async (t) => {
+            const title = `Salaire - ${name}`;
+            const existing = await this.expenseModel.findOne({
+                where: { title, category: 'Salaire', date } as any,
+                transaction: t,
+            });
+            if (!existing) {
+                await this.expenseModel.create({
+                    title,
+                    amount: payslip.grossSalary,
+                    category: 'Salaire',
+                    type: 'ONE_TIME',
+                    date,
+                } as any, { transaction: t });
+            }
+
+            await this.journalEngine.onSalaryPaid({
+                employeeName: name,
+                grossSalary: Number(payslip.grossSalary),
+                netSalary: Number(payslip.netSalary),
+                cnpsEmployee: Number(payslip.cnpsEmployee),
+                cnpsEmployer: Number(payslip.cnpsEmployer),
+                irpp: Number(payslip.irpp),
+                cfc: Number(payslip.cfc),
+                communalTax: Number(payslip.communalTax),
+                date,
+                sourceId: payslip.id,
+                userId,
+            });
+
+            await payslip.update({ paymentDate: date }, { transaction: t });
+
+            // If all payslips in this run are now paid, mark run as PAID
+            const allPayslips = await this.payslipModel.findAll({
+                where: { payrollRunId: payslip.payrollRunId },
+                transaction: t,
+            });
+            const allPaid = allPayslips.every(ps =>
+                ps.id === payslipId || ps.paymentDate != null,
+            );
+            if (allPaid) {
+                await this.payrollRunModel.update(
+                    { status: 'PAID', paidAt: new Date() },
+                    { where: { id: payslip.payrollRunId }, transaction: t },
+                );
+            }
+
+            return this.findPayslip(payslipId);
         });
     }
 

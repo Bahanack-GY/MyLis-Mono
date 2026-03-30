@@ -32,22 +32,22 @@ import type { Demand, DemandImportance } from '../../api/demands/types';
 type DemandStatusKey = 'PENDING' | 'VALIDATED' | 'REJECTED';
 
 const STATUS_COLORS: Record<DemandStatusKey, string> = {
-    PENDING: '#f59e0b',
-    VALIDATED: '#22c55e',
-    REJECTED: '#ef4444',
+    PENDING: '#283852',
+    VALIDATED: '#33cbcc',
+    REJECTED: '#283852',
 };
 
 const STATUS_BG: Record<DemandStatusKey, string> = {
-    PENDING: 'bg-amber-50 text-amber-600',
-    VALIDATED: 'bg-green-50 text-green-600',
-    REJECTED: 'bg-red-50 text-red-600',
+    PENDING: 'bg-[#283852]/10 text-[#283852]/70',
+    VALIDATED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
+    REJECTED: 'bg-gray-100 text-gray-400',
 };
 
 const IMPORTANCE_COLORS: Record<DemandImportance, string> = {
     BARELY: 'bg-gray-100 text-gray-500',
-    IMPORTANT: 'bg-blue-50 text-blue-600',
-    VERY_IMPORTANT: 'bg-orange-50 text-orange-600',
-    URGENT: 'bg-red-50 text-red-600',
+    IMPORTANT: 'bg-[#283852]/10 text-[#283852]',
+    VERY_IMPORTANT: 'bg-[#283852]/10 text-[#283852]',
+    URGENT: 'bg-[#283852]/10 text-[#283852]',
 };
 
 const formatFCFA = (amount: number) =>
@@ -220,7 +220,7 @@ const DemandDetailModal = ({
                                 href={resolveFileUrl(demand.proformaUrl)!}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-xl text-blue-600 hover:bg-blue-100 transition-colors"
+                                className="flex items-center gap-3 p-3 bg-[#283852]/10 border border-gray-200 rounded-xl text-[#283852] hover:bg-[#283852]/20 transition-colors"
                             >
                                 <FileText size={18} />
                                 <span className="text-sm font-medium">{t('demands.viewProforma')}</span>
@@ -248,17 +248,17 @@ const DemandDetailModal = ({
 
                     {/* Rejection reason */}
                     {demand.status === 'REJECTED' && demand.rejectionReason && (
-                        <div className="bg-red-50 border border-red-100 rounded-xl p-4">
-                            <p className="text-xs font-semibold text-red-500 uppercase tracking-wider mb-1">{t('demands.rejectionReason')}</p>
-                            <p className="text-sm text-red-600">{demand.rejectionReason}</p>
+                        <div className="bg-[#283852]/10 border border-gray-200 rounded-xl p-4">
+                            <p className="text-xs font-semibold text-[#283852] uppercase tracking-wider mb-1">{t('demands.rejectionReason')}</p>
+                            <p className="text-sm text-[#283852]">{demand.rejectionReason}</p>
                         </div>
                     )}
 
                     {/* Validated date */}
                     {demand.status === 'VALIDATED' && demand.validatedAt && (
-                        <div className="bg-green-50 border border-green-100 rounded-xl p-4">
-                            <p className="text-xs font-semibold text-green-600 uppercase tracking-wider mb-1">{t('demands.validatedOn')}</p>
-                            <p className="text-sm text-green-700">{new Date(demand.validatedAt).toLocaleDateString()}</p>
+                        <div className="bg-[#33cbcc]/10 border border-gray-200 rounded-xl p-4">
+                            <p className="text-xs font-semibold text-[#33cbcc] uppercase tracking-wider mb-1">{t('demands.validatedOn')}</p>
+                            <p className="text-sm text-[#33cbcc]">{new Date(demand.validatedAt).toLocaleDateString()}</p>
                         </div>
                     )}
 
@@ -271,7 +271,7 @@ const DemandDetailModal = ({
                                 onChange={(e) => setRejectReason(e.target.value)}
                                 placeholder={t('demands.rejectionReasonPlaceholder')}
                                 rows={3}
-                                className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-400 transition-all resize-none"
+                                className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all resize-none"
                                 autoFocus
                             />
                         </div>
@@ -296,7 +296,7 @@ const DemandDetailModal = ({
                         <>
                             <button
                                 onClick={() => setShowRejectInput(true)}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors"
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors"
                             >
                                 <XCircle size={16} />
                                 {t('demands.reject')}
@@ -304,7 +304,7 @@ const DemandDetailModal = ({
                             <button
                                 disabled={validateDemand.isPending}
                                 onClick={() => validateDemand.mutate(demand.id, { onSuccess: () => onClose() })}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors shadow-lg shadow-green-500/20"
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                             >
                                 {validateDemand.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
                                 {t('demands.validate')}
@@ -322,7 +322,7 @@ const DemandDetailModal = ({
                             <button
                                 disabled={rejectDemand.isPending}
                                 onClick={() => rejectDemand.mutate({ id: demand.id, reason: rejectReason }, { onSuccess: () => onClose() })}
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20"
                             >
                                 {rejectDemand.isPending ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
                                 {t('demands.confirmReject')}
@@ -401,9 +401,9 @@ const Demands = () => {
 
     const statCards = [
         { label: t('demands.stats.total'), value: stats?.total ?? 0, icon: HandCoins, color: '#33cbcc' },
-        { label: t('demands.stats.pending'), value: stats?.totalPending ?? 0, icon: Clock, color: '#f59e0b' },
-        { label: t('demands.stats.validated'), value: stats?.totalValidated ?? 0, icon: CheckCircle, color: '#22c55e' },
-        { label: t('demands.stats.rejected'), value: stats?.totalRejected ?? 0, icon: XCircle, color: '#ef4444' },
+        { label: t('demands.stats.pending'), value: stats?.totalPending ?? 0, icon: Clock, color: '#283852' },
+        { label: t('demands.stats.validated'), value: stats?.totalValidated ?? 0, icon: CheckCircle, color: '#33cbcc' },
+        { label: t('demands.stats.rejected'), value: stats?.totalRejected ?? 0, icon: XCircle, color: '#283852' },
         { label: t('demands.stats.totalExpense'), value: formatFCFA(stats?.totalExpense ?? 0), icon: DollarSign, color: '#283852' },
     ];
 
@@ -536,7 +536,7 @@ const Demands = () => {
                                 <Package size={12} className="text-gray-400" />
                                 <span className="text-xs text-gray-400">{demand.items?.length || 0} {t('demands.items')}</span>
                                 {demand.proformaUrl && (
-                                    <span className="text-xs text-blue-500 flex items-center gap-1">
+                                    <span className="text-xs text-[#283852] flex items-center gap-1">
                                         <FileText size={10} />
                                         {t('demands.proforma')}
                                     </span>

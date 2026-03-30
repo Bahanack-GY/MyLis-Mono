@@ -37,6 +37,8 @@ import type { ProjectTab } from '../components/ProjectDetailSidebar';
 import type { ProjectData } from '../layouts/ProjectDetailLayout';
 import { useProjectExpenses, useCreateExpense, useDeleteExpense } from '../api/expenses/hooks';
 import type { CreateExpenseDto } from '../api/expenses/types';
+import { useCreateMilestone, useUpdateMilestone, useToggleMilestone, useDeleteMilestone } from '../api/projects/hooks';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProjectDetailProps {
     project: ProjectData;
@@ -47,10 +49,10 @@ interface ProjectDetailProps {
 /* ─── Status config ─────────────────────────────────────── */
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
-    active:    { bg: 'bg-emerald-50',  text: 'text-emerald-600',  dot: 'bg-emerald-500' },
-    completed: { bg: 'bg-blue-50',     text: 'text-blue-600',     dot: 'bg-blue-500' },
-    on_hold:   { bg: 'bg-amber-50',    text: 'text-amber-600',    dot: 'bg-amber-500' },
-    overdue:   { bg: 'bg-rose-50',     text: 'text-rose-600',     dot: 'bg-rose-500' },
+    active:    { bg: 'bg-[#33cbcc]/10',  text: 'text-[#33cbcc]',  dot: 'bg-[#33cbcc]' },
+    completed: { bg: 'bg-[#283852]',     text: 'text-white',       dot: 'bg-white' },
+    on_hold:   { bg: 'bg-[#283852]/10',  text: 'text-[#283852]',   dot: 'bg-[#283852]' },
+    overdue:   { bg: 'bg-[#283852]/10',  text: 'text-[#283852]',   dot: 'bg-[#283852]' },
 };
 
 const STATUS_I18N: Record<string, string> = {
@@ -342,9 +344,9 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
    ═══════════════════════════════════════════════════════════ */
 
 const DIFFICULTY_STYLES: Record<string, { bg: string; text: string }> = {
-    EASY:   { bg: 'bg-emerald-50', text: 'text-emerald-600' },
-    MEDIUM: { bg: 'bg-blue-50',    text: 'text-blue-600' },
-    HARD:   { bg: 'bg-rose-50',    text: 'text-rose-600' },
+    EASY:   { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]' },
+    MEDIUM: { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
+    HARD:   { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
 };
 
 type KanbanStatus = 'todo' | 'in_progress' | 'done';
@@ -647,7 +649,7 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
                                         <span className="text-sm font-semibold text-gray-800">{fmtCurrency(Number(exp.amount))}</span>
                                         <button
                                             onClick={() => deleteExpense.mutate(exp.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-rose-500 transition-all"
+                                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-[#283852] transition-all"
                                         >
                                             <Trash2 size={14} />
                                         </button>
@@ -754,91 +756,180 @@ const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   TIMELINE TAB
+   MILESTONES TAB
    ═══════════════════════════════════════════════════════════ */
 
-type MilestoneStatus = 'completed' | 'in_progress' | 'upcoming';
+type MilestoneStatus = 'completed' | 'upcoming';
 
-const MILESTONE_STYLES: Record<MilestoneStatus, { ring: string; dot: string; line: string; badge: string; badgeText: string }> = {
-    completed:   { ring: 'ring-blue-500',    dot: 'bg-blue-500',    line: 'bg-blue-500',    badge: 'bg-blue-50',    badgeText: 'text-blue-600' },
-    in_progress: { ring: 'ring-[#33cbcc]',   dot: 'bg-[#33cbcc]',   line: 'bg-gray-200',    badge: 'bg-emerald-50', badgeText: 'text-emerald-600' },
-    upcoming:    { ring: 'ring-gray-300',     dot: 'bg-gray-300',    line: 'bg-gray-200',    badge: 'bg-gray-50',    badgeText: 'text-gray-500' },
+const MS_STYLES: Record<MilestoneStatus, { ring: string; dot: string; line: string; badge: string; badgeText: string }> = {
+    completed: { ring: 'ring-[#283852]',  dot: 'bg-[#283852]',  line: 'bg-[#283852]',  badge: 'bg-[#283852]',  badgeText: 'text-white' },
+    upcoming:  { ring: 'ring-gray-300',  dot: 'bg-gray-300',  line: 'bg-gray-200',  badge: 'bg-gray-50',  badgeText: 'text-gray-500' },
 };
 
-const MILESTONE_STATUS_I18N: Record<string, string> = {
-    completed: 'completed',
-    in_progress: 'inProgress',
-    upcoming: 'upcoming',
-};
+const emptyMsForm = () => ({ title: '', description: '', dueDate: '' });
 
-const TimelineView = ({ project }: { project: ProjectData }) => {
+const MilestonesView = ({ project }: { project: ProjectData }) => {
     const { t } = useTranslation();
+    const { user } = useAuth();
+    const canEdit = user?.role === 'MANAGER' || user?.role === 'HEAD_OF_DEPARTMENT';
 
-    // Derive milestones from tasks, sorted by start/due date
-    const milestones = project.tasks
-        .map(tk => {
-            let msStatus: MilestoneStatus = 'upcoming';
-            if (tk.state === 'COMPLETED' || tk.state === 'REVIEWED') msStatus = 'completed';
-            else if (tk.state === 'IN_PROGRESS' || tk.state === 'BLOCKED' || tk.state === 'ASSIGNED') msStatus = 'in_progress';
+    const createMs = useCreateMilestone(project.id);
+    const updateMs = useUpdateMilestone(project.id);
+    const toggleMs = useToggleMilestone(project.id);
+    const deleteMs = useDeleteMilestone(project.id);
 
-            return {
-                id: tk.id,
-                title: tk.title,
-                description: tk.assignedTo
-                    ? `${tk.assignedTo.firstName} ${tk.assignedTo.lastName}`
-                    : '',
-                date: tk.dueDate || tk.endDate || tk.startDate || '',
-                status: msStatus,
-            };
-        })
-        .sort((a, b) => {
-            if (!a.date) return 1;
-            if (!b.date) return -1;
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
-        });
+    const [showAdd, setShowAdd] = useState(false);
+    const [addForm, setAddForm] = useState(emptyMsForm());
+    const [editId, setEditId] = useState<string | null>(null);
+    const [editForm, setEditForm] = useState(emptyMsForm());
+
+    const milestones = [...(project.milestones || [])].sort((a, b) => a.order - b.order);
+
+    const handleAdd = () => {
+        if (!addForm.title.trim()) return;
+        createMs.mutate(
+            { title: addForm.title, description: addForm.description || undefined, dueDate: addForm.dueDate || undefined, order: milestones.length },
+            { onSuccess: () => { setShowAdd(false); setAddForm(emptyMsForm()); } }
+        );
+    };
+
+    const handleEdit = (id: string) => {
+        updateMs.mutate(
+            { milestoneId: id, dto: { title: editForm.title, description: editForm.description || undefined, dueDate: editForm.dueDate || undefined } },
+            { onSuccess: () => setEditId(null) }
+        );
+    };
+
+    const inputCls = 'w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] outline-none text-gray-800 text-sm transition-colors';
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.timeline.title')}</h2>
+            <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.milestones.title')}</h2>
+                {canEdit && (
+                    <button
+                        onClick={() => setShowAdd(v => !v)}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#33cbcc] text-white text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
+                    >
+                        <Plus size={16} />
+                        {t('projectDetail.milestones.add')}
+                    </button>
+                )}
+            </div>
 
+            {/* Progress bar */}
+            {milestones.length > 0 && (
+                <div className="bg-white rounded-2xl p-5 border border-gray-100">
+                    <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-600">{t('projectDetail.overview.progress')}</span>
+                        <span className="text-sm font-bold text-gray-800">{project.milestonesDone}/{project.milestonesTotal}</span>
+                    </div>
+                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${project.progress}%` }}
+                            transition={{ duration: 1 }}
+                            className="h-full rounded-full bg-[#33cbcc]"
+                        />
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1.5">{project.progress}% {t('projectDetail.overview.progress').toLowerCase()}</p>
+                </div>
+            )}
+
+            {/* Add form */}
+            <AnimatePresence>
+                {showAdd && canEdit && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="bg-white rounded-2xl border border-[#33cbcc]/30 p-5 space-y-3 overflow-hidden"
+                    >
+                        <input type="text" placeholder={t('projectDetail.milestones.namePlaceholder')} value={addForm.title} onChange={e => setAddForm(p => ({ ...p, title: e.target.value }))} className={inputCls} />
+                        <input type="text" placeholder={t('projectDetail.milestones.descPlaceholder')} value={addForm.description} onChange={e => setAddForm(p => ({ ...p, description: e.target.value }))} className={inputCls} />
+                        <input type="date" value={addForm.dueDate} onChange={e => setAddForm(p => ({ ...p, dueDate: e.target.value }))} className={inputCls} />
+                        <div className="flex gap-2 justify-end">
+                            <button onClick={() => { setShowAdd(false); setAddForm(emptyMsForm()); }} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{t('projectDetail.milestones.cancel')}</button>
+                            <button onClick={handleAdd} disabled={createMs.isPending || !addForm.title.trim()} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-50">
+                                {createMs.isPending ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                                {t('projectDetail.milestones.save')}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Milestones list */}
             <div className="relative">
                 {milestones.map((ms, i) => {
-                    const style = MILESTONE_STYLES[ms.status];
+                    const isDone = ms.completedAt != null;
+                    const style = MS_STYLES[isDone ? 'completed' : 'upcoming'];
                     const isLast = i === milestones.length - 1;
+                    const isEditing = editId === ms.id;
 
                     return (
                         <motion.div
                             key={ms.id}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.1 }}
+                            transition={{ delay: i * 0.07 }}
                             className="flex gap-6 relative"
                         >
-                            {/* Timeline line + dot */}
                             <div className="flex flex-col items-center">
-                                <div className={`w-5 h-5 rounded-full ring-4 ${style.ring} ${style.dot} z-10 shrink-0 mt-1`} />
-                                {!isLast && (
-                                    <div className={`w-0.5 flex-1 ${style.line} min-h-16`} />
-                                )}
+                                <button
+                                    onClick={() => canEdit && toggleMs.mutate(ms.id)}
+                                    className={`w-5 h-5 rounded-full ring-4 ${style.ring} ${style.dot} z-10 shrink-0 mt-1 ${canEdit ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
+                                />
+                                {!isLast && <div className={`w-0.5 flex-1 ${style.line} min-h-16`} />}
                             </div>
 
-                            {/* Content card */}
-                            <div className="bg-white rounded-2xl p-5 border border-gray-100 flex-1 mb-6 hover:border-[#33cbcc]/30 transition-colors">
-                                <div className="flex items-start justify-between gap-4">
-                                    <div>
-                                        <h4 className="font-semibold text-gray-800">{ms.title}</h4>
-                                        {ms.description && (
-                                            <p className="text-sm text-gray-500 mt-1">{ms.description}</p>
-                                        )}
+                            <div className={`bg-white rounded-2xl p-5 border flex-1 mb-6 transition-colors ${isDone ? 'border-[#283852]/20' : 'border-gray-100'} hover:border-[#33cbcc]/30`}>
+                                {isEditing ? (
+                                    <div className="space-y-3">
+                                        <input type="text" value={editForm.title} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} className={inputCls} />
+                                        <input type="text" placeholder={t('projectDetail.milestones.descPlaceholder')} value={editForm.description} onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))} className={inputCls} />
+                                        <input type="date" value={editForm.dueDate} onChange={e => setEditForm(p => ({ ...p, dueDate: e.target.value }))} className={inputCls} />
+                                        <div className="flex gap-2 justify-end">
+                                            <button onClick={() => setEditId(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{t('projectDetail.milestones.cancel')}</button>
+                                            <button onClick={() => handleEdit(ms.id)} disabled={updateMs.isPending} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-50">
+                                                {updateMs.isPending ? <Loader2 size={12} className="animate-spin" /> : <Pencil size={12} />}
+                                                {t('projectDetail.milestones.save')}
+                                            </button>
+                                        </div>
                                     </div>
-                                    <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full shrink-0 ${style.badge} ${style.badgeText}`}>
-                                        {t(`projectDetail.timeline.${MILESTONE_STATUS_I18N[ms.status]}`)}
-                                    </span>
-                                </div>
-                                {ms.date && (
-                                    <div className="flex items-center gap-1.5 mt-3 text-xs text-gray-400">
-                                        <Calendar size={12} />
-                                        <span>{fmtDate(ms.date)}</span>
+                                ) : (
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className={`font-semibold text-gray-800 ${isDone ? 'line-through opacity-60' : ''}`}>{ms.title}</h4>
+                                            {ms.description && <p className="text-sm text-gray-500 mt-1">{ms.description}</p>}
+                                            {ms.dueDate && (
+                                                <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-400">
+                                                    <Calendar size={12} />
+                                                    <span>{fmtDate(ms.dueDate)}</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${style.badge} ${style.badgeText}`}>
+                                                {t(`projectDetail.milestones.${isDone ? 'completed' : 'upcoming'}`)}
+                                            </span>
+                                            {canEdit && (
+                                                <div className="flex items-center gap-1">
+                                                    <button
+                                                        onClick={() => { setEditId(ms.id); setEditForm({ title: ms.title, description: ms.description || '', dueDate: ms.dueDate ? ms.dueDate.slice(0, 10) : '' }); }}
+                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors"
+                                                    >
+                                                        <Pencil size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => deleteMs.mutate(ms.id)}
+                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -847,10 +938,10 @@ const TimelineView = ({ project }: { project: ProjectData }) => {
                 })}
             </div>
 
-            {milestones.length === 0 && (
+            {milestones.length === 0 && !showAdd && (
                 <div className="text-center py-16 text-gray-400">
                     <Clock size={48} className="mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium">{t('projectDetail.timeline.empty')}</p>
+                    <p className="text-lg font-medium">{t('projectDetail.milestones.empty')}</p>
                 </div>
             )}
         </div>
@@ -871,8 +962,8 @@ const ProjectDetail = ({ project, activeTab, onEdit }: ProjectDetailProps) => {
             return <BudgetView project={project} />;
         case 'documents':
             return <DocumentsView project={project} />;
-        case 'timeline':
-            return <TimelineView project={project} />;
+        case 'milestones':
+            return <MilestonesView project={project} />;
         default:
             return <OverviewView project={project} onEdit={onEdit} />;
     }

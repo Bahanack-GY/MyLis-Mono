@@ -245,7 +245,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div className="sm:col-span-2">
                                             <label className={labelCls}>
-                                                {t('commercial.leads.company')} <span className="text-red-400">*</span>
+                                                {t('commercial.leads.company')} <span className="text-[#283852]">*</span>
                                             </label>
                                             <input
                                                 autoFocus
@@ -376,14 +376,14 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                     <button
                                                         onClick={() => setPrimary(i)}
                                                         title={t('commercial.leads.wizard.setPrimary', 'Définir comme principal')}
-                                                        className={`p-1.5 rounded-lg transition-colors ${c.isPrimary ? 'text-[#33cbcc]' : 'text-gray-300 hover:text-amber-400'}`}
+                                                        className={`p-1.5 rounded-lg transition-colors ${c.isPrimary ? 'text-[#33cbcc]' : 'text-gray-300 hover:text-[#33cbcc]'}`}
                                                     >
                                                         <Star size={13} fill={c.isPrimary ? 'currentColor' : 'none'} />
                                                     </button>
                                                     {form.contacts.length > 1 && (
                                                         <button
                                                             onClick={() => removeContact(i)}
-                                                            className="p-1.5 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+                                                            className="p-1.5 text-gray-300 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg transition-colors"
                                                         >
                                                             <Trash2 size={13} />
                                                         </button>
@@ -470,7 +470,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                 {form.needs.length > 1 && (
                                                     <button
                                                         onClick={() => removeNeed(i)}
-                                                        className="p-1.5 text-gray-300 hover:text-red-400 hover:bg-red-50 rounded-lg transition-colors"
+                                                        className="p-1.5 text-gray-300 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg transition-colors"
                                                     >
                                                         <Trash2 size={13} />
                                                     </button>
@@ -495,7 +495,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                         </span>
                                                         <button
                                                             onClick={() => updateNeed(i, 'serviceId', null)}
-                                                            className="p-2 text-gray-400 hover:text-red-400 rounded-lg transition-colors"
+                                                            className="p-2 text-gray-400 hover:text-[#283852] rounded-lg transition-colors"
                                                         >
                                                             <X size={14} />
                                                         </button>
@@ -535,12 +535,12 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                         </div>
                                         <div>
                                             <label className={labelCls}>{t('commercial.leads.priority', 'Priorité')}</label>
-                                            <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
-                                                <span className="w-2 h-2 rounded-full bg-blue-400 shrink-0" />
-                                                <span className="text-sm font-semibold text-blue-700">
+                                            <div className="flex items-center gap-2 px-4 py-2.5 bg-[#283852]/10 border border-gray-200 rounded-xl">
+                                                <span className="w-2 h-2 rounded-full bg-[#283852] shrink-0" />
+                                                <span className="text-sm font-semibold text-[#283852]">
                                                     {t('commercial.leads.priorities.COLD', 'Froide')}
                                                 </span>
-                                                <span className="text-xs text-blue-400 ml-auto">{t('commercial.leads.wizard.defaultCold', 'par défaut')}</span>
+                                                <span className="text-xs text-[#283852]/60 ml-auto">{t('commercial.leads.wizard.defaultCold', 'par défaut')}</span>
                                             </div>
                                         </div>
                                         <div>

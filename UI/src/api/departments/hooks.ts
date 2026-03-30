@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
-import { departmentsApi, departmentGoalsApi, departmentServicesApi } from './api';
-import type { CreateDepartmentDto, UpdateDepartmentDto, CreateDepartmentGoalDto, UpdateDepartmentGoalDto, CreateDepartmentServiceDto, UpdateDepartmentServiceDto } from './types';
+import { departmentsApi, departmentGoalsApi, departmentServicesApi, departmentMonthlyTargetsApi } from './api';
+import type { CreateDepartmentDto, UpdateDepartmentDto, CreateDepartmentGoalDto, UpdateDepartmentGoalDto, CreateDepartmentServiceDto, UpdateDepartmentServiceDto, UpsertMonthlyTargetDto } from './types';
 import { toast } from 'sonner';
 import i18n from '../../i18n/config';
 
@@ -12,6 +12,7 @@ export const departmentKeys = {
     services: ['department-services'] as const,
     servicesByDept: (deptId: string) => ['department-services', deptId] as const,
     serviceStats: (from?: string, to?: string, departmentId?: string) => ['department-services', 'stats', from, to, departmentId] as const,
+    monthlyStats: (deptId: string, year: number) => ['department-monthly-targets', deptId, year] as const,
 };
 
 export const useDepartments = () =>
@@ -161,3 +162,22 @@ export const useServiceStats = (from?: string, to?: string, departmentId?: strin
         queryKey: departmentKeys.serviceStats(from, to, departmentId),
         queryFn: () => departmentServicesApi.getServiceStats(from, to, departmentId),
     });
+
+export const useMonthlyStats = (departmentId: string, year: number) =>
+    useQuery({
+        queryKey: departmentKeys.monthlyStats(departmentId, year),
+        queryFn: () => departmentMonthlyTargetsApi.getMonthlyStats(departmentId, year),
+        enabled: !!departmentId,
+    });
+
+export const useUpsertMonthlyTarget = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (dto: UpsertMonthlyTargetDto) => departmentMonthlyTargetsApi.upsert(dto),
+        onSuccess: (_, dto) => {
+            toast.success(i18n.t('toast.targetSaved', 'Objective saved'));
+            qc.invalidateQueries({ queryKey: departmentKeys.monthlyStats(dto.departmentId, dto.year) });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};

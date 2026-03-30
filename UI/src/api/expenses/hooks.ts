@@ -6,16 +6,16 @@ import i18n from '../../i18n/config';
 
 export const expenseKeys = {
     all: ['expenses'] as const,
-    list: (page: number) => ['expenses', 'list', page] as const,
+    list: (page: number, departmentId?: string) => ['expenses', 'list', page, departmentId] as const,
     detail: (id: string) => ['expenses', id] as const,
     stats: (year?: number, departmentId?: string) => ['expenses', 'stats', year, departmentId] as const,
     project: (projectId: string) => ['expenses', 'project', projectId] as const,
 };
 
-export const useExpenses = (page = 1) =>
+export const useExpenses = (page = 1, departmentId?: string) =>
     useQuery({
-        queryKey: expenseKeys.list(page),
-        queryFn: () => expensesApi.getAll(page, 10),
+        queryKey: expenseKeys.list(page, departmentId),
+        queryFn: () => expensesApi.getAll(page, 10, departmentId),
     });
 
 export const useProjectExpenses = (projectId: string) =>

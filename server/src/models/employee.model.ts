@@ -1,5 +1,5 @@
 
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany, BelongsToMany } from 'sequelize-typescript';
 import { User } from './user.model';
 import { Department } from './department.model';
 import { Position } from './position.model';
@@ -12,7 +12,6 @@ import { Sanction } from './sanction.model';
 import { Project } from './project.model';
 import { ProjectMember } from './project-member.model';
 import { EmployeeBadge } from './employee-badge.model';
-import { BelongsToMany } from 'sequelize-typescript';
 
 @Table({
     indexes: [
@@ -147,4 +146,17 @@ export class Employee extends Model {
 
     @BelongsToMany(() => Project, () => ProjectMember)
     declare projects: Project[];
+
+    @ForeignKey(() => Employee)
+    @Column({
+        type: DataType.UUID,
+        allowNull: true,
+    })
+    declare encadreurId: string | null;
+
+    @BelongsTo(() => Employee, 'encadreurId')
+    declare encadreur: Employee;
+
+    @HasMany(() => Employee, 'encadreurId')
+    declare stagiaires: Employee[];
 }

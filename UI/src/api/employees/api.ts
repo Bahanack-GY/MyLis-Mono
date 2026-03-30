@@ -60,6 +60,7 @@ export const employeesApi = {
     promote: (id: string, dto: PromoteEmployeeDto) =>
         api.patch<Employee>(`/employees/${id}/promote`, dto).then(r => r.data),
 
+
     getPromotionHistory: (id: string) =>
         api.get<EmployeePromotionHistory[]>(`/employees/${id}/promotion-history`).then(r => r.data),
 };

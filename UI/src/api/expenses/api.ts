@@ -2,8 +2,8 @@ import api from '../config';
 import type { Expense, CreateExpenseDto, ExpenseStats, PaginatedExpenses } from './types';
 
 export const expensesApi = {
-    getAll: (page = 1, limit = 10) =>
-        api.get<PaginatedExpenses>('/expenses', { params: { page, limit } }).then(res => res.data),
+    getAll: (page = 1, limit = 10, departmentId?: string) =>
+        api.get<PaginatedExpenses>('/expenses', { params: { page, limit, ...(departmentId ? { departmentId } : {}) } }).then(res => res.data),
 
     getAllByProject: (projectId: string) =>
         api.get<PaginatedExpenses>('/expenses', { params: { projectId, page: 1, limit: 1000 } }).then(res => res.data),

@@ -1,6 +1,5 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { Employee } from './employee.model';
-import { Position } from './position.model';
 
 @Table({
     indexes: [
@@ -18,19 +17,11 @@ export class EmployeePromotionHistory extends Model {
     @BelongsTo(() => Employee)
     declare employee: Employee;
 
-    @ForeignKey(() => Position)
-    @Column({ type: DataType.UUID, allowNull: true })
-    declare fromPositionId: string | null;
+    @Column({ type: DataType.STRING, allowNull: true })
+    declare fromRole: string | null;
 
-    @BelongsTo(() => Position, 'fromPositionId')
-    declare fromPosition: Position;
-
-    @ForeignKey(() => Position)
-    @Column(DataType.UUID)
-    declare toPositionId: string;
-
-    @BelongsTo(() => Position, 'toPositionId')
-    declare toPosition: Position;
+    @Column(DataType.STRING)
+    declare toRole: string;
 
     @Column({ type: DataType.UUID, allowNull: true })
     declare promotedByUserId: string | null;

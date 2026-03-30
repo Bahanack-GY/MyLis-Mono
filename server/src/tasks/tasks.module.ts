@@ -12,6 +12,7 @@ import { TaskHistory } from '../models/task-history.model';
 import { TaskNature } from '../models/task-nature.model';
 import { Lead } from '../models/lead.model';
 import { TaskAttachment } from '../models/task-attachment.model';
+import { LeadActivity } from '../models/lead-activity.model';
 import { TasksService } from './tasks.service';
 import { TaskRemindersService } from './task-reminders.service';
 import { TaskFillRemindersService } from './task-fill-reminders.service';
@@ -22,7 +23,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
-    imports: [SequelizeModule.forFeature([Task, Subtask, Employee, Team, Project, Ticket, Department, TaskHistory, TaskNature, Lead, TaskAttachment]), NotificationsModule, GamificationModule],
+    imports: [SequelizeModule.forFeature([Task, Subtask, Employee, Team, Project, Ticket, Department, TaskHistory, TaskNature, Lead, TaskAttachment, LeadActivity]), NotificationsModule, GamificationModule],
     controllers: [EmployeeTasksController, TasksSseController, TasksController],
     providers: [TasksService, TaskRemindersService, TaskFillRemindersService],
     exports: [TasksService],

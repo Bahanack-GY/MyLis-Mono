@@ -18,20 +18,20 @@ import LeadProfileSidebar from './LeadProfileSidebar';
 import LeadCreationWizard from '../../components/commercial/LeadCreationWizard';
 
 const priorityColors: Record<string, string> = {
-    HOT: 'bg-red-100 text-red-700',
-    WARM: 'bg-orange-100 text-orange-700',
-    COLD: 'bg-blue-100 text-blue-700',
+    HOT: 'bg-[#283852]/10 text-[#283852]',
+    WARM: 'bg-[#283852]/10 text-[#283852]',
+    COLD: 'bg-[#283852]/10 text-[#283852]',
 };
 
 const statusColors: Record<string, string> = {
     NOUVEAU: 'bg-gray-100 text-gray-700',
-    CONTACTE: 'bg-blue-100 text-blue-700',
-    QUALIFIE: 'bg-purple-100 text-purple-700',
-    PROPOSITION_ENVOYEE: 'bg-amber-100 text-amber-700',
-    NEGOCIATION: 'bg-cyan-100 text-cyan-700',
-    GAGNE: 'bg-green-100 text-green-700',
-    PERDU: 'bg-red-100 text-red-700',
-    EN_ATTENTE: 'bg-yellow-100 text-yellow-700',
+    CONTACTE: 'bg-[#283852]/10 text-[#283852]',
+    QUALIFIE: 'bg-[#283852]/15 text-[#283852]',
+    PROPOSITION_ENVOYEE: 'bg-[#283852]/20 text-[#283852]',
+    NEGOCIATION: 'bg-[#33cbcc]/10 text-[#33cbcc]',
+    GAGNE: 'bg-[#33cbcc] text-white',
+    PERDU: 'bg-gray-200 text-gray-500',
+    EN_ATTENTE: 'bg-[#283852]/10 text-[#283852]/70',
 };
 
 const ACTIVITY_TYPE_ICONS: Record<string, LucideIcon> = {
@@ -735,7 +735,7 @@ export default function LeadsDatabase() {
                                             <div className="flex items-center gap-1.5">
                                                 {lead.code}
                                                 {lead.clientId && (
-                                                    <CheckCircle2 size={13} className="text-green-500" />
+                                                    <CheckCircle2 size={13} className="text-[#33cbcc]" />
                                                 )}
                                             </div>
                                         </td>
@@ -788,13 +788,13 @@ export default function LeadsDatabase() {
                                                             deleteLead.mutate(lead.id);
                                                             setConfirmDeleteId(null);
                                                         }}
-                                                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
+                                                        className="p-1.5 text-[#33cbcc] hover:bg-[#33cbcc]/10 rounded-lg"
                                                     >
                                                         &#10003;
                                                     </button>
                                                     <button
                                                         onClick={() => setConfirmDeleteId(null)}
-                                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
+                                                        className="p-1.5 text-[#283852] hover:bg-[#283852]/10 rounded-lg"
                                                     >
                                                         &#10005;
                                                     </button>
@@ -819,7 +819,7 @@ export default function LeadsDatabase() {
                                                             onClick={() =>
                                                                 setConfirmDeleteId(lead.id)
                                                             }
-                                                            className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                                                            className="p-1.5 text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg"
                                                         >
                                                             <Trash2 size={15} />
                                                         </button>

@@ -29,6 +29,7 @@ import { Client } from '../models/client.model';
 import { Project } from '../models/project.model';
 import { ProjectMember } from '../models/project-member.model';
 import { ProjectService } from '../models/project-service.model';
+import { ProjectMilestone } from '../models/project-milestone.model';
 import { Log } from '../models/log.model';
 import { Entretien } from '../models/entretien.model';
 import { Formation } from '../models/formation.model';
@@ -36,6 +37,7 @@ import { Sanction } from '../models/sanction.model';
 import { Document } from '../models/document.model';
 import { DepartmentGoal } from '../models/department-goal.model';
 import { DepartmentService } from '../models/department-service.model';
+import { DepartmentMonthlyTarget } from '../models/department-monthly-target.model';
 import { EmployeeBadge } from '../models/employee-badge.model';
 import { EmployeeTransferHistory } from '../models/employee-transfer-history.model';
 import { Invoice } from '../models/invoice.model';
@@ -107,6 +109,7 @@ async function migrate() {
             Project,
             ProjectMember,
             ProjectService,
+            ProjectMilestone,
             Log,
             Entretien,
             Formation,
@@ -114,6 +117,7 @@ async function migrate() {
             Document,
             DepartmentGoal,
             DepartmentService,
+            DepartmentMonthlyTarget,
             EmployeeBadge,
             EmployeeTransferHistory,
             Invoice,

@@ -12,6 +12,7 @@ import { Project } from '../models/project.model';
 import { TaskNature } from '../models/task-nature.model';
 import { Lead } from '../models/lead.model';
 import { TaskAttachment } from '../models/task-attachment.model';
+import { LeadActivity } from '../models/lead-activity.model';
 import { NotificationsService } from '../notifications/notifications.service';
 import { GamificationService, type GamificationResult } from '../gamification/gamification.service';
 import { SseService } from '../sse/sse.service';
@@ -42,6 +43,8 @@ export class TasksService {
         private taskAttachmentModel: typeof TaskAttachment,
         @InjectModel(Lead)
         private leadModel: typeof Lead,
+        @InjectModel(LeadActivity)
+        private leadActivityModel: typeof LeadActivity,
         @InjectConnection()
         private sequelize: Sequelize,
         private notificationsService: NotificationsService,
@@ -521,18 +524,37 @@ export class TasksService {
         // All state writes + gamification + ticket sync in one transaction
         let gamification: GamificationResult | undefined;
         await this.sequelize.transaction(async (t) => {
+            const now = new Date();
             task.set('state', state);
+
+            // First start
             if (state === 'IN_PROGRESS' && !task.getDataValue('startedAt')) {
-                task.set('startedAt', new Date());
+                task.set('startedAt', now);
             }
-            if (state === 'COMPLETED' && !task.getDataValue('completedAt')) {
-                task.set('completedAt', new Date());
+
+            // Blocking: record when blocked started
+            if (state === 'BLOCKED') {
+                task.set('blockedAt', now);
+                if (blockReason) task.set('blockReason', blockReason);
             }
-            if (state === 'BLOCKED' && blockReason) {
-                task.set('blockReason', blockReason);
-            } else if (state !== 'BLOCKED') {
+
+            // Unblocking (BLOCKED → anything else): accumulate blocked duration
+            if (previousState === 'BLOCKED' && state !== 'BLOCKED') {
+                const blockedAt: Date | null = task.getDataValue('blockedAt');
+                if (blockedAt) {
+                    const blockedMs = now.getTime() - new Date(blockedAt).getTime();
+                    const prev = Number(task.getDataValue('totalBlockedMs') || 0);
+                    task.set('totalBlockedMs', prev + blockedMs);
+                }
+                task.set('blockedAt', null);
                 task.set('blockReason', null);
             }
+
+            // Completing
+            if (state === 'COMPLETED' && !task.getDataValue('completedAt')) {
+                task.set('completedAt', now);
+            }
+
             await task.save({ transaction: t });
 
             // Award points and check badges on task completion (only on first completion)
@@ -1056,6 +1078,94 @@ export class TasksService {
         return Object.keys(dailyMap)
             .sort()
             .map(date => ({ date, hours: Math.round(dailyMap[date] * 10) / 10 }));
+    }
+
+    async getGlobalDistribution(dateFrom?: string, dateTo?: string) {
+        // Build date range filter for tasks (filter by startDate within period)
+        const taskWhere: any = {};
+        if (dateFrom || dateTo) {
+            taskWhere.startDate = {};
+            if (dateFrom) taskWhere.startDate[Op.gte] = dateFrom;
+            if (dateTo)   taskWhere.startDate[Op.lte] = dateTo;
+        }
+
+        // Build date range filter for activities
+        const actWhere: any = {};
+        if (dateFrom || dateTo) {
+            actWhere.date = {};
+            if (dateFrom) actWhere.date[Op.gte] = dateFrom;
+            if (dateTo)   actWhere.date[Op.lte] = dateTo;
+        }
+
+        // ── Nature distribution ──
+        const tasks = await this.taskModel.findAll({
+            where: taskWhere,
+            include: [TaskNature],
+            attributes: ['startTime', 'endTime', 'startDate', 'endDate', 'natureId'],
+        });
+
+        const natureBucket: Record<string, { name: string; color: string; hours: number }> = {};
+        for (const task of tasks) {
+            let hours = 1;
+            if (task.startTime && task.endTime) {
+                const [sh, sm] = task.startTime.split(':').map(Number);
+                const [eh, em] = task.endTime.split(':').map(Number);
+                const dailyH = (eh * 60 + em - sh * 60 - sm) / 60;
+                if (dailyH > 0) {
+                    // Clamp task days to the selected period
+                    let taskStart = task.startDate ? new Date(task.startDate) : null;
+                    let taskEnd   = task.endDate   ? new Date(task.endDate)   : taskStart;
+                    if (dateFrom && taskStart && taskStart < new Date(dateFrom)) taskStart = new Date(dateFrom);
+                    if (dateTo   && taskEnd   && taskEnd   > new Date(dateTo))   taskEnd   = new Date(dateTo);
+                    const days = taskStart && taskEnd
+                        ? Math.max(1, Math.round((taskEnd.getTime() - taskStart.getTime()) / 86400000) + 1)
+                        : 1;
+                    hours = dailyH * days;
+                }
+            }
+            const key = task.natureId || '__uncategorized__';
+            if (!natureBucket[key]) {
+                natureBucket[key] = {
+                    name: (task as any).nature?.name || 'Sans nature',
+                    color: (task as any).nature?.color || '#9CA3AF',
+                    hours: 0,
+                };
+            }
+            natureBucket[key].hours += hours;
+        }
+
+        const totalNatureHours = Object.values(natureBucket).reduce((s, d) => s + d.hours, 0);
+        const natureDistribution = Object.values(natureBucket)
+            .map(d => ({
+                name: d.name,
+                color: d.color,
+                hours: Math.round(d.hours * 10) / 10,
+                percentage: totalNatureHours > 0 ? Math.round((d.hours / totalNatureHours) * 1000) / 10 : 0,
+            }))
+            .sort((a, b) => b.hours - a.hours);
+
+        // ── Activity type distribution ──
+        const activities = await this.leadActivityModel.findAll({
+            where: actWhere,
+            attributes: ['type'],
+        });
+
+        const activityBucket: Record<string, number> = {};
+        for (const act of activities) {
+            const t = act.getDataValue('type');
+            activityBucket[t] = (activityBucket[t] || 0) + 1;
+        }
+
+        const totalActivities = Object.values(activityBucket).reduce((s, c) => s + c, 0);
+        const activityDistribution = Object.entries(activityBucket)
+            .map(([type, count]) => ({
+                type,
+                count,
+                percentage: totalActivities > 0 ? Math.round((count / totalActivities) * 1000) / 10 : 0,
+            }))
+            .sort((a, b) => b.count - a.count);
+
+        return { natureDistribution, activityDistribution };
     }
 
     async getTimeDistribution(employeeId: string) {

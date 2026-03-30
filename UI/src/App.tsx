@@ -74,6 +74,8 @@ const FiscalYears = lazy(() => import("./pages/accounting/FiscalYears"))
 const Payroll = lazy(() => import("./pages/accounting/Payroll"))
 const TaxDeclarations = lazy(() => import("./pages/accounting/TaxDeclarations"))
 const AIReports = lazy(() => import("./pages/accounting/AIReports"))
+const Suppliers = lazy(() => import("./pages/accounting/Suppliers"))
+const CashFlow = lazy(() => import("./pages/accounting/CashFlow"))
 
 function App() {
   return (
@@ -193,6 +195,8 @@ function App() {
             <Route path="/accounting/payroll" element={<Payroll />} />
             <Route path="/accounting/tax" element={<TaxDeclarations />} />
             <Route path="/accounting/ai-reports" element={<AIReports />} />
+            <Route path="/accounting/suppliers" element={<Suppliers />} />
+            <Route path="/accounting/cash-flow" element={<CashFlow />} />
           </Route>
         </Route>
 

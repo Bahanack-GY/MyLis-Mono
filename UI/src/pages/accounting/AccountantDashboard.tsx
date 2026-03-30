@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -42,6 +42,8 @@ import {
 import type { DashboardKpis, FiscalYear, IncomeStatement } from '../../api/accounting/types';
 import { useUpcomingDeclarations } from '../../api/tax/hooks';
 import type { TaxDeclaration } from '../../api/tax/types';
+import { useDepartments } from '../../api/departments/hooks';
+import { useExpenseStats } from '../../api/expenses/hooks';
 
 /* ─── Currency formatter (XAF / fr-CM) ─────────────────────────────────── */
 
@@ -110,16 +112,16 @@ const getDaysUntil = (dateStr: string) => {
 
 const urgencyClasses = (dueDate: string) => {
  const days = getDaysUntil(dueDate);
- if (days <= 7) return 'bg-red-50/40';
- if (days <= 30) return 'bg-orange-50/30';
+ if (days <= 7) return 'bg-[#283852]/5';
+ if (days <= 30) return 'bg-[#283852]/5';
  return '';
 };
 
 const statusBadge = (status: string) => {
  const map: Record<string, string> = {
- DRAFT: 'text-yellow-700',
- VALIDATED: 'text-blue-700',
- FILED: 'text-green-700',
+ DRAFT: 'text-[#283852]/70',
+ VALIDATED: 'text-[#283852]',
+ FILED: 'text-[#33cbcc]',
  };
  return map[status] ?? 'text-gray-500';
 };
@@ -136,8 +138,8 @@ const statusLabel = (status: string) => {
 /* ─── Chart colors ─────────────────────────────────────────────────────── */
 
 const CHART_TEAL = '#33cbcc';
-const CHART_RED = '#ef4444';
-const PIE_COLORS = [CHART_TEAL, CHART_RED];
+const CHART_NAVY = '#283852';
+const PIE_COLORS = [CHART_TEAL, CHART_NAVY];
 
 /* ─── No fiscal year prompt ────────────────────────────────────────────── */
 
@@ -187,11 +189,16 @@ const NoFiscalYearPrompt = () => {
 const AccountantDashboard = () => {
  const navigate = useNavigate();
 
+ // Department filter
+ const [selectedDeptId, setSelectedDeptId] = useState<string>('');
+ const { data: departments = [] } = useDepartments();
+
  // Fiscal year data
  const { isLoading: loadingFY } = useFiscalYears();
  const { data: openFY, isLoading: loadingOpenFY } = useOpenFiscalYear();
 
  const fiscalYearId = (openFY as FiscalYear | undefined)?.id ?? '';
+ const fiscalYear = openFY ? new Date((openFY as FiscalYear).startDate).getFullYear() : new Date().getFullYear();
 
  // KPIs and income statement (only fetch when fiscal year exists)
  const { data: kpis, isLoading: loadingKpis } = useDashboardKpis(fiscalYearId);
@@ -199,6 +206,9 @@ const AccountantDashboard = () => {
 
  // Monthly summary (real data for chart)
  const { data: monthlySummaryData } = useMonthlySummary(fiscalYearId);
+
+ // Department-filtered expense stats (for charges KPI and chart when a dept is selected)
+ const { data: deptExpenseStats } = useExpenseStats(fiscalYear, selectedDeptId || undefined);
 
  // Tax declarations
  const { data: declarations = [] } = useUpcomingDeclarations();
@@ -218,25 +228,32 @@ const AccountantDashboard = () => {
  ];
 
  const summary = monthlySummaryData as { month: number; revenue: number; expenses: number }[] | undefined;
+ const deptMonths = (deptExpenseStats as any)?.byMonth as any[] | undefined;
 
  return monthLabels.map((label, idx) => {
  const entry = summary?.find((s) => s.month === idx + 1);
+ const deptMonth = deptMonths?.[idx];
  return {
  month: label,
  revenue: entry?.revenue ?? 0,
- expenses: entry?.expenses ?? 0,
+ expenses: selectedDeptId && deptMonth !== undefined
+ ? Math.round(Number(deptMonth.total) || 0)
+ : (entry?.expenses ?? 0),
  };
  });
- }, [monthlySummaryData]);
+ }, [monthlySummaryData, deptExpenseStats, selectedDeptId]);
 
  // Pie data for income statement summary
  const pieData = useMemo(() => {
  if (!dashboardKpis) return [];
+ const expensesValue = selectedDeptId
+ ? ((deptExpenseStats as any)?.totalYear ?? dashboardKpis.totalExpenses)
+ : dashboardKpis.totalExpenses;
  return [
  { name: 'Revenus', value: dashboardKpis.totalRevenue },
- { name: 'Charges', value: dashboardKpis.totalExpenses },
+ { name: 'Charges', value: expensesValue },
  ].filter((d) => d.value > 0);
- }, [dashboardKpis]);
+ }, [dashboardKpis, deptExpenseStats, selectedDeptId]);
 
  // Sorted declarations
  const sortedDeclarations = useMemo(
@@ -288,10 +305,14 @@ const AccountantDashboard = () => {
 
  /* ── KPI definitions ────────────────────────────────────────── */
 
+ const deptTotalExpenses = selectedDeptId
+ ? ((deptExpenseStats as any)?.totalYear ?? dashboardKpis?.totalExpenses ?? 0)
+ : (dashboardKpis?.totalExpenses ?? 0);
+
  const kpiRow1 = [
  { label: 'Chiffre d\'affaires', value: dashboardKpis?.totalRevenue ?? 0, icon: TrendingUp },
- { label: 'Charges', value: dashboardKpis?.totalExpenses ?? 0, icon: TrendingDown },
- { label: 'Resultat net', value: dashboardKpis?.netIncome ?? 0, icon: BarChart3 },
+ { label: 'Charges', value: deptTotalExpenses, icon: TrendingDown },
+ { label: 'Resultat net', value: (dashboardKpis?.totalRevenue ?? 0) - deptTotalExpenses, icon: BarChart3 },
  { label: 'Tresorerie', value: dashboardKpis?.cashBalance ?? 0, icon: Wallet },
  ];
 
@@ -310,12 +331,25 @@ const AccountantDashboard = () => {
  initial={{ opacity: 0, y: -12 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.35 }}
+ className="flex items-start justify-between gap-4 flex-wrap"
  >
+ <div>
  <h1 className="text-3xl font-bold text-gray-800">Tableau de bord comptable</h1>
  <p className="text-gray-500 mt-1">
  Vue d'ensemble de la sante financiere --{' '}
  {(openFY as FiscalYear).name}
  </p>
+ </div>
+ <select
+ value={selectedDeptId}
+ onChange={e => setSelectedDeptId(e.target.value)}
+ className="px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] outline-none appearance-none cursor-pointer shadow-sm"
+ >
+ <option value="">Tous les départements</option>
+ {departments.map(dept => (
+ <option key={dept.id} value={dept.id}>{dept.name}</option>
+ ))}
+ </select>
  </motion.div>
 
  {/* ── Row 1: Primary KPIs ──────────────────────────────── */}
@@ -383,7 +417,7 @@ const AccountantDashboard = () => {
  ]}
  />
  <Bar dataKey="revenue"fill={CHART_TEAL} radius={[4, 4, 0, 0]} name="revenue"/>
- <Bar dataKey="expenses"fill={CHART_RED} radius={[4, 4, 0, 0]} name="expenses"/>
+ <Bar dataKey="expenses"fill={CHART_NAVY} radius={[4, 4, 0, 0]} name="expenses"/>
  </RechartsBarChart>
  </ResponsiveContainer>
  </div>
@@ -394,7 +428,7 @@ const AccountantDashboard = () => {
  <span className="text-xs text-gray-500 font-medium">Revenus</span>
  </div>
  <div className="flex items-center gap-2">
- <div className="w-3 h-3 rounded-sm"style={{ backgroundColor: CHART_RED }} />
+ <div className="w-3 h-3 rounded-sm"style={{ backgroundColor: CHART_NAVY }} />
  <span className="text-xs text-gray-500 font-medium">Charges</span>
  </div>
  </div>
@@ -457,10 +491,10 @@ const AccountantDashboard = () => {
  <p
  className="text-xl font-bold"
  style={{
- color: (dashboardKpis?.netIncome ?? 0) >= 0 ? '#22c55e' : '#ef4444',
+ color: ((dashboardKpis?.totalRevenue ?? 0) - deptTotalExpenses) >= 0 ? '#33cbcc' : '#283852',
  }}
  >
- {fmt(dashboardKpis?.netIncome ?? 0)}
+ {fmt((dashboardKpis?.totalRevenue ?? 0) - deptTotalExpenses)}
  </p>
  <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-0.5">
  Resultat net
@@ -513,12 +547,12 @@ const AccountantDashboard = () => {
  year: 'numeric',
  })}
  {days <= 7 && days >= 0 && (
- <span className="ml-2 text-red-500 font-semibold">
+ <span className="ml-2 text-[#283852] font-semibold">
  ({days === 0 ?"Aujourd'hui": `J-${days}`})
  </span>
  )}
  {days > 7 && days <= 30 && (
- <span className="ml-2 text-orange-500 font-medium">
+ <span className="ml-2 text-[#283852]/60 font-medium">
  (J-{days})
  </span>
  )}

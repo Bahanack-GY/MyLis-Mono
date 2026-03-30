@@ -13,7 +13,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
-export type ProjectTab = 'overview' | 'tasks' | 'budget' | 'documents' | 'timeline';
+export type ProjectTab = 'overview' | 'tasks' | 'budget' | 'documents' | 'milestones';
 
 interface ProjectDetailSidebarProps {
     project: { id: string; name: string; status: string };
@@ -25,10 +25,10 @@ interface ProjectDetailSidebarProps {
 }
 
 const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {
-    active:    { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Active' },
-    completed: { bg: 'bg-blue-500/20',    text: 'text-blue-400',    label: 'Completed' },
-    on_hold:   { bg: 'bg-amber-500/20',   text: 'text-amber-400',   label: 'On Hold' },
-    overdue:   { bg: 'bg-rose-500/20',     text: 'text-rose-400',    label: 'Overdue' },
+    active:    { bg: 'bg-[#33cbcc]/20',  text: 'text-[#33cbcc]',  label: 'Active' },
+    completed: { bg: 'bg-[#283852]',     text: 'text-white',      label: 'Completed' },
+    on_hold:   { bg: 'bg-[#283852]/20',  text: 'text-white/70',   label: 'On Hold' },
+    overdue:   { bg: 'bg-[#283852]/20',  text: 'text-white/70',   label: 'Overdue' },
 };
 
 const ProjectDetailSidebar = ({ project, activeTab, onTabChange, isOpen, setIsOpen, onEdit }: ProjectDetailSidebarProps) => {
@@ -40,7 +40,7 @@ const ProjectDetailSidebar = ({ project, activeTab, onTabChange, isOpen, setIsOp
         { id: 'tasks',     icon: ListChecks,      label: t('projectSidebar.tasks') },
         { id: 'budget',    icon: Wallet,           label: t('projectSidebar.budget') },
         { id: 'documents', icon: FileText,         label: t('projectSidebar.documents') },
-        { id: 'timeline',  icon: Clock,            label: t('projectSidebar.timeline') },
+        { id: 'milestones', icon: Clock,            label: t('projectSidebar.milestones') },
     ];
 
     const badge = STATUS_BADGE[project.status] || STATUS_BADGE.active;

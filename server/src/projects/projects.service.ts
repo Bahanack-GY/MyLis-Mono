@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Project } from '../models/project.model';
 import { ProjectMember } from '../models/project-member.model';
+import { ProjectMilestone } from '../models/project-milestone.model';
 import { Client } from '../models/client.model';
 import { Department } from '../models/department.model';
 import { DepartmentService } from '../models/department-service.model';
@@ -18,10 +19,40 @@ export class ProjectsService {
         private projectModel: typeof Project,
         @InjectModel(ProjectMember)
         private projectMemberModel: typeof ProjectMember,
+        @InjectModel(ProjectMilestone)
+        private milestoneModel: typeof ProjectMilestone,
         @InjectModel(Employee)
         private employeeModel: typeof Employee,
         private notificationsService: NotificationsService,
     ) { }
+
+    /* ── Milestone CRUD ──────────────────────────────────── */
+
+    async createMilestone(projectId: string, dto: { title: string; description?: string; dueDate?: string; order?: number }): Promise<ProjectMilestone> {
+        const project = await this.projectModel.findByPk(projectId);
+        if (!project) throw new NotFoundException('Project not found');
+        return this.milestoneModel.create({ ...dto, projectId } as any);
+    }
+
+    async updateMilestone(projectId: string, milestoneId: string, dto: { title?: string; description?: string; dueDate?: string; order?: number }): Promise<ProjectMilestone> {
+        const ms = await this.milestoneModel.findOne({ where: { id: milestoneId, projectId } });
+        if (!ms) throw new NotFoundException('Milestone not found');
+        await ms.update(dto);
+        return ms;
+    }
+
+    async toggleMilestone(projectId: string, milestoneId: string): Promise<ProjectMilestone> {
+        const ms = await this.milestoneModel.findOne({ where: { id: milestoneId, projectId } });
+        if (!ms) throw new NotFoundException('Milestone not found');
+        await ms.update({ completedAt: ms.completedAt ? null : new Date() });
+        return ms;
+    }
+
+    async deleteMilestone(projectId: string, milestoneId: string): Promise<void> {
+        const ms = await this.milestoneModel.findOne({ where: { id: milestoneId, projectId } });
+        if (!ms) throw new NotFoundException('Milestone not found');
+        await ms.destroy();
+    }
 
     async findAll(): Promise<Project[]> {
         return this.projectModel.findAll({
@@ -30,6 +61,7 @@ export class ProjectsService {
                 Department,
                 { model: DepartmentService, through: { attributes: [] } },
                 { model: Task, attributes: ['id', 'state'] },
+                { model: ProjectMilestone, attributes: ['id', 'title', 'completedAt', 'dueDate', 'order'], order: [['order', 'ASC'], ['createdAt', 'ASC']] },
             ],
         });
     }
@@ -45,6 +77,7 @@ export class ProjectsService {
                     model: Task,
                     include: [{ model: Employee, as: 'assignedTo', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] }],
                 },
+                { model: ProjectMilestone, order: [['order', 'ASC'], ['createdAt', 'ASC']] },
             ],
         });
     }
@@ -134,14 +167,14 @@ export class ProjectsService {
     async findByClient(clientId: string): Promise<Project[]> {
         return this.projectModel.findAll({
             where: { clientId },
-            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }],
+            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }, { model: ProjectMilestone, attributes: ['id', 'completedAt'] }],
         });
     }
 
     async findByDepartment(departmentId: string): Promise<Project[]> {
         return this.projectModel.findAll({
             where: { departmentId },
-            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }],
+            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }, { model: ProjectMilestone, attributes: ['id', 'completedAt'] }],
         });
     }
 
@@ -153,6 +186,7 @@ export class ProjectsService {
                 { model: Department, attributes: ['id', 'name'] },
                 { model: Employee, through: { attributes: [] }, attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
                 { model: Task, attributes: ['id', 'state'] },
+                { model: ProjectMilestone, attributes: ['id', 'completedAt'] },
             ],
         });
     }
@@ -167,6 +201,7 @@ export class ProjectsService {
                     model: Task,
                     include: [{ model: Employee, as: 'assignedTo', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] }],
                 },
+                { model: ProjectMilestone, attributes: ['id', 'title', 'completedAt', 'dueDate', 'order', 'description'], order: [['order', 'ASC'], ['createdAt', 'ASC']] },
             ],
         });
     }

@@ -171,7 +171,7 @@ export const useEmployeeReports = (id: string) =>
 export const usePromoteEmployee = () => {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, dto }: { id: string; dto: { toPositionId: string; reason?: string } }) =>
+        mutationFn: ({ id, dto }: { id: string; dto: { toRole: string; reason?: string } }) =>
             employeesApi.promote(id, dto),
         onSuccess: (_, { id }) => {
             toast.success(i18n.t('toast.employeePromoted', 'Employé promu avec succès'));

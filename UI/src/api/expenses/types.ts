@@ -8,7 +8,9 @@ export interface Expense {
     date: string;
     demandId: string | null;
     projectId: string | null;
+    departmentId: string | null;
     project?: { id: string; name: string } | null;
+    department?: { id: string; name: string } | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -28,6 +30,7 @@ export interface CreateExpenseDto {
     frequency?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | null;
     date: string;
     projectId?: string | null;
+    departmentId?: string | null;
 }
 
 export interface ExpenseStats {

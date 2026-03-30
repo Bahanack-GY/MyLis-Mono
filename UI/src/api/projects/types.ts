@@ -1,3 +1,13 @@
+export interface ProjectMilestone {
+    id: string;
+    projectId: string;
+    title: string;
+    description?: string;
+    dueDate?: string;
+    completedAt: string | null;
+    order: number;
+}
+
 export interface Project {
     id: string;
     name: string;
@@ -12,6 +22,7 @@ export interface Project {
     department?: { id: string; name: string };
     services?: { id: string; name: string; price?: number; duration?: string }[];
     members?: { id: string; firstName: string; lastName: string; avatarUrl: string }[];
+    milestones?: ProjectMilestone[];
     tasks?: {
         id: string;
         title: string;

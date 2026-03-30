@@ -255,7 +255,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                                 <button
                                                     onClick={() => setConfirmDeleteId(pos.id)}
                                                     aria-label={`${t('common.delete', 'Delete')} ${pos.title}`}
-                                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors"
+                                                    className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#283852] transition-colors"
                                                 >
                                                     <Trash2 size={15} aria-hidden="true" />
                                                 </button>
@@ -332,7 +332,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                                 <button
                                                     onClick={() => removeMission(i)}
                                                     aria-label={`${t('common.remove', 'Remove')} ${m}`}
-                                                    className="text-gray-400 hover:text-rose-500 transition-colors p-1"
+                                                    className="text-gray-400 hover:text-[#283852] transition-colors p-1"
                                                 >
                                                     <Trash2 size={13} aria-hidden="true" />
                                                 </button>
@@ -404,8 +404,8 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                             onClick={e => e.stopPropagation()}
                             className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm"
                         >
-                            <div className="w-12 h-12 rounded-full bg-rose-50 flex items-center justify-center mx-auto mb-4">
-                                <Trash2 size={22} className="text-rose-500" />
+                            <div className="w-12 h-12 rounded-full bg-[#283852]/10 flex items-center justify-center mx-auto mb-4">
+                                <Trash2 size={22} className="text-[#283852]" />
                             </div>
                             <h4 className="text-center font-bold text-gray-800 mb-2">{t('roles.modal.deleteTitle', 'Delete Role')}</h4>
                             <p className="text-center text-sm text-gray-500 mb-6">
@@ -421,7 +421,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                 <button
                                     onClick={() => handleDelete(confirmDeleteId)}
                                     disabled={deletePosition.isPending}
-                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-rose-500 hover:bg-rose-600 disabled:opacity-60 transition-colors"
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852]/90 disabled:opacity-60 transition-colors"
                                 >
                                     {deletePosition.isPending ? <Loader2 size={14} className="animate-spin" /> : null}
                                     {t('common.delete', 'Delete')}
