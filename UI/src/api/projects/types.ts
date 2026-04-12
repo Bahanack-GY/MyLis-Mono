@@ -5,6 +5,8 @@ export interface ProjectMilestone {
     description?: string;
     dueDate?: string;
     completedAt: string | null;
+    completedById: string | null;
+    completedByName: string | null;
     order: number;
 }
 

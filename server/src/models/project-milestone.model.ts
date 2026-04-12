@@ -25,6 +25,12 @@ export class ProjectMilestone extends Model {
     @Column({ type: DataType.DATE, allowNull: true, defaultValue: null })
     declare completedAt: Date | null;
 
+    @Column({ type: DataType.UUID, allowNull: true, defaultValue: null })
+    declare completedById: string | null;
+
+    @Column({ type: DataType.STRING, allowNull: true, defaultValue: null })
+    declare completedByName: string | null;
+
     @Column({ type: DataType.INTEGER, defaultValue: 0 })
     declare order: number;
 }

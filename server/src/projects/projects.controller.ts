@@ -73,6 +73,7 @@ export class ProjectsController {
 
     /* ── Milestones ─────────────────────────────────────── */
 
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
     @Post(':id/milestones')
     createMilestone(
         @Param('id') projectId: string,
@@ -81,6 +82,7 @@ export class ProjectsController {
         return this.projectsService.createMilestone(projectId, dto);
     }
 
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
     @Patch(':id/milestones/:milestoneId')
     updateMilestone(
         @Param('id') projectId: string,
@@ -90,14 +92,20 @@ export class ProjectsController {
         return this.projectsService.updateMilestone(projectId, milestoneId, dto);
     }
 
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
     @Patch(':id/milestones/:milestoneId/toggle')
-    toggleMilestone(
+    async toggleMilestone(
         @Param('id') projectId: string,
         @Param('milestoneId') milestoneId: string,
+        @Request() req,
     ) {
-        return this.projectsService.toggleMilestone(projectId, milestoneId);
+        const { userId } = req.user;
+        const employee = await this.employeeModel.findOne({ where: { userId } });
+        const name = employee ? `${employee.getDataValue('firstName')} ${employee.getDataValue('lastName')}` : 'Manager';
+        return this.projectsService.toggleMilestone(projectId, milestoneId, userId, name);
     }
 
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
     @Delete(':id/milestones/:milestoneId')
     deleteMilestone(
         @Param('id') projectId: string,

@@ -1012,7 +1012,9 @@
       "descPlaceholder": "Description (optionnel)",
       "dueDate": "Échéance",
       "save": "Enregistrer",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "completedOn": "Complété le {{date}}",
+      "completedBy": "Par"
     }
   },
   "departments": {

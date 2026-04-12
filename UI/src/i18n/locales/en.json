@@ -1012,7 +1012,9 @@
       "descPlaceholder": "Description (optional)",
       "dueDate": "Due date",
       "save": "Save",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "completedOn": "Completed on {{date}}",
+      "completedBy": "By"
     }
   },
   "departments": {

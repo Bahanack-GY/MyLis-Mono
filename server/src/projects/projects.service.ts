@@ -41,10 +41,43 @@ export class ProjectsService {
         return ms;
     }
 
-    async toggleMilestone(projectId: string, milestoneId: string): Promise<ProjectMilestone> {
+    async toggleMilestone(projectId: string, milestoneId: string, completedById?: string, completedByName?: string): Promise<ProjectMilestone> {
         const ms = await this.milestoneModel.findOne({ where: { id: milestoneId, projectId } });
         if (!ms) throw new NotFoundException('Milestone not found');
-        await ms.update({ completedAt: ms.completedAt ? null : new Date() });
+
+        const completing = !ms.completedAt;
+        await ms.update(completing
+            ? { completedAt: new Date(), completedById: completedById ?? null, completedByName: completedByName ?? null }
+            : { completedAt: null, completedById: null, completedByName: null },
+        );
+
+        // Notify project members when a milestone is marked complete
+        if (completing) {
+            const project = await this.projectModel.findByPk(projectId);
+            if (project) {
+                const members = await this.projectMemberModel.findAll({ where: { projectId } });
+                const memberUserIds: string[] = [];
+                for (const pm of members) {
+                    const empId = pm.getDataValue('employeeId');
+                    const emp = await this.employeeModel.findByPk(empId);
+                    if (emp?.userId) memberUserIds.push(emp.userId);
+                }
+                const projectName = project.getDataValue('name') || 'Untitled';
+                const msTitle = ms.getDataValue('title');
+                const notifications = memberUserIds.map(userId => ({
+                    title: 'Milestone completed',
+                    body: `Milestone "${msTitle}" has been completed in project "${projectName}"`,
+                    titleFr: 'Étape complétée',
+                    bodyFr: `L'étape "${msTitle}" a été complétée dans le projet "${projectName}"`,
+                    type: 'project',
+                    userId,
+                }));
+                if (notifications.length > 0) {
+                    await this.notificationsService.createMany(notifications);
+                }
+            }
+        }
+
         return ms;
     }
 
@@ -61,7 +94,7 @@ export class ProjectsService {
                 Department,
                 { model: DepartmentService, through: { attributes: [] } },
                 { model: Task, attributes: ['id', 'state'] },
-                { model: ProjectMilestone, attributes: ['id', 'title', 'completedAt', 'dueDate', 'order'], order: [['order', 'ASC'], ['createdAt', 'ASC']] },
+                { model: ProjectMilestone, attributes: ['id', 'title', 'completedAt', 'completedById', 'completedByName', 'dueDate', 'order'], order: [['order', 'ASC'], ['createdAt', 'ASC']] },
             ],
         });
     }
@@ -167,14 +200,14 @@ export class ProjectsService {
     async findByClient(clientId: string): Promise<Project[]> {
         return this.projectModel.findAll({
             where: { clientId },
-            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }, { model: ProjectMilestone, attributes: ['id', 'completedAt'] }],
+            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }, { model: ProjectMilestone, attributes: ['id', 'completedAt', 'completedById', 'completedByName'] }],
         });
     }
 
     async findByDepartment(departmentId: string): Promise<Project[]> {
         return this.projectModel.findAll({
             where: { departmentId },
-            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }, { model: ProjectMilestone, attributes: ['id', 'completedAt'] }],
+            include: [Client, Department, { model: DepartmentService, through: { attributes: [] } }, { model: Task, attributes: ['id', 'state'] }, { model: ProjectMilestone, attributes: ['id', 'completedAt', 'completedById', 'completedByName'] }],
         });
     }
 
@@ -186,7 +219,7 @@ export class ProjectsService {
                 { model: Department, attributes: ['id', 'name'] },
                 { model: Employee, through: { attributes: [] }, attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] },
                 { model: Task, attributes: ['id', 'state'] },
-                { model: ProjectMilestone, attributes: ['id', 'completedAt'] },
+                { model: ProjectMilestone, attributes: ['id', 'completedAt', 'completedById', 'completedByName'] },
             ],
         });
     }
@@ -201,7 +234,7 @@ export class ProjectsService {
                     model: Task,
                     include: [{ model: Employee, as: 'assignedTo', attributes: ['id', 'firstName', 'lastName', 'avatarUrl'] }],
                 },
-                { model: ProjectMilestone, attributes: ['id', 'title', 'completedAt', 'dueDate', 'order', 'description'], order: [['order', 'ASC'], ['createdAt', 'ASC']] },
+                { model: ProjectMilestone, attributes: ['id', 'title', 'completedAt', 'completedById', 'completedByName', 'dueDate', 'order', 'description'], order: [['order', 'ASC'], ['createdAt', 'ASC']] },
             ],
         });
     }

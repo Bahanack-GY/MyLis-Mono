@@ -908,6 +908,17 @@ const MilestonesView = ({ project }: { project: ProjectData }) => {
                                                     <span>{fmtDate(ms.dueDate)}</span>
                                                 </div>
                                             )}
+                                            {isDone && ms.completedAt && (
+                                                <div className="flex items-center gap-1.5 mt-2 text-xs text-[#283852]/60">
+                                                    <CheckCircle size={12} />
+                                                    <span>
+                                                        {t('projectDetail.milestones.completedOn', { date: fmtDate(ms.completedAt) })}
+                                                        {ms.completedByName && (
+                                                            <span className="font-medium"> &mdash; {ms.completedByName}</span>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${style.badge} ${style.badgeText}`}>

@@ -119,6 +119,8 @@ const ProjectDetailModal = ({
 
     const detailTasks = detail?.tasks || [];
     const detailMembers = detail?.members || [];
+    const detailMilestones = (detail?.milestones || []).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const milestonesDone = detailMilestones.filter(m => m.completedAt != null).length;
 
     return (
         <motion.div
@@ -295,6 +297,57 @@ const ProjectDetailModal = ({
                                                 </span>
                                             </div>
                                         ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Milestones */}
+                            {detailMilestones.length > 0 && (
+                                <div>
+                                    <div className="flex items-center justify-between mb-3">
+                                        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                                            {t('projectSidebar.milestones')}
+                                        </p>
+                                        <span className="text-[10px] font-semibold text-gray-500">
+                                            {milestonesDone}/{detailMilestones.length}
+                                        </span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden mb-3">
+                                        <div
+                                            className="h-full rounded-full bg-[#33cbcc] transition-all duration-700"
+                                            style={{ width: `${detailMilestones.length > 0 ? Math.round((milestonesDone / detailMilestones.length) * 100) : 0}%` }}
+                                        />
+                                    </div>
+                                    <div className="space-y-2 max-h-56 overflow-y-auto">
+                                        {detailMilestones.map((ms) => {
+                                            const isDone = ms.completedAt != null;
+                                            return (
+                                                <div
+                                                    key={ms.id}
+                                                    className={`flex items-start gap-3 rounded-xl px-4 py-3 border transition-colors ${isDone ? 'bg-[#283852]/5 border-[#283852]/15' : 'bg-gray-50 border-gray-100'}`}
+                                                >
+                                                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1 ${isDone ? 'bg-[#283852]' : 'bg-gray-300'}`} />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className={`text-sm font-medium truncate ${isDone ? 'text-gray-500 line-through' : 'text-gray-800'}`}>
+                                                            {ms.title}
+                                                        </p>
+                                                        {isDone && ms.completedByName && (
+                                                            <p className="text-[11px] text-[#283852]/60 mt-0.5">
+                                                                {t('projectDetail.milestones.completedBy', 'By')} {ms.completedByName}
+                                                            </p>
+                                                        )}
+                                                        {ms.dueDate && !isDone && (
+                                                            <p className="text-[11px] text-gray-400 mt-0.5">
+                                                                {fmtDate(ms.dueDate)}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <span className={`text-[10px] font-semibold shrink-0 ${isDone ? 'text-[#283852]' : 'text-gray-400'}`}>
+                                                        {isDone ? t('projectDetail.milestones.completed') : t('projectDetail.milestones.upcoming')}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
