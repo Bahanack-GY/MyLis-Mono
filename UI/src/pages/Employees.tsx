@@ -957,9 +957,9 @@ const Employees = () => {
                     />
                  </div>
 
-                 <div className="flex gap-4">
+                 <div className="flex flex-wrap gap-3">
                      {/* View toggle */}
-                     <div className="flex items-center bg-white rounded-2xl border border-gray-100 shadow-sm p-1">
+                     <div className="flex items-center bg-white rounded-2xl border border-gray-100 shadow-sm p-1 self-start">
                          <button
                              onClick={() => setViewMode('grid')}
                              className={`p-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
@@ -973,12 +973,12 @@ const Employees = () => {
                              <List size={16} />
                          </button>
                      </div>
-                     <div className="relative">
+                     <div className="relative flex-1 min-w-40">
                          <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
                          <select
                              value={selectedDepartment}
                              onChange={e => setSelectedDepartment(e.target.value)}
-                             className="bg-white rounded-2xl p-3 pl-10 pr-8 border border-gray-100 shadow-sm min-w-45 text-sm text-gray-600 appearance-none cursor-pointer hover:border-[#33cbcc]/30 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 transition-all"
+                             className="w-full bg-white rounded-2xl p-3 pl-10 pr-8 border border-gray-100 shadow-sm text-sm text-gray-600 appearance-none cursor-pointer hover:border-[#33cbcc]/30 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 transition-all"
                          >
                              <option value="">{t('employees.allDepartments')}</option>
                              {(apiDepartments || []).map(d => (
@@ -990,7 +990,7 @@ const Employees = () => {
                      {selectedDepartment && (
                          <button
                              onClick={() => setSelectedDepartment('')}
-                             className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:bg-[#283852]/10 hover:border-gray-200 text-gray-400 hover:text-[#283852] transition-colors"
+                             className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:bg-[#283852]/10 hover:border-gray-200 text-gray-400 hover:text-[#283852] transition-colors self-start"
                              title={t('employees.clearFilter')}
                          >
                              <X size={20} />

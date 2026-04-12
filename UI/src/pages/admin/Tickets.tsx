@@ -691,7 +691,7 @@ const Tickets = () => {
                     />
                 </div>
 
-                <div className="flex bg-white rounded-xl border border-gray-100 p-1">
+                <div className="flex bg-white rounded-xl border border-gray-100 p-1 self-start">
                     <button
                         onClick={() => setViewMode('grid')}
                         className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}

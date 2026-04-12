@@ -1013,7 +1013,7 @@ const Meetings = () => {
                         className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
                     />
                 </div>
-                <div className="flex bg-white rounded-xl border border-gray-100 p-1">
+                <div className="flex bg-white rounded-xl border border-gray-100 p-1 self-start">
                     <button
                         onClick={() => setViewMode('grid')}
                         className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}

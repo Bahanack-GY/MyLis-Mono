@@ -46,6 +46,7 @@ import { leadsApi } from '../../api/commercial/api';
 import { useCreateLeadActivity } from '../../api/commercial/hooks';
 import type { ActivityType } from '../../api/commercial/types';
 import type { Task, TaskDifficulty, TaskState } from '../../api/tasks/types';
+import { tasksApi } from '../../api/tasks/api';
 
 /* ─── Helper Functions ───────────────────────────────────── */
 
@@ -778,6 +779,86 @@ const TaskHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () => 
     );
 };
 
+/* ─── Weekly Compliance Block Modal ─────────────────────── */
+
+const WeeklyComplianceBlockModal = ({ pendingTasks, onClose }: { pendingTasks: Task[]; onClose: () => void }) => {
+    const { t } = useTranslation();
+
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        document.addEventListener('keydown', handler);
+        document.body.style.overflow = 'hidden';
+        return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = ''; };
+    }, [onClose]);
+
+    const fmtDate = (d: string) => new Date(d).toLocaleDateString();
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+        >
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                onClick={e => e.stopPropagation()}
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
+            >
+                <div className="h-1.5 bg-[#283852] shrink-0" />
+
+                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center">
+                            <AlertCircle size={18} className="text-[#283852]" />
+                        </div>
+                        <h3 className="text-base font-bold text-gray-800">{t('tasks.weeklyCompliance.title')}</h3>
+                    </div>
+                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                        <X size={18} />
+                    </button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                    <p className="text-sm text-gray-600">{t('tasks.weeklyCompliance.message')}</p>
+
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {pendingTasks.map(task => (
+                            <div key={task.id} className="bg-[#283852]/5 border border-gray-200 rounded-xl p-3">
+                                <div className="flex items-start justify-between gap-2">
+                                    <h4 className="text-sm font-semibold text-gray-800 truncate">{task.title}</h4>
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
+                                        {task.state}
+                                    </span>
+                                </div>
+                                {(task.startDate || task.endDate) && (
+                                    <div className="flex items-center gap-1 text-[11px] text-gray-400 mt-1">
+                                        <Calendar size={10} />
+                                        <span>{task.startDate ? fmtDate(task.startDate) : '--'} - {task.endDate ? fmtDate(task.endDate) : '--'}</span>
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    <p className="text-xs text-gray-400 italic">{t('tasks.weeklyCompliance.hint')}</p>
+                </div>
+
+                <div className="px-6 py-4 border-t border-gray-100 flex justify-end shrink-0">
+                    <button
+                        onClick={onClose}
+                        className="px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-[#283852] hover:bg-[#1e2d42] transition-colors"
+                    >
+                        {t('tasks.weeklyCompliance.understood')}
+                    </button>
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 /* ─── Self-Assign Modal ──────────────────────────────────── */
 
 const SelfAssignModal = ({
@@ -1300,6 +1381,8 @@ export default function Planning() {
     const { t } = useTranslation();
     const [currentMonday, setCurrentMonday] = useState(() => getMonday(new Date()));
     const [showModal, setShowModal] = useState(false);
+    const [showComplianceBlock, setShowComplianceBlock] = useState(false);
+    const [compliancePendingTasks, setCompliancePendingTasks] = useState<Task[]>([]);
     const [selectedDate, setSelectedDate] = useState<string | undefined>();
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -1340,9 +1423,20 @@ export default function Planning() {
         setCurrentMonday(getMonday(new Date()));
     };
 
-    const handleAddTask = (date: string) => {
-        setSelectedDate(date);
-        setShowModal(true);
+    const handleAddTask = async (date: string) => {
+        try {
+            const result = await tasksApi.weeklyCheck();
+            if (!result.canCreate) {
+                setCompliancePendingTasks(result.pendingTasks);
+                setShowComplianceBlock(true);
+            } else {
+                setSelectedDate(date);
+                setShowModal(true);
+            }
+        } catch {
+            setSelectedDate(date);
+            setShowModal(true);
+        }
     };
 
     const handleCloseModal = () => {
@@ -1560,6 +1654,12 @@ export default function Planning() {
 
             {/* Modals */}
             <AnimatePresence>
+                {showComplianceBlock && (
+                    <WeeklyComplianceBlockModal
+                        pendingTasks={compliancePendingTasks}
+                        onClose={() => setShowComplianceBlock(false)}
+                    />
+                )}
                 {showModal && (
                     <SelfAssignModal onClose={handleCloseModal} prefilledDate={selectedDate} />
                 )}

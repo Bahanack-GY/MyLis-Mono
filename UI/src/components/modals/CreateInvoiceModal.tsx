@@ -10,10 +10,12 @@ import {
     Briefcase,
     AlignLeft,
     Loader2,
+    Layers,
 } from 'lucide-react';
 import { useCreateInvoice } from '../../api/invoices/hooks';
 import { useDepartmentScope } from '../../contexts/AuthContext';
 import { useProjects } from '../../api/projects/hooks';
+import { useDepartments } from '../../api/departments/hooks';
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
@@ -27,7 +29,9 @@ export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
     const { t } = useTranslation();
     const createInvoice = useCreateInvoice();
     const deptScope = useDepartmentScope();
-    const { data: projects } = useProjects(deptScope);
+    const { data: departments } = useDepartments();
+    const [selectedDepartmentId, setSelectedDepartmentId] = useState<string>(deptScope || '');
+    const { data: projects } = useProjects(selectedDepartmentId || undefined);
 
     const [customColumns, setCustomColumns] = useState<{ id: string; label: string }[]>([]);
     const [form, setForm] = useState({
@@ -115,6 +119,29 @@ export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
 
                 {/* Content */}
                 <div className="p-6 space-y-5 overflow-y-auto flex-1">
+                    {/* Department filter (hidden if user is scoped to a department) */}
+                    {!deptScope && (
+                        <div>
+                            <label className={labelCls}>
+                                <Layers size={12} />
+                                {t('invoices.create.department')}
+                            </label>
+                            <select
+                                value={selectedDepartmentId}
+                                onChange={e => {
+                                    setSelectedDepartmentId(e.target.value);
+                                    setForm(prev => ({ ...prev, projectId: '' }));
+                                }}
+                                className={inputCls + ' appearance-none cursor-pointer'}
+                            >
+                                <option value="">{t('invoices.create.departmentPlaceholder', 'All departments')}</option>
+                                {(departments || []).map(d => (
+                                    <option key={d.id} value={d.id}>{d.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+
                     {/* Project */}
                     <div>
                         <label className={labelCls}>
@@ -133,20 +160,12 @@ export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
                         </select>
                     </div>
 
-                    {/* Auto-filled client + department */}
+                    {/* Auto-filled client info */}
                     {selectedProject && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className={labelCls}>{t('invoices.create.client')}</label>
-                                <div className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600">
-                                    {selectedProject.client?.name || '—'}
-                                </div>
-                            </div>
-                            <div>
-                                <label className={labelCls}>{t('invoices.create.department')}</label>
-                                <div className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600">
-                                    {selectedProject.department?.name || '—'}
-                                </div>
+                        <div>
+                            <label className={labelCls}>{t('invoices.create.client')}</label>
+                            <div className="px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-100 text-sm text-gray-600">
+                                {selectedProject.client?.name || '—'}
                             </div>
                         </div>
                     )}

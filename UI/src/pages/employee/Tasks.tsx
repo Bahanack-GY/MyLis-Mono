@@ -1325,9 +1325,14 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
     });
     const leads = (leadsData as any)?.data || [];
 
+    // description is stored in a ref instead of state to avoid triggering
+    // React re-renders on every Tiptap keystroke, which causes ProseMirror's
+    // internally-managed DOM nodes to conflict with React's reconciliation
+    // (the classic insertBefore crash).
+    const descriptionRef = useRef('');
+
     const [form, setForm] = useState({
         title: '',
-        description: '',
         difficulty: 'MEDIUM' as TaskDifficulty,
         projectId: '',
         natureId: '',
@@ -1410,7 +1415,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
                             {t('tasks.selfAssign.descriptionLabel')}
                         </label>
-                        <RichTextEditor value={form.description} onChange={html => update('description', html)} placeholder={t('tasks.selfAssign.descriptionPlaceholder')} />
+                        <RichTextEditor value={descriptionRef.current} onChange={html => { descriptionRef.current = html; }} placeholder={t('tasks.selfAssign.descriptionPlaceholder')} />
                     </div>
 
                     {/* Difficulty (non-commercial only) */}
@@ -1584,7 +1589,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
                             const hasActivity = isCommercial && !!form.activityType;
                             selfAssign.mutate({
                                 title: form.title.trim(),
-                                description: form.description.trim() || undefined,
+                                description: descriptionRef.current.trim() || undefined,
                                 difficulty: form.difficulty,
                                 projectId: form.projectId || undefined,
                                 natureId: form.natureId || undefined,

@@ -70,7 +70,14 @@ export const useCreateTask = () => {
             qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
             qc.invalidateQueries({ queryKey: ['tasks', 'all-week'] });
         },
-        onError: () => toast.error(i18n.t('toast.error')),
+        onError: (error: any) => {
+            const msg: string = error?.response?.data?.message ?? '';
+            if (error?.response?.status === 403 && msg) {
+                toast.error(msg);
+            } else {
+                toast.error(i18n.t('toast.error'));
+            }
+        },
     });
 };
 
@@ -88,7 +95,14 @@ export const useUpdateTask = () => {
             qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
             qc.invalidateQueries({ queryKey: ['tasks', 'all-week'] });
         },
-        onError: () => toast.error(i18n.t('toast.error')),
+        onError: (error: any) => {
+            const msg: string = error?.response?.data?.message ?? '';
+            if (error?.response?.status === 403 && msg) {
+                toast.error(msg);
+            } else {
+                toast.error(i18n.t('toast.error'));
+            }
+        },
     });
 };
 
@@ -163,7 +177,14 @@ export const useSelfAssignTask = () => {
             qc.invalidateQueries({ queryKey: ['tasks', 'week'] });
             qc.invalidateQueries({ queryKey: ['tasks', 'all-week'] });
         },
-        onError: () => toast.error(i18n.t('toast.error')),
+        onError: (error: any) => {
+            const msg: string = error?.response?.data?.message ?? '';
+            if (msg.toLowerCase().includes('pending') || msg.toLowerCase().includes('last week') || msg.toLowerCase().includes('status update')) {
+                toast.error(i18n.t('toast.complianceBlock', 'You have pending tasks from last week that need status updates.'));
+            } else {
+                toast.error(i18n.t('toast.error'));
+            }
+        },
     });
 };
 

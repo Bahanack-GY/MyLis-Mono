@@ -491,35 +491,37 @@ const Clients = () => {
                     />
                 </div>
 
-                {!deptScope && (
-                    <div className="bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm min-w-[180px]">
-                        <Building className="text-gray-400 ml-2" size={18} />
-                        <select
-                            value={filterDepartment}
-                            onChange={e => setFilterDepartment(e.target.value)}
-                            className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 px-2 text-sm appearance-none cursor-pointer"
-                        >
-                            <option value="">{t('clients.allDepartments')}</option>
-                            {(departments || []).map(d => (
-                                <option key={d.id} value={d.id}>{d.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                )}
+                <div className="flex items-center gap-3">
+                    {!deptScope && (
+                        <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm min-w-0">
+                            <Building className="text-gray-400 ml-2 shrink-0" size={18} />
+                            <select
+                                value={filterDepartment}
+                                onChange={e => setFilterDepartment(e.target.value)}
+                                className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 px-2 text-sm appearance-none cursor-pointer"
+                            >
+                                <option value="">{t('clients.allDepartments')}</option>
+                                {(departments || []).map(d => (
+                                    <option key={d.id} value={d.id}>{d.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
-                <div className="flex bg-white rounded-xl border border-gray-100 p-1">
-                    <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <LayoutGrid size={18} />
-                    </button>
-                    <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                    >
-                        <List size={18} />
-                    </button>
+                    <div className="flex bg-white rounded-xl border border-gray-100 p-1 shrink-0">
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                        >
+                            <LayoutGrid size={18} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
+                        >
+                            <List size={18} />
+                        </button>
+                    </div>
                 </div>
             </div>
 

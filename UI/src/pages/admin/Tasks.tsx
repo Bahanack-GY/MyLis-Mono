@@ -1755,7 +1755,7 @@ const Tasks = () => {
                     <h1 className="text-2xl font-bold text-gray-800">{t('tasksPage.title')}</h1>
                     <p className="text-sm text-gray-400 mt-1">{t('tasksPage.subtitle')}</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     {/* Calendar / Board toggle */}
                     <div className="flex bg-gray-100 rounded-xl p-1">
                         <button
@@ -1782,19 +1782,19 @@ const Tasks = () => {
                     </button>
                     <button
                         onClick={() => setAddTaskData({ date: new Date() })}
-                        className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20"
+                        className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20 flex-1 sm:flex-none justify-center"
                     >
                         <Plus size={16} />
                         {t('tasksPage.addTask')}
                     </button>
-                    <div className="relative">
+                    <div className="relative w-full sm:w-auto">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             placeholder={t('tasksPage.searchPlaceholder')}
-                            className="bg-white rounded-xl border border-gray-200 pl-9 pr-9 py-2.5 text-sm text-gray-700 placeholder-gray-400 w-52 sm:w-60 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+                            className="bg-white rounded-xl border border-gray-200 pl-9 pr-9 py-2.5 text-sm text-gray-700 placeholder-gray-400 w-full sm:w-60 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
                         />
                         {searchQuery && (
                             <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -2416,15 +2416,17 @@ const Tasks = () => {
                                                 }}
                                             >
                                                 {/* Left resize handle */}
+                                                {!task.selfAssigned && (
                                                 <div
                                                     className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize z-10 rounded-l-xl opacity-0 group-hover/task:opacity-100 bg-black/5 hover:bg-black/15! transition-opacity"
                                                     onPointerDown={ev => { ev.stopPropagation(); startDrag(ev, task, emp, 'resize-start'); }}
                                                 />
+                                                )}
 
                                                 {/* Content area — move drag + click for modal */}
                                                 <div
                                                     className="flex items-center gap-1.5 px-2.5 h-full cursor-grab active:cursor-grabbing relative group/bar"
-                                                    onPointerDown={ev => { if (ev.button === 0) startDrag(ev, task, emp, 'move'); }}
+                                                    onPointerDown={ev => { if (ev.button === 0 && !task.selfAssigned) startDrag(ev, task, emp, 'move'); }}
                                                     onClick={e => { e.stopPropagation(); if (!wasDragging.current) setModalData({ task, employee: emp }); }}
                                                 >
                                                     {!narrow && (
@@ -2457,10 +2459,12 @@ const Tasks = () => {
                                                 </div>
 
                                                 {/* Right resize handle */}
+                                                {!task.selfAssigned && (
                                                 <div
                                                     className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 rounded-r-xl opacity-0 group-hover/task:opacity-100 bg-black/5 hover:bg-black/15! transition-opacity"
                                                     onPointerDown={ev => { ev.stopPropagation(); startDrag(ev, task, emp, 'resize-end'); }}
                                                 />
+                                                )}
 
                                                 {/* Date tooltip while dragging */}
                                                 {isDrag && preview && (

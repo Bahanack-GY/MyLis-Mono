@@ -14,6 +14,7 @@ import {
     STREAK_BONUS_3,
     STREAK_BONUS_5,
     STREAK_BONUS_7,
+    MAX_TASK_POINTS,
     BADGE_DEFINITIONS,
 } from './gamification.constants';
 
@@ -71,7 +72,7 @@ export class GamificationService {
             // 0 to -3 days late: no bonus, no penalty
         }
 
-        pointsEarned = Math.max(1, pointsEarned + speedBonus);
+        pointsEarned = Math.min(MAX_TASK_POINTS, Math.max(1, pointsEarned + speedBonus));
 
         // 3. Weekly streak bonus
         // Count tasks completed by this employee in the last 7 days
@@ -97,7 +98,7 @@ export class GamificationService {
             streakBonus = STREAK_BONUS_3;
         }
 
-        pointsEarned += streakBonus;
+        pointsEarned = Math.min(MAX_TASK_POINTS, pointsEarned + streakBonus);
 
         // 4. Update employee points
         const employee = await this.employeeModel.findByPk(employeeId, { transaction });
