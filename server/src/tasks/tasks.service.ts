@@ -181,21 +181,36 @@ export class TasksService {
             where.assignedToId = params.employeeId;
         }
 
-        // Date-range overlap: task overlaps [boardFrom, boardTo]
-        // Show task if: (startDate IS NULL OR startDate <= boardTo) AND (endDate IS NULL OR endDate >= boardFrom)
-        const andConditions: any[] = [];
-        if (params.boardTo) {
-            andConditions.push({
-                [Op.or]: [{ startDate: null }, { startDate: { [Op.lte]: new Date(params.boardTo) } }],
-            });
-        }
-        if (params.boardFrom) {
-            andConditions.push({
-                [Op.or]: [{ endDate: null }, { endDate: { [Op.gte]: new Date(params.boardFrom) } }],
-            });
-        }
-        if (andConditions.length) {
-            where[Op.and] = andConditions;
+        // Date filtering: completed/reviewed tasks use completedAt; others use startDate/endDate overlap
+        const completedStates = ['COMPLETED', 'REVIEWED'];
+        const allCompleted = params.states?.length &&
+            params.states.every(s => completedStates.includes(s));
+
+        if (allCompleted) {
+            // For done tasks: show if completedAt falls within [boardFrom, boardTo]
+            if (params.boardFrom || params.boardTo) {
+                const completedAtCond: any = {};
+                if (params.boardFrom) completedAtCond[Op.gte] = new Date(params.boardFrom);
+                if (params.boardTo) completedAtCond[Op.lte] = new Date(params.boardTo);
+                where.completedAt = completedAtCond;
+            }
+        } else {
+            // For non-completed tasks: date-range overlap [boardFrom, boardTo]
+            // Show task if: (startDate IS NULL OR startDate <= boardTo) AND (endDate IS NULL OR endDate >= boardFrom)
+            const andConditions: any[] = [];
+            if (params.boardTo) {
+                andConditions.push({
+                    [Op.or]: [{ startDate: null }, { startDate: { [Op.lte]: new Date(params.boardTo) } }],
+                });
+            }
+            if (params.boardFrom) {
+                andConditions.push({
+                    [Op.or]: [{ endDate: null }, { endDate: { [Op.gte]: new Date(params.boardFrom) } }],
+                });
+            }
+            if (andConditions.length) {
+                where[Op.and] = andConditions;
+            }
         }
 
         const employeeInclude: any = {

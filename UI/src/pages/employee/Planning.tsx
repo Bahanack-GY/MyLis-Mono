@@ -122,6 +122,15 @@ const STATE_TO_STATUS: Record<TaskState, MappedStatus> = {
     REVIEWED: 'done',
 };
 
+const STATE_BORDER_COLOR: Record<TaskState, string> = {
+    CREATED: '#9ca3af',
+    ASSIGNED: '#3b82f6',
+    IN_PROGRESS: '#33cbcc',
+    BLOCKED: '#ef4444',
+    COMPLETED: '#22c55e',
+    REVIEWED: '#8b5cf6',
+};
+
 /* ─── Task Detail Modal ──────────────────────────────────── */
 
 const TaskDetailModal = ({
@@ -1238,7 +1247,8 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             onClick={onClick}
-            className="bg-white rounded-lg border border-gray-200 p-3  transition-shadow cursor-pointer"
+            className="bg-white rounded-lg border border-gray-200 border-l-4 p-3 transition-shadow cursor-pointer hover:shadow-sm"
+            style={{ borderLeftColor: STATE_BORDER_COLOR[task.state] }}
         >
             <div className="flex items-start justify-between gap-2 mb-2">
                 <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{task.title}</h4>
@@ -1404,8 +1414,12 @@ export default function Planning() {
     }
 
     tasks.forEach(task => {
-        if (task.startDate) {
-            const taskDate = formatDate(new Date(task.startDate));
+        // Completed/Reviewed tasks → group by completion date; others → by start date
+        const dateSource = (task.state === 'COMPLETED' || task.state === 'REVIEWED') && task.completedAt
+            ? task.completedAt
+            : task.startDate;
+        if (dateSource) {
+            const taskDate = formatDate(new Date(dateSource));
             const existing = tasksByDay.get(taskDate) || [];
             tasksByDay.set(taskDate, [...existing, task]);
         }
@@ -1596,6 +1610,28 @@ export default function Planning() {
                             </div>
                         </motion.div>
                     )}
+                </div>
+
+                {/* Status Color Legend */}
+                <div className="mb-4 bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                        <span className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            {t('planning.legend', 'Legend')}:
+                        </span>
+                        {([
+                            { state: 'CREATED' as TaskState, color: STATE_BORDER_COLOR.CREATED, label: t('tasks.states.created', 'Created') },
+                            { state: 'ASSIGNED' as TaskState, color: STATE_BORDER_COLOR.ASSIGNED, label: t('tasks.states.assigned', 'Assigned') },
+                            { state: 'IN_PROGRESS' as TaskState, color: STATE_BORDER_COLOR.IN_PROGRESS, label: t('tasks.states.in_progress', 'In Progress') },
+                            { state: 'BLOCKED' as TaskState, color: STATE_BORDER_COLOR.BLOCKED, label: t('tasks.states.blocked', 'Blocked') },
+                            { state: 'COMPLETED' as TaskState, color: STATE_BORDER_COLOR.COMPLETED, label: t('tasks.states.completed', 'Completed') },
+                            { state: 'REVIEWED' as TaskState, color: STATE_BORDER_COLOR.REVIEWED, label: t('tasks.states.reviewed', 'Reviewed') },
+                        ] as { state: TaskState; color: string; label: string }[]).map(({ state, color, label }) => (
+                            <div key={state} className="flex items-center gap-1.5">
+                                <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
+                                <span className="text-[10px] sm:text-xs text-gray-600">{label}</span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Week Grid */}

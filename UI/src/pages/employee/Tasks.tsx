@@ -180,7 +180,11 @@ const taskMatchesDateFilter = (
 ): boolean => {
     if (filterKey === 'all') return true;
 
-    const taskDate = task.startDate || task.dueDate || task.endDate;
+    // Completed/Reviewed tasks → filter by completion date; others → by start date
+    const isCompleted = task.state === 'COMPLETED' || task.state === 'REVIEWED';
+    const taskDate = (isCompleted && task.completedAt)
+        ? task.completedAt
+        : (task.startDate || task.dueDate || task.endDate);
     if (!taskDate) return false;
     const d = new Date(taskDate);
 

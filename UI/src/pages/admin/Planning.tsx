@@ -527,6 +527,15 @@ const STATE_COLORS: Record<string, string> = {
     REVIEWED: 'bg-[#33cbcc]/10 text-[#33cbcc]',
 };
 
+const STATE_BORDER_COLOR: Record<string, string> = {
+    CREATED: '#9ca3af',
+    ASSIGNED: '#3b82f6',
+    IN_PROGRESS: '#33cbcc',
+    BLOCKED: '#ef4444',
+    COMPLETED: '#22c55e',
+    REVIEWED: '#8b5cf6',
+};
+
 const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void }) => {
     const { t } = useTranslation();
 
@@ -725,7 +734,8 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             onClick={onClick}
-            className="bg-white rounded-lg border border-gray-200 p-3 transition-shadow cursor-pointer hover:border-[#33cbcc]/40 hover:shadow-sm"
+            className="bg-white rounded-lg border border-gray-200 border-l-4 p-3 transition-shadow cursor-pointer hover:shadow-sm"
+            style={{ borderLeftColor: STATE_BORDER_COLOR[task.state] || '#9ca3af' }}
         >
             {/* Employee info */}
             {task.assignedTo && (
@@ -908,8 +918,12 @@ export default function Planning() {
     }
 
     tasks.forEach(task => {
-        if (task.startDate) {
-            const taskDate = formatDate(new Date(task.startDate));
+        // Completed/Reviewed tasks → group by completion date; others → by start date
+        const dateSource = (task.state === 'COMPLETED' || task.state === 'REVIEWED') && task.completedAt
+            ? task.completedAt
+            : task.startDate;
+        if (dateSource) {
+            const taskDate = formatDate(new Date(dateSource));
             const existing = tasksByDay.get(taskDate) || [];
             tasksByDay.set(taskDate, [...existing, task]);
         }
@@ -1054,6 +1068,23 @@ export default function Planning() {
                             </div>
                         </motion.div>
                     )}
+                </div>
+
+                {/* Status Color Legend */}
+                <div className="mb-4 bg-white rounded-xl border border-gray-200 p-3 sm:p-4">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                        <span className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            {t('planning.legend', 'Legend')}:
+                        </span>
+                        {Object.entries(STATE_BORDER_COLOR).map(([state, color]) => (
+                            <div key={state} className="flex items-center gap-1.5">
+                                <div className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
+                                <span className="text-[10px] sm:text-xs text-gray-600">
+                                    {t(`tasks.states.${state.toLowerCase()}`, state)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Week Grid */}
