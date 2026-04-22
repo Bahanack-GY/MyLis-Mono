@@ -38,6 +38,7 @@ import {
     Truck,
     Waves,
     Trophy,
+    Landmark,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -135,6 +136,7 @@ const ALL_SECTIONS: Section[] = [
             { icon: Receipt, label: 'taxDeclarations', path: '/accounting/tax' },
             { icon: Truck, label: 'suppliers', path: '/accounting/suppliers' },
             { icon: Waves, label: 'cashFlow', path: '/accounting/cash-flow' },
+            { icon: Landmark, label: 'fundMovements', path: '/accounting/fund-movements' },
         ],
     },
     {

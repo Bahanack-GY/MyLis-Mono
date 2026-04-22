@@ -34,6 +34,7 @@ import { SuppliersModule } from './suppliers/suppliers.module';
 import { SseModule } from './sse/sse.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { ChargeNaturesModule } from './charge-natures/charge-natures.module';
+import { FundMovementsModule } from './fund-movements/fund-movements.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RolesGuard } from './auth/roles.guard';
 import { ActivityInterceptor } from './logs/activity.interceptor';
@@ -89,6 +90,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     ReportsModule,
     SuppliersModule,
     ChargeNaturesModule,
+    FundMovementsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -76,6 +76,7 @@ const TaxDeclarations = lazy(() => import("./pages/accounting/TaxDeclarations"))
 const AIReports = lazy(() => import("./pages/accounting/AIReports"))
 const Suppliers = lazy(() => import("./pages/accounting/Suppliers"))
 const CashFlow = lazy(() => import("./pages/accounting/CashFlow"))
+const FundMovements = lazy(() => import("./pages/accounting/FundMovements"))
 const MonthlyRankings = lazy(() => import("./pages/admin/MonthlyRankings"))
 
 function App() {
@@ -199,6 +200,13 @@ function App() {
             <Route path="/accounting/ai-reports" element={<AIReports />} />
             <Route path="/accounting/suppliers" element={<Suppliers />} />
             <Route path="/accounting/cash-flow" element={<CashFlow />} />
+          </Route>
+        </Route>
+
+        {/* Fund Movements — CEO + ACCOUNTANT */}
+        <Route element={<ProtectedRoute allowedRoles={['CEO', 'ACCOUNTANT']} />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/accounting/fund-movements" element={<FundMovements />} />
           </Route>
         </Route>
 

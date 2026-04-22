@@ -74,6 +74,7 @@ export const SEED_ACCOUNTS: SeedAccount[] = [
     { code: '416000', name: 'Clients douteux', type: 'ASSET', categoryCode: '4', parentCode: '411000' },
     { code: '421000', name: 'Personnel - Rémunérations dues', type: 'LIABILITY', categoryCode: '4' },
     { code: '422000', name: 'Personnel - Avances et acomptes', type: 'ASSET', categoryCode: '4' },
+    { code: '461000', name: 'Associés, comptes courants', type: 'LIABILITY', categoryCode: '4' },
     { code: '431000', name: 'Sécurité sociale (CNPS)', type: 'LIABILITY', categoryCode: '4' },
     { code: '431100', name: 'CNPS - Part salariale', type: 'LIABILITY', categoryCode: '4', parentCode: '431000' },
     { code: '431200', name: 'CNPS - Part patronale', type: 'LIABILITY', categoryCode: '4', parentCode: '431000' },

@@ -69,11 +69,11 @@ export class JournalEntry extends Model {
     declare reference: string | null;
 
     @Column({
-        type: DataType.ENUM('MANUAL', 'INVOICE', 'EXPENSE', 'SALARY', 'TAX', 'CREDIT_NOTE', 'SUPPLIER_INVOICE'),
+        type: DataType.ENUM('MANUAL', 'INVOICE', 'EXPENSE', 'SALARY', 'TAX', 'CREDIT_NOTE', 'SUPPLIER_INVOICE', 'FUND_MOVEMENT'),
         allowNull: false,
         defaultValue: 'MANUAL',
     })
-    declare sourceType: 'MANUAL' | 'INVOICE' | 'EXPENSE' | 'SALARY' | 'TAX' | 'CREDIT_NOTE' | 'SUPPLIER_INVOICE';
+    declare sourceType: 'MANUAL' | 'INVOICE' | 'EXPENSE' | 'SALARY' | 'TAX' | 'CREDIT_NOTE' | 'SUPPLIER_INVOICE' | 'FUND_MOVEMENT';
 
     @Column({
         type: DataType.UUID,

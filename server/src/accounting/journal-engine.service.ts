@@ -294,6 +294,58 @@ export class JournalEngineService {
     }
 
     /**
+     * Called when a fund movement is created.
+     * APPORT: Débit 521000 Banque / Crédit 461000 Associés comptes courants
+     * RETRAIT: Débit 461000 Associés comptes courants / Crédit 521000 Banque
+     */
+    async onFundMovement(movement: any, userId: string): Promise<string | null> {
+        try {
+            const amount = Number(movement.amount);
+            const date = movement.date || new Date().toISOString().split('T')[0];
+            const isApport = movement.type === 'APPORT';
+            const label = isApport
+                ? `Apport - ${movement.description}`
+                : `Retrait - ${movement.description}`;
+
+            const entry = await this.createAutoEntry({
+                journalCode: 'OD',
+                date,
+                description: isApport
+                    ? `Apport en compte courant: ${movement.description}`
+                    : `Retrait en compte courant: ${movement.description}`,
+                reference: movement.id,
+                sourceType: 'FUND_MOVEMENT',
+                sourceId: movement.id,
+                lines: isApport
+                    ? [
+                        { accountCode: '521000', debit: amount, credit: 0, label },
+                        { accountCode: '461000', debit: 0, credit: amount, label },
+                    ]
+                    : [
+                        { accountCode: '461000', debit: amount, credit: 0, label },
+                        { accountCode: '521000', debit: 0, credit: amount, label },
+                    ],
+                userId,
+            });
+            return entry?.getDataValue('entryNumber') ?? null;
+        } catch (error) {
+            this.logger.error(`Failed to create journal entry for fund movement: ${error.message}`);
+            return null;
+        }
+    }
+
+    /**
+     * Called when a fund movement is deleted — removes its journal entry.
+     */
+    async onFundMovementDeleted(movementId: string): Promise<void> {
+        try {
+            await this.deleteEntriesForSource('FUND_MOVEMENT', movementId);
+        } catch (error) {
+            this.logger.error(`Failed to delete journal entry for fund movement: ${error.message}`);
+        }
+    }
+
+    /**
      * Called when an expense is deleted — removes its journal entry.
      */
     async onExpenseDeleted(expenseId: string): Promise<void> {
