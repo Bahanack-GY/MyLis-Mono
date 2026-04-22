@@ -25,7 +25,7 @@ const inputCls =
 const labelCls =
     'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
 
-export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
+export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: () => void; isProforma?: boolean }) => {
     const { t } = useTranslation();
     const createInvoice = useCreateInvoice();
     const deptScope = useDepartmentScope();
@@ -110,7 +110,7 @@ export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
                             <FileText size={20} className="text-[#33cbcc]" />
                         </div>
-                        <h2 className="text-lg font-bold text-gray-800">{t('invoices.create.title')}</h2>
+                        <h2 className="text-lg font-bold text-gray-800">{isProforma ? 'Nouvelle Proforma' : t('invoices.create.title')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
                         <X size={18} />
@@ -373,6 +373,7 @@ export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
                         onClick={() => {
                             if (!isValid || !selectedProject) return;
                             createInvoice.mutate({
+                                type: isProforma ? 'PROFORMA' : 'INVOICE',
                                 projectId: form.projectId,
                                 departmentId: selectedProject.departmentId,
                                 clientId: selectedProject.clientId!,
@@ -398,7 +399,7 @@ export const CreateInvoiceModal = ({ onClose }: { onClose: () => void }) => {
                         }`}
                     >
                         {createInvoice.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-                        {t('invoices.create.submit')}
+                        {isProforma ? 'Créer la proforma' : t('invoices.create.submit')}
                     </button>
                 </div>
             </motion.div>

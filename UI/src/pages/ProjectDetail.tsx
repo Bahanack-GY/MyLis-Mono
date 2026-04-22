@@ -643,7 +643,7 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
                                 <div key={exp.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group">
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-medium text-gray-800 truncate">{exp.title}</p>
-                                        <p className="text-xs text-gray-400">{exp.category} · {new Date(exp.date).toLocaleDateString()}</p>
+                                        <p className="text-xs text-gray-400">{exp.chargeNature} · {new Date(exp.date).toLocaleDateString()}</p>
                                     </div>
                                     <div className="flex items-center gap-3 ml-2 shrink-0">
                                         <span className="text-sm font-semibold text-gray-800">{fmtCurrency(Number(exp.amount))}</span>

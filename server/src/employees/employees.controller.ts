@@ -118,6 +118,12 @@ export class EmployeesController {
         );
     }
 
+    @Patch(':id/remove-department')
+    @Roles('MANAGER', 'CEO')
+    removeFromDepartment(@Param('id') id: string) {
+        return this.employeesService.removeFromDepartment(id);
+    }
+
     @Get(':id/transfer-history')
     getTransferHistory(@Param('id') id: string) {
         return this.employeesService.getTransferHistory(id);

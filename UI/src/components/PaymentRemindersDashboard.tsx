@@ -120,7 +120,7 @@ function PaymentItem({ invoice, onSelect }: { invoice: Invoice; onSelect: () => 
                 </div>
                 <div className="flex flex-col items-end gap-1">
                     <div className="text-base font-bold text-gray-800">
-                        {formatFCFA(invoice.total)} <span className="text-xs font-normal text-gray-500">FCFA</span>
+                        {formatFCFA(Number(invoice.total) || 0)} <span className="text-xs font-normal text-gray-500">FCFA</span>
                     </div>
                     <ChevronRight size={14} className="text-gray-400" />
                 </div>
@@ -168,11 +168,11 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
 
         unpaid.forEach(inv => {
             const { urgency } = getPaymentUrgency(inv.dueDate);
-            totalAmount += inv.total;
+            totalAmount += Number(inv.total) || 0;
 
             if (urgency === 'overdue') {
                 overdue.push(inv);
-                overdueAmount += inv.total;
+                overdueAmount += Number(inv.total) || 0;
             } else if (urgency === 'dueSoon') {
                 dueSoon.push(inv);
             } else {

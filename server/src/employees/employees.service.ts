@@ -420,6 +420,31 @@ export class EmployeesService {
         });
     }
 
+    async removeFromDepartment(employeeId: string): Promise<Employee> {
+        return this.sequelize.transaction(async (t) => {
+            const employee = await this.employeeModel.findByPk(employeeId, {
+                include: [Department, User],
+                transaction: t,
+            });
+            if (!employee) throw new NotFoundException('Employee not found');
+
+            const fromDepartmentId = employee.getDataValue('departmentId');
+            if (!fromDepartmentId) throw new BadRequestException('Employee has no department');
+
+            const dept = await this.departmentModel.findByPk(fromDepartmentId, { transaction: t });
+            if (dept && dept.getDataValue('headId') === employeeId) {
+                await dept.update({ headId: null }, { transaction: t });
+                const user = await this.userModel.findByPk(employee.userId, { transaction: t });
+                if (user && user.role === 'HEAD_OF_DEPARTMENT') {
+                    await user.update({ role: 'EMPLOYEE' }, { transaction: t });
+                }
+            }
+
+            await employee.update({ departmentId: null }, { transaction: t });
+            return employee.reload({ include: [User, Department, Position], transaction: t });
+        });
+    }
+
     async getTransferHistory(employeeId: string): Promise<EmployeeTransferHistory[]> {
         return this.employeeTransferHistoryModel.findAll({
             where: { employeeId },
@@ -437,7 +462,7 @@ export class EmployeesService {
         promotedByUserId: string,
         reason?: string,
     ): Promise<Employee> {
-        const ALLOWED_ROLES = ['EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'ACCOUNTANT', 'MANAGER', 'STAGIAIRE'];
+        const ALLOWED_ROLES = ['EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'ACCOUNTANT', 'MANAGER', 'STAGIAIRE', 'CEO'];
         if (!ALLOWED_ROLES.includes(toRole)) {
             throw new BadRequestException('Invalid role');
         }

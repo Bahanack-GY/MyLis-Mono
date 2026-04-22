@@ -25,7 +25,7 @@ export class User extends Model {
     declare passwordHash: string;
 
     @Column({
-        type: DataType.ENUM('MANAGER', 'EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE'),
+        type: DataType.ENUM('MANAGER', 'EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE', 'CEO'),
         defaultValue: 'EMPLOYEE',
     })
     declare role: string;

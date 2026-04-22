@@ -10,6 +10,8 @@ import { Account } from '../models/account.model';
 import { FiscalYear } from '../models/fiscal-year.model';
 import { User } from '../models/user.model';
 import { FiscalYearsService } from './fiscal-years.service';
+import { CacheService } from '../cache/cache.service';
+import { CACHE_PATTERNS } from '../cache/cache.keys';
 
 @Injectable()
 export class JournalEntriesService {
@@ -23,6 +25,7 @@ export class JournalEntriesService {
         @InjectConnection()
         private sequelize: Sequelize,
         private fiscalYearsService: FiscalYearsService,
+        private cache: CacheService,
     ) {}
 
     async generateEntryNumber(journalCode: string): Promise<string> {
@@ -124,7 +127,7 @@ export class JournalEntriesService {
 
         const entryNumber = await this.generateEntryNumber(journal.code);
 
-        return this.sequelize.transaction(async (t) => {
+        const created = await this.sequelize.transaction(async (t) => {
             const entry = await this.entryModel.create({
                 entryNumber,
                 journalId,
@@ -151,8 +154,13 @@ export class JournalEntriesService {
                 { transaction: t },
             );
 
-            return this.findOne(entry.id);
+            return entry.id;
         });
+
+        // Invalidate AFTER the transaction commits so no reader can cache stale data
+        // in the window between invalidation and commit.
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTING_REPORTS);
+        return this.findOne(created);
     }
 
     async validate(id: string, userId: string) {
@@ -168,6 +176,7 @@ export class JournalEntriesService {
             validatedByUserId: userId,
         });
 
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTING_REPORTS);
         return this.findOne(id);
     }
 
@@ -180,6 +189,7 @@ export class JournalEntriesService {
             await this.lineModel.destroy({ where: { journalEntryId: id }, transaction: t });
             await entry.destroy({ transaction: t });
         });
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTING_REPORTS);
         return { deleted: true };
     }
 }

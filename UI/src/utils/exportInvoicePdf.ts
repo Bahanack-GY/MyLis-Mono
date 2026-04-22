@@ -103,6 +103,7 @@ export function exportInvoicePdf(
     letterheadImg?: string,
     signatureImg?: string,
     cachetImg?: string,
+    isProforma?: boolean,
 ) {
     const doc = new jsPDF();
     const pw = doc.internal.pageSize.getWidth();
@@ -134,17 +135,21 @@ export function exportInvoicePdf(
         if (template?.email) { doc.text(template.email, MARGIN, y); y += 3.5; }
     }
 
-    // ── FACTURE title block (right-aligned) ──
+    // ── Title block (right-aligned) ──
     const titleY = hasLH ? LH_TOP : 20;
+    const docIsProforma = isProforma === true || invoice.type === 'PROFORMA';
+    const docIsAcompte = invoice.type === 'ACOMPTE';
+    const docTitle = docIsAcompte ? "FACTURE D'ACOMPTE" : docIsProforma ? 'PROFORMA' : 'FACTURE';
+    const docNumber = docIsAcompte ? (invoice.acompteNumber || '') : docIsProforma ? (invoice.proformaNumber || '') : (invoice.invoiceNumber || '');
     doc.setFontSize(28);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...BRAND);
-    doc.text('FACTURE', rightEdge, titleY, { align: 'right' });
+    doc.text(docTitle, rightEdge, titleY, { align: 'right' });
 
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...DARK);
-    doc.text(invoice.invoiceNumber, rightEdge, titleY + 9, { align: 'right' });
+    if (docNumber) doc.text(docNumber, rightEdge, titleY + 9, { align: 'right' });
 
     y = Math.max(y, titleY + 14) + 8;
 
@@ -199,7 +204,12 @@ export function exportInvoicePdf(
     y += 12;
 
     // ── Items Table ──
-    const tableBody = (invoice.items || []).map(item => [
+    const items = (invoice.items && invoice.items.length > 0)
+        ? invoice.items
+        : invoice.type === 'ACOMPTE'
+            ? [{ description: invoice.notes || `Acompte sur facture`, quantity: 1, unitPrice: Number(invoice.total), amount: Number(invoice.total) }]
+            : [];
+    const tableBody = items.map(item => [
         item.description,
         String(Number(item.quantity)),
         formatCurrency(item.unitPrice),
@@ -306,14 +316,46 @@ export function exportInvoicePdf(
     doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...DARK);
-    doc.text('Arrêter le montant de la présente facture à la somme de :', MARGIN + 3, y + 4);
+    const docLabel = docIsAcompte ? "facture d'acompte" : docIsProforma ? 'proforma' : 'facture';
+    doc.text(`Arrêter le montant de la présente ${docLabel} à la somme de :`, MARGIN + 3, y + 4);
 
     doc.setFontSize(12);
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(80, 80, 80);
-    doc.text(wrappedLines, MARGIN + 3, y + 11, { maxWidth: boxInnerW });
+    if (wrappedLines.length > 0) doc.text(wrappedLines, MARGIN + 3, y + 11, { maxWidth: boxInnerW });
 
     y += boxH + 4;
+
+    // ── Reste à payer (acompte only) ──
+    if (docIsAcompte && invoice.parentInvoice) {
+        const parentTotal = Number(invoice.parentInvoice.total);
+        const resteAPayer = Math.max(0, parentTotal - Number(invoice.total));
+        y = ensureSpace(doc, y, 20, letterheadImg);
+
+        doc.setFillColor(255, 248, 230);
+        doc.roundedRect(MARGIN, y - 3, pw - MARGIN * 2, 22, 2, 2, 'F');
+
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...DARK);
+        doc.text(`Facture ${invoice.parentInvoice.invoiceNumber || ''} - Montant total :`, MARGIN + 3, y + 4);
+        doc.setFont('helvetica', 'normal');
+        doc.text(formatCurrency(parentTotal), rightEdge, y + 4, { align: 'right' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.text('Acompte verse :', MARGIN + 3, y + 11);
+        doc.setTextColor(51, 203, 204);
+        doc.text(`- ${formatCurrency(Number(invoice.total))}`, rightEdge, y + 11, { align: 'right' });
+
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...DARK);
+        doc.text('Reste a payer :', MARGIN + 3, y + 18);
+        doc.setFontSize(10);
+        doc.setTextColor(40, 56, 82);
+        doc.text(formatCurrency(resteAPayer), rightEdge, y + 18, { align: 'right' });
+
+        y += 28;
+    }
 
     // ── Notes ──
     if (invoice.notes) {
@@ -434,5 +476,10 @@ export function exportInvoicePdf(
         doc.text(template.footerText, pw / 2, footerY, { align: 'center' });
     }
 
-    doc.save(`${invoice.invoiceNumber}.pdf`);
+    const filename = docIsAcompte
+        ? (invoice.acompteNumber || 'acompte')
+        : docIsProforma
+            ? (invoice.proformaNumber || 'proforma')
+            : (invoice.invoiceNumber || 'facture');
+    doc.save(`${filename}.pdf`);
 }

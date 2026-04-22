@@ -5,6 +5,8 @@ import { AccountCategory } from '../models/account-category.model';
 import { Journal } from '../models/journal.model';
 import { Department } from '../models/department.model';
 import { SEED_CATEGORIES, SEED_ACCOUNTS, SEED_JOURNALS } from './syscohada-seed';
+import { CacheService } from '../cache/cache.service';
+import { CACHE_KEYS, CACHE_TTL, CACHE_PATTERNS } from '../cache/cache.keys';
 
 @Injectable()
 export class AccountsService {
@@ -17,21 +19,31 @@ export class AccountsService {
         private journalModel: typeof Journal,
         @InjectModel(Department)
         private departmentModel: typeof Department,
+        private cache: CacheService,
     ) {}
 
     // ===== CHART OF ACCOUNTS =====
 
     async findAll() {
-        return this.accountModel.findAll({
+        const cached = await this.cache.get<any[]>(CACHE_KEYS.ACCOUNTS_LIST);
+        if (cached) return cached;
+
+        const rows = await this.accountModel.findAll({
             include: [
                 { model: AccountCategory, attributes: ['id', 'code', 'name'] },
                 { model: Department, attributes: ['id', 'name'], required: false },
             ],
             order: [['code', 'ASC']],
         });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(CACHE_KEYS.ACCOUNTS_LIST, result, CACHE_TTL.REFERENCE_LONG);
+        return result;
     }
 
     async findTree() {
+        const cached = await this.cache.get<any[]>(CACHE_KEYS.ACCOUNTS_TREE);
+        if (cached) return cached;
+
         const accounts = await this.accountModel.findAll({
             include: [
                 { model: AccountCategory, attributes: ['id', 'code', 'name'] },
@@ -41,10 +53,8 @@ export class AccountsService {
         });
         const categories = await this.categoryModel.findAll({ order: [['code', 'ASC']] });
 
-        // Group accounts by category
         const tree = categories.map(cat => {
             const catAccounts = accounts.filter(a => a.categoryId === cat.id);
-            // Build hierarchical tree within each category
             const rootAccounts = catAccounts.filter(a => !a.parentId);
             const buildChildren = (parentId: string): any[] => {
                 return catAccounts
@@ -63,6 +73,7 @@ export class AccountsService {
             };
         });
 
+        await this.cache.set(CACHE_KEYS.ACCOUNTS_TREE, tree, CACHE_TTL.REFERENCE_LONG);
         return tree;
     }
 
@@ -83,7 +94,9 @@ export class AccountsService {
     async create(dto: any) {
         const existing = await this.accountModel.findOne({ where: { code: dto.code } });
         if (existing) throw new ConflictException(`Account with code ${dto.code} already exists`);
-        return this.accountModel.create(dto);
+        const result = await this.accountModel.create(dto);
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTS);
+        return result;
     }
 
     async update(id: string, dto: any) {
@@ -91,7 +104,9 @@ export class AccountsService {
         if (account.isSystem) {
             throw new BadRequestException('Cannot modify a system account');
         }
-        return account.update(dto);
+        const result = await account.update(dto);
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTS);
+        return result;
     }
 
     async remove(id: string) {
@@ -100,6 +115,7 @@ export class AccountsService {
             throw new BadRequestException('Cannot delete a system account');
         }
         await account.destroy();
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTS);
         return { deleted: true };
     }
 
@@ -112,7 +128,13 @@ export class AccountsService {
     // ===== JOURNALS =====
 
     async findAllJournals() {
-        return this.journalModel.findAll({ order: [['code', 'ASC']] });
+        const cached = await this.cache.get<any[]>(CACHE_KEYS.JOURNALS);
+        if (cached) return cached;
+
+        const rows = await this.journalModel.findAll({ order: [['code', 'ASC']] });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(CACHE_KEYS.JOURNALS, result, CACHE_TTL.REFERENCE);
+        return result;
     }
 
     async findJournalByCode(code: string) {
@@ -124,13 +146,17 @@ export class AccountsService {
     async createJournal(dto: any) {
         const existing = await this.journalModel.findOne({ where: { code: dto.code } });
         if (existing) throw new ConflictException(`Journal with code ${dto.code} already exists`);
-        return this.journalModel.create(dto);
+        const result = await this.journalModel.create(dto);
+        await this.cache.del(CACHE_KEYS.JOURNALS);
+        return result;
     }
 
     async updateJournal(id: string, dto: any) {
         const journal = await this.journalModel.findByPk(id);
         if (!journal) throw new NotFoundException('Journal not found');
-        return journal.update(dto);
+        const result = await journal.update(dto);
+        await this.cache.del(CACHE_KEYS.JOURNALS);
+        return result;
     }
 
     // ===== SEED =====
@@ -182,6 +208,9 @@ export class AccountsService {
         for (const journal of SEED_JOURNALS) {
             await this.journalModel.create(journal as any);
         }
+
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTS);
+        await this.cache.del(CACHE_KEYS.JOURNALS);
 
         return {
             message: 'SYSCOHADA chart of accounts seeded successfully',

@@ -1,6 +1,7 @@
 import { Column, DataType, Model, Table, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { JournalEntry } from './journal-entry.model';
 import { Account } from './account.model';
+import { Department } from './department.model';
 
 @Table({
     tableName: 'journal_entry_lines',
@@ -57,4 +58,14 @@ export class JournalEntryLine extends Model {
         allowNull: true,
     })
     declare label: string | null;
+
+    @ForeignKey(() => Department)
+    @Column({
+        type: DataType.UUID,
+        allowNull: true,
+    })
+    declare departmentId: string | null;
+
+    @BelongsTo(() => Department)
+    declare department: Department;
 }

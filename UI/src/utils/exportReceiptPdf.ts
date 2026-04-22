@@ -133,18 +133,20 @@ export function exportReceiptPdf(
         if (template?.email) { doc.text(template.email, MARGIN, y); y += 3.5; }
     }
 
-    // ── REÇU DE PAIEMENT title (right-aligned) ──
+    // ── Title (right-aligned) ──
+    const isAcompte = invoice.type === 'ACOMPTE';
     const titleY = hasLH ? LH_TOP : 20;
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...GREEN);
-    doc.text('RECU DE PAIEMENT', rightEdge, titleY, { align: 'right' });
+    doc.text(isAcompte ? "RECU D'ACOMPTE" : 'RECU DE PAIEMENT', rightEdge, titleY, { align: 'right' });
 
-    const receiptNumber = `REC-${invoice.invoiceNumber}`;
+    const refNumber = invoice.acompteNumber || invoice.invoiceNumber || invoice.proformaNumber || '';
+    const receiptNumber = refNumber ? `REC-${refNumber}` : 'RECU';
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(...DARK);
-    doc.text(receiptNumber, rightEdge, titleY + 8, { align: 'right' });
+    if (receiptNumber) doc.text(receiptNumber, rightEdge, titleY + 8, { align: 'right' });
 
     y = Math.max(y, titleY + 14) + 8;
 
@@ -162,7 +164,9 @@ export function exportReceiptPdf(
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(...GREEN);
     doc.text(
-        `Nous confirmons la reception du paiement de la facture ${invoice.invoiceNumber}`,
+        isAcompte
+            ? `Nous confirmons la reception d'un acompte sur la facture ${invoice.parentInvoice?.invoiceNumber || refNumber}`
+            : `Nous confirmons la reception du paiement de la facture ${refNumber}`,
         pw / 2,
         y + 8,
         { align: 'center' }
@@ -192,7 +196,7 @@ export function exportReceiptPdf(
     doc.setFont('helvetica', 'bold');
     doc.text('Facture ref.:', MARGIN, y);
     doc.setFont('helvetica', 'normal');
-    doc.text(invoice.invoiceNumber, MARGIN + 38, y);
+    if (refNumber) doc.text(refNumber, MARGIN + 38, y);
     y += 5;
 
     doc.setFont('helvetica', 'bold');
@@ -227,7 +231,12 @@ export function exportReceiptPdf(
     y += 14;
 
     // ── Items Table ──
-    const tableBody = (invoice.items || []).map(item => [
+    const items = (invoice.items && invoice.items.length > 0)
+        ? invoice.items
+        : isAcompte
+            ? [{ description: invoice.notes || `Acompte sur facture`, quantity: 1, unitPrice: Number(invoice.total), amount: Number(invoice.total) }]
+            : [];
+    const tableBody = items.map(item => [
         item.description,
         String(Number(item.quantity)),
         formatCurrency(item.unitPrice),
@@ -468,5 +477,5 @@ export function exportReceiptPdf(
         doc.text(footerMsg, pw / 2, footerY, { align: 'center' });
     }
 
-    doc.save(`${receiptNumber}.pdf`);
+    doc.save(`${receiptNumber || 'recu'}.pdf`);
 }

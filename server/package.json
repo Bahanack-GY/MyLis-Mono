@@ -21,6 +21,7 @@
     "seed": "ts-node src/scripts/seed.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
@@ -38,6 +39,7 @@
     "baileys": "^7.0.0-rc.9",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
+    "ioredis": "^5.10.1",
     "nest-winston": "^1.10.2",
     "nodemailer": "^8.0.2",
     "passport": "^0.7.0",

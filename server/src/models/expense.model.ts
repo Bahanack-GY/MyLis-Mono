@@ -6,9 +6,10 @@ import { Department } from './department.model';
 @Table({
     tableName: 'expenses',
     indexes: [
-        { fields: ['category'] },
+        { fields: ['chargeFamily'] },
+        { fields: ['chargeNature'] },
         { fields: ['date'] },
-        { fields: ['category', 'date'] },
+        { fields: ['chargeFamily', 'date'] },
         { fields: ['demandId'] },
     ],
 })
@@ -33,10 +34,23 @@ export class Expense extends Model {
     declare amount: number;
 
     @Column({
-        type: DataType.STRING,
+        type: DataType.STRING(100),
         allowNull: false,
     })
-    declare category: string;
+    declare chargeFamily: string;
+
+    @Column({
+        type: DataType.STRING(200),
+        allowNull: false,
+    })
+    declare chargeNature: string;
+
+    @Column({
+        type: DataType.ENUM('MANUAL', 'PAYROLL'),
+        allowNull: false,
+        defaultValue: 'MANUAL',
+    })
+    declare source: 'MANUAL' | 'PAYROLL';
 
     @Column({
         type: DataType.ENUM('ONE_TIME', 'RECURRENT'),
@@ -87,4 +101,11 @@ export class Expense extends Model {
 
     @BelongsTo(() => Department)
     declare department: Department;
+
+    @Column({
+        type: DataType.JSONB,
+        allowNull: false,
+        defaultValue: [],
+    })
+    declare justificationFiles: { filePath: string; originalName: string }[];
 }

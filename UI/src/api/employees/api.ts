@@ -57,6 +57,9 @@ export const employeesApi = {
     getReports: (id: string) =>
         api.get<Report[]>(`/employees/${id}/reports`).then(r => r.data),
 
+    removeFromDepartment: (id: string) =>
+        api.patch<Employee>(`/employees/${id}/remove-department`).then(r => r.data),
+
     promote: (id: string, dto: PromoteEmployeeDto) =>
         api.patch<Employee>(`/employees/${id}/promote`, dto).then(r => r.data),
 

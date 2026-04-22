@@ -34,16 +34,16 @@ export const closeFiscalYear = (id: string) => api.post(`/accounting/fiscal-year
 export const reopenFiscalYear = (id: string) => api.post(`/accounting/fiscal-years/${id}/reopen`).then(r => r.data);
 
 // Reports
-export const getGrandLivre = (fiscalYearId: string, accountId?: string) =>
-    api.get(`/accounting/reports/grand-livre/${fiscalYearId}`, { params: { accountId } }).then(r => r.data);
-export const getTrialBalance = (fiscalYearId: string) =>
-    api.get(`/accounting/reports/trial-balance/${fiscalYearId}`).then(r => r.data);
+export const getGrandLivre = (fiscalYearId: string, accountId?: string, departmentId?: string) =>
+    api.get(`/accounting/reports/grand-livre/${fiscalYearId}`, { params: { accountId, departmentId } }).then(r => r.data);
+export const getTrialBalance = (fiscalYearId: string, departmentId?: string) =>
+    api.get(`/accounting/reports/trial-balance/${fiscalYearId}`, { params: departmentId ? { departmentId } : undefined }).then(r => r.data);
 export const getBalanceSheet = (fiscalYearId: string) =>
     api.get(`/accounting/reports/balance-sheet/${fiscalYearId}`).then(r => r.data);
 export const getIncomeStatement = (fiscalYearId: string) =>
     api.get(`/accounting/reports/income-statement/${fiscalYearId}`).then(r => r.data);
-export const getDashboardKpis = (fiscalYearId: string) =>
-    api.get(`/accounting/reports/dashboard-kpis/${fiscalYearId}`).then(r => r.data);
+export const getDashboardKpis = (fiscalYearId: string, departmentId?: string) =>
+    api.get(`/accounting/reports/dashboard-kpis/${fiscalYearId}`, { params: departmentId ? { departmentId } : undefined }).then(r => r.data);
 export const getMonthlySummary = (fiscalYearId: string) =>
     api.get(`/accounting/reports/monthly-summary/${fiscalYearId}`).then(r => r.data);
 

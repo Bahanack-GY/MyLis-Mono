@@ -30,6 +30,12 @@ export const invoicesApi = {
     reject: (id: string) =>
         api.patch<Invoice>(`/invoices/${id}/reject`).then(r => r.data),
 
+    validateProforma: (id: string) =>
+        api.patch<Invoice>(`/invoices/${id}/validate`).then(r => r.data),
+
+    createAcompte: (id: string, amount: number) =>
+        api.post<Invoice>(`/invoices/${id}/acompte`, { amount }).then(r => r.data),
+
     remove: (id: string) =>
         api.delete(`/invoices/${id}`).then(r => r.data),
 

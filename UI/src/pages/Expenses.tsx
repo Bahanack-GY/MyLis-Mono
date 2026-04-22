@@ -4,13 +4,22 @@ import ExpenseModal from './ExpenseModal';
 import {
     LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell
 } from 'recharts';
-import { Plus, FileText, Search, Trash2, Pencil, ChevronLeft, ChevronRight, Briefcase, Users, Tag, TrendingUp, Building2 } from 'lucide-react';
+import { Plus, FileText, Search, Trash2, Pencil, ChevronLeft, ChevronRight, Briefcase, Users, Tag, TrendingUp, Building2, Layers } from 'lucide-react';
 import { useExpenses, useExpenseStats, useDeleteExpense } from '../api/expenses/hooks';
 import { useDepartments } from '../api/departments/hooks';
+import { useChargeFamilies } from '../api/charge-natures/hooks';
 import { ExpensesSkeleton } from '../components/Skeleton';
 import type { Expense } from '../api/expenses/types';
 
 const COLORS = ['#33cbcc', '#283852', '#33cbcc99', '#28385280', '#33cbcc50', '#283852', '#33cbcc', '#283852', '#33cbcc99', '#28385280'];
+
+const FAMILY_COLORS: Record<string, string> = {
+    CHARGES_PERSONNEL:            '#33cbcc',
+    CHARGES_OPERATIONNELLES:      '#283852',
+    SOUS_TRAITANCE:               '#f59e0b',
+    CHARGES_STRUCTURE:            '#8b5cf6',
+    CHARGES_FINANCIERES_FISCALES: '#ef4444',
+};
 
 const formatFCFA = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
 const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('fr-FR');
@@ -32,6 +41,7 @@ export default function Expenses() {
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
     const { data: departments = [] } = useDepartments();
+    const { data: families = [] } = useChargeFamilies();
     const { data: expensesPage, isLoading: expLoading } = useExpenses(page, selectedDeptId);
     const expenses = expensesPage?.data ?? [];
     const totalPages = expensesPage?.totalPages ?? 1;
@@ -63,16 +73,19 @@ export default function Expenses() {
         return map;
     }, [seriesKey]);
 
+    const familyLabel = (code: string) => families.find(f => f.code === code)?.label ?? code;
+
     const filteredExpenses = useMemo(() => {
         if (!search) return expenses;
         const q = search.toLowerCase();
         return expenses.filter(e =>
             e.title.toLowerCase().includes(q) ||
-            e.category.toLowerCase().includes(q) ||
+            e.chargeNature.toLowerCase().includes(q) ||
+            familyLabel(e.chargeFamily).toLowerCase().includes(q) ||
             (e.project?.name || '').toLowerCase().includes(q) ||
             (e.department?.name || '').toLowerCase().includes(q)
         );
-    }, [expenses, search]);
+    }, [expenses, search, families]);
 
     const isLoading = expLoading || statsLoading;
 
@@ -96,6 +109,13 @@ export default function Expenses() {
     }
 
     const selectedDeptName = departments.find(d => d.id === selectedDeptId)?.name;
+
+    // Family breakdown for the 5 families
+    const familyBreakdown = (stats?.byFamily || []).map(f => ({
+        ...f,
+        label: familyLabel(f.code),
+        color: FAMILY_COLORS[f.code] || '#33cbcc',
+    }));
 
     return (
         <div className="space-y-6">
@@ -166,9 +186,8 @@ export default function Expenses() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                {/* Grand Total */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#33cbcc]/5 rounded-bl-[100px] transition-transform " />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#33cbcc]/5 rounded-bl-[100px]" />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Total des Charges</p>
@@ -183,9 +202,8 @@ export default function Expenses() {
                     </div>
                 </motion.div>
 
-                {/* Direct charges only */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px] transition-transform " />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px]" />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Charges Directes</p>
@@ -201,9 +219,8 @@ export default function Expenses() {
                     </div>
                 </motion.div>
 
-                {/* Monthly payroll */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px] transition-transform " />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px]" />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Masse Salariale</p>
@@ -216,9 +233,8 @@ export default function Expenses() {
                     </div>
                 </motion.div>
 
-                {/* Project budgets */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#33cbcc]/5 rounded-bl-[100px] transition-transform " />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#33cbcc]/5 rounded-bl-[100px]" />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
                             <p className="text-sm font-medium text-gray-500 mb-1">Budget Projets</p>
@@ -231,12 +247,11 @@ export default function Expenses() {
                     </div>
                 </motion.div>
 
-                {/* Top charge category */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden group">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px] transition-transform " />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px]" />
                     <div className="flex justify-between items-start">
                         <div className="min-w-0 flex-1 pr-2">
-                            <p className="text-sm font-medium text-gray-500 mb-1">Top Catégorie</p>
+                            <p className="text-sm font-medium text-gray-500 mb-1">Top Nature</p>
                             <h3 className="text-xl font-bold text-gray-800 truncate">
                                 {stats?.byCategory?.[0] ? formatFCFA(stats.byCategory[0].value) : '—'}
                             </h3>
@@ -251,12 +266,30 @@ export default function Expenses() {
                 </motion.div>
             </div>
 
+            {/* Family breakdown mini-cards */}
+            {familyBreakdown.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex items-center gap-2 mb-4">
+                        <Layers size={16} className="text-gray-400" />
+                        <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Répartition par Famille</h3>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {familyBreakdown.map(f => (
+                            <div key={f.code} className="flex flex-col gap-1 p-3 rounded-xl" style={{ backgroundColor: f.color + '15', borderLeft: `3px solid ${f.color}` }}>
+                                <p className="text-xs font-semibold text-gray-600 leading-tight">{f.label}</p>
+                                <p className="text-sm font-bold text-gray-800">{formatFCFA(f.value)}</p>
+                            </div>
+                        ))}
+                    </div>
+                </motion.div>
+            )}
+
             {/* Multi-Series Line Chart */}
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                     <div>
                         <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Évolution Mensuelle ({selectedYear})</h3>
-                        <p className="text-xs text-gray-500 mt-1">Salaires + charges par catégorie</p>
+                        <p className="text-xs text-gray-500 mt-1">Salaires + charges par nature</p>
                     </div>
                 </div>
                 {allSeries.length > 0 && (
@@ -274,10 +307,7 @@ export default function Expenses() {
                                         }`}
                                     style={active ? { backgroundColor: color } : undefined}
                                 >
-                                    <span
-                                        className="w-2 h-2 rounded-full shrink-0"
-                                        style={{ backgroundColor: active ? '#fff' : color }}
-                                    />
+                                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: active ? '#fff' : color }} />
                                     {name}
                                 </button>
                             );
@@ -293,7 +323,7 @@ export default function Expenses() {
                                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B7280' }} tickFormatter={(v) => v === 0 ? '0' : (v / 1000).toFixed(0) + 'k'} dx={-10} />
                                 <RechartsTooltip
                                     cursor={{ stroke: '#f3f4f6', strokeWidth: 2 }}
-                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
+                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                                     formatter={(value, name) => [formatFCFA(Number(value) || 0), String(name)]}
                                 />
                                 {allSeries.map((name) => (
@@ -311,23 +341,21 @@ export default function Expenses() {
                             </LineChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                            Aucune donnée pour cette année
-                        </div>
+                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">Aucune donnée pour cette année</div>
                     )}
                 </div>
             </motion.div>
 
-            {/* Category Bar Chart */}
+            {/* Nature Bar Chart */}
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 className="text-sm font-bold text-gray-800 mb-6 uppercase tracking-wider">Par Catégorie</h3>
+                <h3 className="text-sm font-bold text-gray-800 mb-6 uppercase tracking-wider">Par Nature de Charge</h3>
                 <div className="h-64">
                     {(stats?.byCategory?.length || 0) > 0 ? (
                         <ResponsiveContainer width="100%" height="100%" debounce={50}>
                             <BarChart data={stats?.byCategory || []} layout="vertical" margin={{ top: 0, right: 0, left: 20, bottom: 0 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E5E7EB" />
                                 <XAxis type="number" hide />
-                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#4B5563', fontWeight: 500 }} width={100} />
+                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#4B5563', fontWeight: 500 }} width={130} />
                                 <RechartsTooltip
                                     cursor={{ fill: '#f9fafb' }}
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
@@ -341,9 +369,7 @@ export default function Expenses() {
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                            Aucune donnée pour cette année
-                        </div>
+                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">Aucune donnée pour cette année</div>
                     )}
                 </div>
             </motion.div>
@@ -355,9 +381,7 @@ export default function Expenses() {
                         <FileText size={20} className="text-gray-400" />
                         Historique des Charges
                         {selectedDeptName && (
-                            <span className="text-sm font-medium text-[#33cbcc] bg-[#33cbcc]/10 px-2 py-0.5 rounded-lg">
-                                {selectedDeptName}
-                            </span>
+                            <span className="text-sm font-medium text-[#33cbcc] bg-[#33cbcc]/10 px-2 py-0.5 rounded-lg">{selectedDeptName}</span>
                         )}
                     </h2>
                     <div className="relative w-full sm:w-64">
@@ -386,93 +410,99 @@ export default function Expenses() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 text-sm">
-                            {filteredExpenses.map((expense) => (
-                                <tr key={expense.id} className="hover:bg-gray-50 transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <p className="font-semibold text-gray-800">{expense.title}</p>
-                                        <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-[#33cbcc]" />
-                                            {expense.category}
-                                        </p>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {expense.department ? (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold">
-                                                <Building2 size={11} />
-                                                {expense.department.name}
-                                            </span>
-                                        ) : (
-                                            <span className="text-xs text-gray-400">—</span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {expense.project ? (
-                                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold">
-                                                <Briefcase size={11} />
-                                                {expense.project.name}
-                                            </span>
-                                        ) : (
-                                            <span className="text-xs text-gray-400">—</span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {expense.type === 'ONE_TIME' ? (
-                                            <span className="inline-flex items-center px-2 py-1 rounded-md bg-[#283852]/10 text-[#283852] text-xs font-semibold">
-                                                Ponctuelle
-                                            </span>
-                                        ) : (
-                                            <span className="inline-flex items-center px-2 py-1 rounded-md bg-[#283852]/10 text-[#283852] text-xs font-semibold">
-                                                {expense.frequency ? FREQUENCY_LABELS[expense.frequency] : 'Récurrente'}
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
-                                        {formatDate(expense.date)}
-                                    </td>
-                                    <td className="px-6 py-4 font-bold text-gray-800 text-right whitespace-nowrap">
-                                        {formatFCFA(expense.amount)}
-                                    </td>
-                                    <td className="px-2">
-                                        <div className="flex justify-center items-center gap-1 h-[72px] border-l border-transparent group-hover:border-gray-100 group-hover:bg-gray-100/50 transition-colors">
-                                            {confirmDeleteId === expense.id ? (
-                                                <>
-                                                    <button
-                                                        onClick={() => { deleteExpense.mutate(expense.id); setConfirmDeleteId(null); }}
-                                                        className="p-1.5 text-white bg-[#283852] hover:bg-[#283852]/80 rounded-lg transition-colors text-[10px] font-semibold px-2"
-                                                        title="Confirmer"
-                                                    >
-                                                        ✓
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setConfirmDeleteId(null)}
-                                                        className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-[10px] font-semibold px-2"
-                                                        title="Annuler"
-                                                    >
-                                                        ✕
-                                                    </button>
-                                                </>
+                            {filteredExpenses.map((expense) => {
+                                const famColor = FAMILY_COLORS[expense.chargeFamily] || '#33cbcc';
+                                return (
+                                    <tr key={expense.id} className="hover:bg-gray-50 transition-colors group">
+                                        <td className="px-6 py-4">
+                                            <p className="font-semibold text-gray-800">{expense.title}</p>
+                                            <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-0.5">
+                                                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: famColor }} />
+                                                {expense.chargeNature}
+                                            </p>
+                                            <p className="text-[10px] text-gray-400 mt-0.5">{familyLabel(expense.chargeFamily)}</p>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {expense.department ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold">
+                                                    <Building2 size={11} />
+                                                    {expense.department.name}
+                                                </span>
                                             ) : (
-                                                <>
-                                                    <button
-                                                        onClick={() => handleEdit(expense)}
-                                                        className="p-2 text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 rounded-lg transition-colors"
-                                                        title="Modifier"
-                                                    >
-                                                        <Pencil size={15} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setConfirmDeleteId(expense.id)}
-                                                        className="p-2 text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg transition-colors"
-                                                        title="Supprimer"
-                                                    >
-                                                        <Trash2 size={15} />
-                                                    </button>
-                                                </>
+                                                <span className="text-xs text-gray-400">—</span>
                                             )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {expense.project ? (
+                                                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold">
+                                                    <Briefcase size={11} />
+                                                    {expense.project.name}
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-gray-400">—</span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            {expense.source === 'PAYROLL' ? (
+                                                <span className="inline-flex items-center px-2 py-1 rounded-md bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold">
+                                                    Paie
+                                                </span>
+                                            ) : expense.type === 'ONE_TIME' ? (
+                                                <span className="inline-flex items-center px-2 py-1 rounded-md bg-[#283852]/10 text-[#283852] text-xs font-semibold">
+                                                    Ponctuelle
+                                                </span>
+                                            ) : (
+                                                <span className="inline-flex items-center px-2 py-1 rounded-md bg-[#283852]/10 text-[#283852] text-xs font-semibold">
+                                                    {expense.frequency ? FREQUENCY_LABELS[expense.frequency] : 'Récurrente'}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-gray-600 whitespace-nowrap">
+                                            {formatDate(expense.date)}
+                                        </td>
+                                        <td className="px-6 py-4 font-bold text-gray-800 text-right whitespace-nowrap">
+                                            {formatFCFA(expense.amount)}
+                                        </td>
+                                        <td className="px-2">
+                                            <div className="flex justify-center items-center gap-1 h-[72px] border-l border-transparent group-hover:border-gray-100 group-hover:bg-gray-100/50 transition-colors">
+                                                {confirmDeleteId === expense.id ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => { deleteExpense.mutate(expense.id); setConfirmDeleteId(null); }}
+                                                            className="p-1.5 text-white bg-[#283852] hover:bg-[#283852]/80 rounded-lg transition-colors text-[10px] font-semibold px-2"
+                                                        >
+                                                            ✓
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setConfirmDeleteId(null)}
+                                                            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors text-[10px] font-semibold px-2"
+                                                        >
+                                                            ✕
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleEdit(expense)}
+                                                            className="p-2 text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 rounded-lg transition-colors"
+                                                            title="Modifier"
+                                                        >
+                                                            <Pencil size={15} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setConfirmDeleteId(expense.id)}
+                                                            className="p-2 text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg transition-colors"
+                                                            title="Supprimer"
+                                                        >
+                                                            <Trash2 size={15} />
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             {filteredExpenses.length === 0 && (
                                 <tr>
                                     <td colSpan={7} className="px-6 py-16 text-center bg-gray-50/30">
@@ -518,9 +548,7 @@ export default function Expenses() {
                                     key={p}
                                     onClick={() => setPage(p)}
                                     className={`w-7 h-7 rounded-lg text-xs font-semibold transition-colors ${
-                                        p === page
-                                            ? 'bg-[#33cbcc] text-white'
-                                            : 'border border-gray-200 text-gray-600 hover:bg-white'
+                                        p === page ? 'bg-[#33cbcc] text-white' : 'border border-gray-200 text-gray-600 hover:bg-white'
                                     }`}
                                 >
                                     {p}

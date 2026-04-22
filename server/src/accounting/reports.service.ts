@@ -7,6 +7,8 @@ import { JournalEntry } from '../models/journal-entry.model';
 import { JournalEntryLine } from '../models/journal-entry-line.model';
 import { Account } from '../models/account.model';
 import { AccountCategory } from '../models/account-category.model';
+import { CacheService } from '../cache/cache.service';
+import { CACHE_KEYS, CACHE_TTL } from '../cache/cache.keys';
 
 @Injectable()
 export class ReportsService {
@@ -21,14 +23,20 @@ export class ReportsService {
         private categoryModel: typeof AccountCategory,
         @InjectConnection()
         private sequelize: Sequelize,
+        private cache: CacheService,
     ) {}
 
     /**
      * Grand Livre — All validated entries grouped by account with running balance
      */
-    async grandLivre(fiscalYearId: string, accountId?: string) {
+    async grandLivre(fiscalYearId: string, accountId?: string, departmentId?: string) {
+        const key = CACHE_KEYS.GRAND_LIVRE(fiscalYearId, accountId, departmentId);
+        const cached = await this.cache.get<any>(key);
+        if (cached) return cached;
+
         const where: any = {};
         if (accountId) where.accountId = accountId;
+        if (departmentId) where.departmentId = departmentId;
 
         const lines = await this.lineModel.findAll({
             where,
@@ -81,14 +89,24 @@ export class ReportsService {
             });
         }
 
-        return Array.from(accountMap.values()).sort((a, b) => a.account.code.localeCompare(b.account.code));
+        const result = Array.from(accountMap.values()).sort((a, b) => a.account.code.localeCompare(b.account.code));
+        await this.cache.set(key, result, CACHE_TTL.REPORTS);
+        return result;
     }
 
     /**
      * Balance des comptes — Summary of each account's total debit, credit, and balance
      */
-    async trialBalance(fiscalYearId: string) {
+    async trialBalance(fiscalYearId: string, departmentId?: string) {
+        const key = CACHE_KEYS.TRIAL_BALANCE(fiscalYearId, departmentId);
+        const cached = await this.cache.get<any>(key);
+        if (cached) return cached;
+
+        const lineWhere: any = {};
+        if (departmentId) lineWhere.departmentId = departmentId;
+
         const results = await this.lineModel.findAll({
+            where: Object.keys(lineWhere).length ? lineWhere : undefined,
             attributes: [
                 'accountId',
                 [this.sequelize.fn('SUM', this.sequelize.col('JournalEntryLine.debit')), 'totalDebit'],
@@ -131,7 +149,7 @@ export class ReportsService {
             };
         });
 
-        return {
+        const result = {
             accounts,
             totals: {
                 totalDebit: grandTotalDebit,
@@ -139,6 +157,8 @@ export class ReportsService {
                 isBalanced: Math.abs(grandTotalDebit - grandTotalCredit) < 0.01,
             },
         };
+        await this.cache.set(key, result, CACHE_TTL.REPORTS);
+        return result;
     }
 
     /**
@@ -146,6 +166,10 @@ export class ReportsService {
      * Assets (classes 2,3,4-debit,5) vs Liabilities (classes 1,4-credit)
      */
     async balanceSheet(fiscalYearId: string) {
+        const key = CACHE_KEYS.BALANCE_SHEET(fiscalYearId);
+        const cached = await this.cache.get<any>(key);
+        if (cached) return cached;
+
         const trial = await this.trialBalance(fiscalYearId);
 
         const assets: any[] = [];
@@ -194,21 +218,27 @@ export class ReportsService {
             totalLiabilities += incomeStatement.netIncome;
         }
 
-        return {
+        const result = {
             assets,
             liabilities,
             totalAssets: Math.round(totalAssets * 100) / 100,
             totalLiabilities: Math.round(totalLiabilities * 100) / 100,
             isBalanced: Math.abs(totalAssets - totalLiabilities) < 0.01,
         };
+        await this.cache.set(key, result, CACHE_TTL.REPORTS);
+        return result;
     }
 
     /**
      * Compte de Résultat (Income Statement) — OHADA format
      * Revenue (class 7) minus Expenses (class 6) = Net Income
      */
-    async incomeStatement(fiscalYearId: string) {
-        const trial = await this.trialBalance(fiscalYearId);
+    async incomeStatement(fiscalYearId: string, departmentId?: string) {
+        const key = CACHE_KEYS.INCOME_STATEMENT(fiscalYearId, departmentId);
+        const cached = await this.cache.get<any>(key);
+        if (cached) return cached;
+
+        const trial = await this.trialBalance(fiscalYearId, departmentId);
 
         const revenues: any[] = [];
         const expenses: any[] = [];
@@ -233,55 +263,46 @@ export class ReportsService {
             }
         }
 
-        return {
+        const result = {
             revenues,
             expenses,
             totalRevenue: Math.round(totalRevenue * 100) / 100,
             totalExpenses: Math.round(totalExpenses * 100) / 100,
             netIncome: Math.round((totalRevenue - totalExpenses) * 100) / 100,
         };
+        await this.cache.set(key, result, CACHE_TTL.REPORTS);
+        return result;
     }
 
     /**
      * Dashboard KPIs for the accountant
      */
-    async dashboardKpis(fiscalYearId: string) {
-        const incomeStmt = await this.incomeStatement(fiscalYearId);
+    async dashboardKpis(fiscalYearId: string, departmentId?: string) {
+        const key = CACHE_KEYS.DASHBOARD_KPIS(fiscalYearId, departmentId);
+        const cached = await this.cache.get<any>(key);
+        if (cached) return cached;
+
+        // When filtering by department, income statement uses department-scoped trial balance
+        const incomeStmt = await this.incomeStatement(fiscalYearId, departmentId);
+        // Global trial balance for balance sheet KPIs (cash, receivables, payables are company-wide)
         const trial = await this.trialBalance(fiscalYearId);
 
-        // Cash balance (class 5 accounts)
         let cashBalance = 0;
-        for (const item of trial.accounts) {
-            if (item.account.code.startsWith('5')) {
-                cashBalance += (item.debitBalance || 0) - (item.creditBalance || 0);
-            }
-        }
-
-        // Receivables (411xxx accounts)
         let receivables = 0;
-        for (const item of trial.accounts) {
-            if (item.account.code.startsWith('411')) {
-                receivables += item.debitBalance || 0;
-            }
-        }
-
-        // Payables (401xxx accounts)
         let payables = 0;
-        for (const item of trial.accounts) {
-            if (item.account.code.startsWith('401')) {
-                payables += item.creditBalance || 0;
-            }
-        }
-
-        // TVA due
         let tvaCollected = 0;
         let tvaDeductible = 0;
+
         for (const item of trial.accounts) {
-            if (item.account.code === '443100') tvaCollected = item.creditBalance || 0;
-            if (item.account.code === '443200') tvaDeductible = item.debitBalance || 0;
+            const code = item.account.code;
+            if (code.startsWith('5')) cashBalance += (item.debitBalance || 0) - (item.creditBalance || 0);
+            if (code.startsWith('411')) receivables += item.debitBalance || 0;
+            if (code.startsWith('401')) payables += item.creditBalance || 0;
+            if (code === '443100') tvaCollected = item.creditBalance || 0;
+            if (code === '443200') tvaDeductible = item.debitBalance || 0;
         }
 
-        return {
+        const result = {
             totalRevenue: incomeStmt.totalRevenue,
             totalExpenses: incomeStmt.totalExpenses,
             netIncome: incomeStmt.netIncome,
@@ -290,6 +311,8 @@ export class ReportsService {
             payables: Math.round(payables * 100) / 100,
             tvaDue: Math.round((tvaCollected - tvaDeductible) * 100) / 100,
         };
+        await this.cache.set(key, result, CACHE_TTL.REPORTS_FAST);
+        return result;
     }
 
     /**
@@ -298,6 +321,10 @@ export class ReportsService {
      * Debits = entrées (cash in), Credits = sorties (cash out)
      */
     async cashFlow(fiscalYearId: string) {
+        const key = CACHE_KEYS.CASH_FLOW(fiscalYearId);
+        const cached = await this.cache.get<any>(key);
+        if (cached) return cached;
+
         // Monthly aggregates for chart
         const [monthRows] = await this.sequelize.query(`
             SELECT
@@ -361,13 +388,15 @@ export class ReportsService {
         const totalEntrees = months.reduce((s, m) => s + m.entrees, 0);
         const totalSorties = months.reduce((s, m) => s + m.sorties, 0);
 
-        return {
+        const result = {
             months,
             lines: lineRows,
             totalEntrees,
             totalSorties,
             netCashFlow: totalEntrees - totalSorties,
         };
+        await this.cache.set(key, result, CACHE_TTL.REPORTS);
+        return result;
     }
 
     /**
@@ -376,6 +405,10 @@ export class ReportsService {
      * and expenses (class 6) separated.
      */
     async monthlySummary(fiscalYearId: string) {
+        const key = CACHE_KEYS.MONTHLY_SUMMARY(fiscalYearId);
+        const cached = await this.cache.get<any>(key);
+        if (cached) return cached;
+
         const [rows] = await this.sequelize.query(`
             SELECT
                 EXTRACT(MONTH FROM je."date")::int AS month,
@@ -407,6 +440,7 @@ export class ReportsService {
             }
         }
 
+        await this.cache.set(key, months, CACHE_TTL.REPORTS);
         return months;
     }
 }

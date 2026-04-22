@@ -15,9 +15,16 @@ export interface InvoiceItem {
     metadata?: Record<string, string> | null;
 }
 
+export type InvoiceType = 'PROFORMA' | 'INVOICE' | 'ACOMPTE';
+
 export interface Invoice {
     id: string;
-    invoiceNumber: string;
+    invoiceNumber: string | null;
+    proformaNumber: string | null;
+    acompteNumber: string | null;
+    acompteAmount: number | null;
+    parentInvoiceId: string | null;
+    type: InvoiceType;
     status: InvoiceStatus;
     projectId: string;
     departmentId: string;
@@ -39,10 +46,12 @@ export interface Invoice {
     department?: { id: string; name: string };
     client?: { id: string; name: string };
     createdBy?: { id: string; email: string };
+    parentInvoice?: { id: string; invoiceNumber: string | null; total: number } | null;
     items: InvoiceItem[];
 }
 
 export interface CreateInvoiceDto {
+    type?: InvoiceType;
     projectId: string;
     departmentId: string;
     clientId: string;

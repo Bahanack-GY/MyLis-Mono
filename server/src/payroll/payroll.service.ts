@@ -217,14 +217,16 @@ export class PayrollService {
 
                 const title = `Salaire - ${name}`;
                 const existing = await this.expenseModel.findOne({
-                    where: { title, category: 'Salaire', date } as any,
+                    where: { title, chargeNature: 'Salaires bruts', date } as any,
                     transaction: t,
                 });
                 if (!existing) {
                     await this.expenseModel.create({
                         title,
                         amount: payslip.grossSalary,
-                        category: 'Salaire',
+                        chargeFamily: 'CHARGES_PERSONNEL',
+                        chargeNature: 'Salaires bruts',
+                        source: 'PAYROLL',
                         type: 'ONE_TIME',
                         date,
                     } as any, { transaction: t });
@@ -280,14 +282,16 @@ export class PayrollService {
         return this.sequelize.transaction(async (t) => {
             const title = `Salaire - ${name}`;
             const existing = await this.expenseModel.findOne({
-                where: { title, category: 'Salaire', date } as any,
+                where: { title, chargeNature: 'Salaires bruts', date } as any,
                 transaction: t,
             });
             if (!existing) {
                 await this.expenseModel.create({
                     title,
                     amount: payslip.grossSalary,
-                    category: 'Salaire',
+                    chargeFamily: 'CHARGES_PERSONNEL',
+                    chargeNature: 'Salaires bruts',
+                    source: 'PAYROLL',
                     type: 'ONE_TIME',
                     date,
                 } as any, { transaction: t });
@@ -509,7 +513,9 @@ export class PayrollService {
         const expense = await this.expenseModel.create({
             title: `Avance sur salaire - ${name}${note ? ` (${note})` : ''}`,
             amount,
-            category: 'Avance sur salaire',
+            chargeFamily: 'CHARGES_PERSONNEL',
+            chargeNature: 'Avances sur salaire',
+            source: 'PAYROLL',
             type: 'ONE_TIME',
             date,
         } as any);

@@ -14,13 +14,17 @@ export class ReportsController {
     grandLivre(
         @Param('fiscalYearId') fiscalYearId: string,
         @Query('accountId') accountId?: string,
+        @Query('departmentId') departmentId?: string,
     ) {
-        return this.reportsService.grandLivre(fiscalYearId, accountId);
+        return this.reportsService.grandLivre(fiscalYearId, accountId, departmentId);
     }
 
     @Get('trial-balance/:fiscalYearId')
-    trialBalance(@Param('fiscalYearId') fiscalYearId: string) {
-        return this.reportsService.trialBalance(fiscalYearId);
+    trialBalance(
+        @Param('fiscalYearId') fiscalYearId: string,
+        @Query('departmentId') departmentId?: string,
+    ) {
+        return this.reportsService.trialBalance(fiscalYearId, departmentId);
     }
 
     @Get('balance-sheet/:fiscalYearId')
@@ -34,8 +38,11 @@ export class ReportsController {
     }
 
     @Get('dashboard-kpis/:fiscalYearId')
-    dashboardKpis(@Param('fiscalYearId') fiscalYearId: string) {
-        return this.reportsService.dashboardKpis(fiscalYearId);
+    dashboardKpis(
+        @Param('fiscalYearId') fiscalYearId: string,
+        @Query('departmentId') departmentId?: string,
+    ) {
+        return this.reportsService.dashboardKpis(fiscalYearId, departmentId);
     }
 
     @Get('monthly-summary/:fiscalYearId')

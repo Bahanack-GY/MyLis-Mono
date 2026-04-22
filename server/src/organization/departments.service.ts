@@ -8,6 +8,8 @@ import { User } from '../models/user.model';
 import { Position } from '../models/position.model';
 import { Project } from '../models/project.model';
 import { Op } from 'sequelize';
+import { CacheService } from '../cache/cache.service';
+import { CACHE_KEYS, CACHE_TTL, CACHE_PATTERNS } from '../cache/cache.keys';
 
 @Injectable()
 export class DepartmentsService {
@@ -20,6 +22,7 @@ export class DepartmentsService {
         private employeeModel: typeof Employee,
         @InjectModel(User)
         private userModel: typeof User,
+        private cache: CacheService,
     ) { }
 
     private async setHeadRole(employeeId: string, role: 'HEAD_OF_DEPARTMENT' | 'EMPLOYEE') {
@@ -42,6 +45,7 @@ export class DepartmentsService {
         if (createDepartmentDto.headId) {
             await this.setHeadRole(createDepartmentDto.headId, 'HEAD_OF_DEPARTMENT');
         }
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.DEPARTMENTS);
         return department;
     }
 
@@ -49,7 +53,6 @@ export class DepartmentsService {
         const department = await this.departmentModel.findByPk(id);
         if (!department) return null;
 
-        // If headId is changing, revert old head and set new head
         if ('headId' in updateDepartmentDto && updateDepartmentDto.headId !== undefined && updateDepartmentDto.headId !== department.headId) {
             if (department.headId) {
                 await this.setHeadRole(department.headId, 'EMPLOYEE');
@@ -60,11 +63,15 @@ export class DepartmentsService {
         }
 
         await this.departmentModel.update(updateDepartmentDto, { where: { id } });
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.DEPARTMENTS);
         return this.findOne(id);
     }
 
-    findAll() {
-        return this.departmentModel.findAll({
+    async findAll() {
+        const cached = await this.cache.get<any[]>(CACHE_KEYS.DEPARTMENTS);
+        if (cached) return cached;
+
+        const rows = await this.departmentModel.findAll({
             include: [
                 DepartmentGoal,
                 { model: Employee, as: 'employees', include: [Position] },
@@ -72,6 +79,9 @@ export class DepartmentsService {
                 Project,
             ],
         });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(CACHE_KEYS.DEPARTMENTS, result, CACHE_TTL.REFERENCE);
+        return result;
     }
 
     async findAllPaginated(params: {
@@ -98,8 +108,12 @@ export class DepartmentsService {
         });
     }
 
-    findOne(id: string) {
-        return this.departmentModel.findByPk(id, {
+    async findOne(id: string) {
+        const key = CACHE_KEYS.DEPARTMENT(id);
+        const cached = await this.cache.get<any>(key);
+        if (cached) return cached;
+
+        const row = await this.departmentModel.findByPk(id, {
             include: [
                 DepartmentGoal,
                 { model: Employee, as: 'employees', include: [Position] },
@@ -107,5 +121,9 @@ export class DepartmentsService {
                 Project,
             ],
         });
+        if (!row) return null;
+        const plain = row.get({ plain: true });
+        await this.cache.set(key, plain, CACHE_TTL.REFERENCE);
+        return plain;
     }
 }

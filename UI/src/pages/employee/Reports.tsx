@@ -252,6 +252,7 @@ export default function EmployeeReports() {
     const [period, setPeriod] = useState<ReportPeriod>('WEEK');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
+    const [language, setLanguage] = useState<'fr' | 'en'>(i18n.language.startsWith('fr') ? 'fr' : 'en');
 
     /* ── Filter state ── */
     const [search, setSearch] = useState('');
@@ -302,7 +303,7 @@ export default function EmployeeReports() {
         if (!isCustomValid) return;
 
         generateReport.mutate(
-            { type: 'PERSONAL', period, ...dates, language: i18n.language },
+            { type: 'PERSONAL', period, ...dates, language },
             { onSuccess: () => setShowForm(false) },
         );
     };
@@ -436,6 +437,25 @@ export default function EmployeeReports() {
                             </div>
                         </div>
                     )}
+
+                    <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1.5 block">Langue du rapport</label>
+                        <div className="flex gap-2">
+                            {(['fr', 'en'] as const).map(lang => (
+                                <button
+                                    key={lang}
+                                    onClick={() => setLanguage(lang)}
+                                    className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                                        language === lang
+                                            ? 'bg-[#283852] text-white border-[#283852]'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#283852]'
+                                    }`}
+                                >
+                                    {lang === 'fr' ? 'Français' : 'English'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
                     <div className="flex justify-end gap-2">
                         <button

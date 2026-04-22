@@ -56,9 +56,19 @@ export class InvoicesController {
         return this.invoicesService.reject(id);
     }
 
+    @Patch(':id/validate')
+    validateProforma(@Param('id') id: string) {
+        return this.invoicesService.validateProforma(id);
+    }
+
+    @Post(':id/acompte')
+    createAcompte(@Param('id') id: string, @Body() dto: { amount: number }) {
+        return this.invoicesService.createAcompte(id, dto.amount);
+    }
+
     @Patch(':id')
-    update(@Param('id') id: string, @Body() dto: any) {
-        return this.invoicesService.update(id, dto);
+    update(@Param('id') id: string, @Body() dto: any, @Request() req) {
+        return this.invoicesService.update(id, dto, req.user?.userId);
     }
 
     @Delete(':id')

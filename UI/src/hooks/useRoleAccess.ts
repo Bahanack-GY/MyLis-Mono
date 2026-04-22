@@ -2,7 +2,7 @@ import { useAuth } from '../contexts/AuthContext';
 import type { Role } from '../api/auth/types';
 
 // Roles that see admin-level content via RolePageSwitch
-export const ADMIN_ROLES: Role[] = ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'];
+export const ADMIN_ROLES: Role[] = ['CEO', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'];
 
 // Roles that have BOTH a management view AND an employee view and can toggle between them.
 // MANAGER always stays in admin view (no toggle needed).

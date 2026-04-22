@@ -1,7 +1,12 @@
 import api from '../config';
-import type { Expense, CreateExpenseDto, ExpenseStats, PaginatedExpenses } from './types';
+import type { Expense, CreateExpenseDto, ExpenseStats, PaginatedExpenses, JustificationFile } from './types';
 
 export const expensesApi = {
+    uploadJustification: (formData: FormData) =>
+        api.post<JustificationFile>('/expenses/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        }).then(res => res.data),
+
     getAll: (page = 1, limit = 10, departmentId?: string) =>
         api.get<PaginatedExpenses>('/expenses', { params: { page, limit, ...(departmentId ? { departmentId } : {}) } }).then(res => res.data),
 

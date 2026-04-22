@@ -8,7 +8,9 @@ import { JournalEntryLine } from '../models/journal-entry-line.model';
 import { Journal } from '../models/journal.model';
 import { Account } from '../models/account.model';
 import { FiscalYear } from '../models/fiscal-year.model';
-import { EXPENSE_CATEGORY_ACCOUNT_MAP, DEFAULT_EXPENSE_ACCOUNT } from './syscohada-seed';
+import { CHARGE_NATURE_ACCOUNT_MAP, DEFAULT_EXPENSE_ACCOUNT } from './syscohada-seed';
+import { CacheService } from '../cache/cache.service';
+import { CACHE_PATTERNS } from '../cache/cache.keys';
 
 @Injectable()
 export class JournalEngineService {
@@ -27,6 +29,7 @@ export class JournalEngineService {
         private fiscalYearModel: typeof FiscalYear,
         @InjectConnection()
         private sequelize: Sequelize,
+        private cache: CacheService,
     ) {}
 
     // ===== HELPERS =====
@@ -78,7 +81,7 @@ export class JournalEngineService {
         reference: string;
         sourceType: string;
         sourceId: string;
-        lines: { accountCode: string; debit: number; credit: number; label?: string }[];
+        lines: { accountCode: string; debit: number; credit: number; label?: string; departmentId?: string | null }[];
         userId: string;
     }): Promise<JournalEntry | null> {
         const journal = await this.getJournalByCode(params.journalCode);
@@ -91,7 +94,7 @@ export class JournalEngineService {
         }
 
         // Resolve account codes to IDs
-        const resolvedLines: { accountId: string; debit: number; credit: number; label?: string }[] = [];
+        const resolvedLines: { accountId: string; debit: number; credit: number; label?: string; departmentId?: string | null }[] = [];
         for (const line of params.lines) {
             const account = await this.getAccountByCode(line.accountCode);
             if (!account) {
@@ -103,6 +106,7 @@ export class JournalEngineService {
                 debit: Math.round((line.debit || 0) * 100) / 100,
                 credit: Math.round((line.credit || 0) * 100) / 100,
                 label: line.label,
+                departmentId: line.departmentId ?? null,
             });
         }
 
@@ -111,8 +115,8 @@ export class JournalEngineService {
 
         const entryNumber = await this.generateEntryNumber(params.journalCode);
 
-        return this.sequelize.transaction(async (t) => {
-            const entry = await this.entryModel.create({
+        const entry = await this.sequelize.transaction(async (t) => {
+            const created = await this.entryModel.create({
                 entryNumber,
                 journalId: journal.id,
                 fiscalYearId: fiscalYear.id,
@@ -130,14 +134,31 @@ export class JournalEngineService {
 
             await this.lineModel.bulkCreate(
                 resolvedLines.map(l => ({
-                    journalEntryId: entry.id,
+                    journalEntryId: created.id,
                     ...l,
                 })),
                 { transaction: t },
             );
 
-            return entry;
+            return created;
         });
+
+        // Invalidate AFTER the transaction commits — fire-and-forget, never block the caller.
+        this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTING_REPORTS).catch(() => {});
+        return entry;
+    }
+
+    // ===== HELPERS (continued) =====
+
+    /** Delete all journal entries (and their lines) tied to a given source. */
+    private async deleteEntriesForSource(sourceType: string, sourceId: string): Promise<void> {
+        const entries = await this.entryModel.findAll({ where: { sourceType, sourceId } });
+        if (entries.length === 0) return;
+        for (const entry of entries) {
+            await this.lineModel.destroy({ where: { journalEntryId: entry.id } });
+            await entry.destroy();
+        }
+        this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTING_REPORTS).catch(() => {});
     }
 
     // ===== EVENT HANDLERS =====
@@ -151,31 +172,16 @@ export class JournalEngineService {
             const date = invoice.sentAt
                 ? new Date(invoice.sentAt).toISOString().split('T')[0]
                 : new Date().toISOString().split('T')[0];
+            const deptId = invoice.departmentId || null;
 
-            const lines: { accountCode: string; debit: number; credit: number; label?: string }[] = [
-                {
-                    accountCode: '411000',
-                    debit: Number(invoice.total),
-                    credit: 0,
-                    label: `Client - ${invoice.invoiceNumber}`,
-                },
-                {
-                    accountCode: '706000',
-                    debit: 0,
-                    credit: Number(invoice.subtotal),
-                    label: `Vente - ${invoice.invoiceNumber}`,
-                },
+            const lines: { accountCode: string; debit: number; credit: number; label?: string; departmentId?: string | null }[] = [
+                { accountCode: '411000', debit: Number(invoice.total), credit: 0, label: `Client - ${invoice.invoiceNumber}`, departmentId: deptId },
+                { accountCode: '706000', debit: 0, credit: Number(invoice.subtotal), label: `Vente - ${invoice.invoiceNumber}`, departmentId: deptId },
             ];
 
-            // Add TVA line if there's tax
             const taxAmount = Number(invoice.taxAmount) || 0;
             if (taxAmount > 0) {
-                lines.push({
-                    accountCode: '443100',
-                    debit: 0,
-                    credit: taxAmount,
-                    label: `TVA collectée - ${invoice.invoiceNumber}`,
-                });
+                lines.push({ accountCode: '443100', debit: 0, credit: taxAmount, label: `TVA collectée - ${invoice.invoiceNumber}`, departmentId: deptId });
             }
 
             await this.createAutoEntry({
@@ -194,14 +200,19 @@ export class JournalEngineService {
     }
 
     /**
-     * Called when an invoice is paid (SENT → PAID)
+     * Called when an invoice is paid (SENT → PAID).
+     * amount = remaining after any acomptes already collected (defaults to invoice.total).
      * Creates: Debit 521000 Banque / Credit 411000 Clients
      */
-    async onInvoicePaid(invoice: any, userId: string): Promise<void> {
+    async onInvoicePaid(invoice: any, userId: string, amount?: number): Promise<void> {
         try {
+            const paymentAmount = amount !== undefined ? amount : Number(invoice.total);
+            if (paymentAmount <= 0) return;
+
             const date = invoice.paidAt
                 ? new Date(invoice.paidAt).toISOString().split('T')[0]
                 : new Date().toISOString().split('T')[0];
+            const deptId = invoice.departmentId || null;
 
             await this.createAutoEntry({
                 journalCode: 'BQ',
@@ -211,18 +222,8 @@ export class JournalEngineService {
                 sourceType: 'INVOICE',
                 sourceId: invoice.id,
                 lines: [
-                    {
-                        accountCode: '521000',
-                        debit: Number(invoice.total),
-                        credit: 0,
-                        label: `Encaissement - ${invoice.invoiceNumber}`,
-                    },
-                    {
-                        accountCode: '411000',
-                        debit: 0,
-                        credit: Number(invoice.total),
-                        label: `Solde client - ${invoice.invoiceNumber}`,
-                    },
+                    { accountCode: '521000', debit: paymentAmount, credit: 0, label: `Encaissement - ${invoice.invoiceNumber}`, departmentId: deptId },
+                    { accountCode: '411000', debit: 0, credit: paymentAmount, label: `Solde client - ${invoice.invoiceNumber}`, departmentId: deptId },
                 ],
                 userId,
             });
@@ -232,14 +233,112 @@ export class JournalEngineService {
     }
 
     /**
+     * Called when a SENT invoice is rejected — reverses the onInvoiceSent entry.
+     * Creates: Credit 411000 Clients / Debit 706000 Services + Debit 443100 TVA collectée
+     */
+    async onInvoiceRejected(invoice: any, userId: string): Promise<void> {
+        try {
+            const date = new Date().toISOString().split('T')[0];
+            const deptId = invoice.departmentId || null;
+
+            const lines: { accountCode: string; debit: number; credit: number; label?: string; departmentId?: string | null }[] = [
+                { accountCode: '411000', debit: 0, credit: Number(invoice.total), label: `Annulation client - ${invoice.invoiceNumber}`, departmentId: deptId },
+                { accountCode: '706000', debit: Number(invoice.subtotal), credit: 0, label: `Annulation vente - ${invoice.invoiceNumber}`, departmentId: deptId },
+            ];
+
+            const taxAmount = Number(invoice.taxAmount) || 0;
+            if (taxAmount > 0) {
+                lines.push({ accountCode: '443100', debit: taxAmount, credit: 0, label: `Annulation TVA - ${invoice.invoiceNumber}`, departmentId: deptId });
+            }
+
+            await this.createAutoEntry({
+                journalCode: 'VTE',
+                date,
+                description: `Annulation facture ${invoice.invoiceNumber}`,
+                reference: invoice.invoiceNumber,
+                sourceType: 'INVOICE',
+                sourceId: invoice.id,
+                lines,
+                userId,
+            });
+        } catch (error) {
+            this.logger.error(`Failed to create reversal entry for rejected invoice: ${error.message}`);
+        }
+    }
+
+    /**
+     * Called when an acompte is created (partial client payment).
+     * Creates: Debit 521000 Banque / Credit 411000 Clients
+     */
+    async onAcompteCreated(acompte: any, parentInvoice: any, userId: string): Promise<void> {
+        try {
+            const date = new Date(acompte.issueDate).toISOString().split('T')[0];
+            const deptId = acompte.departmentId || parentInvoice.departmentId || null;
+
+            await this.createAutoEntry({
+                journalCode: 'BQ',
+                date,
+                description: `Acompte sur facture ${parentInvoice.invoiceNumber}`,
+                reference: acompte.acompteNumber,
+                sourceType: 'INVOICE',
+                sourceId: acompte.id,
+                lines: [
+                    { accountCode: '521000', debit: Number(acompte.total), credit: 0, label: `Acompte - ${acompte.acompteNumber}`, departmentId: deptId },
+                    { accountCode: '411000', debit: 0, credit: Number(acompte.total), label: `Règlement partiel - ${parentInvoice.invoiceNumber}`, departmentId: deptId },
+                ],
+                userId,
+            });
+        } catch (error) {
+            this.logger.error(`Failed to create journal entry for acompte: ${error.message}`);
+        }
+    }
+
+    /**
+     * Called when an expense is deleted — removes its journal entry.
+     */
+    async onExpenseDeleted(expenseId: string): Promise<void> {
+        try {
+            await this.deleteEntriesForSource('EXPENSE', expenseId);
+        } catch (error) {
+            this.logger.error(`Failed to delete journal entry for expense: ${error.message}`);
+        }
+    }
+
+    /**
+     * Called when an expense is updated — replaces the existing journal entry.
+     */
+    async onExpenseUpdated(expense: any, userId: string): Promise<void> {
+        try {
+            if (expense.source === 'PAYROLL') return; // payroll entries managed separately
+            await this.deleteEntriesForSource('EXPENSE', expense.id);
+            await this.onExpenseCreated(expense, userId);
+        } catch (error) {
+            this.logger.error(`Failed to update journal entry for expense: ${error.message}`);
+        }
+    }
+
+    /**
+     * Called when an acompte is updated — replaces the existing journal entry.
+     */
+    async onAcompteUpdated(acompte: any, parentInvoice: any, userId: string): Promise<void> {
+        try {
+            await this.deleteEntriesForSource('INVOICE', acompte.id);
+            await this.onAcompteCreated(acompte, parentInvoice, userId);
+        } catch (error) {
+            this.logger.error(`Failed to update journal entry for acompte: ${error.message}`);
+        }
+    }
+
+    /**
      * Called when an expense is created
      * Creates: Debit 6XXXXX Charge / Credit 521000 Banque
      */
     async onExpenseCreated(expense: any, userId: string): Promise<void> {
         try {
-            const category = expense.category || '';
-            const accountCode = EXPENSE_CATEGORY_ACCOUNT_MAP[category] || DEFAULT_EXPENSE_ACCOUNT;
+            const chargeNature = expense.chargeNature || '';
+            const accountCode = CHARGE_NATURE_ACCOUNT_MAP[chargeNature] || DEFAULT_EXPENSE_ACCOUNT;
             const date = expense.date || new Date().toISOString().split('T')[0];
+            const deptId = expense.departmentId || null;
 
             await this.createAutoEntry({
                 journalCode: 'BQ',
@@ -249,18 +348,8 @@ export class JournalEngineService {
                 sourceType: 'EXPENSE',
                 sourceId: expense.id,
                 lines: [
-                    {
-                        accountCode,
-                        debit: Number(expense.amount),
-                        credit: 0,
-                        label: expense.title,
-                    },
-                    {
-                        accountCode: '521000',
-                        debit: 0,
-                        credit: Number(expense.amount),
-                        label: `Paiement - ${expense.title}`,
-                    },
+                    { accountCode, debit: Number(expense.amount), credit: 0, label: expense.title, departmentId: deptId },
+                    { accountCode: '521000', debit: 0, credit: Number(expense.amount), label: `Paiement - ${expense.title}`, departmentId: deptId },
                 ],
                 userId,
             });
@@ -462,7 +551,7 @@ export class JournalEngineService {
 
             if (params.taxAmount > 0) {
                 lines.push({
-                    accountCode: '445200',
+                    accountCode: '443200',
                     debit: params.taxAmount,
                     credit: 0,
                     label: `TVA déductible - ${params.invoiceNumber}`,

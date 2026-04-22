@@ -24,10 +24,47 @@ export class Invoice extends Model {
 
     @Column({
         type: DataType.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true,
     })
-    declare invoiceNumber: string;
+    declare invoiceNumber: string | null;
+
+    @Column({
+        type: DataType.STRING(20),
+        allowNull: true,
+        unique: true,
+    })
+    declare proformaNumber: string | null;
+
+    @Column({
+        type: DataType.STRING(20),
+        allowNull: false,
+        defaultValue: 'INVOICE',
+    })
+    declare type: 'PROFORMA' | 'INVOICE' | 'ACOMPTE';
+
+    @Column({
+        type: DataType.STRING(20),
+        allowNull: true,
+        unique: true,
+    })
+    declare acompteNumber: string | null;
+
+    @Column({
+        type: DataType.DECIMAL(15, 2),
+        allowNull: true,
+    })
+    declare acompteAmount: number | null;
+
+    @ForeignKey(() => Invoice)
+    @Column({
+        type: DataType.UUID,
+        allowNull: true,
+    })
+    declare parentInvoiceId: string | null;
+
+    @BelongsTo(() => Invoice, 'parentInvoiceId')
+    declare parentInvoice: Invoice;
 
     @Column({
         type: DataType.ENUM('CREATED', 'SENT', 'PAID', 'REJECTED'),

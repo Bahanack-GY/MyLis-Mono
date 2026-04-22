@@ -111,16 +111,16 @@ export const useReopenFiscalYear = () => {
 };
 
 // Reports
-export const useGrandLivre = (fiscalYearId: string, accountId?: string) =>
-    useQuery({ queryKey: ['grand-livre', fiscalYearId, accountId], queryFn: () => accountingApi.getGrandLivre(fiscalYearId, accountId), enabled: !!fiscalYearId });
-export const useTrialBalance = (fiscalYearId: string) =>
-    useQuery({ queryKey: ['trial-balance', fiscalYearId], queryFn: () => accountingApi.getTrialBalance(fiscalYearId), enabled: !!fiscalYearId });
+export const useGrandLivre = (fiscalYearId: string, accountId?: string, departmentId?: string) =>
+    useQuery({ queryKey: ['grand-livre', fiscalYearId, accountId, departmentId], queryFn: () => accountingApi.getGrandLivre(fiscalYearId, accountId, departmentId), enabled: !!fiscalYearId });
+export const useTrialBalance = (fiscalYearId: string, departmentId?: string) =>
+    useQuery({ queryKey: ['trial-balance', fiscalYearId, departmentId], queryFn: () => accountingApi.getTrialBalance(fiscalYearId, departmentId), enabled: !!fiscalYearId });
 export const useBalanceSheet = (fiscalYearId: string) =>
     useQuery({ queryKey: ['balance-sheet', fiscalYearId], queryFn: () => accountingApi.getBalanceSheet(fiscalYearId), enabled: !!fiscalYearId });
 export const useIncomeStatement = (fiscalYearId: string) =>
     useQuery({ queryKey: ['income-statement', fiscalYearId], queryFn: () => accountingApi.getIncomeStatement(fiscalYearId), enabled: !!fiscalYearId });
-export const useDashboardKpis = (fiscalYearId: string) =>
-    useQuery({ queryKey: ['dashboard-kpis', fiscalYearId], queryFn: () => accountingApi.getDashboardKpis(fiscalYearId), enabled: !!fiscalYearId });
+export const useDashboardKpis = (fiscalYearId: string, departmentId?: string) =>
+    useQuery({ queryKey: ['dashboard-kpis', fiscalYearId, departmentId], queryFn: () => accountingApi.getDashboardKpis(fiscalYearId, departmentId), enabled: !!fiscalYearId });
 export const useMonthlySummary = (fiscalYearId: string) =>
     useQuery({ queryKey: ['monthly-summary', fiscalYearId], queryFn: () => accountingApi.getMonthlySummary(fiscalYearId), enabled: !!fiscalYearId });
 

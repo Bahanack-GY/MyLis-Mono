@@ -16,6 +16,8 @@ import { LeadActivity } from '../models/lead-activity.model';
 import { NotificationsService } from '../notifications/notifications.service';
 import { GamificationService, type GamificationResult } from '../gamification/gamification.service';
 import { SseService } from '../sse/sse.service';
+import { CacheService } from '../cache/cache.service';
+import { CACHE_KEYS, CACHE_TTL, CACHE_PATTERNS } from '../cache/cache.keys';
 import { Op } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
@@ -50,6 +52,7 @@ export class TasksService {
         private notificationsService: NotificationsService,
         private gamificationService: GamificationService,
         private sseService: SseService,
+        private cache: CacheService,
     ) { }
 
     /* ─── Sync Lead Actions from Tasks ──────────────────────── */
@@ -137,6 +140,7 @@ export class TasksService {
         }
 
         this.sseService.emit('tasks', 'task_created');
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
         return task;
     }
 
@@ -258,10 +262,12 @@ export class TasksService {
     }
 
     async update(id: string, updateTaskDto: any): Promise<[number, Task[]]> {
-        return this.taskModel.update(updateTaskDto, {
+        const result = await this.taskModel.update(updateTaskDto, {
             where: { id },
             returning: true,
         });
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
+        return result;
     }
 
     async remove(id: string): Promise<void> {
@@ -275,6 +281,7 @@ export class TasksService {
             if (removedLeadId) {
                 await this.syncLeadActions(removedLeadId);
             }
+            await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
         }
     }
 
@@ -285,13 +292,17 @@ export class TasksService {
         if (!task) throw new NotFoundException('Task not found');
 
         const selfAssigned = task.getDataValue('selfAssigned');
-        const isManagerOrHod = role === 'MANAGER' || role === 'HEAD_OF_DEPARTMENT';
+        const isManager = role === 'MANAGER';
+        const isHod = role === 'HEAD_OF_DEPARTMENT';
+        const isManagerOrHod = isManager || isHod;
         const isEmployee = role === 'EMPLOYEE';
 
-        if (selfAssigned && isManagerOrHod) throw new ForbiddenException('Cannot edit a self-assigned task');
+        // Managers cannot touch self-assigned tasks; employees cannot touch management-assigned tasks
+        if (selfAssigned && isManager) throw new ForbiddenException('Cannot edit a self-assigned task');
         if (!selfAssigned && isEmployee) throw new ForbiddenException('Cannot edit a task assigned by management');
 
-        if (isEmployee) {
+        // Employees and HODs editing self-assigned tasks must own the task
+        if (isEmployee || (isHod && selfAssigned)) {
             const employee = await this.employeeModel.findOne({ where: { userId } });
             if (!employee || task.getDataValue('assignedToId') !== employee.id) {
                 throw new ForbiddenException('Not your task');
@@ -330,10 +341,11 @@ export class TasksService {
             });
 
             const taskTitle = task.getDataValue('title');
-            if (isManagerOrHod) {
+            // HOD editing their own self-assigned task: no notification needed
+            if (isManagerOrHod && !(isHod && selfAssigned)) {
                 const assignedTo = task.get('assignedTo') as any;
                 const empUserId = assignedTo?.userId || assignedTo?.getDataValue?.('userId');
-                if (empUserId) {
+                if (empUserId && empUserId !== userId) {
                     notificationData = {
                         title: 'Task updated',
                         body: `Your task "${taskTitle}" has been updated by management.`,
@@ -343,7 +355,7 @@ export class TasksService {
                         userId: empUserId,
                     };
                 }
-            } else {
+            } else if (!isManagerOrHod || (isHod && selfAssigned)) {
                 if (!employee) employee = await this.employeeModel.findOne({ where: { userId } });
                 const deptId = employee?.getDataValue('departmentId');
                 if (deptId) {
@@ -403,6 +415,7 @@ export class TasksService {
             await this.syncLeadActions(changes.leadId.from);
         }
 
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
         return reloadedTask;
     }
 
@@ -413,13 +426,15 @@ export class TasksService {
         if (!task) throw new NotFoundException('Task not found');
 
         const selfAssigned = task.getDataValue('selfAssigned');
-        const isManagerOrHod = role === 'MANAGER' || role === 'HEAD_OF_DEPARTMENT';
+        const isManager = role === 'MANAGER';
+        const isHod = role === 'HEAD_OF_DEPARTMENT';
+        const isManagerOrHod = isManager || isHod;
         const isEmployee = role === 'EMPLOYEE';
 
-        if (selfAssigned && isManagerOrHod) throw new ForbiddenException('Cannot delete a self-assigned task');
+        if (selfAssigned && isManager) throw new ForbiddenException('Cannot delete a self-assigned task');
         if (!selfAssigned && isEmployee) throw new ForbiddenException('Cannot delete a task assigned by management');
 
-        if (isEmployee) {
+        if (isEmployee || (isHod && selfAssigned)) {
             const employee = await this.employeeModel.findOne({ where: { userId } });
             if (!employee || task.getDataValue('assignedToId') !== employee.id) {
                 throw new ForbiddenException('Not your task');
@@ -429,10 +444,11 @@ export class TasksService {
         const taskTitle = task.getDataValue('title');
         const deletedTaskLeadId = task.getDataValue('leadId');
 
-        if (isManagerOrHod) {
+        // HOD deleting their own self-assigned task: no notification needed
+        if (isManagerOrHod && !(isHod && selfAssigned)) {
             const assignedTo = task.get('assignedTo') as any;
             const empUserId = assignedTo?.userId || assignedTo?.getDataValue?.('userId');
-            if (empUserId) {
+            if (empUserId && empUserId !== userId) {
                 await this.notificationsService.create({
                     title: 'Task deleted',
                     body: `Your task "${taskTitle}" has been deleted by management.`,
@@ -473,6 +489,7 @@ export class TasksService {
         if (deletedTaskLeadId) {
             await this.syncLeadActions(deletedTaskLeadId);
         }
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
     }
 
     async getHistory(id: string): Promise<TaskHistory[]> {
@@ -483,7 +500,11 @@ export class TasksService {
     }
 
     async findByProject(projectId: string): Promise<Task[]> {
-        return this.taskModel.findAll({
+        const key = CACHE_KEYS.TASKS_BY_PROJECT(projectId);
+        const cached = await this.cache.get<any[]>(key);
+        if (cached) return cached as any;
+
+        const rows = await this.taskModel.findAll({
             where: { projectId },
             include: [
                 { model: Employee, as: 'assignedTo' },
@@ -494,10 +515,17 @@ export class TasksService {
                 { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' },
             ],
         });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(key, result, CACHE_TTL.TASKS_LIST);
+        return result as any;
     }
 
     async findByLead(leadId: string): Promise<Task[]> {
-        return this.taskModel.findAll({
+        const key = CACHE_KEYS.TASKS_BY_LEAD(leadId);
+        const cached = await this.cache.get<any[]>(key);
+        if (cached) return cached as any;
+
+        const rows = await this.taskModel.findAll({
             where: { leadId },
             include: [
                 { model: Employee, as: 'assignedTo' },
@@ -508,6 +536,9 @@ export class TasksService {
             ],
             order: [['createdAt', 'DESC']],
         });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(key, result, CACHE_TTL.TASKS_LIST);
+        return result as any;
     }
 
     async findByUserId(userId: string): Promise<Task[]> {
@@ -673,6 +704,7 @@ export class TasksService {
             await this.syncLeadActions(leadId);
         }
 
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
         return { task: updatedTask, gamification };
     }
 
@@ -711,6 +743,8 @@ export class TasksService {
         if (dto.leadId) {
             await this.syncLeadActions(dto.leadId);
         }
+
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
 
         // Notify department head if self-assigned task is urgent/important
         if (dto.urgent || dto.important) {
@@ -787,7 +821,11 @@ export class TasksService {
     }
 
     async findByEmployee(employeeId: string): Promise<Task[]> {
-        return this.taskModel.findAll({
+        const key = CACHE_KEYS.TASKS_BY_EMPLOYEE(employeeId);
+        const cached = await this.cache.get<any[]>(key);
+        if (cached) return cached as any;
+
+        const rows = await this.taskModel.findAll({
             where: { assignedToId: employeeId },
             include: [
                 { model: Employee, as: 'assignedTo' },
@@ -798,16 +836,24 @@ export class TasksService {
                 { model: Subtask, as: 'subtasks' }, { model: TaskAttachment, as: 'attachments' },
             ],
         });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(key, result, CACHE_TTL.TASKS_LIST);
+        return result as any;
     }
 
     // ── Weekly planning ──────────────────────────────────────────────
 
     async findByWeek(employeeId: string, weekStartDate: Date): Promise<Task[]> {
+        const weekStart = weekStartDate.toISOString().split('T')[0];
+        const key = CACHE_KEYS.TASKS_WEEK(employeeId, weekStart);
+        const cached = await this.cache.get<any[]>(key);
+        if (cached) return cached as any;
+
         const weekEnd = new Date(weekStartDate);
         weekEnd.setDate(weekEnd.getDate() + 6);
         weekEnd.setHours(23, 59, 59, 999);
 
-        return this.taskModel.findAll({
+        const rows = await this.taskModel.findAll({
             where: {
                 assignedToId: employeeId,
                 startDate: { [Op.between]: [weekStartDate, weekEnd] },
@@ -821,6 +867,9 @@ export class TasksService {
             ],
             order: [['startDate', 'ASC']],
         });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(key, result, CACHE_TTL.TASKS_WEEK);
+        return result as any;
     }
 
     async findMyWeek(userId: string, weekStartDate: Date): Promise<Task[]> {
@@ -830,6 +879,11 @@ export class TasksService {
     }
 
     async findWeekForAllEmployees(departmentId: string | undefined, weekStartDate: Date): Promise<Task[]> {
+        const weekStart = weekStartDate.toISOString().split('T')[0];
+        const key = CACHE_KEYS.TASKS_WEEK_ALL(departmentId, weekStart);
+        const cached = await this.cache.get<any[]>(key);
+        if (cached) return cached as any;
+
         const weekEnd = new Date(weekStartDate);
         weekEnd.setDate(weekEnd.getDate() + 6);
         weekEnd.setHours(23, 59, 59, 999);
@@ -848,7 +902,10 @@ export class TasksService {
             include[0].required = true;
         }
 
-        return this.taskModel.findAll({ where, include, order: [['startDate', 'ASC']] });
+        const rows = await this.taskModel.findAll({ where, include, order: [['startDate', 'ASC']] });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(key, result, CACHE_TTL.TASKS_WEEK);
+        return result as any;
     }
 
     /* ─── Task Transfer ──────────────────────────────────────── */
@@ -903,6 +960,7 @@ export class TasksService {
             }, { transaction: t });
         });
 
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
         return task.reload({
             include: [
                 { model: Employee, as: 'assignedTo' },
@@ -930,6 +988,7 @@ export class TasksService {
             completed: false,
         });
 
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
         return subtask;
     }
 
@@ -954,6 +1013,7 @@ export class TasksService {
         if (dto.order !== undefined) subtask.order = dto.order;
 
         await subtask.save();
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
         return subtask;
     }
 
@@ -963,6 +1023,7 @@ export class TasksService {
             throw new NotFoundException('Subtask not found');
         }
         await subtask.destroy();
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
     }
 
     async toggleSubtask(id: string, userId?: string): Promise<{ subtask: Subtask; pointsEarned: number; totalPoints: number; allCompleted: boolean; taskStarted: boolean }> {
@@ -1006,6 +1067,7 @@ export class TasksService {
         const allSubtasks = await this.subtaskModel.findAll({ where: { taskId } });
         const allCompleted = allSubtasks.length > 0 && allSubtasks.every(s => s.getDataValue('completed'));
 
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
         return { subtask, pointsEarned, totalPoints, allCompleted, taskStarted };
     }
 
@@ -1018,6 +1080,7 @@ export class TasksService {
                 );
             }
         });
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
     }
 
     /* ─── Attachment Methods ─────────────────────────────────── */
@@ -1025,7 +1088,9 @@ export class TasksService {
     async addAttachment(taskId: string, file: { fileName: string; filePath: string; fileType: string; size: number }, uploadedByUserId: string): Promise<TaskAttachment> {
         const task = await this.taskModel.findByPk(taskId);
         if (!task) throw new NotFoundException('Task not found');
-        return this.taskAttachmentModel.create({ taskId, ...file, uploadedByUserId });
+        const att = await this.taskAttachmentModel.create({ taskId, ...file, uploadedByUserId });
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
+        return att;
     }
 
     async removeAttachment(taskId: string, attachmentId: string): Promise<void> {
@@ -1035,6 +1100,7 @@ export class TasksService {
         const { join } = require('path');
         try { unlinkSync(join(process.cwd(), attachment.filePath)); } catch {}
         await attachment.destroy();
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.TASKS);
     }
 
     /* ─── Time Distribution ──────────────────────────────────── */

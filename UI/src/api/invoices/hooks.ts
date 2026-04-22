@@ -114,6 +114,32 @@ export const useRejectInvoice = () => {
     });
 };
 
+export const useCreateAcompte = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, amount }: { id: string; amount: number }) => invoicesApi.createAcompte(id, amount),
+        onSuccess: () => {
+            toast.success('Facture d\'acompte créée');
+            qc.invalidateQueries({ queryKey: invoiceKeys.all });
+            qc.invalidateQueries({ queryKey: invoiceKeys.stats });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
+export const useValidateProforma = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => invoicesApi.validateProforma(id),
+        onSuccess: () => {
+            toast.success('Proforma validé en facture');
+            qc.invalidateQueries({ queryKey: invoiceKeys.all });
+            qc.invalidateQueries({ queryKey: invoiceKeys.stats });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
 export const useDeleteInvoice = () => {
     const qc = useQueryClient();
     return useMutation({

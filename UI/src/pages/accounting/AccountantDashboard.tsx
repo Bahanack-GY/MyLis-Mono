@@ -201,7 +201,7 @@ const AccountantDashboard = () => {
  const fiscalYear = openFY ? new Date((openFY as FiscalYear).startDate).getFullYear() : new Date().getFullYear();
 
  // KPIs and income statement (only fetch when fiscal year exists)
- const { data: kpis, isLoading: loadingKpis } = useDashboardKpis(fiscalYearId);
+ const { data: kpis, isLoading: loadingKpis } = useDashboardKpis(fiscalYearId, selectedDeptId || undefined);
  const { data: incomeStatement, isLoading: loadingIS } = useIncomeStatement(fiscalYearId);
 
  // Monthly summary (real data for chart)

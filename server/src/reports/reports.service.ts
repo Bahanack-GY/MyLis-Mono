@@ -5,6 +5,7 @@ import {
     ConflictException,
     Logger,
 } from '@nestjs/common';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { InjectModel } from '@nestjs/sequelize';
 import { Op } from 'sequelize';
 import { Report } from '../models/report.model';
@@ -35,8 +36,8 @@ import { ReportsService as AccountingReportsService } from '../accounting/report
 export class ReportsService {
     private readonly logger = new Logger(ReportsService.name);
 
-    private readonly ollamaBaseUrl = process.env.OLLAMA_BASE_URL || 'http://host.docker.internal:11434';
-    private readonly ollamaModel = process.env.OLLAMA_MODEL || 'qwen2.5:7b';
+    private readonly geminiApiKey = process.env.GEMINI_API_KEY;
+    private readonly geminiModel = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
     constructor(
         @InjectModel(Report) private reportModel: typeof Report,
@@ -65,7 +66,7 @@ export class ReportsService {
         const locked = await this.reportModel.findOne({
             where: { status: 'GENERATING', createdAt: { [Op.gte]: twentyMinutesAgo } },
         });
-        return { locked: !!locked, model: this.ollamaModel };
+        return { locked: !!locked, model: this.geminiModel };
     }
 
     /* ── Date helpers ────────────────────────────────────── */
@@ -652,67 +653,33 @@ ${headingInstruction}
         return instruction;
     }
 
-    /* ── Call Ollama ─────────────────────────────────────── */
+    /* ── Call Gemini ─────────────────────────────────────── */
 
-    private async callOllama(prompt: string): Promise<string> {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 900_000); // 15 minutes
+    private async callGemini(prompt: string): Promise<string> {
+        if (!this.geminiApiKey) throw new Error('GEMINI_API_KEY is not set');
+        this.logger.debug(`Calling Gemini model ${this.geminiModel}`);
 
-        try {
-            this.logger.debug(`Calling Ollama at ${this.ollamaBaseUrl} with model ${this.ollamaModel}`);
+        const genAI = new GoogleGenerativeAI(this.geminiApiKey);
+        const model = genAI.getGenerativeModel({
+            model: this.geminiModel,
+            generationConfig: {
+                temperature: 0.4,
+                maxOutputTokens: 8192,
+                topP: 0.9,
+                topK: 40,
+            },
+        });
 
-            const response = await fetch(`${this.ollamaBaseUrl}/api/generate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    model: this.ollamaModel,
-                    prompt,
-                    stream: false,
-                    think: false,
-                    options: {
-                        temperature: 0.4,
-                        num_predict: 4096,
-                        num_ctx: 8192,
-                        top_p: 0.9,
-                        top_k: 40,
-                    },
-                }),
-                signal: controller.signal,
-            });
+        const result = await model.generateContent(prompt);
+        const text = result.response.text().trim();
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                this.logger.error(`Ollama HTTP ${response.status}: ${errorText}`);
-                throw new Error(`Ollama returned ${response.status}`);
-            }
-
-            const data: any = await response.json();
-            // qwen3 thinking: template prepends <think> internally so the response field
-            // may start with raw thinking text and end with </think>\n\nactual content.
-            // Handle both cases: paired tags, or orphan </think> (opening tag in template).
-            let result = (data.response || '').trim();
-            result = result.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-            const closeIdx = result.indexOf('</think>');
-            if (closeIdx !== -1) {
-                result = result.slice(closeIdx + 8).trim();
-            }
-
-            if (!result) {
-                this.logger.warn('Ollama returned empty response');
-                throw new Error('Empty AI response');
-            }
-
-            this.logger.debug(`Ollama success: ${result.length} chars`);
-            return result;
-        } catch (error) {
-            if (error.name === 'AbortError') {
-                this.logger.error('Ollama timeout after 15 minutes');
-                throw new Error('AI timeout');
-            }
-            throw error;
-        } finally {
-            clearTimeout(timeout);
+        if (!text) {
+            this.logger.warn('Gemini returned empty response');
+            throw new Error('Empty AI response');
         }
+
+        this.logger.debug(`Gemini success: ${text.length} chars`);
+        return text;
     }
 
     /* ── Background generation ───────────────────────────── */
@@ -747,15 +714,21 @@ ${headingInstruction}
                     reportData.taxStatus = accountingData.taxStatus;
                 }
 
+                // Resolve generator name
+                const generatorEmployee = await this.employeeModel.findOne({ where: { userId } });
+                const generatorName = generatorEmployee
+                    ? `${generatorEmployee.getDataValue('firstName')} ${generatorEmployee.getDataValue('lastName')}`
+                    : null;
+
                 // Call AI for narrative
                 let aiContent = '';
                 try {
-                    this.logger.log(`Calling Ollama (${this.ollamaModel}) for accounting report ${reportId}...`);
-                    const prompt = this.buildAccountingPrompt(accountingData, dto.language || 'fr');
-                    aiContent = await this.callOllama(prompt);
-                    this.logger.log(`Ollama complete for accounting report ${reportId} (${aiContent.length} chars)`);
+                    this.logger.log(`Calling Gemini (${this.geminiModel}) for accounting report ${reportId}...`);
+                    const prompt = this.buildAccountingPrompt(accountingData, dto.language || 'fr', generatorName);
+                    aiContent = await this.callGemini(prompt);
+                    this.logger.log(`Gemini complete for accounting report ${reportId} (${aiContent.length} chars)`);
                 } catch (aiErr) {
-                    this.logger.warn(`Ollama failed for accounting report ${reportId}: ${aiErr.message}`);
+                    this.logger.warn(`Gemini failed for accounting report ${reportId}: ${aiErr.message}`);
                     aiContent = dto.language === 'en'
                         ? 'AI analysis unavailable. Please review the data below.'
                         : 'Analyse IA indisponible. Veuillez consulter les données ci-dessous.';
@@ -807,12 +780,12 @@ ${headingInstruction}
             // Build prompt and call AI
             let aiContent = '';
             try {
-                this.logger.log(`Calling Ollama (${this.ollamaModel}) for report ${reportId}...`);
+                this.logger.log(`Calling Gemini (${this.geminiModel}) for report ${reportId}...`);
                 const prompt = this.buildPrompt(dto, reportData, contextData, dto.language || 'fr');
-                aiContent = await this.callOllama(prompt);
-                this.logger.log(`Ollama complete for report ${reportId} (${aiContent.length} chars)`);
+                aiContent = await this.callGemini(prompt);
+                this.logger.log(`Gemini complete for report ${reportId} (${aiContent.length} chars)`);
             } catch (aiErr) {
-                this.logger.warn(`Ollama failed for report ${reportId}: ${aiErr.message}`);
+                this.logger.warn(`Gemini failed for report ${reportId}: ${aiErr.message}`);
                 aiContent = dto.language === 'en'
                     ? 'The AI-generated narrative could not be produced at this time. Please consult the statistical data below.'
                     : 'La narration generee par IA n\'a pas pu etre produite pour le moment. Veuillez consulter les donnees statistiques ci-dessous.';
@@ -1020,7 +993,7 @@ ${headingInstruction}
         };
     }
 
-    private buildAccountingPrompt(data: any, language: string): string {
+    private buildAccountingPrompt(data: any, language: string, generatorName?: string | null): string {
         const isFr = language === 'fr';
 
         const formatXAF = (n: number | undefined | null) => {
@@ -1051,9 +1024,12 @@ ${headingInstruction}
             classTotals[classNum] = total;
         });
 
+        const preparedBy = generatorName || (isFr ? 'Non spécifié' : 'Not specified');
+
         const prompt = isFr
-            ? `Tu es un expert-comptable certifié SYSCOHADA pour LIFE'S SIMPLE SARL.
+            ? `Tu es un expert-comptable pour LIFE'S SIMPLE SARL.
 Rédige un rapport financier complet EN FRANÇAIS conforme au référentiel OHADA/SYSCOHADA.
+Préparé par : ${preparedBy}, Expert-Comptable
 
 ═══════════════════════════════════════════════════════════
 CADRE RÉGLEMENTAIRE
@@ -1195,8 +1171,9 @@ RECOMMANDATIONS
 - SOIS EXHAUSTIF - ce rapport doit contenir TOUTES les informations nécessaires pour une compréhension complète de la situation financière
 
 Ce rapport sera présenté à la direction et potentiellement aux auditeurs externes. Il doit être irréprochable et complet.`
-            : `You are a SYSCOHADA certified accountant for LIFE'S SIMPLE SARL.
+            : `You are an accountant for LIFE'S SIMPLE SARL.
 Write a comprehensive financial report IN ENGLISH compliant with OHADA/SYSCOHADA framework.
+Prepared by: ${preparedBy}, Accountant
 
 ═══════════════════════════════════════════════════════════
 REGULATORY FRAMEWORK

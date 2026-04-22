@@ -1,14 +1,22 @@
+export interface JustificationFile {
+    filePath: string;
+    originalName: string;
+}
+
 export interface Expense {
     id: string;
     title: string;
     amount: number;
-    category: string;
+    chargeFamily: string;
+    chargeNature: string;
+    source: 'MANUAL' | 'PAYROLL';
     type: 'ONE_TIME' | 'RECURRENT';
     frequency: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | null;
     date: string;
     demandId: string | null;
     projectId: string | null;
     departmentId: string | null;
+    justificationFiles: JustificationFile[];
     project?: { id: string; name: string } | null;
     department?: { id: string; name: string } | null;
     createdAt: string;
@@ -25,12 +33,14 @@ export interface PaginatedExpenses {
 export interface CreateExpenseDto {
     title: string;
     amount: number;
-    category: string;
+    chargeFamily: string;
+    chargeNature: string;
     type: 'ONE_TIME' | 'RECURRENT';
     frequency?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | null;
     date: string;
     projectId?: string | null;
     departmentId?: string | null;
+    justificationFiles?: JustificationFile[];
 }
 
 export interface ExpenseStats {
@@ -40,6 +50,7 @@ export interface ExpenseStats {
     totalSalaries: number;
     totalProjects: number;
     byCategory: { name: string; value: number }[];
+    byFamily: { code: string; value: number }[];
     byMonth: Record<string, any>[];
     series: string[];
 }

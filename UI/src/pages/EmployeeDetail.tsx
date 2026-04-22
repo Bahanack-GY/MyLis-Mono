@@ -61,7 +61,7 @@ import {
     Star,
     ArrowRight,
 } from 'lucide-react';
-import { useEmployee, useEmployees, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword, useEmployeeTransferHistory, useEmployeeReports, usePromoteEmployee, useEmployeePromotionHistory } from '../api/employees/hooks';
+import { useEmployee, useEmployees, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword, useEmployeeTransferHistory, useEmployeeReports, usePromoteEmployee, useEmployeePromotionHistory, useRemoveFromDepartment } from '../api/employees/hooks';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextDisplay from '../components/RichTextDisplay';
 import TransferEmployeeModal from '../components/modals/TransferEmployeeModal';
@@ -3012,6 +3012,8 @@ const ROLE_LABELS: Record<string, string> = {
     COMMERCIAL: 'Commercial',
     ACCOUNTANT: 'Comptable',
     MANAGER: 'Manager',
+    STAGIAIRE: 'Stagiaire',
+    CEO: 'CEO',
 };
 
 const ROLE_COLORS: Record<string, string> = {
@@ -3020,19 +3022,21 @@ const ROLE_COLORS: Record<string, string> = {
     COMMERCIAL: 'bg-[#283852]/10 text-[#283852]',
     ACCOUNTANT: 'bg-[#283852]/10 text-[#283852]',
     MANAGER: 'bg-teal-100 text-[#33cbcc]',
+    STAGIAIRE: 'bg-orange-100 text-orange-700',
+    CEO: 'bg-yellow-100 text-yellow-700',
 };
 
 const PromotionsView = ({ employee }: { employee: Employee }) => {
     const { t } = useTranslation();
     const { role } = useAuth();
-    const isManager = role === 'MANAGER';
+    const isManager = role === 'MANAGER' || role === 'CEO';
     const { data: history = [], isLoading } = useEmployeePromotionHistory(String(employee.id));
     const promote = usePromoteEmployee();
     const [showForm, setShowForm] = useState(false);
     const [toRole, setToRole] = useState('');
     const [reason, setReason] = useState('');
 
-    const AVAILABLE_ROLES = ['EMPLOYEE', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'ACCOUNTANT', 'MANAGER'];
+    const AVAILABLE_ROLES = ['EMPLOYEE', 'STAGIAIRE', 'COMMERCIAL', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'MANAGER', 'CEO'];
 
     const handleSubmit = () => {
         if (!toRole) return;
@@ -3180,14 +3184,16 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
 const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetailProps) => {
     const { t } = useTranslation();
     const { role } = useAuth();
-    const isManager = role === 'MANAGER';
+    const isManager = role === 'MANAGER' || role === 'CEO';
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDismissConfirm, setShowDismissConfirm] = useState(false);
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [showTransferHistory, setShowTransferHistory] = useState(false);
+    const [showRemoveDeptConfirm, setShowRemoveDeptConfirm] = useState(false);
 
     const dismissEmployee = useDismissEmployee();
     const reinstateEmployee = useReinstateEmployee();
+    const removeFromDepartment = useRemoveFromDepartment();
 
     // API data - fetch employee detail by id (stringified) for enrichment
     const { data: apiEmployee, isLoading: loadingEmployee } = useEmployee(String(employee.id));
@@ -3280,6 +3286,15 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                 <Repeat className="w-4 h-4" />
                                 {t('employees.transfer.button')}
                             </button>
+                            {employee.departmentId && isManager && (
+                                <button
+                                    onClick={() => setShowRemoveDeptConfirm(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
+                                >
+                                    <Building className="w-4 h-4" />
+                                    Retirer du département
+                                </button>
+                            )}
                             <button
                                 onClick={() => setShowTransferHistory(true)}
                                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
@@ -3361,6 +3376,56 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                         : isDismissed
                                             ? t('employees.reinstate', 'Reinstate')
                                             : t('employees.dismiss', 'Dismiss')}
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Remove from department confirm */}
+            <AnimatePresence>
+                {showRemoveDeptConfirm && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                        onClick={() => setShowRemoveDeptConfirm(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+                        >
+                            <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-4">
+                                <Building size={24} className="text-orange-500" />
+                            </div>
+                            <h3 className="text-lg font-bold text-gray-800 mb-2">Retirer du département</h3>
+                            <p className="text-sm text-gray-500 mb-6">
+                                {employee.name} sera retiré(e) de son département actuel et restera sans affectation.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowRemoveDeptConfirm(false)}
+                                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        removeFromDepartment.mutate(String(employee.id), {
+                                            onSuccess: () => setShowRemoveDeptConfirm(false),
+                                        });
+                                    }}
+                                    disabled={removeFromDepartment.isPending}
+                                    className="flex-1 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+                                >
+                                    {removeFromDepartment.isPending
+                                        ? <Loader2 size={16} className="animate-spin mx-auto" />
+                                        : 'Confirmer'}
                                 </button>
                             </div>
                         </motion.div>

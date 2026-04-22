@@ -168,6 +168,19 @@ export const useEmployeeReports = (id: string) =>
         enabled: !!id,
     });
 
+export const useRemoveFromDepartment = () => {
+    const qc = useQueryClient();
+    return useMutation({
+        mutationFn: (id: string) => employeesApi.removeFromDepartment(id),
+        onSuccess: (_, id) => {
+            toast.success('Employé retiré du département');
+            qc.invalidateQueries({ queryKey: employeeKeys.all });
+            qc.invalidateQueries({ queryKey: employeeKeys.detail(id) });
+        },
+        onError: () => toast.error(i18n.t('toast.error')),
+    });
+};
+
 export const usePromoteEmployee = () => {
     const qc = useQueryClient();
     return useMutation({

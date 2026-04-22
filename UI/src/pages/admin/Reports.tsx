@@ -310,6 +310,7 @@ export default function AdminReports() {
     const [targetDepartmentId, setTargetDepartmentId] = useState(isHOD ? (departmentId || '') : '');
     const [customStart, setCustomStart] = useState('');
     const [customEnd, setCustomEnd] = useState('');
+    const [language, setLanguage] = useState<'fr' | 'en'>(i18n.language.startsWith('fr') ? 'fr' : 'en');
 
     /* ── Filter state ── */
     const [search, setSearch] = useState('');
@@ -348,7 +349,7 @@ export default function AdminReports() {
         const dates = period === 'CUSTOM'
             ? { startDate: customStart, endDate: customEnd }
             : getPeriodDates(period);
-        const dto: any = { type: reportType, period, ...dates, language: i18n.language };
+        const dto: any = { type: reportType, period, ...dates, language };
         if (reportType === 'PERSONAL' && targetEmployeeId) dto.targetEmployeeId = targetEmployeeId;
         if (reportType === 'DEPARTMENT') dto.targetDepartmentId = targetDepartmentId || departmentId;
         generateReport.mutate(dto, { onSuccess: () => { setShowForm(false); setTargetEmployeeId(''); } });
@@ -546,6 +547,25 @@ export default function AdminReports() {
                             {t('reports.form.hodDeptInfo')}
                         </div>
                     )}
+
+                    <div>
+                        <label className="text-xs font-medium text-gray-500 mb-1.5 block">Langue du rapport</label>
+                        <div className="flex gap-2">
+                            {(['fr', 'en'] as const).map(lang => (
+                                <button
+                                    key={lang}
+                                    onClick={() => setLanguage(lang)}
+                                    className={`flex-1 px-3 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                                        language === lang
+                                            ? 'bg-[#283852] text-white border-[#283852]'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-[#283852]'
+                                    }`}
+                                >
+                                    {lang === 'fr' ? 'Français' : 'English'}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
 
                     <div className="flex justify-end gap-2 pt-1">
                         <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">

@@ -1,16 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { TaxConfig } from '../models/tax-config.model';
+import { CacheService } from '../cache/cache.service';
+import { CACHE_KEYS, CACHE_TTL } from '../cache/cache.keys';
 
 @Injectable()
 export class TaxConfigService {
     constructor(
         @InjectModel(TaxConfig)
         private taxConfigModel: typeof TaxConfig,
+        private cache: CacheService,
     ) {}
 
     async findAll() {
-        return this.taxConfigModel.findAll({ order: [['key', 'ASC']] });
+        const cached = await this.cache.get<any[]>(CACHE_KEYS.TAX_CONFIG);
+        if (cached) return cached;
+
+        const rows = await this.taxConfigModel.findAll({ order: [['key', 'ASC']] });
+        const result = rows.map(r => r.get({ plain: true }));
+        await this.cache.set(CACHE_KEYS.TAX_CONFIG, result, CACHE_TTL.REFERENCE_LONG);
+        return result;
     }
 
     async findByKey(key: string) {
@@ -21,6 +30,7 @@ export class TaxConfigService {
 
     async upsert(dto: any) {
         const [config] = await this.taxConfigModel.upsert(dto as any);
+        await this.cache.del(CACHE_KEYS.TAX_CONFIG);
         return config;
     }
 
@@ -42,6 +52,7 @@ export class TaxConfigService {
         ];
 
         await this.taxConfigModel.bulkCreate(configs as any[]);
+        await this.cache.del(CACHE_KEYS.TAX_CONFIG);
         return { message: 'Tax configs seeded', count: configs.length };
     }
 }

@@ -26,7 +26,6 @@ export class InvoicesService {
     ) { }
 
     private async generateInvoiceNumber(): Promise<string> {
-        // Use a transaction with SERIALIZABLE isolation to prevent race conditions
         return this.sequelize.transaction({ isolationLevel: 'SERIALIZABLE' as any }, async (t) => {
             const year = new Date().getFullYear();
             const prefix = `INV-${year}-`;
@@ -37,14 +36,33 @@ export class InvoicesService {
                 transaction: t,
             });
             const nextNum = lastInvoice
-                ? parseInt(lastInvoice.invoiceNumber.replace(prefix, ''), 10) + 1
+                ? parseInt(lastInvoice.invoiceNumber!.replace(prefix, ''), 10) + 1
+                : 1;
+            return `${prefix}${String(nextNum).padStart(4, '0')}`;
+        });
+    }
+
+    private async generateProformaNumber(): Promise<string> {
+        return this.sequelize.transaction({ isolationLevel: 'SERIALIZABLE' as any }, async (t) => {
+            const year = new Date().getFullYear();
+            const prefix = `PRO-${year}-`;
+            const last = await this.invoiceModel.findOne({
+                where: { proformaNumber: { [Op.like]: `${prefix}%` } },
+                order: [['proformaNumber', 'DESC']],
+                lock: true,
+                transaction: t,
+            });
+            const nextNum = last
+                ? parseInt(last.proformaNumber!.replace(prefix, ''), 10) + 1
                 : 1;
             return `${prefix}${String(nextNum).padStart(4, '0')}`;
         });
     }
 
     async create(dto: any, userId: string): Promise<Invoice> {
-        const invoiceNumber = await this.generateInvoiceNumber();
+        const isProforma = dto.type === 'PROFORMA';
+        const invoiceNumber = isProforma ? null : await this.generateInvoiceNumber();
+        const proformaNumber = isProforma ? await this.generateProformaNumber() : null;
 
         const items = dto.items || [];
         const subtotal = items.reduce((sum: number, item: any) => {
@@ -57,6 +75,8 @@ export class InvoicesService {
         const invoice = await this.sequelize.transaction(async (t) => {
             const inv = await this.invoiceModel.create({
                 invoiceNumber,
+                proformaNumber,
+                type: isProforma ? 'PROFORMA' : 'INVOICE',
                 status: 'CREATED',
                 projectId: dto.projectId,
                 departmentId: dto.departmentId,
@@ -97,22 +117,123 @@ export class InvoicesService {
         if (departmentId) where.departmentId = departmentId;
         return this.invoiceModel.findAll({
             where,
-            include: [Project, Department, Client, { model: User, as: 'createdBy' }, InvoiceItem],
+            include: [
+                Project, Department, Client,
+                { model: User, as: 'createdBy' },
+                InvoiceItem,
+                { model: Invoice, as: 'parentInvoice', attributes: ['id', 'invoiceNumber', 'total'] },
+            ],
             order: [['createdAt', 'DESC']],
         });
     }
 
     async findOne(id: string): Promise<Invoice> {
         const invoice = await this.invoiceModel.findByPk(id, {
-            include: [Project, Department, Client, { model: User, as: 'createdBy' }, InvoiceItem],
+            include: [
+                Project, Department, Client,
+                { model: User, as: 'createdBy' },
+                InvoiceItem,
+                { model: Invoice, as: 'parentInvoice', attributes: ['id', 'invoiceNumber', 'total'] },
+            ],
         });
         if (!invoice) throw new NotFoundException('Invoice not found');
         return invoice;
     }
 
-    async update(id: string, dto: any): Promise<Invoice> {
+    private async generateAcompteNumber(): Promise<string> {
+        return this.sequelize.transaction({ isolationLevel: 'SERIALIZABLE' as any }, async (t) => {
+            const year = new Date().getFullYear();
+            const prefix = `ACP-${year}-`;
+            const last = await this.invoiceModel.findOne({
+                where: { acompteNumber: { [Op.like]: `${prefix}%` } },
+                order: [['acompteNumber', 'DESC']],
+                lock: true,
+                transaction: t,
+            });
+            const nextNum = last
+                ? parseInt(last.acompteNumber!.replace(prefix, ''), 10) + 1
+                : 1;
+            return `${prefix}${String(nextNum).padStart(4, '0')}`;
+        });
+    }
+
+    async createAcompte(parentId: string, amount: number): Promise<Invoice> {
+        const parent = await this.findOne(parentId);
+        if (parent.type !== 'INVOICE' || parent.status !== 'SENT') {
+            throw new BadRequestException('Les acomptes ne peuvent être créés que sur une facture envoyée');
+        }
+        if (amount <= 0 || amount > Number(parent.total)) {
+            throw new BadRequestException('Montant invalide');
+        }
+        const acompteNumber = await this.generateAcompteNumber();
+        const acompte = await this.sequelize.transaction(async (t) => {
+            const inv = await this.invoiceModel.create({
+                acompteNumber,
+                type: 'ACOMPTE',
+                status: 'PAID',
+                parentInvoiceId: parentId,
+                projectId: parent.projectId,
+                departmentId: parent.departmentId,
+                clientId: parent.clientId,
+                createdById: parent.createdById,
+                issueDate: new Date(),
+                dueDate: parent.dueDate,
+                subtotal: amount,
+                taxRate: 0,
+                taxAmount: 0,
+                total: amount,
+                acompteAmount: amount,
+                notes: `Acompte sur facture ${parent.invoiceNumber}`,
+            }, { transaction: t });
+
+            await this.invoiceItemModel.create({
+                invoiceId: inv.id,
+                description: `Acompte sur facture ${parent.invoiceNumber}`,
+                quantity: 1,
+                unitPrice: amount,
+                amount,
+            }, { transaction: t });
+
+            return inv;
+        });
+
+        // Journal entry: bank receives acompte, client account reduced
+        const acompteRecord = await this.findOne(acompte.id);
+        await this.journalEngine.onAcompteCreated(acompteRecord, parent, parent.createdById || '');
+
+        // Record acompte revenue immediately
+        if (parent.departmentId) {
+            const year = new Date().getFullYear();
+            let goal = await this.departmentGoalsService.findByDepartmentAndYear(parent.departmentId, year);
+            if (!goal) {
+                goal = await this.departmentGoalsService.create({
+                    departmentId: parent.departmentId,
+                    year,
+                    targetRevenue: 0,
+                    currentRevenue: 0,
+                });
+            }
+            await this.departmentGoalsService.update(goal.id, {
+                currentRevenue: Number(goal.currentRevenue) + Number(amount),
+            });
+        }
+
+        return this.findOne(acompte.id);
+    }
+
+    async validateProforma(id: string): Promise<Invoice> {
         const invoice = await this.findOne(id);
-        if (invoice.status !== 'CREATED') {
+        if (invoice.type !== 'PROFORMA') {
+            throw new BadRequestException('Only proformas can be validated');
+        }
+        const invoiceNumber = await this.generateInvoiceNumber();
+        await invoice.update({ type: 'INVOICE', invoiceNumber, status: 'CREATED' });
+        return this.findOne(id);
+    }
+
+    async update(id: string, dto: any, userId?: string): Promise<Invoice> {
+        const invoice = await this.findOne(id);
+        if (invoice.type === 'INVOICE' && invoice.status !== 'CREATED') {
             throw new BadRequestException('Can only edit invoices with CREATED status');
         }
 
@@ -147,15 +268,28 @@ export class InvoicesService {
 
                 await invoice.update(dto, { transaction: t });
             });
-            return this.findOne(id);
+        } else {
+            await invoice.update(dto);
         }
 
-        await invoice.update(dto);
-        return this.findOne(id);
+        const updated = await this.findOne(id);
+
+        // Acomptes already have a journal entry — sync it when amounts change
+        if (invoice.type === 'ACOMPTE' && userId) {
+            const parentInvoice = invoice.parentInvoiceId
+                ? await this.findOne(invoice.parentInvoiceId)
+                : null;
+            await this.journalEngine.onAcompteUpdated(updated, parentInvoice, userId);
+        }
+
+        return updated;
     }
 
     async send(id: string): Promise<Invoice> {
         const invoice = await this.findOne(id);
+        if (invoice.type === 'PROFORMA') {
+            throw new BadRequestException('Cannot send a proforma — validate it first');
+        }
         // Idempotent: already sent
         if (invoice.status === 'SENT') return invoice;
         if (invoice.status !== 'CREATED') {
@@ -182,27 +316,46 @@ export class InvoicesService {
             }
             await invoice.update({ status: 'PAID', paidAt: new Date() }, { transaction: t });
 
-            // Increment department revenue
+            // Increment department revenue only by the remaining amount (after acomptes)
             if (invoice.departmentId) {
-                const year = new Date().getFullYear();
-                let goal = await this.departmentGoalsService.findByDepartmentAndYear(invoice.departmentId, year);
-                if (!goal) {
-                    goal = await this.departmentGoalsService.create({
-                        departmentId: invoice.departmentId,
-                        year,
-                        targetRevenue: 0,
-                        currentRevenue: 0,
+                const acomptes = await this.invoiceModel.findAll({
+                    where: { parentInvoiceId: id, type: 'ACOMPTE', status: 'PAID' },
+                    transaction: t,
+                });
+                const acompteTotal = acomptes.reduce((sum, a) => sum + Number(a.total), 0);
+                const revenueToAdd = Math.max(0, Number(invoice.total) - acompteTotal);
+
+                if (revenueToAdd > 0) {
+                    const year = new Date().getFullYear();
+                    let goal = await this.departmentGoalsService.findByDepartmentAndYear(invoice.departmentId, year);
+                    if (!goal) {
+                        goal = await this.departmentGoalsService.create({
+                            departmentId: invoice.departmentId,
+                            year,
+                            targetRevenue: 0,
+                            currentRevenue: 0,
+                        });
+                    }
+                    await this.departmentGoalsService.update(goal.id, {
+                        currentRevenue: Number(goal.currentRevenue) + revenueToAdd,
                     });
                 }
-                const newRevenue = Number(goal.currentRevenue) + Number(invoice.total);
-                await this.departmentGoalsService.update(goal.id, { currentRevenue: newRevenue });
             }
         });
 
         const paid = await this.findOne(id);
 
-        // Auto-generate journal entry for invoice payment
-        await this.journalEngine.onInvoicePaid(paid, paid.createdById || '');
+        // Compute remaining amount after any acomptes already journalised
+        const acomptes = await this.invoiceModel.findAll({
+            where: { parentInvoiceId: id, type: 'ACOMPTE', status: 'PAID' },
+        });
+        const acompteTotal = acomptes.reduce((sum, a) => sum + Number(a.total), 0);
+        const remainingAmount = Math.max(0, Number(paid.total) - acompteTotal);
+
+        // Only create payment entry for the amount not yet collected via acomptes
+        if (remainingAmount > 0) {
+            await this.journalEngine.onInvoicePaid(paid, paid.createdById || '', remainingAmount);
+        }
 
         return paid;
     }
@@ -215,12 +368,14 @@ export class InvoicesService {
             throw new BadRequestException('Can only reject SENT invoices');
         }
         await invoice.update({ status: 'REJECTED' });
-        return this.findOne(id);
+        const updated = await this.findOne(id);
+        await this.journalEngine.onInvoiceRejected(updated, (updated as any).createdById || '');
+        return updated;
     }
 
     async remove(id: string): Promise<void> {
         const invoice = await this.findOne(id);
-        if (invoice.status !== 'CREATED') {
+        if (invoice.type === 'INVOICE' && invoice.status !== 'CREATED') {
             throw new BadRequestException('Can only delete invoices with CREATED status');
         }
         await this.sequelize.transaction(async (t) => {
@@ -242,11 +397,26 @@ export class InvoicesService {
             include: [{ model: Department, attributes: ['id', 'name'] }],
         });
 
+        // Pre-compute acompte totals per parent invoice to avoid double-counting
+        const acomptesByParent: Record<string, number> = {};
+        for (const inv of invoices) {
+            if (inv.type === 'ACOMPTE' && inv.parentInvoiceId) {
+                acomptesByParent[inv.parentInvoiceId] = (acomptesByParent[inv.parentInvoiceId] || 0) + Number(inv.total);
+            }
+        }
+
         const map = new Map<string, { name: string; revenue: number }>();
         for (const inv of invoices) {
             if (!inv.departmentId || !inv.department) continue;
+            let contribution = 0;
+            if (inv.type === 'ACOMPTE') {
+                contribution = Number(inv.total);
+            } else if (inv.type === 'INVOICE') {
+                contribution = Math.max(0, Number(inv.total) - (acomptesByParent[inv.id] || 0));
+            }
+            if (contribution <= 0) continue;
             const entry = map.get(inv.departmentId) ?? { name: inv.department.name, revenue: 0 };
-            entry.revenue += Number(inv.total);
+            entry.revenue += contribution;
             map.set(inv.departmentId, entry);
         }
 
@@ -264,29 +434,44 @@ export class InvoicesService {
             if (to) where.issueDate[Op.lte] = new Date(to);
         }
 
-        const invoices = await this.invoiceModel.findAll({ where });
+        const allRecords = await this.invoiceModel.findAll({ where });
 
-        const totalRevenue = invoices
-            .filter(i => i.status === 'PAID')
-            .reduce((sum, i) => sum + Number(i.total), 0);
+        const paidAcomptes = allRecords.filter(i => i.type === 'ACOMPTE' && i.status === 'PAID');
+        const acomptesByParent: Record<string, number> = {};
+        for (const a of paidAcomptes) {
+            if (a.parentInvoiceId) {
+                acomptesByParent[a.parentInvoiceId] = (acomptesByParent[a.parentInvoiceId] || 0) + Number(a.total);
+            }
+        }
 
-        const totalPending = invoices
+        // Only INVOICE-type records for counts and pending (not proformas, not acomptes)
+        const invoicesOnly = allRecords.filter(i => i.type === 'INVOICE');
+
+        // Revenue = paid acomptes + paid invoices minus their already-counted acomptes
+        const totalRevenue =
+            paidAcomptes.reduce((sum, a) => sum + Number(a.total), 0) +
+            invoicesOnly
+                .filter(i => i.status === 'PAID')
+                .reduce((sum, i) => sum + Math.max(0, Number(i.total) - (acomptesByParent[i.id] || 0)), 0);
+
+        // Pending = sent/created invoices minus their already-paid acomptes
+        const totalPending = invoicesOnly
             .filter(i => i.status !== 'PAID' && i.status !== 'REJECTED')
-            .reduce((sum, i) => sum + Number(i.total), 0);
+            .reduce((sum, i) => sum + Math.max(0, Number(i.total) - (acomptesByParent[i.id] || 0)), 0);
 
         const countByStatus = {
-            CREATED: invoices.filter(i => i.status === 'CREATED').length,
-            SENT: invoices.filter(i => i.status === 'SENT').length,
-            PAID: invoices.filter(i => i.status === 'PAID').length,
-            REJECTED: invoices.filter(i => i.status === 'REJECTED').length,
+            CREATED: invoicesOnly.filter(i => i.status === 'CREATED').length,
+            SENT: invoicesOnly.filter(i => i.status === 'SENT').length,
+            PAID: invoicesOnly.filter(i => i.status === 'PAID').length,
+            REJECTED: invoicesOnly.filter(i => i.status === 'REJECTED').length,
         };
 
-        const overdue = invoices.filter(
+        const overdue = invoicesOnly.filter(
             i => i.status === 'SENT' && i.dueDate && new Date(i.dueDate) < new Date(),
         ).length;
 
         return {
-            total: invoices.length,
+            total: invoicesOnly.length,
             totalRevenue,
             totalPending,
             overdue,

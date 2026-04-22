@@ -152,6 +152,7 @@ const ALL_SECTIONS: Section[] = [
 
 function filterSections(sections: Section[], role: Role | null): Section[] {
     if (!role) return [];
+    if (role === 'CEO') return sections.map(s => ({ ...s }));
 
     return sections
         .filter(section => !section.roles || section.roles.includes(role))

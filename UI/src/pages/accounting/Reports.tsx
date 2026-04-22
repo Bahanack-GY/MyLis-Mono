@@ -21,6 +21,7 @@ import {
  getBalanceSheet,
  getIncomeStatement,
 } from '../../api/accounting/api';
+import { useDepartments } from '../../api/departments/hooks';
 import type {
  FiscalYear,
  TrialBalance,
@@ -67,17 +68,17 @@ const useFiscalYears = () =>
  queryFn: getFiscalYears,
  });
 
-const useGrandLivre = (fiscalYearId: string) =>
+const useGrandLivre = (fiscalYearId: string, departmentId?: string) =>
  useQuery<any[]>({
- queryKey: ['accounting', 'reports', 'grand-livre', fiscalYearId],
- queryFn: () => getGrandLivre(fiscalYearId),
+ queryKey: ['accounting', 'reports', 'grand-livre', fiscalYearId, departmentId],
+ queryFn: () => getGrandLivre(fiscalYearId, undefined, departmentId),
  enabled: !!fiscalYearId,
  });
 
-const useTrialBalance = (fiscalYearId: string) =>
+const useTrialBalance = (fiscalYearId: string, departmentId?: string) =>
  useQuery<TrialBalance>({
- queryKey: ['accounting', 'reports', 'trial-balance', fiscalYearId],
- queryFn: () => getTrialBalance(fiscalYearId),
+ queryKey: ['accounting', 'reports', 'trial-balance', fiscalYearId, departmentId],
+ queryFn: () => getTrialBalance(fiscalYearId, departmentId),
  enabled: !!fiscalYearId,
  });
 
@@ -99,8 +100,8 @@ const useIncomeStatement = (fiscalYearId: string) =>
 /* Grand Livre Tab */
 /* ------------------------------------------------------------------ */
 
-const GrandLivreTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
- const { data, isLoading } = useGrandLivre(fiscalYearId);
+const GrandLivreTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; departmentId?: string }) => {
+ const { data, isLoading } = useGrandLivre(fiscalYearId, departmentId);
 
  if (isLoading) {
  return (
@@ -207,8 +208,8 @@ const GrandLivreTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
 /* Balance (Trial Balance) Tab */
 /* ------------------------------------------------------------------ */
 
-const BalanceTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
- const { data, isLoading } = useTrialBalance(fiscalYearId);
+const BalanceTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; departmentId?: string }) => {
+ const { data, isLoading } = useTrialBalance(fiscalYearId, departmentId);
 
  if (isLoading) {
  return (
@@ -560,8 +561,10 @@ export default function Reports() {
  const { t } = useTranslation();
  const [activeTab, setActiveTab] = useState<TabKey>('grand-livre');
  const [selectedFiscalYearId, setSelectedFiscalYearId] = useState('');
+ const [selectedDeptId, setSelectedDeptId] = useState('');
 
  const { data: fiscalYears, isLoading: fyLoading } = useFiscalYears();
+ const { data: departments = [] } = useDepartments();
 
  // Auto-select first open fiscal year
  useMemo(() => {
@@ -591,8 +594,9 @@ export default function Reports() {
  </p>
  </div>
 
- {/* Fiscal Year Selector */}
- <div className="bg-white rounded-2xl p-4 flex items-center gap-4">
+ {/* Fiscal Year + Department Selector */}
+ <div className="bg-white rounded-2xl p-4 flex items-center gap-6 flex-wrap">
+ <div className="flex items-center gap-2">
  <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
  <Calendar size={16} className="text-[#33cbcc]"/>
  Exercice fiscal
@@ -608,6 +612,20 @@ export default function Reports() {
  </option>
  ))}
  </select>
+ </div>
+ <div className="flex items-center gap-2">
+ <span className="text-sm font-semibold text-gray-600">Departement</span>
+ <select
+ value={selectedDeptId}
+ onChange={(e) => setSelectedDeptId(e.target.value)}
+ className="bg-gray-50 rounded-xl border-0 px-4 py-2.5 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
+ >
+ <option value="">Tous les departements</option>
+ {(departments as any[]).map((d: any) => (
+ <option key={d.id} value={d.id}>{d.name}</option>
+ ))}
+ </select>
+ </div>
  </div>
 
  {/* Tab sections */}
@@ -667,8 +685,8 @@ export default function Reports() {
  animate={{ opacity: 1, y: 0 }}
  transition={{ duration: 0.2 }}
  >
- {activeTab === 'grand-livre' && <GrandLivreTab fiscalYearId={selectedFiscalYearId} />}
- {activeTab === 'balance' && <BalanceTab fiscalYearId={selectedFiscalYearId} />}
+ {activeTab === 'grand-livre' && <GrandLivreTab fiscalYearId={selectedFiscalYearId} departmentId={selectedDeptId || undefined} />}
+ {activeTab === 'balance' && <BalanceTab fiscalYearId={selectedFiscalYearId} departmentId={selectedDeptId || undefined} />}
  {activeTab === 'bilan' && <BilanTab fiscalYearId={selectedFiscalYearId} />}
  {activeTab === 'resultat' && <ResultatTab fiscalYearId={selectedFiscalYearId} />}
  </motion.div>

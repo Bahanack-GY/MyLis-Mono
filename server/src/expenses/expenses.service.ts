@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Expense } from '../models/expense.model';
 import { Project } from '../models/project.model';
 import { Department } from '../models/department.model';
+import { TaxDeclaration } from '../models/tax-declaration.model';
 import { JournalEngineService } from '../accounting/journal-engine.service';
 import { Op } from 'sequelize';
 
@@ -15,18 +16,40 @@ export class ExpensesService {
         private projectModel: typeof Project,
         @InjectModel(Department)
         private departmentModel: typeof Department,
+        @InjectModel(TaxDeclaration)
+        private taxDeclarationModel: typeof TaxDeclaration,
         private journalEngine: JournalEngineService,
     ) { }
 
-    async create(createExpenseDto: any) {
+    async create(createExpenseDto: any, userId?: string) {
         const expense = await this.expenseModel.create(createExpenseDto);
 
-        // Auto-generate journal entry (skip salary expenses — handled by PayrollModule)
-        if (createExpenseDto.category !== 'Salaire') {
-            await this.journalEngine.onExpenseCreated(expense, '');
+        // Payroll-generated expenses have their own journal entries via onSalaryPaid
+        if (expense.source !== 'PAYROLL' && userId) {
+            await this.journalEngine.onExpenseCreated(expense, userId);
+        }
+
+        // When TVA is paid, mark the corresponding TVA declaration as FILED
+        if (expense.chargeNature === 'TVA & taxes reversées') {
+            await this.linkTvaPaymentToDeclaration(String(expense.date));
         }
 
         return expense;
+    }
+
+    private async linkTvaPaymentToDeclaration(date: string) {
+        try {
+            const [year, month] = date.split('-');
+            const period = `${year}-${month}`;
+            const decl = await this.taxDeclarationModel.findOne({
+                where: { type: 'TVA_MONTHLY', period },
+            });
+            if (decl && decl.status === 'VALIDATED') {
+                await decl.update({ status: 'FILED', filedAt: new Date() });
+            }
+        } catch {
+            // Non-blocking — TVA link failure should not prevent expense creation
+        }
     }
 
     async findAll(projectId?: string, departmentId?: string, page = 1, limit = 10) {
@@ -58,13 +81,18 @@ export class ExpensesService {
         return expense;
     }
 
-    async update(id: string, updateExpenseDto: any) {
+    async update(id: string, updateExpenseDto: any, userId?: string) {
         const expense = await this.findOne(id);
-        return expense.update(updateExpenseDto);
+        await expense.update(updateExpenseDto);
+        if (userId) {
+            await this.journalEngine.onExpenseUpdated(expense, userId);
+        }
+        return expense;
     }
 
     async remove(id: string) {
         const expense = await this.findOne(id);
+        await this.journalEngine.onExpenseDeleted(expense.id);
         await expense.destroy();
         return { success: true };
     }
@@ -79,15 +107,13 @@ export class ExpensesService {
             expenseWhere.departmentId = departmentId;
         }
 
-        const expenses = await this.expenseModel.findAll({
-            where: expenseWhere,
-        });
+        const expenses = await this.expenseModel.findAll({ where: expenseWhere });
 
-        // Sum of salary expenses that were actually paid (category = 'Salaire') in this year
-        const salaryExpenses = expenses.filter(e => e.category === 'Salaire');
+        // Salary expenses from payroll (chargeFamily = CHARGES_PERSONNEL, source = PAYROLL)
+        const salaryExpenses = expenses.filter(e => e.source === 'PAYROLL');
         const totalSalaries = salaryExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
-        // Projects that overlap with the selected year
+        // Projects budget distribution
         const projectWhere: any = {
             budget: { [Op.gt]: 0 },
             startDate: { [Op.lte]: new Date(`${currentYear}-12-31`) },
@@ -101,20 +127,16 @@ export class ExpensesService {
             raw: true,
         });
 
-        // Distribute each project's budget across its months within the year
         const projectByMonth = new Array(12).fill(0);
         let totalProjects = 0;
         projects.forEach(p => {
             const budget = Number(p.budget) || 0;
             const pStart = new Date(p.startDate);
             const pEnd = new Date(p.endDate);
-            // Total months the project spans
             const totalMonths = Math.max(1,
                 (pEnd.getFullYear() - pStart.getFullYear()) * 12 + (pEnd.getMonth() - pStart.getMonth()) + 1,
             );
             const monthlyBudget = budget / totalMonths;
-
-            // Clamp to current year
             const firstMonth = pStart.getFullYear() < currentYear ? 0 : pStart.getMonth();
             const lastMonth = pEnd.getFullYear() > currentYear ? 11 : pEnd.getMonth();
             for (let m = firstMonth; m <= lastMonth; m++) {
@@ -123,10 +145,11 @@ export class ExpensesService {
             }
         });
 
-        const byCategory: Record<string, number> = {};
-        const allCategories = new Set<string>();
+        // Group by chargeNature for chart series (use chargeFamily as display grouping)
+        const byFamily: Record<string, number> = {};
+        const byNature: Record<string, number> = {};
+        const allNatures = new Set<string>();
 
-        // Build monthly breakdown with per-category columns
         const byMonth: Record<string, any>[] = Array.from({ length: 12 }, (_, i) => ({
             name: new Date(2000, i, 1).toLocaleString('fr-FR', { month: 'short' }),
             Projets: Math.round(projectByMonth[i]),
@@ -139,36 +162,36 @@ export class ExpensesService {
         expenses.forEach(e => {
             const amount = Number(e.amount);
             totalYear += amount;
-
             if (e.type === 'RECURRENT') recurrentCount++;
 
-            const cat = e.category || 'Autre';
-            allCategories.add(cat);
+            const nature = e.chargeNature || 'Autre';
+            const family = e.chargeFamily || 'CHARGES_OPERATIONNELLES';
+            allNatures.add(nature);
 
-            if (!byCategory[cat]) byCategory[cat] = 0;
-            byCategory[cat] += amount;
+            byNature[nature] = (byNature[nature] || 0) + amount;
+            byFamily[family] = (byFamily[family] || 0) + amount;
 
             const dateStr = String(e.date);
             const monthIndex = parseInt(dateStr.split('-')[1], 10) - 1;
             if (monthIndex >= 0 && monthIndex < 12) {
                 byMonth[monthIndex].total += amount;
-                byMonth[monthIndex][cat] = (byMonth[monthIndex][cat] || 0) + amount;
+                byMonth[monthIndex][nature] = (byMonth[monthIndex][nature] || 0) + amount;
             }
         });
 
-        // Ensure all months have all category keys (default 0)
-        const categories = Array.from(allCategories).sort();
+        const natures = Array.from(allNatures).sort();
         byMonth.forEach(month => {
-            categories.forEach(cat => {
-                if (month[cat] === undefined) month[cat] = 0;
-            });
+            natures.forEach(n => { if (month[n] === undefined) month[n] = 0; });
         });
 
-        const categoryData = Object.entries(byCategory)
+        const categoryData = Object.entries(byNature)
             .map(([name, value]) => ({ name, value }))
             .sort((a, b) => Number(b.value) - Number(a.value));
 
-        // Series list: Salaires, Projets, then expense categories sorted by total
+        const familyData = Object.entries(byFamily)
+            .map(([code, value]) => ({ code, value }))
+            .sort((a, b) => Number(b.value) - Number(a.value));
+
         const series = ['Salaires', 'Projets', ...categoryData.map(c => c.name)];
 
         return {
@@ -178,6 +201,7 @@ export class ExpensesService {
             totalSalaries,
             totalProjects: Math.round(totalProjects),
             byCategory: categoryData,
+            byFamily: familyData,
             byMonth,
             series,
         };

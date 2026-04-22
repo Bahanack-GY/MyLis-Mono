@@ -4,6 +4,7 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AppCacheModule } from './cache/cache.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
@@ -32,6 +33,7 @@ import { ReportsModule } from './reports/reports.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
 import { SseModule } from './sse/sse.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
+import { ChargeNaturesModule } from './charge-natures/charge-natures.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RolesGuard } from './auth/roles.guard';
 import { ActivityInterceptor } from './logs/activity.interceptor';
@@ -39,6 +41,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    AppCacheModule,
     SseModule,
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 300 }]),
@@ -85,6 +88,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     BusinessExpensesModule,
     ReportsModule,
     SuppliersModule,
+    ChargeNaturesModule,
   ],
   controllers: [AppController],
   providers: [
