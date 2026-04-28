@@ -1,14 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
-    AlertTriangle,
-    Search,
-    Shield,
-    Calendar,
-    Loader2,
-    X,
-} from 'lucide-react';
+import { Alert02Icon, Search01Icon, Shield01Icon, Calendar01Icon, Loading02Icon, Cancel01Icon } from 'hugeicons-react';
 import { useMySanctions } from '../api/sanctions/hooks';
 import type { Sanction, SanctionSeverity } from '../api/sanctions/types';
 
@@ -52,7 +45,7 @@ const SanctionDetailModal = ({ sanction, onClose, t }: { sanction: Sanction; onC
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl ${sev.bg} flex items-center justify-center`}>
-                            <AlertTriangle size={20} className={sev.text} />
+                            <Alert02Icon size={20} className={sev.text} />
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-gray-800">{t(`sanctions.types.${sanction.type.toLowerCase()}`)}</h2>
@@ -62,7 +55,7 @@ const SanctionDetailModal = ({ sanction, onClose, t }: { sanction: Sanction; onC
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -126,10 +119,10 @@ const Sanctions = () => {
     };
 
     const stats = [
-        { label: t('sanctions.stats.total'), value: sanctions.length, icon: AlertTriangle },
-        { label: t('sanctions.stats.light'), value: severityCounts.leger, icon: Shield },
-        { label: t('sanctions.stats.medium'), value: severityCounts.moyen, icon: Shield },
-        { label: t('sanctions.stats.severe'), value: severityCounts.grave, icon: Shield },
+        { label: t('sanctions.stats.total'), value: sanctions.length, icon: Alert02Icon, color: '#283852' },
+        { label: t('sanctions.stats.light'), value: severityCounts.leger, icon: Shield01Icon, color: '#33cbcc' },
+        { label: t('sanctions.stats.medium'), value: severityCounts.moyen, icon: Shield01Icon, color: '#f59e0b' },
+        { label: t('sanctions.stats.severe'), value: severityCounts.grave, icon: Shield01Icon, color: '#ef4444' },
     ];
 
     const severityFilters = [
@@ -142,7 +135,7 @@ const Sanctions = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-96">
-                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
     }
@@ -163,30 +156,31 @@ const Sanctions = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-xs md:text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-1 md:mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out text-[#33cbcc]">
-                            <stat.icon size={80} strokeWidth={1.5} className="md:hidden" />
-                            <stat.icon size={100} strokeWidth={1.5} className="hidden md:block" />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
             </div>
 
-            {/* Search + Filters */}
+            {/* Search01Icon + Filters */}
             <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
                 <div className="relative flex-1 max-w-sm">
-                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Search01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                     <input
                         type="text"
                         placeholder={t('sanctions.searchPlaceholder')}
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+                        className="w-full bg-white border border-[#e5e8ef] rounded-2xl py-3.5 pl-11 pr-4 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors"
                     />
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -214,7 +208,7 @@ const Sanctions = () => {
                         animate={{ opacity: 1 }}
                         className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 p-12 text-center"
                     >
-                        <AlertTriangle size={40} className="mx-auto text-gray-200 mb-3" />
+                        <Alert02Icon size={40} className="mx-auto text-gray-200 mb-3" />
                         <p className="text-gray-400 text-sm">{t('sanctions.noResults')}</p>
                     </motion.div>
                 ) : (
@@ -247,7 +241,7 @@ const Sanctions = () => {
                                         )}
                                         <div className="flex items-center gap-3 mt-2">
                                             <span className="flex items-center gap-1 text-[11px] text-gray-400">
-                                                <Calendar size={12} />
+                                                <Calendar01Icon size={12} />
                                                 {sanction.date
                                                     ? new Date(sanction.date).toLocaleDateString()
                                                     : new Date(sanction.createdAt!).toLocaleDateString()}

@@ -1,20 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    GraduationCap,
-    Search,
-    Plus,
-    X,
-    BookOpen,
-    Award,
-    Clock,
-    CheckCircle,
-    Calendar,
-    Building,
-    Loader2,
-    Eye,
-} from 'lucide-react';
+import { GraduationScrollIcon, Search01Icon, Add01Icon, Cancel01Icon, BookOpen01Icon, Award01Icon, Clock01Icon, Tick01Icon, Calendar01Icon, Building01Icon, Loading02Icon, ViewIcon } from 'hugeicons-react';
 import { useFormations, useCreateFormation } from '../api/formations/hooks';
 import { useAuth } from '../contexts/AuthContext';
 import type { Formation } from '../api/formations/types';
@@ -82,12 +69,12 @@ const CreateFormationModal = ({ onClose }: { onClose: () => void }) => {
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Plus size={20} className="text-[#33cbcc]" />
+                            <Add01Icon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{t('formations.create.title')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -95,7 +82,7 @@ const CreateFormationModal = ({ onClose }: { onClose: () => void }) => {
                 <div className="p-6 space-y-5 overflow-y-auto flex-1">
                     <div>
                         <label className={labelCls}>
-                            <BookOpen size={12} />
+                            <BookOpen01Icon size={12} />
                             {t('formations.create.formationTitle')}
                         </label>
                         <input
@@ -109,7 +96,7 @@ const CreateFormationModal = ({ onClose }: { onClose: () => void }) => {
 
                     <div>
                         <label className={labelCls}>
-                            <Building size={12} />
+                            <Building01Icon size={12} />
                             {t('formations.create.organization')}
                         </label>
                         <input
@@ -124,7 +111,7 @@ const CreateFormationModal = ({ onClose }: { onClose: () => void }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('formations.create.startDate')}
                             </label>
                             <input
@@ -136,7 +123,7 @@ const CreateFormationModal = ({ onClose }: { onClose: () => void }) => {
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('formations.create.endDate')}
                             </label>
                             <input
@@ -150,7 +137,7 @@ const CreateFormationModal = ({ onClose }: { onClose: () => void }) => {
 
                     <div>
                         <label className={labelCls}>
-                            <Award size={12} />
+                            <Award01Icon size={12} />
                             {t('formations.create.certificate')}
                         </label>
                         <input
@@ -173,7 +160,7 @@ const CreateFormationModal = ({ onClose }: { onClose: () => void }) => {
                         disabled={create.isPending || !form.title.trim()}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20 transition-colors disabled:opacity-50"
                     >
-                        <Plus size={16} />
+                        <Add01Icon size={16} />
                         {create.isPending ? '...' : t('formations.create.submit')}
                     </button>
                 </div>
@@ -207,7 +194,7 @@ const FormationDetailModal = ({ formation, onClose }: { formation: Formation; on
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-gray-800">{formation.title}</h2>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -285,10 +272,10 @@ const Formations = () => {
     const certificates = (formations || []).filter(f => f.certificateDetails).length;
 
     const stats = [
-        { label: t('formations.stats.total'), value: formations?.length || 0, icon: GraduationCap },
-        { label: t('formations.stats.ongoing'), value: ongoing, icon: Clock },
-        { label: t('formations.stats.completed'), value: completed, icon: CheckCircle },
-        { label: t('formations.stats.certificates'), value: certificates, icon: Award },
+        { label: t('formations.stats.total'), value: formations?.length || 0, icon: GraduationScrollIcon, color: '#283852' },
+        { label: t('formations.stats.ongoing'), value: ongoing, icon: Clock01Icon, color: '#33cbcc' },
+        { label: t('formations.stats.completed'), value: completed, icon: Tick01Icon, color: '#22c55e' },
+        { label: t('formations.stats.certificates'), value: certificates, icon: Award01Icon, color: '#f59e0b' },
     ];
 
     const filters = [
@@ -301,7 +288,7 @@ const Formations = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-96">
-                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
     }
@@ -318,7 +305,7 @@ const Formations = () => {
                     onClick={() => setShowCreate(true)}
                     className="flex items-center justify-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 w-full md:w-auto"
                 >
-                    <Plus size={18} />
+                    <Add01Icon size={18} />
                     {t('formations.addFormation')}
                 </button>
             </div>
@@ -331,30 +318,32 @@ const Formations = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-xs font-medium">{stat.label}</h3>
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-1">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out text-[#283852]">
-                            <stat.icon size={80} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
             </div>
 
-            {/* Search + Filters */}
+            {/* Search01Icon + Filters */}
             <div className="flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
+                    <Search01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                     <input
                         type="text"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         placeholder={t('formations.searchPlaceholder')}
-                        className="w-full bg-white rounded-xl border border-gray-200 py-3 px-4 pl-4 pr-12 text-sm focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] outline-none transition-all"
+                        className="w-full bg-white border border-[#e5e8ef] rounded-2xl py-3.5 pl-11 pr-4 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors"
                     />
-                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 </div>
                 <div className="flex gap-2 overflow-x-auto pb-1">
                     {filters.map(f => (
@@ -376,7 +365,7 @@ const Formations = () => {
             {/* List */}
             {filtered.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-100 py-16 text-center">
-                    <GraduationCap size={40} className="mx-auto text-gray-200 mb-3" />
+                    <GraduationScrollIcon size={40} className="mx-auto text-gray-200 mb-3" />
                     <p className="text-gray-400 text-sm">{t('formations.noResults')}</p>
                 </div>
             ) : (
@@ -399,7 +388,7 @@ const Formations = () => {
                                             status === 'ongoing' ? 'bg-[#33cbcc]/10' :
                                             'bg-gray-100'
                                         }`}>
-                                            <GraduationCap size={20} className={
+                                            <GraduationScrollIcon size={20} className={
                                                 status === 'completed' ? 'text-[#283852]' :
                                                 status === 'ongoing' ? 'text-[#33cbcc]' :
                                                 'text-gray-400'
@@ -409,7 +398,7 @@ const Formations = () => {
                                             <h3 className="font-semibold text-gray-800 text-sm md:text-base truncate">{formation.title}</h3>
                                             {formation.organization && (
                                                 <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
-                                                    <Building size={12} />
+                                                    <Building01Icon size={12} />
                                                     {formation.organization}
                                                 </p>
                                             )}
@@ -423,7 +412,7 @@ const Formations = () => {
                                                 </span>
                                                 {formation.certificateDetails && (
                                                     <span className="text-[10px] text-gray-400 flex items-center gap-1">
-                                                        <Award size={10} />
+                                                        <Award01Icon size={10} />
                                                         {formation.certificateDetails}
                                                     </span>
                                                 )}
@@ -431,7 +420,7 @@ const Formations = () => {
                                         </div>
                                     </div>
                                     <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors shrink-0">
-                                        <Eye size={16} />
+                                        <ViewIcon size={16} />
                                     </button>
                                 </div>
                             </motion.div>

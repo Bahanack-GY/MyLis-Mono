@@ -1,22 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
- Plus,
- X,
- Loader2,
- Calendar,
- CheckCircle,
- FileCheck,
- Eye,
- Receipt,
- Building2,
- Users,
- Clock,
- AlertTriangle,
- ArrowLeft,
- Shield,
-} from 'lucide-react';
+import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, Tick01Icon, File01Icon, ViewIcon, Invoice01Icon, Building02Icon, UserGroupIcon, Clock01Icon, Alert02Icon, ArrowLeft01Icon, Shield01Icon } from 'hugeicons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../api/config';
@@ -76,9 +61,9 @@ const STATUS_COLORS: Record<string, { text: string; label: string }> = {
 };
 
 const TYPE_CONFIG: Record<string, { text: string; icon: any; label: string; full: string }> = {
- TVA: { text: 'text-gray-600', icon: Receipt, label: 'TVA', full: 'TVA Mensuelle' },
- IS: { text: 'text-gray-600', icon: Building2, label: 'IS', full: 'Impot sur les Societes' },
- CNPS: { text: 'text-gray-600', icon: Users, label: 'CNPS', full: 'CNPS Mensuelle' },
+ TVA: { text: 'text-gray-600', icon: Invoice01Icon, label: 'TVA', full: 'TVA Mensuelle' },
+ IS: { text: 'text-gray-600', icon: Building02Icon, label: 'IS', full: 'Impot sur les Societes' },
+ CNPS: { text: 'text-gray-600', icon: UserGroupIcon, label: 'CNPS', full: 'CNPS Mensuelle' },
 };
 
 const inputCls =
@@ -267,7 +252,7 @@ const GenerateModal = ({
  onClick={onClose}
  className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
 
@@ -318,7 +303,7 @@ const GenerateModal = ({
  onClick={handleGenerate}
  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors bg-[#283852] hover:bg-[#1e2d3d] disabled:opacity-50"
  >
- {isPending ? <Loader2 size={16} className="animate-spin"/> : <Plus size={16} />}
+ {isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Add01Icon size={16} />}
  Generer
  </button>
  </div>
@@ -395,7 +380,7 @@ const DeclarationDetailModal = ({
  onClick={onClose}
  className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
 
@@ -444,7 +429,7 @@ const DeclarationDetailModal = ({
 
  {declaration.filedAt && (
  <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-2">
- <FileCheck size={16} className="text-gray-500"/>
+ <File01Icon size={16} className="text-gray-500"/>
  <span className="text-sm text-gray-600">
  Deposee le {formatDate(declaration.filedAt)}
  </span>
@@ -461,9 +446,9 @@ const DeclarationDetailModal = ({
  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
  >
  {validateMut.isPending ? (
- <Loader2 size={14} className="animate-spin"/>
+ <Loading02Icon size={14} className="animate-spin"/>
  ) : (
- <CheckCircle size={14} />
+ <Tick01Icon size={14} />
  )}
  Valider
  </button>
@@ -475,9 +460,9 @@ const DeclarationDetailModal = ({
  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
  >
  {fileMut.isPending ? (
- <Loader2 size={14} className="animate-spin"/>
+ <Loading02Icon size={14} className="animate-spin"/>
  ) : (
- <FileCheck size={14} />
+ <File01Icon size={14} />
  )}
  Marquer deposee
  </button>
@@ -543,7 +528,7 @@ export default function TaxDeclarations() {
  {/* Fiscal Year Selector */}
  <div className="bg-white rounded-2xl p-4 flex flex-col md:flex-row md:items-center gap-4">
  <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
- <Calendar size={16} className="text-[#33cbcc]"/>
+ <Calendar01Icon size={16} className="text-[#33cbcc]"/>
  Exercice fiscal
  </div>
  <select
@@ -581,7 +566,7 @@ export default function TaxDeclarations() {
  {upcoming && upcoming.length > 0 && (
  <div className="bg-white rounded-2xl p-6">
  <div className="flex items-center gap-2 mb-4">
- <Clock size={18} className="text-[#283852]"/>
+ <Clock01Icon size={18} className="text-[#283852]"/>
  <h3 className="text-sm font-bold text-gray-800">Prochaines echeances</h3>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -608,7 +593,7 @@ export default function TaxDeclarations() {
  >
  {obl.type}
  </span>
- {isUrgent && <AlertTriangle size={14} className="text-[#283852]"/>}
+ {isUrgent && <Alert02Icon size={14} className="text-[#283852]"/>}
  </div>
  <p className="text-sm text-gray-700 mb-1">{obl.description}</p>
  <div className="flex items-center justify-between">
@@ -631,7 +616,7 @@ export default function TaxDeclarations() {
  {/* Declarations Table */}
  {declLoading ? (
  <div className="flex items-center justify-center py-16">
- <Loader2 size={24} className="animate-spin text-[#33cbcc]"/>
+ <Loading02Icon size={24} className="animate-spin text-[#33cbcc]"/>
  </div>
  ) : (declarations || []).length > 0 ? (
  <div className="bg-white rounded-2xl overflow-hidden">
@@ -683,7 +668,7 @@ export default function TaxDeclarations() {
  >
  {formatDate(decl.dueDate)}
  {isOverdue && (
- <AlertTriangle size={10} className="inline ml-1 text-[#283852]"/>
+ <Alert02Icon size={10} className="inline ml-1 text-[#283852]"/>
  )}
  </span>
  </div>
@@ -708,7 +693,7 @@ export default function TaxDeclarations() {
  title="Valider"
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
  >
- <CheckCircle size={14} />
+ <Tick01Icon size={14} />
  </button>
  )}
  {decl.status === 'VALIDATED' && (
@@ -721,7 +706,7 @@ export default function TaxDeclarations() {
  title="Marquer deposee"
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
  >
- <FileCheck size={14} />
+ <File01Icon size={14} />
  </button>
  )}
  <button
@@ -732,7 +717,7 @@ export default function TaxDeclarations() {
  title="Details"
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
  >
- <Eye size={14} />
+ <ViewIcon size={14} />
  </button>
  </div>
  </motion.div>
@@ -741,7 +726,7 @@ export default function TaxDeclarations() {
  </div>
  ) : (
  <div className="bg-white rounded-2xl p-12 text-center">
- <Shield size={48} className="mx-auto text-gray-300 mb-4"/>
+ <Shield01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-500 font-medium mb-2">Aucune declaration fiscale</p>
  <p className="text-sm text-gray-400">
  Utilisez les boutons ci-dessus pour generer vos declarations.

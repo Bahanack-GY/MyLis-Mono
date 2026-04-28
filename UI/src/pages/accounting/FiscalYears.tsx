@@ -1,17 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
- Plus,
- X,
- Loader2,
- Calendar,
- Lock,
- Unlock,
- AlertTriangle,
- CheckCircle,
- CalendarDays,
-} from 'lucide-react';
+import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, LockPasswordIcon, CircleUnlock01Icon, Alert02Icon, Tick01Icon } from 'hugeicons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -146,7 +136,7 @@ const CreateFiscalYearModal = ({ onClose }: { onClose: () => void }) => {
  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
- <CalendarDays size={20} className="text-[#33cbcc]"/>
+ <Calendar01Icon size={20} className="text-[#33cbcc]"/>
  </div>
  <h2 className="text-lg font-bold text-gray-800">Nouvel exercice fiscal</h2>
  </div>
@@ -154,7 +144,7 @@ const CreateFiscalYearModal = ({ onClose }: { onClose: () => void }) => {
  onClick={onClose}
  className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
 
@@ -173,7 +163,7 @@ const CreateFiscalYearModal = ({ onClose }: { onClose: () => void }) => {
  <div className="grid grid-cols-2 gap-4">
  <div>
  <label className={labelCls}>
- <Calendar size={12} />
+ <Calendar01Icon size={12} />
  Date de debut
  </label>
  <input
@@ -185,7 +175,7 @@ const CreateFiscalYearModal = ({ onClose }: { onClose: () => void }) => {
  </div>
  <div>
  <label className={labelCls}>
- <Calendar size={12} />
+ <Calendar01Icon size={12} />
  Date de fin
  </label>
  <input
@@ -215,7 +205,7 @@ const CreateFiscalYearModal = ({ onClose }: { onClose: () => void }) => {
  : 'bg-gray-300 cursor-not-allowed shadow-none'
  }`}
  >
- {createMut.isPending ? <Loader2 size={16} className="animate-spin"/> : <Plus size={16} />}
+ {createMut.isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Add01Icon size={16} />}
  Creer
  </button>
  </div>
@@ -293,7 +283,7 @@ const ConfirmModal = ({
  disabled={isPending}
  className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50 ${confirmColor}`}
  >
- {isPending && <Loader2 size={14} className="animate-spin"/>}
+ {isPending && <Loading02Icon size={14} className="animate-spin"/>}
  {confirmLabel}
  </button>
  </div>
@@ -346,7 +336,7 @@ export default function FiscalYears() {
  onClick={() => setShowCreateModal(true)}
  className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
  >
- <Plus size={16} />
+ <Add01Icon size={16} />
  Nouvel Exercice
  </button>
  </div>
@@ -382,7 +372,7 @@ export default function FiscalYears() {
 
  {/* Period */}
  <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
- <Calendar size={14} className="text-gray-400"/>
+ <Calendar01Icon size={14} className="text-gray-400"/>
  <span>
  {formatDate(fy.startDate)} - {formatDate(fy.endDate)}
  </span>
@@ -405,7 +395,7 @@ export default function FiscalYears() {
  {/* Open highlight */}
  {isOpen && (
  <div className="flex items-center gap-2 bg-[#33cbcc]/5 rounded-xl p-3 mb-4">
- <CheckCircle size={14} className="text-[#33cbcc]"/>
+ <Tick01Icon size={14} className="text-[#33cbcc]"/>
  <span className="text-xs font-semibold text-[#33cbcc]">
  Exercice en cours
  </span>
@@ -419,7 +409,7 @@ export default function FiscalYears() {
  onClick={() => setClosingId(fy.id)}
  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors"
  >
- <Lock size={14} />
+ <LockPasswordIcon size={14} />
  Cloturer
  </button>
  ) : (
@@ -427,7 +417,7 @@ export default function FiscalYears() {
  onClick={() => setReopeningId(fy.id)}
  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
  >
- <Unlock size={14} />
+ <CircleUnlock01Icon size={14} />
  Reouvrir
  </button>
  )}
@@ -438,7 +428,7 @@ export default function FiscalYears() {
  </div>
  ) : (
  <div className="bg-white rounded-2xl p-12 text-center">
- <CalendarDays size={48} className="mx-auto text-gray-300 mb-4"/>
+ <Calendar01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-500 font-medium mb-2">Aucun exercice fiscal</p>
  <p className="text-sm text-gray-400">Creez votre premier exercice fiscal pour commencer.</p>
  </div>
@@ -451,7 +441,7 @@ export default function FiscalYears() {
  <ConfirmModal
  title="Cloturer l'exercice"
  message="Etes-vous sur de vouloir cloturer cet exercice fiscal ? Les ecritures ne pourront plus etre modifiees."
- icon={Lock}
+ icon={LockPasswordIcon}
  iconBg="bg-[#283852]/10"
  iconColor="text-[#283852]"
  confirmLabel="Cloturer"
@@ -467,7 +457,7 @@ export default function FiscalYears() {
  <ConfirmModal
  title="Reouvrir l'exercice"
  message="Etes-vous sur de vouloir reouvrir cet exercice fiscal ? Les ecritures pourront a nouveau etre modifiees."
- icon={Unlock}
+ icon={CircleUnlock01Icon}
  iconBg="bg-[#33cbcc]/10"
  iconColor="text-[#33cbcc]"
  confirmLabel="Reouvrir"

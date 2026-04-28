@@ -5,11 +5,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     PieChart, Pie, Cell, LineChart, Line,
 } from 'recharts';
-import {
-    Target, Users, Phone, DollarSign, TrendingUp, ShoppingCart,
-    Award, UserPlus, Percent, BarChart3, Trophy, Activity,
-    ChevronLeft, ChevronRight, Pencil, Check, X as XIcon, Flag,
-} from 'lucide-react';
+import { Target01Icon, UserGroupIcon, CallIcon, DollarCircleIcon, ArrowUpRight01Icon, ShoppingCart01Icon, Award01Icon, UserAdd01Icon, PercentIcon, BarChartHorizontalIcon, Activity01Icon, ArrowLeft01Icon, ArrowRight01Icon, PencilIcon, Tick01Icon, Cancel01Icon as XIcon, Flag01Icon } from 'hugeicons-react';
 import { useCommercialKpis, useLeadStats, useMyGoal, useTeamPerformance, useSetGoal } from '../../api/commercial/hooks';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEmployees } from '../../api/employees/hooks';
@@ -74,23 +70,25 @@ function progressColor(pct: number | null): string {
 }
 
 // ── Inline KPI Card ──
-function KpiCard({ icon: Icon, label, value, subtitle, delay = 0 }: {
-    icon: any; label: string; value: string; subtitle?: string; delay?: number;
+function KpiCard({ icon: Icon, label, value, subtitle, delay = 0, color = '#33cbcc' }: {
+    icon: any; label: string; value: string; subtitle?: string; delay?: number; color?: string;
 }) {
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
-            className="bg-white p-5 rounded-2xl border border-gray-100 relative overflow-hidden"
+            className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
         >
-            <div className="relative z-10">
-                <p className="text-sm font-medium text-gray-500 mb-1">{label}</p>
-                <h3 className="text-2xl font-bold text-gray-800">{value}</h3>
-                {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
+            <div className="px-5 py-3" style={{ backgroundColor: color }}>
+                <p className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{label}</p>
             </div>
-            <div className="absolute -right-4 -bottom-4 opacity-5">
-                <Icon size={100} strokeWidth={1.5} className="text-[#33cbcc]" />
+            <div className="p-5 bg-white relative overflow-hidden">
+                <h3 className="text-3xl font-bold text-[#1c2b3a] leading-none">{value}</h3>
+                {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
+                <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color }}>
+                    <Icon size={110} strokeWidth={1.2} />
+                </div>
             </div>
         </motion.div>
     );
@@ -318,7 +316,7 @@ export default function CommercialDashboard() {
                     {/* Card header: title + month navigator */}
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <Flag size={15} className="text-[#33cbcc]" />
+                            <Flag01Icon size={15} className="text-[#33cbcc]" />
                             <span className="text-sm font-semibold text-gray-700">
                                 {t('commercial.goal.myGoalTitle', 'Mon objectif mensuel')}
                             </span>
@@ -329,7 +327,7 @@ export default function CommercialDashboard() {
                                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                 aria-label="Mois précédent"
                             >
-                                <ChevronLeft size={14} />
+                                <ArrowLeft01Icon size={14} />
                             </button>
                             <span className="text-xs font-semibold text-gray-600 min-w-[110px] text-center">
                                 {MONTH_LABELS[goalMonth - 1]} {goalYear}
@@ -340,7 +338,7 @@ export default function CommercialDashboard() {
                                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30"
                                 aria-label="Mois suivant"
                             >
-                                <ChevronRight size={14} />
+                                <ArrowRight01Icon size={14} />
                             </button>
                         </div>
                     </div>
@@ -412,7 +410,7 @@ export default function CommercialDashboard() {
                     {/* Card header: title + month navigator */}
                     <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50">
                         <div className="flex items-center gap-2">
-                            <Flag size={15} className="text-[#33cbcc]" />
+                            <Flag01Icon size={15} className="text-[#33cbcc]" />
                             <span className="text-sm font-semibold text-gray-700">
                                 {t('commercial.goal.teamTitle', "Performance de l'équipe")}
                             </span>
@@ -423,7 +421,7 @@ export default function CommercialDashboard() {
                                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                 aria-label="Mois précédent"
                             >
-                                <ChevronLeft size={14} />
+                                <ArrowLeft01Icon size={14} />
                             </button>
                             <span className="text-xs font-semibold text-gray-600 min-w-[110px] text-center">
                                 {MONTH_LABELS[goalMonth - 1]} {goalYear}
@@ -434,7 +432,7 @@ export default function CommercialDashboard() {
                                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30"
                                 aria-label="Mois suivant"
                             >
-                                <ChevronRight size={14} />
+                                <ArrowRight01Icon size={14} />
                             </button>
                         </div>
                     </div>
@@ -510,7 +508,7 @@ export default function CommercialDashboard() {
                                                                 className="p-1.5 rounded-lg bg-[#33cbcc] text-white hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors"
                                                                 aria-label="Enregistrer"
                                                             >
-                                                                <Check size={13} />
+                                                                <Tick01Icon size={13} />
                                                             </button>
                                                             <button
                                                                 onClick={() => setEditingGoalFor(null)}
@@ -561,7 +559,7 @@ export default function CommercialDashboard() {
                                                             aria-label={`Définir objectif pour ${row.firstName} ${row.lastName}`}
                                                             className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                                         >
-                                                            <Pencil size={14} />
+                                                            <PencilIcon size={14} />
                                                         </button>
                                                     )}
                                                 </td>
@@ -578,28 +576,28 @@ export default function CommercialDashboard() {
             {/* ── KPI Cards — Row 1 ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KpiCard
-                    icon={Target}
+                    icon={Target01Icon}
                     label={t('commercial.kpi.totalVisites', 'Total Visites')}
                     value={isLoading ? '...' : String(kpis?.totalVisites || 0)}
                     subtitle={t('commercial.kpi.totalVisitesSubtitle', 'Toutes activites terrain')}
                     delay={0}
                 />
                 <KpiCard
-                    icon={Users}
+                    icon={UserGroupIcon}
                     label={t('commercial.kpi.visitesClients', 'Visites Clients')}
                     value={isLoading ? '...' : String(kpis?.visitesClients || 0)}
                     subtitle={t('commercial.kpi.visitesClientsSubtitle', 'Clients existants')}
                     delay={0.05}
                 />
                 <KpiCard
-                    icon={Phone}
+                    icon={CallIcon}
                     label={t('commercial.kpi.visitesProspects', 'Visites Prospects')}
                     value={isLoading ? '...' : String(kpis?.visitesProspects || 0)}
                     subtitle={t('commercial.kpi.visitesProspectsSubtitle', 'Nouveaux prospects')}
                     delay={0.1}
                 />
                 <KpiCard
-                    icon={DollarSign}
+                    icon={DollarCircleIcon}
                     label={t('commercial.kpi.coutVisites', 'Cout Visites')}
                     value={isLoading ? '...' : formatFCFA(kpis?.coutVisites || 0)}
                     subtitle={t('commercial.kpi.coutVisitesSubtitle', 'Charges deplacement')}
@@ -610,28 +608,28 @@ export default function CommercialDashboard() {
             {/* ── KPI Cards — Row 2 ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KpiCard
-                    icon={TrendingUp}
+                    icon={ArrowUpRight01Icon}
                     label={t('commercial.kpi.chiffreAffaire', "Chiffre d'Affaire")}
                     value={isLoading ? '...' : formatFCFA(kpis?.chiffreAffaire || 0)}
                     subtitle={t('commercial.kpi.chiffreAffaireSubtitle', 'CA realise')}
                     delay={0.2}
                 />
                 <KpiCard
-                    icon={ShoppingCart}
+                    icon={ShoppingCart01Icon}
                     label={t('commercial.kpi.panierMoyen', 'Panier Moyen')}
                     value={isLoading ? '...' : formatFCFA(kpis?.panierMoyen || 0)}
                     subtitle={t('commercial.kpi.panierMoyenSubtitle', 'Par transaction')}
                     delay={0.25}
                 />
                 <KpiCard
-                    icon={Award}
+                    icon={Award01Icon}
                     label={t('commercial.kpi.margeVisite', 'Marge/Visite')}
                     value={isLoading ? '...' : formatFCFA(kpis?.margeParVisite || 0)}
                     subtitle={t('commercial.kpi.margeVisiteSubtitle', 'Rentabilite terrain')}
                     delay={0.3}
                 />
                 <KpiCard
-                    icon={UserPlus}
+                    icon={UserAdd01Icon}
                     label={t('commercial.kpi.nouveauxClients', 'Nouveaux Clients')}
                     value={isLoading ? '...' : String(kpis?.nouveauxClients || 0)}
                     subtitle={t('commercial.kpi.nouveauxClientsSubtitle', 'Leads convertis')}
@@ -642,28 +640,28 @@ export default function CommercialDashboard() {
             {/* ── KPI Cards — Row 3 ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <KpiCard
-                    icon={Percent}
+                    icon={PercentIcon}
                     label={t('commercial.kpi.tauxAcquisition', 'Taux Acquisition')}
                     value={isLoading ? '...' : `${(kpis?.tauxAcquisition || 0).toFixed(1)}%`}
                     subtitle={t('commercial.kpi.tauxAcquisitionSubtitle', 'Nouveaux / total')}
                     delay={0.4}
                 />
                 <KpiCard
-                    icon={BarChart3}
+                    icon={BarChartHorizontalIcon}
                     label={t('commercial.kpi.pipelineValue', 'Pipeline Value')}
                     value={isLoading ? '...' : formatFCFA(kpis?.pipelineValue || 0)}
                     subtitle={t('commercial.kpi.pipelineValueSubtitle', 'Valeur des opportunites')}
                     delay={0.45}
                 />
                 <KpiCard
-                    icon={Trophy}
+                    icon={Award01Icon}
                     label={t('commercial.kpi.winRate', 'Win Rate')}
                     value={isLoading ? '...' : `${(kpis?.winRate || 0).toFixed(1)}%`}
                     subtitle={t('commercial.kpi.winRateSubtitle', 'Affaires gagnees')}
                     delay={0.5}
                 />
                 <KpiCard
-                    icon={Activity}
+                    icon={Activity01Icon}
                     label={t('commercial.kpi.conversionRate', 'Conversion Rate')}
                     value={isLoading ? '...' : `${(kpis?.conversionRate || 0).toFixed(1)}%`}
                     subtitle={t('commercial.kpi.conversionRateSubtitle', 'Lead vers client')}

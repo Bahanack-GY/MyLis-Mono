@@ -2,21 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import {
-    Bell,
-    Search,
-    Settings,
-    ListChecks,
-    Briefcase,
-    Calendar,
-    FileText,
-    Ticket,
-    CheckCheck,
-    Circle,
-    Clock,
-    CalendarDays,
-    MessageSquare,
-} from 'lucide-react';
+import { Notification01Icon, Search01Icon, Settings01Icon, Task01Icon, Briefcase01Icon, Calendar01Icon, File01Icon, Ticket01Icon, TickDouble01Icon, CircleIcon, Clock01Icon, Message02Icon } from 'hugeicons-react';
 
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from '../../api/notifications/hooks';
 import type { NotificationType } from '../../api/notifications/types';
@@ -35,14 +21,14 @@ const TYPE_COLORS: Record<NotificationType, string> = {
 };
 
 const TYPE_ICONS: Record<NotificationType, React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>> = {
-    system: Settings,
-    task: ListChecks,
-    project: Briefcase,
-    meeting: Calendar,
-    document: FileText,
-    ticket: Ticket,
-    message: MessageSquare,
-    chat: MessageSquare,
+    system: Settings01Icon,
+    task: Task01Icon,
+    project: Briefcase01Icon,
+    meeting: Calendar01Icon,
+    document: File01Icon,
+    ticket: Ticket01Icon,
+    message: Message02Icon,
+    chat: Message02Icon,
 };
 
 const NOTIFICATION_TYPES: NotificationType[] = ['system', 'task', 'project', 'meeting', 'document', 'ticket', 'message', 'chat'];
@@ -97,10 +83,10 @@ const Notifications = () => {
     }).length;
 
     const stats = [
-        { label: t('notifications.stats.total'), value: notifications.length, icon: Bell, color: '#33cbcc' },
-        { label: t('notifications.stats.unread'), value: unreadCount, icon: Circle, color: '#ef4444' },
-        { label: t('notifications.stats.today'), value: todayCount, icon: CalendarDays, color: '#3b82f6' },
-        { label: t('notifications.stats.thisWeek'), value: thisWeekCount, icon: Clock, color: '#8b5cf6' },
+        { label: t('notifications.stats.total'), value: notifications.length, icon: Notification01Icon, color: '#33cbcc' },
+        { label: t('notifications.stats.unread'), value: unreadCount, icon: CircleIcon, color: '#ef4444' },
+        { label: t('notifications.stats.today'), value: todayCount, icon: Calendar01Icon, color: '#3b82f6' },
+        { label: t('notifications.stats.thisWeek'), value: thisWeekCount, icon: Clock01Icon, color: '#8b5cf6' },
     ];
 
     /* Type filter pills */
@@ -133,7 +119,7 @@ const Notifications = () => {
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}
                 >
-                    <CheckCheck size={16} />
+                    <TickDouble01Icon size={16} />
                     {t('notifications.markAllRead')}
                 </button>
             </div>
@@ -159,16 +145,16 @@ const Notifications = () => {
                 ))}
             </div>
 
-            {/* ── Search + Read/Unread Toggle ── */}
+            {/* ── Search01Icon + Read/Unread Toggle ── */}
             <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
+                <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                    <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                     <input
                         type="text"
                         placeholder={t('notifications.searchPlaceholder')}
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                        className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                     />
                 </div>
                 <div className="flex bg-white rounded-xl border border-gray-100 p-1">
@@ -212,7 +198,7 @@ const Notifications = () => {
             {filteredNotifications.length > 0 && (
                 <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden divide-y divide-gray-100">
                     {filteredNotifications.map((notif, i) => {
-                        const TypeIcon = TYPE_ICONS[notif.type as NotificationType] || Bell;
+                        const TypeIcon = TYPE_ICONS[notif.type as NotificationType] || Notification01Icon;
                         const typeColor = TYPE_COLORS[notif.type as NotificationType] || '#6b7280';
                         return (
                             <motion.div
@@ -270,7 +256,7 @@ const Notifications = () => {
             {/* ── Empty State ── */}
             {filteredNotifications.length === 0 && (
                 <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-                    <Bell size={48} className="mx-auto text-gray-300 mb-4" />
+                    <Notification01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-400 font-medium">
                         {unreadCount === 0 && filterRead === 'unread'
                             ? t('notifications.allRead')

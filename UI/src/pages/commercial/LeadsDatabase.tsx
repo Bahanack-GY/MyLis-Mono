@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Plus, Search, Pencil, Trash2, X, Filter, ChevronLeft, ChevronRight,
-    Eye, CheckCircle2, Phone, Mail, MapPin, Building2, Clock,
-    MessageSquare, ArrowRightCircle, User, ListTodo,
-    PhoneCall, ScanSearch, MailOpen, Users, Monitor, RefreshCw, FileText, MoreHorizontal,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Add01Icon, Search01Icon, PencilIcon, Delete02Icon, Cancel01Icon, FilterIcon, ArrowLeft01Icon, ArrowRight01Icon, ViewIcon, Tick01Icon, CallIcon, Mail01Icon, Location01Icon, Building02Icon, Clock01Icon, Message02Icon, UserIcon, Task01Icon, ScanIcon, UserGroupIcon, ComputerIcon, RefreshIcon, File01Icon, MoreHorizontalIcon } from 'hugeicons-react';
+import type { FC, SVGProps } from 'react';
+type LucideIcon = FC<Omit<SVGProps<SVGSVGElement>, 'ref'> & { size?: number | string }>;
 import { useLeads, useCreateLead, useUpdateLead, useDeleteLead, useLead, useLeadActivities, useCreateLeadActivity } from '../../api/commercial/hooks';
 import { useTasksByLead } from '../../api/tasks/hooks';
 import type { Lead, CreateLeadDto, CreateLeadActivityDto, LeadPriority, LeadStatus, LeadType, ActivityType } from '../../api/commercial/types';
@@ -35,18 +31,18 @@ const statusColors: Record<string, string> = {
 };
 
 const ACTIVITY_TYPE_ICONS: Record<string, LucideIcon> = {
-    VISITE_CLIENT: Building2,
-    VISITE_PROSPECT: ScanSearch,
-    APPEL: PhoneCall,
-    EMAIL: MailOpen,
-    REUNION: Users,
-    DEMO: Monitor,
-    RELANCE: RefreshCw,
-    AUTRE: FileText,
+    VISITE_CLIENT: Building02Icon,
+    VISITE_PROSPECT: ScanIcon,
+    APPEL: CallIcon,
+    EMAIL: Mail01Icon,
+    REUNION: UserGroupIcon,
+    DEMO: ComputerIcon,
+    RELANCE: RefreshIcon,
+    AUTRE: File01Icon,
 };
 
 const ActivityTypeIcon = ({ type, size = 16 }: { type: string; size?: number }) => {
-    const Icon = ACTIVITY_TYPE_ICONS[type] ?? MoreHorizontal;
+    const Icon = ACTIVITY_TYPE_ICONS[type] ?? MoreHorizontalIcon;
     return <Icon size={size} />;
 };
 
@@ -183,7 +179,7 @@ function LeadModal({ isOpen, onClose, lead }: LeadModalProps) {
                                 onClick={onClose}
                                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
                             >
-                                <X size={18} />
+                                <Cancel01Icon size={18} />
                             </button>
                         </div>
 
@@ -598,7 +594,7 @@ export default function LeadsDatabase() {
                     onClick={handleAdd}
                     className="flex items-center gap-2 px-4 py-2.5 bg-[#33cbcc] text-white rounded-xl hover:bg-[#2bb5b6] transition-colors text-sm"
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     {t('commercial.leads.addLead')}
                 </button>
             </div>
@@ -607,9 +603,9 @@ export default function LeadsDatabase() {
             <div className="bg-white rounded-2xl sm border border-gray-100 p-4">
                 <div className="flex flex-wrap items-center gap-3">
                     <div className="relative flex-1 min-w-[200px]">
-                        <Search
-                            size={16}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        <Search01Icon
+                            size={18}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none"
                         />
                         <input
                             value={search}
@@ -618,12 +614,12 @@ export default function LeadsDatabase() {
                                 setPage(1);
                             }}
                             placeholder={t('commercial.leads.searchPlaceholder')}
-                            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] transition-colors outline-none text-gray-800 text-sm"
+                            className="w-full bg-white border border-[#e5e8ef] rounded-2xl py-3.5 pl-11 pr-4 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors"
                         />
                     </div>
 
                     <div className="flex items-center gap-2 text-gray-400">
-                        <Filter size={16} />
+                        <FilterIcon size={16} />
                     </div>
 
                     <select
@@ -735,7 +731,7 @@ export default function LeadsDatabase() {
                                             <div className="flex items-center gap-1.5">
                                                 {lead.code}
                                                 {lead.clientId && (
-                                                    <CheckCircle2 size={13} className="text-[#33cbcc]" />
+                                                    <Tick01Icon size={13} className="text-[#33cbcc]" />
                                                 )}
                                             </div>
                                         </td>
@@ -806,13 +802,13 @@ export default function LeadsDatabase() {
                                                         className="p-1.5 text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 rounded-lg"
                                                         title={t('commercial.detail.view')}
                                                     >
-                                                        <Eye size={15} />
+                                                        <ViewIcon size={15} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleEdit(lead)}
                                                         className="p-1.5 text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 rounded-lg"
                                                     >
-                                                        <Pencil size={15} />
+                                                        <PencilIcon size={15} />
                                                     </button>
                                                     {isManager && (
                                                         <button
@@ -821,7 +817,7 @@ export default function LeadsDatabase() {
                                                             }
                                                             className="p-1.5 text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg"
                                                         >
-                                                            <Trash2 size={15} />
+                                                            <Delete02Icon size={15} />
                                                         </button>
                                                     )}
                                                 </div>
@@ -850,7 +846,7 @@ export default function LeadsDatabase() {
                                 disabled={page <= 1}
                                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronLeft size={16} />
+                                <ArrowLeft01Icon size={16} />
                             </button>
                             {Array.from({ length: totalPages }, (_, i) => i + 1)
                                 .filter(
@@ -892,7 +888,7 @@ export default function LeadsDatabase() {
                                 disabled={page >= totalPages}
                                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronRight size={16} />
+                                <ArrowRight01Icon size={16} />
                             </button>
                         </div>
                     </div>

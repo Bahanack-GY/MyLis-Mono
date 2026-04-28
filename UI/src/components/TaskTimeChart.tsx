@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft01Icon, ArrowRight01Icon } from 'hugeicons-react';
 import { useDailyHours } from '../api/tasks/hooks';
 
 type Period = 'week' | 'month' | 'year' | 'custom';
@@ -164,7 +164,7 @@ export default function TaskTimeChart({ employeeId }: Props) {
                         onClick={() => setOffset(o => o - 1)}
                         className="p-1 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
                     >
-                        <ChevronLeft size={16} />
+                        <ArrowLeft01Icon size={16} />
                     </button>
                     <span className="text-xs font-semibold text-gray-700 capitalize">{range.label}</span>
                     <button
@@ -172,7 +172,7 @@ export default function TaskTimeChart({ employeeId }: Props) {
                         disabled={offset >= 0}
                         className="p-1 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors disabled:opacity-30"
                     >
-                        <ChevronRight size={16} />
+                        <ArrowRight01Icon size={16} />
                     </button>
                 </div>
             ) : (

@@ -2,28 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Search,
-  Plus,
-  Calendar,
-  CheckCircle,
-  Clock,
-  MoreHorizontal,
-  ArrowUpRight,
-  Briefcase,
-  AlertCircle,
-  X,
-  AlignLeft,
-  Building,
-  Users,
-  TrendingUp,
-  Upload,
-  FileText,
-  Trash2,
-  Loader2,
-  Pencil,
-  Wrench
-} from 'lucide-react';
+import { Search01Icon, Add01Icon, Calendar01Icon, Tick01Icon, Clock01Icon, MoreHorizontalIcon, ArrowUpRight01Icon, Briefcase01Icon, Alert01Icon, Cancel01Icon, AlignLeftIcon, Building01Icon, UserGroupIcon, Upload01Icon, File01Icon, Delete02Icon, Loading02Icon, PencilIcon, Wrench01Icon } from 'hugeicons-react';
 import { useProjects, useCreateProject, useProject, useUpdateProject } from '../../api/projects/hooks';
 import { ProjectsSkeleton } from '../../components/Skeleton';
 import { useDepartments, useDepartmentServices } from '../../api/departments/hooks';
@@ -65,24 +44,68 @@ interface Project {
 /* ─── Status config ─────────────────────────────────────── */
 
 const STATUS_I18N: Record<ProjectStatus, string> = {
-  active: 'statusActive',
+  active:    'statusActive',
   completed: 'statusCompleted',
-  on_hold: 'statusOnHold',
-  overdue: 'statusOverdue',
+  on_hold:   'statusOnHold',
+  overdue:   'statusOverdue',
 };
 
-const STATUS_STYLES: Record<ProjectStatus, { bg: string; text: string; dot: string }> = {
-  active:    { bg: 'bg-emerald-50',  text: 'text-emerald-600',  dot: 'bg-emerald-500' },
-  completed: { bg: 'bg-blue-50',     text: 'text-blue-600',     dot: 'bg-blue-500' },
-  on_hold:   { bg: 'bg-amber-50',    text: 'text-amber-600',    dot: 'bg-amber-500' },
-  overdue:   { bg: 'bg-rose-50',     text: 'text-rose-600',     dot: 'bg-rose-500' },
+const STATUS_DOT: Record<ProjectStatus, string> = {
+  active:    '#33cbcc',
+  completed: '#b0bac9',
+  on_hold:   '#283852',
+  overdue:   '#e05e5e',
 };
 
-/* ─── (no mock data) ───────────────────────────────────── */
+const STATUS_TEXT: Record<ProjectStatus, string> = {
+  active:    'text-[#33cbcc]',
+  completed: 'text-[#b0bac9]',
+  on_hold:   'text-[#283852]',
+  overdue:   'text-[#e05e5e]',
+};
+
+/* ─── Shared form styles ────────────────────────────────── */
+
+const INPUT = 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-2.5 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors';
+const SELECT = 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-2.5 text-sm text-[#1c2b3a] focus:outline-none focus:border-[#33cbcc] transition-colors appearance-none cursor-pointer';
+const LABEL = 'flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-widest mb-1.5';
+
+/* ─── Panel component ───────────────────────────────────── */
+
+const Panel = ({
+  children,
+  onClose,
+  wide = false,
+  zIndex = 'z-50',
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  wide?: boolean;
+  zIndex?: string;
+}) => (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    onClick={onClose}
+    className={`fixed inset-0 bg-black/30 ${zIndex} flex justify-end`}
+  >
+    <motion.div
+      initial={{ x: '100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '100%' }}
+      transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+      onClick={e => e.stopPropagation()}
+      className={`bg-white ${wide ? 'w-full max-w-lg' : 'w-full max-w-sm'} h-full flex flex-col border-l border-[#e5e8ef]`}
+    >
+      {children}
+    </motion.div>
+  </motion.div>
+);
 
 /* ─── Donut Chart ───────────────────────────────────────── */
 
-const DONUT_COLORS = ['#33cbcc', '#3b82f6', '#f43f5e'];
+const DONUT_COLORS = ['#33cbcc', '#283852', '#e05e5e'];
 
 const DonutChart = ({ projects }: { projects: Project[] }) => {
   const { t } = useTranslation();
@@ -100,10 +123,10 @@ const DonutChart = ({ projects }: { projects: Project[] }) => {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.4 }}
-      className="bg-white p-6 rounded-3xl border border-gray-100 flex flex-col"
+      className="bg-white p-6 border border-[#e5e8ef] flex flex-col"
     >
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-gray-800">{t('projects.distribution')}</h3>
+        <h3 className="text-sm font-bold text-[#1c2b3a]">{t('projects.distribution')}</h3>
       </div>
 
       <div className="h-50 relative">
@@ -115,7 +138,7 @@ const DonutChart = ({ projects }: { projects: Project[] }) => {
               cy="50%"
               innerRadius={55}
               outerRadius={75}
-              paddingAngle={5}
+              paddingAngle={4}
               dataKey="value"
               strokeWidth={0}
             >
@@ -124,14 +147,14 @@ const DonutChart = ({ projects }: { projects: Project[] }) => {
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+              contentStyle={{ border: '1px solid #e5e8ef', boxShadow: 'none', borderRadius: 0 }}
             />
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="text-center">
-            <p className="text-xs text-gray-400 font-medium">{t('projects.stats.total')}</p>
-            <p className="text-2xl font-bold text-gray-800">{total}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8892a4]">{t('projects.stats.total')}</p>
+            <p className="text-2xl font-bold text-[#1c2b3a]">{total}</p>
           </div>
         </div>
       </div>
@@ -140,10 +163,10 @@ const DonutChart = ({ projects }: { projects: Project[] }) => {
         {donutData.map((entry, i) => (
           <div key={i} className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: DONUT_COLORS[i] }} />
-              <span className="text-gray-600">{entry.name}</span>
+              <div className="w-2.5 h-2.5" style={{ backgroundColor: DONUT_COLORS[i] }} />
+              <span className="text-[#8892a4] text-xs">{entry.name}</span>
             </div>
-            <span className="font-semibold text-gray-800">{entry.value}</span>
+            <span className="font-bold text-[#1c2b3a] text-sm">{entry.value}</span>
           </div>
         ))}
       </div>
@@ -151,14 +174,9 @@ const DonutChart = ({ projects }: { projects: Project[] }) => {
   );
 };
 
-/* ─── Create Project Modal ──────────────────────────────── */
+/* ─── Create Client Modal (small centered overlay) ──────── */
 
-/* departments are now fetched from API inside the modal */
-
-interface DocFile {
-  name: string;
-  size: string;
-}
+interface DocFile { name: string; size: string; }
 
 interface ProjectForm {
   name: string;
@@ -179,8 +197,6 @@ const fmtToday = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 
-/* ─── Create Client Modal ────────────────────────────────── */
-
 const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCreated: (name: string) => void }) => {
   const { t } = useTranslation();
   const createClient = useCreateClient();
@@ -200,80 +216,63 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
 
   const isValid = form.name.trim().length > 0;
 
-  const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
-  const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
-  const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-60 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/30 z-[60] flex items-center justify-center p-4"
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 16 }}
+        transition={{ type: 'tween', duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         onClick={e => e.stopPropagation()}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+        className="bg-white border border-[#e5e8ef] w-full max-w-md overflow-hidden"
       >
+        {/* Top accent */}
+        <div className="h-1 bg-[#33cbcc]" />
+
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-              <Users size={18} className="text-[#33cbcc]" />
-            </div>
-            <h3 className="text-base font-bold text-gray-800">{t('clients.createTitle')}</h3>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-            <X size={18} />
+        <div className="px-6 py-4 border-b border-[#e5e8ef] flex items-center justify-between">
+          <h3 className="text-sm font-bold text-[#1c2b3a]">{t('clients.createTitle')}</h3>
+          <button onClick={onClose} className="text-[#b0bac9] hover:text-[#1c2b3a] transition-colors">
+            <Cancel01Icon size={16} />
           </button>
         </div>
 
         {/* Content */}
         <div className="px-6 py-5 space-y-4">
-          {/* Name */}
           <div>
-            <label className={labelCls}>
-              <Users size={12} />
-              {t('clients.name')}
-            </label>
+            <label className={LABEL}><UserGroupIcon size={11} />{t('clients.name')}</label>
             <input
               type="text"
               value={form.name}
               onChange={e => setForm(prev => ({ ...prev, name: e.target.value }))}
               placeholder={t('clients.namePlaceholder')}
-              className={inputCls}
+              className={INPUT}
               autoFocus
             />
           </div>
-
-          {/* Type */}
           <div>
-            <label className={labelCls}>{t('clients.type')}</label>
+            <label className={LABEL}>{t('clients.type')}</label>
             <select
               value={form.type}
               onChange={e => setForm(prev => ({ ...prev, type: e.target.value as 'one_time' | 'subscription' }))}
-              className={selectCls}
+              className={SELECT}
             >
               <option value="one_time">{t('clients.typeOneTime')}</option>
               <option value="subscription">{t('clients.typeSubscription')}</option>
             </select>
           </div>
-
-          {/* Department */}
           <div>
-            <label className={labelCls}>
-              <Building size={12} />
-              {t('clients.department')}
-            </label>
+            <label className={LABEL}><Building01Icon size={11} />{t('clients.department')}</label>
             <select
               value={form.department}
               onChange={e => setForm(prev => ({ ...prev, department: e.target.value }))}
-              className={selectCls}
+              className={SELECT}
             >
               <option value="">{t('clients.departmentPlaceholder')}</option>
               {(apiDepartments || []).map(d => (
@@ -284,8 +283,11 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+        <div className="px-6 py-4 border-t border-[#e5e8ef] flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2.5 text-xs font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
+          >
             {t('clients.cancel')}
           </button>
           <button
@@ -293,24 +295,16 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
             onClick={() => {
               if (!isValid) return;
               const selectedDept = apiDepartments?.find(d => d.name === form.department);
-              createClient.mutate({
-                name: form.name,
-                type: form.type,
-                departmentId: selectedDept?.id,
-              }, {
-                onSuccess: () => {
-                  onCreated(form.name);
-                  onClose();
-                },
-              });
+              createClient.mutate(
+                { name: form.name, type: form.type, departmentId: selectedDept?.id },
+                { onSuccess: () => { onCreated(form.name); onClose(); } }
+              );
             }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${
-              isValid && !createClient.isPending
-                ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
-                : 'bg-gray-300 cursor-not-allowed shadow-none'
+            className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white transition-colors ${
+              isValid && !createClient.isPending ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-[#b0bac9] cursor-not-allowed'
             }`}
           >
-            {createClient.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+            {createClient.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Add01Icon size={14} />}
             {t('clients.create')}
           </button>
         </div>
@@ -319,9 +313,9 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
   );
 };
 
-/* ─── Create Project Modal ───────────────────────────────── */
+/* ─── Create Project Panel ───────────────────────────────── */
 
-const CreateProjectModal = ({ onClose, hodDepartmentId }: { onClose: () => void; hodDepartmentId?: string | null }) => {
+const CreateProjectPanel = ({ onClose, hodDepartmentId }: { onClose: () => void; hodDepartmentId?: string | null }) => {
   const { t } = useTranslation();
   const createProject = useCreateProject();
   const { data: apiDepartments } = useDepartments();
@@ -333,42 +327,26 @@ const CreateProjectModal = ({ onClose, hodDepartmentId }: { onClose: () => void;
     : null;
 
   const [form, setForm] = useState<ProjectForm>({
-    name: '',
-    description: '',
-    department: '',
-    client: '',
-    cost: '',
-    revenue: '',
-    startDate: fmtToday(),
-    dueDate: '',
-    contract: null,
-    srs: null,
-    otherDocs: [],
+    name: '', description: '', department: '', client: '',
+    cost: '', revenue: '', startDate: fmtToday(), dueDate: '',
+    contract: null, srs: null, otherDocs: [],
   });
 
-  // Auto-set department when HOD's department becomes available
   useEffect(() => {
     if (hodDepartment && !form.department) {
       setForm(prev => ({ ...prev, department: hodDepartment.name }));
     }
   }, [hodDepartment?.name]);
 
-  // Close on Escape + lock scroll
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handleKey);
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', handleKey);
-      document.body.style.overflow = '';
-    };
+    return () => { document.removeEventListener('keydown', handleKey); document.body.style.overflow = ''; };
   }, [onClose]);
 
-  const update = <K extends keyof ProjectForm>(key: K, value: ProjectForm[K]) => {
+  const update = <K extends keyof ProjectForm>(key: K, value: ProjectForm[K]) =>
     setForm(prev => ({ ...prev, [key]: value }));
-  };
 
   const handleFileSelect = (key: 'contract' | 'srs', e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -379,315 +357,219 @@ const CreateProjectModal = ({ onClose, hodDepartmentId }: { onClose: () => void;
   const handleOtherDocs = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
-    const newDocs: DocFile[] = Array.from(files).map(f => ({
-      name: f.name,
-      size: `${(f.size / 1024).toFixed(0)} KB`,
-    }));
+    const newDocs: DocFile[] = Array.from(files).map(f => ({ name: f.name, size: `${(f.size / 1024).toFixed(0)} KB` }));
     setForm(prev => ({ ...prev, otherDocs: [...prev.otherDocs, ...newDocs] }));
   };
 
-  const removeOtherDoc = (idx: number) => {
+  const removeOtherDoc = (idx: number) =>
     setForm(prev => ({ ...prev, otherDocs: prev.otherDocs.filter((_, i) => i !== idx) }));
-  };
 
   const isValid = form.name.trim().length > 0 && form.department.length > 0 && form.dueDate.length > 0;
 
-  const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
-  const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
-  const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        onClick={e => e.stopPropagation()}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden max-h-[90vh] flex flex-col"
-      >
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-              <Plus size={18} className="text-[#33cbcc]" />
+    <Panel onClose={onClose} wide>
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-0.5">
+            {t('projects.title')}
+          </p>
+          <h3 className="text-sm font-bold text-[#1c2b3a]">{t('projects.createTitle')}</h3>
+        </div>
+        <button onClick={onClose} className="text-[#b0bac9] hover:text-[#1c2b3a] transition-colors">
+          <Cancel01Icon size={18} />
+        </button>
+      </div>
+
+      {/* Scrollable content */}
+      <div className="overflow-y-auto flex-1 px-5 py-5 space-y-5">
+        <div>
+          <label className={LABEL}><Briefcase01Icon size={11} />{t('projects.formName')}</label>
+          <input type="text" value={form.name} onChange={e => update('name', e.target.value)}
+            placeholder={t('projects.formNamePlaceholder')} className={INPUT} />
+        </div>
+        <div>
+          <label className={LABEL}><AlignLeftIcon size={11} />{t('projects.description')}</label>
+          <textarea value={form.description} onChange={e => update('description', e.target.value)}
+            placeholder={t('projects.formDescriptionPlaceholder')} rows={3}
+            className={`${INPUT} resize-none`} />
+        </div>
+        <div>
+          <label className={LABEL}><Building01Icon size={11} />{t('projects.formDepartment')}</label>
+          {hodDepartment ? (
+            <div className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-2.5 text-sm text-[#1c2b3a] flex items-center gap-2">
+              <Building01Icon size={13} className="text-[#b0bac9] shrink-0" />
+              {hodDepartment.name}
             </div>
-            <h3 className="text-base font-bold text-gray-800">{t('projects.createTitle')}</h3>
+          ) : (
+            <select value={form.department} onChange={e => update('department', e.target.value)} className={SELECT}>
+              <option value="">{t('projects.formDepartmentPlaceholder')}</option>
+              {(apiDepartments || []).map(d => (
+                <option key={d.id} value={d.name}>{d.name}</option>
+              ))}
+            </select>
+          )}
+        </div>
+        <div>
+          <label className={LABEL}><UserGroupIcon size={11} />{t('projects.formClient')}</label>
+          <div className="flex gap-2">
+            <select value={form.client} onChange={e => update('client', e.target.value)} className={SELECT}>
+              <option value="">{t('projects.formClientPlaceholder')}</option>
+              {(allClients || []).map(c => (
+                <option key={c.id} value={c.name}>{c.name}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              onClick={() => setShowCreateClient(true)}
+              className="shrink-0 w-10 h-10 border border-[#e5e8ef] flex items-center justify-center text-[#33cbcc] hover:bg-[#33cbcc]/5 hover:border-[#33cbcc] transition-colors"
+              title={t('clients.createTitle')}
+            >
+              <Add01Icon size={16} />
+            </button>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-            <X size={18} />
-          </button>
+        </div>
+        <div>
+          <label className={LABEL}><ArrowUpRight01Icon size={11} />{t('projects.formRevenue')}</label>
+          <input type="text" value={form.revenue} onChange={e => update('revenue', e.target.value)}
+            placeholder="0 FCFA" className={INPUT} />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className={LABEL}><Calendar01Icon size={11} />{t('projects.startDate')}</label>
+            <input type="date" value={form.startDate} onChange={e => update('startDate', e.target.value)} className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}><Calendar01Icon size={11} />{t('projects.formDueDate')}</label>
+            <input type="date" value={form.dueDate} onChange={e => update('dueDate', e.target.value)} className={INPUT} />
+          </div>
         </div>
 
-        {/* Scrollable content */}
-        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
-
-          {/* Project name */}
+        {/* Documents */}
+        <div className="space-y-4">
+          <p className={`${LABEL} mb-0`}><File01Icon size={11} />{t('projects.formDocuments')}</p>
+          {/* Contract */}
           <div>
-            <label className={labelCls}>
-              <Briefcase size={12} />
-              {t('projects.formName')}
-            </label>
-            <input
-              type="text"
-              value={form.name}
-              onChange={e => update('name', e.target.value)}
-              placeholder={t('projects.formNamePlaceholder')}
-              className={inputCls}
-            />
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className={labelCls}>
-              <AlignLeft size={12} />
-              {t('projects.description')}
-            </label>
-            <textarea
-              value={form.description}
-              onChange={e => update('description', e.target.value)}
-              placeholder={t('projects.formDescriptionPlaceholder')}
-              rows={3}
-              className={`${inputCls} resize-none`}
-            />
-          </div>
-
-          {/* Department */}
-          <div>
-            <label className={labelCls}>
-              <Building size={12} />
-              {t('projects.formDepartment')}
-            </label>
-            {hodDepartment ? (
-              <div className="w-full bg-gray-50 rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-700 font-medium flex items-center gap-2">
-                <Building size={13} className="text-gray-400 shrink-0" />
-                {hodDepartment.name}
+            <p className="text-xs font-medium text-[#8892a4] mb-1.5">{t('projects.formContract')}</p>
+            {form.contract ? (
+              <div className="flex items-center justify-between bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3">
+                <div className="flex items-center gap-2 text-sm min-w-0">
+                  <File01Icon size={14} className="text-[#33cbcc] shrink-0" />
+                  <span className="font-medium text-[#1c2b3a] truncate max-w-[180px] inline-block">{form.contract.name}</span>
+                  <span className="text-[#b0bac9] shrink-0">{form.contract.size}</span>
+                </div>
+                <button onClick={() => update('contract', null)} className="text-[#b0bac9] hover:text-[#e05e5e] transition-colors">
+                  <Delete02Icon size={14} />
+                </button>
               </div>
             ) : (
-              <select
-                value={form.department}
-                onChange={e => update('department', e.target.value)}
-                className={selectCls}
-              >
-                <option value="">{t('projects.formDepartmentPlaceholder')}</option>
-                {(apiDepartments || []).map(d => (
-                  <option key={d.id} value={d.name}>{d.name}</option>
-                ))}
-              </select>
-            )}
-          </div>
-
-          {/* Client */}
-          <div>
-            <label className={labelCls}>
-              <Users size={12} />
-              {t('projects.formClient')}
-            </label>
-            <div className="flex gap-2">
-              <select
-                value={form.client}
-                onChange={e => update('client', e.target.value)}
-                className={selectCls}
-              >
-                <option value="">{t('projects.formClientPlaceholder')}</option>
-                {(allClients || []).map(c => (
-                  <option key={c.id} value={c.name}>{c.name}</option>
-                ))}
-              </select>
-              <button
-                type="button"
-                onClick={() => setShowCreateClient(true)}
-                className="shrink-0 w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-[#33cbcc] hover:bg-[#33cbcc]/5 hover:border-[#33cbcc]/30 transition-colors"
-                title={t('clients.createTitle')}
-              >
-                <Plus size={16} />
-              </button>
-            </div>
-          </div>
-
-          <AnimatePresence>
-            {showCreateClient && (
-              <CreateClientModal
-                onClose={() => setShowCreateClient(false)}
-                onCreated={(name) => update('client', name)}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Revenue */}
-          <div>
-            <label className={labelCls}>
-              <TrendingUp size={12} />
-              {t('projects.formRevenue')}
-            </label>
-            <input
-              type="text"
-              value={form.revenue}
-              onChange={e => update('revenue', e.target.value)}
-              placeholder="0 FCFA"
-              className={inputCls}
-            />
-          </div>
-
-          {/* Start date + Due date row */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>
-                <Calendar size={12} />
-                {t('projects.startDate')}
-              </label>
-              <input
-                type="date"
-                value={form.startDate}
-                onChange={e => update('startDate', e.target.value)}
-                className={inputCls}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>
-                <Calendar size={12} />
-                {t('projects.formDueDate')}
-              </label>
-              <input
-                type="date"
-                value={form.dueDate}
-                onChange={e => update('dueDate', e.target.value)}
-                className={inputCls}
-              />
-            </div>
-          </div>
-
-          {/* ── Documents section ── */}
-          <div className="space-y-4">
-            <p className={`${labelCls} mb-0`}>
-              <FileText size={12} />
-              {t('projects.formDocuments')}
-            </p>
-
-            {/* Contract */}
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1.5">{t('projects.formContract')}</p>
-              {form.contract ? (
-                <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
-                  <div className="flex items-center gap-2 text-sm min-w-0">
-                    <FileText size={14} className="text-[#33cbcc] shrink-0" />
-                    <span className="font-medium text-gray-700 truncate max-w-[180px] inline-block align-bottom">{form.contract.name}</span>
-                    <span className="text-gray-400 shrink-0">{form.contract.size}</span>
-                  </div>
-                  <button onClick={() => update('contract', null)} className="text-gray-400 hover:text-red-500 transition-colors">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-gray-400">
-                  <Upload size={16} />
-                  {t('projects.formUpload')}
-                  <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={e => handleFileSelect('contract', e)} />
-                </label>
-              )}
-            </div>
-
-            {/* SRS */}
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1.5">{t('projects.formSRS')}</p>
-              {form.srs ? (
-                <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
-                  <div className="flex items-center gap-2 text-sm min-w-0">
-                    <FileText size={14} className="text-[#33cbcc] shrink-0" />
-                    <span className="font-medium text-gray-700 truncate max-w-[180px] inline-block align-bottom">{form.srs.name}</span>
-                    <span className="text-gray-400 shrink-0">{form.srs.size}</span>
-                  </div>
-                  <button onClick={() => update('srs', null)} className="text-gray-400 hover:text-red-500 transition-colors">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-gray-400">
-                  <Upload size={16} />
-                  {t('projects.formUpload')}
-                  <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={e => handleFileSelect('srs', e)} />
-                </label>
-              )}
-            </div>
-
-            {/* Other documents */}
-            <div>
-              <p className="text-xs font-medium text-gray-500 mb-1.5">{t('projects.formOtherDocs')}</p>
-              {form.otherDocs.length > 0 && (
-                <div className="space-y-2 mb-3">
-                  {form.otherDocs.map((doc, i) => (
-                    <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
-                      <div className="flex items-center gap-2 text-sm min-w-0">
-                        <FileText size={14} className="text-[#33cbcc] shrink-0" />
-                        <span className="font-medium text-gray-700 truncate max-w-[180px] inline-block align-bottom">{doc.name}</span>
-                        <span className="text-gray-400 shrink-0">{doc.size}</span>
-                      </div>
-                      <button onClick={() => removeOtherDoc(i)} className="text-gray-400 hover:text-red-500 transition-colors">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-gray-400">
-                <Upload size={16} />
+              <label className="flex items-center justify-center gap-2 border-2 border-dashed border-[#e5e8ef] px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-[#b0bac9]">
+                <Upload01Icon size={16} />
                 {t('projects.formUpload')}
-                <input type="file" className="hidden" multiple onChange={handleOtherDocs} />
+                <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={e => handleFileSelect('contract', e)} />
               </label>
-            </div>
+            )}
+          </div>
+          {/* SRS */}
+          <div>
+            <p className="text-xs font-medium text-[#8892a4] mb-1.5">{t('projects.formSRS')}</p>
+            {form.srs ? (
+              <div className="flex items-center justify-between bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3">
+                <div className="flex items-center gap-2 text-sm min-w-0">
+                  <File01Icon size={14} className="text-[#33cbcc] shrink-0" />
+                  <span className="font-medium text-[#1c2b3a] truncate max-w-[180px] inline-block">{form.srs.name}</span>
+                  <span className="text-[#b0bac9] shrink-0">{form.srs.size}</span>
+                </div>
+                <button onClick={() => update('srs', null)} className="text-[#b0bac9] hover:text-[#e05e5e] transition-colors">
+                  <Delete02Icon size={14} />
+                </button>
+              </div>
+            ) : (
+              <label className="flex items-center justify-center gap-2 border-2 border-dashed border-[#e5e8ef] px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-[#b0bac9]">
+                <Upload01Icon size={16} />
+                {t('projects.formUpload')}
+                <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={e => handleFileSelect('srs', e)} />
+              </label>
+            )}
+          </div>
+          {/* Other docs */}
+          <div>
+            <p className="text-xs font-medium text-[#8892a4] mb-1.5">{t('projects.formOtherDocs')}</p>
+            {form.otherDocs.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {form.otherDocs.map((doc, i) => (
+                  <div key={i} className="flex items-center justify-between bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3">
+                    <div className="flex items-center gap-2 text-sm min-w-0">
+                      <File01Icon size={14} className="text-[#33cbcc] shrink-0" />
+                      <span className="font-medium text-[#1c2b3a] truncate max-w-[180px] inline-block">{doc.name}</span>
+                      <span className="text-[#b0bac9] shrink-0">{doc.size}</span>
+                    </div>
+                    <button onClick={() => removeOtherDoc(i)} className="text-[#b0bac9] hover:text-[#e05e5e] transition-colors">
+                      <Delete02Icon size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <label className="flex items-center justify-center gap-2 border-2 border-dashed border-[#e5e8ef] px-4 py-4 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all text-sm text-[#b0bac9]">
+              <Upload01Icon size={16} />
+              {t('projects.formUpload')}
+              <input type="file" className="hidden" multiple onChange={handleOtherDocs} />
+            </label>
           </div>
         </div>
+      </div>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
-          >
-            {t('projects.formCancel')}
-          </button>
-          <button
-            onClick={() => {
-              if (isValid) {
-                const selectedDept = apiDepartments?.find(d => d.name === form.department);
-                const selectedClient = allClients?.find(c => c.name === form.client);
-                createProject.mutate({
-                  name: form.name,
-                  description: form.description || undefined,
-                  departmentId: selectedDept?.id,
-                  clientId: selectedClient?.id,
-                  budget: form.cost ? parseFloat(form.cost) : undefined,
-                  revenue: form.revenue ? parseFloat(form.revenue) : undefined,
-                  startDate: form.startDate || undefined,
-                  endDate: form.dueDate || undefined,
-                }, { onSuccess: () => onClose() });
-              }
-            }}
-            disabled={!isValid || createProject.isPending}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${
-              isValid
-                ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
-                : 'bg-gray-300 cursor-not-allowed shadow-none'
-            }`}
-          >
-            {createProject.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
-            {t('projects.formCreate')}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+      {/* Footer */}
+      <div className="px-5 py-4 border-t border-[#e5e8ef] flex justify-end gap-3 shrink-0">
+        <button
+          onClick={onClose}
+          className="px-5 py-2.5 text-xs font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
+        >
+          {t('projects.formCancel')}
+        </button>
+        <button
+          onClick={() => {
+            if (isValid) {
+              const selectedDept = apiDepartments?.find(d => d.name === form.department);
+              const selectedClient = allClients?.find(c => c.name === form.client);
+              createProject.mutate({
+                name: form.name,
+                description: form.description || undefined,
+                departmentId: selectedDept?.id,
+                clientId: selectedClient?.id,
+                budget: form.cost ? parseFloat(form.cost) : undefined,
+                revenue: form.revenue ? parseFloat(form.revenue) : undefined,
+                startDate: form.startDate || undefined,
+                endDate: form.dueDate || undefined,
+              }, { onSuccess: () => onClose() });
+            }
+          }}
+          disabled={!isValid || createProject.isPending}
+          className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white transition-colors ${
+            isValid ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-[#b0bac9] cursor-not-allowed'
+          }`}
+        >
+          {createProject.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Add01Icon size={14} />}
+          {t('projects.formCreate')}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {showCreateClient && (
+          <CreateClientModal
+            onClose={() => setShowCreateClient(false)}
+            onCreated={(name) => update('client', name)}
+          />
+        )}
+      </AnimatePresence>
+    </Panel>
   );
 };
 
-/* ─── Edit Project Modal ─────────────────────────────────── */
+/* ─── Edit Project Panel ─────────────────────────────────── */
 
-const EditProjectModal = ({ projectId, onClose }: { projectId: string; onClose: () => void }) => {
+const EditProjectPanel = ({ projectId, onClose }: { projectId: string; onClose: () => void }) => {
   const { t } = useTranslation();
   const { data: apiProject, isLoading } = useProject(projectId);
   const updateProject = useUpdateProject();
@@ -695,15 +577,8 @@ const EditProjectModal = ({ projectId, onClose }: { projectId: string; onClose: 
   const { data: allClients } = useClients();
 
   const [form, setForm] = useState({
-    name: '',
-    description: '',
-    departmentId: '',
-    clientId: '',
-    serviceIds: [] as string[],
-    cost: '',
-    revenue: '',
-    startDate: '',
-    dueDate: '',
+    name: '', description: '', departmentId: '', clientId: '',
+    serviceIds: [] as string[], cost: '', revenue: '', startDate: '', dueDate: '',
   });
 
   const { data: departmentServices } = useDepartmentServices(form.departmentId || undefined);
@@ -736,150 +611,137 @@ const EditProjectModal = ({ projectId, onClose }: { projectId: string; onClose: 
 
   const isValid = form.name.trim().length > 0;
 
-  const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
-  const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
-  const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-    >
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-        onClick={e => e.stopPropagation()}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden max-h-[90vh] flex flex-col"
-      >
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-              <Pencil size={18} className="text-[#33cbcc]" />
-            </div>
-            <h3 className="text-base font-bold text-gray-800">{t('projects.editTitle')}</h3>
-          </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-            <X size={18} />
-          </button>
+    <Panel onClose={onClose} wide>
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-0.5">
+            {t('projects.title')}
+          </p>
+          <h3 className="text-sm font-bold text-[#1c2b3a]">{t('projects.editTitle')}</h3>
         </div>
+        <button onClick={onClose} className="text-[#b0bac9] hover:text-[#1c2b3a] transition-colors">
+          <Cancel01Icon size={18} />
+        </button>
+      </div>
 
-        {/* Scrollable content */}
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 size={24} className="animate-spin text-[#33cbcc]" />
-          </div>
-        ) : (
-          <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
-            <div>
-              <label className={labelCls}><Briefcase size={12} />{t('projects.formName')}</label>
-              <input type="text" value={form.name} onChange={e => update('name', e.target.value)} placeholder={t('projects.formNamePlaceholder')} className={inputCls} />
-            </div>
-            <div>
-              <label className={labelCls}><AlignLeft size={12} />{t('projects.description')}</label>
-              <textarea value={form.description} onChange={e => update('description', e.target.value)} placeholder={t('projects.formDescriptionPlaceholder')} rows={3} className={`${inputCls} resize-none`} />
-            </div>
-            <div>
-              <label className={labelCls}><Building size={12} />{t('projects.formDepartment')}</label>
-              <select value={form.departmentId} onChange={e => { update('departmentId', e.target.value); update('serviceIds', []); }} className={selectCls}>
-                <option value="">{t('projects.formDepartmentPlaceholder')}</option>
-                {(apiDepartments || []).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-              </select>
-            </div>
-            {form.departmentId && (
-              <div>
-                <label className={labelCls}><Wrench size={12} />{t('projects.formServices', 'Services')}</label>
-                {(departmentServices || []).filter(s => s.isActive).length === 0 ? (
-                  <p className="text-xs text-gray-400 py-2">{t('projects.noServices', 'No active services for this department')}</p>
-                ) : (
-                  <div className="space-y-2">
-                    {(departmentServices || []).filter(s => s.isActive).map(s => (
-                      <label key={s.id} className="flex items-center gap-3 px-4 py-2.5 rounded-xl border border-gray-200 cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all">
-                        <input
-                          type="checkbox"
-                          checked={form.serviceIds.includes(s.id)}
-                          onChange={e => {
-                            const next = e.target.checked
-                              ? [...form.serviceIds, s.id]
-                              : form.serviceIds.filter(id => id !== s.id);
-                            update('serviceIds', next);
-                          }}
-                          className="accent-[#33cbcc] w-4 h-4 shrink-0"
-                        />
-                        <span className="text-sm text-gray-700 flex-1">{s.name}</span>
-                        {s.price != null && (
-                          <span className="text-xs text-gray-400">{new Intl.NumberFormat('fr-FR').format(s.price)} FCFA</span>
-                        )}
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            <div>
-              <label className={labelCls}><Users size={12} />{t('projects.formClient')}</label>
-              <select value={form.clientId} onChange={e => update('clientId', e.target.value)} className={selectCls}>
-                <option value="">{t('projects.formClientPlaceholder')}</option>
-                {(allClients || []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}><TrendingUp size={12} />{t('projects.formRevenue')}</label>
-              <input type="text" value={form.revenue} onChange={e => update('revenue', e.target.value)} placeholder="0 FCFA" className={inputCls} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className={labelCls}><Calendar size={12} />{t('projects.startDate')}</label>
-                <input type="date" value={form.startDate} onChange={e => update('startDate', e.target.value)} className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}><Calendar size={12} />{t('projects.formDueDate')}</label>
-                <input type="date" value={form.dueDate} onChange={e => update('dueDate', e.target.value)} className={inputCls} />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
-          <button onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
-            {t('projects.formCancel')}
-          </button>
-          <button
-            onClick={() => {
-              if (isValid) {
-                updateProject.mutate({
-                  id: projectId,
-                  dto: {
-                    name: form.name,
-                    description: form.description || undefined,
-                    departmentId: form.departmentId || undefined,
-                    clientId: form.clientId || undefined,
-                    serviceIds: form.serviceIds,
-                    budget: form.cost ? parseFloat(form.cost) : undefined,
-                    revenue: form.revenue ? parseFloat(form.revenue) : undefined,
-                    startDate: form.startDate || undefined,
-                    endDate: form.dueDate || undefined,
-                  },
-                }, { onSuccess: () => onClose() });
-              }
-            }}
-            disabled={!isValid || updateProject.isPending}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#33cbcc]/20 ${
-              isValid ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-gray-300 cursor-not-allowed shadow-none'
-            }`}
-          >
-            {updateProject.isPending ? <Loader2 size={16} className="animate-spin" /> : <Pencil size={16} />}
-            {t('projects.formSave')}
-          </button>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loading02Icon size={24} className="animate-spin text-[#33cbcc]" />
         </div>
-      </motion.div>
-    </motion.div>
+      ) : (
+        <div className="overflow-y-auto flex-1 px-5 py-5 space-y-5">
+          <div>
+            <label className={LABEL}><Briefcase01Icon size={11} />{t('projects.formName')}</label>
+            <input type="text" value={form.name} onChange={e => update('name', e.target.value)}
+              placeholder={t('projects.formNamePlaceholder')} className={INPUT} />
+          </div>
+          <div>
+            <label className={LABEL}><AlignLeftIcon size={11} />{t('projects.description')}</label>
+            <textarea value={form.description} onChange={e => update('description', e.target.value)}
+              placeholder={t('projects.formDescriptionPlaceholder')} rows={3}
+              className={`${INPUT} resize-none`} />
+          </div>
+          <div>
+            <label className={LABEL}><Building01Icon size={11} />{t('projects.formDepartment')}</label>
+            <select value={form.departmentId} onChange={e => { update('departmentId', e.target.value); update('serviceIds', []); }} className={SELECT}>
+              <option value="">{t('projects.formDepartmentPlaceholder')}</option>
+              {(apiDepartments || []).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
+          </div>
+          {form.departmentId && (
+            <div>
+              <label className={LABEL}><Wrench01Icon size={11} />{t('projects.formServices', 'Services')}</label>
+              {(departmentServices || []).filter(s => s.isActive).length === 0 ? (
+                <p className="text-xs text-[#b0bac9] py-2">{t('projects.noServices', 'No active services for this department')}</p>
+              ) : (
+                <div className="space-y-2">
+                  {(departmentServices || []).filter(s => s.isActive).map(s => (
+                    <label key={s.id} className="flex items-center gap-3 px-4 py-2.5 border border-[#e5e8ef] cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all">
+                      <input
+                        type="checkbox"
+                        checked={form.serviceIds.includes(s.id)}
+                        onChange={e => {
+                          const next = e.target.checked
+                            ? [...form.serviceIds, s.id]
+                            : form.serviceIds.filter(id => id !== s.id);
+                          update('serviceIds', next);
+                        }}
+                        className="accent-[#33cbcc] w-4 h-4 shrink-0"
+                      />
+                      <span className="text-sm text-[#1c2b3a] flex-1">{s.name}</span>
+                      {s.price != null && (
+                        <span className="text-xs text-[#b0bac9]">{new Intl.NumberFormat('fr-FR').format(s.price)} FCFA</span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+          <div>
+            <label className={LABEL}><UserGroupIcon size={11} />{t('projects.formClient')}</label>
+            <select value={form.clientId} onChange={e => update('clientId', e.target.value)} className={SELECT}>
+              <option value="">{t('projects.formClientPlaceholder')}</option>
+              {(allClients || []).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className={LABEL}><ArrowUpRight01Icon size={11} />{t('projects.formRevenue')}</label>
+            <input type="text" value={form.revenue} onChange={e => update('revenue', e.target.value)}
+              placeholder="0 FCFA" className={INPUT} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className={LABEL}><Calendar01Icon size={11} />{t('projects.startDate')}</label>
+              <input type="date" value={form.startDate} onChange={e => update('startDate', e.target.value)} className={INPUT} />
+            </div>
+            <div>
+              <label className={LABEL}><Calendar01Icon size={11} />{t('projects.formDueDate')}</label>
+              <input type="date" value={form.dueDate} onChange={e => update('dueDate', e.target.value)} className={INPUT} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="px-5 py-4 border-t border-[#e5e8ef] flex justify-end gap-3 shrink-0">
+        <button
+          onClick={onClose}
+          className="px-5 py-2.5 text-xs font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
+        >
+          {t('projects.formCancel')}
+        </button>
+        <button
+          onClick={() => {
+            if (isValid) {
+              updateProject.mutate({
+                id: projectId,
+                dto: {
+                  name: form.name,
+                  description: form.description || undefined,
+                  departmentId: form.departmentId || undefined,
+                  clientId: form.clientId || undefined,
+                  serviceIds: form.serviceIds,
+                  budget: form.cost ? parseFloat(form.cost) : undefined,
+                  revenue: form.revenue ? parseFloat(form.revenue) : undefined,
+                  startDate: form.startDate || undefined,
+                  endDate: form.dueDate || undefined,
+                },
+              }, { onSuccess: () => onClose() });
+            }
+          }}
+          disabled={!isValid || updateProject.isPending}
+          className={`flex items-center gap-2 px-5 py-2.5 text-xs font-semibold text-white transition-colors ${
+            isValid ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-[#b0bac9] cursor-not-allowed'
+          }`}
+        >
+          {updateProject.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <PencilIcon size={14} />}
+          {t('projects.formSave')}
+        </button>
+      </div>
+    </Panel>
   );
 };
 
@@ -894,50 +756,47 @@ const Projects = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editProjectId, setEditProjectId] = useState<string | null>(null);
 
-  // API data
   const { role, departmentId } = useAuth();
   const deptScope = useDepartmentScope();
   const { data: apiProjects, isLoading } = useProjects(deptScope);
   const { data: apiDepartments } = useDepartments();
   const isHod = role === 'HEAD_OF_DEPARTMENT';
 
-  // Map API projects to display shape — no mock fallback
   const projects: Project[] = (apiProjects || []).map((p) => {
-      const tasks = p.tasks || [];
-      const tasksDone = tasks.filter(t => t.state === 'COMPLETED' || t.state === 'REVIEWED').length;
-      const milestones = p.milestones || [];
-      const milestonesDone = milestones.filter(m => m.completedAt != null).length;
-      const progress = milestones.length > 0
-          ? Math.round((milestonesDone / milestones.length) * 100)
-          : (tasks.length > 0 ? Math.round((tasksDone / tasks.length) * 100) : 0);
+    const tasks = p.tasks || [];
+    const tasksDone = tasks.filter(t => t.state === 'COMPLETED' || t.state === 'REVIEWED').length;
+    const milestones = p.milestones || [];
+    const milestonesDone = milestones.filter(m => m.completedAt != null).length;
+    const progress = milestones.length > 0
+      ? Math.round((milestonesDone / milestones.length) * 100)
+      : (tasks.length > 0 ? Math.round((tasksDone / tasks.length) * 100) : 0);
 
-      let status: ProjectStatus = 'active';
-      if (milestones.length > 0) {
-          if (milestones.every(m => m.completedAt != null)) status = 'completed';
-          else if (p.endDate && new Date(p.endDate) < new Date()) status = 'overdue';
-      } else {
-          const allDone = tasks.length > 0 && tasksDone === tasks.length;
-          if (allDone && tasks.length > 0) status = 'completed';
-          else if (p.endDate && new Date(p.endDate) < new Date() && !allDone) status = 'overdue';
-      }
+    let status: ProjectStatus = 'active';
+    if (milestones.length > 0) {
+      if (milestones.every(m => m.completedAt != null)) status = 'completed';
+      else if (p.endDate && new Date(p.endDate) < new Date()) status = 'overdue';
+    } else {
+      const allDone = tasks.length > 0 && tasksDone === tasks.length;
+      if (allDone && tasks.length > 0) status = 'completed';
+      else if (p.endDate && new Date(p.endDate) < new Date() && !allDone) status = 'overdue';
+    }
 
-      return {
-          id: p.id,
-          name: p.name,
-          description: p.description || '',
-          status,
-          progress,
-          startDate: p.startDate ? new Date(p.startDate).toLocaleDateString() : '',
-          endDate: p.endDate ? new Date(p.endDate).toLocaleDateString() : '',
-          department: p.department?.name || '',
-          tasksTotal: tasks.length,
-          tasksDone,
-          budget: p.budget ? `${new Intl.NumberFormat('fr-FR').format(p.budget)} FCFA` : '',
-          revenue: p.revenue ? `${new Intl.NumberFormat('fr-FR').format(p.revenue)} FCFA` : '',
-          category: p.department?.name || '',
-      };
+    return {
+      id: p.id,
+      name: p.name,
+      description: p.description || '',
+      status,
+      progress,
+      startDate: p.startDate ? new Date(p.startDate).toLocaleDateString() : '',
+      endDate: p.endDate ? new Date(p.endDate).toLocaleDateString() : '',
+      department: p.department?.name || '',
+      tasksTotal: tasks.length,
+      tasksDone,
+      budget: p.budget ? `${new Intl.NumberFormat('fr-FR').format(p.budget)} FCFA` : '',
+      revenue: p.revenue ? `${new Intl.NumberFormat('fr-FR').format(p.revenue)} FCFA` : '',
+      category: p.department?.name || '',
+    };
   });
-
 
   const filteredProjects = projects.filter((p) => {
     const matchesSearch =
@@ -949,10 +808,10 @@ const Projects = () => {
   });
 
   const stats = [
-    { label: t('projects.stats.total'),     value: projects.length,                                       icon: Briefcase,   color: '#283852' },
-    { label: t('projects.stats.active'),    value: projects.filter(p => p.status === 'active').length,     icon: Clock,       color: '#33cbcc' },
-    { label: t('projects.stats.completed'), value: projects.filter(p => p.status === 'completed').length,  icon: CheckCircle, color: '#3b82f6' },
-    { label: t('projects.stats.overdue'),   value: projects.filter(p => p.status === 'overdue').length,    icon: AlertCircle, color: '#f43f5e' },
+    { label: t('projects.stats.total'),     value: projects.length,                                        icon: Briefcase01Icon, color: '#283852' },
+    { label: t('projects.stats.active'),    value: projects.filter(p => p.status === 'active').length,     icon: Clock01Icon,     color: '#33cbcc' },
+    { label: t('projects.stats.completed'), value: projects.filter(p => p.status === 'completed').length,  icon: Tick01Icon,      color: '#283852' },
+    { label: t('projects.stats.overdue'),   value: projects.filter(p => p.status === 'overdue').length,    icon: Alert01Icon,     color: '#e05e5e' },
   ];
 
   const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -981,23 +840,23 @@ const Projects = () => {
     { key: 'overdue',   label: t('projects.statusOverdue') },
   ];
 
-  if (isLoading) {
-    return <ProjectsSkeleton />;
-  }
+  if (isLoading) return <ProjectsSkeleton />;
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">{t('projects.title')}</h1>
-          <p className="text-gray-500 mt-1">{t('projects.subtitle')}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-1">
+            {t('projects.subtitle')}
+          </p>
+          <h1 className="text-2xl font-bold text-[#1c2b3a]">{t('projects.title')}</h1>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
+          className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
         >
-          <Plus size={16} />
+          <Add01Icon size={16} />
           {t('projects.newProject')}
         </button>
       </div>
@@ -1010,40 +869,39 @@ const Projects = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-2xl border border-gray-100 relative overflow-hidden group hover:border-[#33cbcc]/50 transition-colors"
+            className="border border-gray-100 rounded-2xl overflow-hidden transition-colors duration-200 hover:border-[#33cbcc]/50"
           >
-            <div className="relative z-10">
-              <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-              <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+            <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+              <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
             </div>
-            <div
-              className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
-              style={{ color: stat.color }}
-            >
-              <stat.icon size={100} strokeWidth={1.5} />
+            <div className="p-5 bg-white relative overflow-hidden">
+              <h2 className="text-4xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+              <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                <stat.icon size={110} strokeWidth={1.2} />
+              </div>
             </div>
           </motion.div>
         ))}
       </div>
 
       {/* Filters & Search */}
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-          <Search className="text-gray-400 ml-3" size={20} />
+      <div className="flex flex-col md:flex-row gap-3">
+        <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] px-4 py-3 focus-within:border-[#33cbcc] transition-colors">
+          <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
           <input
             type="text"
             placeholder={t('projects.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400 px-3"
+            className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
           />
         </div>
-        <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 px-3">
-          <Building size={16} className="text-gray-400 shrink-0" />
+        <div className="flex items-center gap-2 bg-white border border-[#e5e8ef] px-3">
+          <Building01Icon size={15} className="text-[#b0bac9] shrink-0" />
           <select
             value={filterDepartment}
             onChange={(e) => setFilterDepartment(e.target.value)}
-            className="bg-transparent border-none text-sm font-medium text-gray-700 focus:outline-none focus:ring-0 py-2.5 cursor-pointer appearance-none pr-6"
+            className="bg-transparent text-xs font-medium text-[#1c2b3a] focus:outline-none py-2.5 cursor-pointer appearance-none pr-4"
           >
             <option value="all">{t('projects.filterAll')}</option>
             {(apiDepartments || []).map(d => (
@@ -1056,10 +914,10 @@ const Projects = () => {
             <button
               key={sf.key}
               onClick={() => setFilterStatus(sf.key)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+              className={`px-4 py-2 text-xs font-semibold border transition-colors ${
                 filterStatus === sf.key
-                  ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
-                  : 'bg-white text-gray-600 border border-gray-100 hover:border-[#33cbcc]/30'
+                  ? 'bg-[#283852] text-white border-[#283852]'
+                  : 'bg-white text-[#8892a4] border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852]'
               }`}
             >
               {sf.label}
@@ -1071,132 +929,130 @@ const Projects = () => {
       {/* Chart + Projects Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left column: Charts */}
-        <div className="space-y-8">
-        {/* Area Chart */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white p-6 rounded-3xl border border-gray-100"
-        >
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-bold text-gray-800">{t('projects.chartTitle')}</h3>
-            <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-400">
-              <MoreHorizontal size={20} />
-            </button>
-          </div>
-          <div className="h-[200px] w-full">
-            <ResponsiveContainer width="100%" height="100%" debounce={50}>
-              <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorProjects" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#33cbcc" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#33cbcc" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9CA3AF', fontSize: 12 }} />
-                <CartesianGrid vertical={false} stroke="#E5E7EB" strokeDasharray="3 3" />
-                <Tooltip
-                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
-                  cursor={{ stroke: '#33cbcc', strokeWidth: 2 }}
-                />
-                <Area type="monotone" dataKey="projects" stroke="#33cbcc" strokeWidth={3} fillOpacity={1} fill="url(#colorProjects)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
+        <div className="space-y-6">
+          {/* Area Chart */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white p-6 border border-[#e5e8ef]"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-sm font-bold text-[#1c2b3a]">{t('projects.chartTitle')}</h3>
+              <button className="p-1.5 hover:bg-[#f8f9fc] text-[#b0bac9] transition-colors">
+                <MoreHorizontalIcon size={18} />
+              </button>
+            </div>
+            <div className="h-[200px] w-full">
+              <ResponsiveContainer width="100%" height="100%" debounce={50}>
+                <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorProjects" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#33cbcc" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#33cbcc" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#8892a4', fontSize: 11 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#8892a4', fontSize: 11 }} />
+                  <CartesianGrid vertical={false} stroke="#e5e8ef" strokeDasharray="3 3" />
+                  <Tooltip
+                    contentStyle={{ border: '1px solid #e5e8ef', boxShadow: 'none', borderRadius: 0 }}
+                    cursor={{ stroke: '#33cbcc', strokeWidth: 1.5 }}
+                  />
+                  <Area type="monotone" dataKey="projects" stroke="#33cbcc" strokeWidth={2} fillOpacity={1} fill="url(#colorProjects)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </motion.div>
 
-        {/* Donut Chart — Status Distribution */}
-        <DonutChart projects={projects} />
+          <DonutChart projects={projects} />
         </div>
 
         {/* Projects List */}
         <div className="lg:col-span-2 space-y-4">
           {filteredProjects.length === 0 && (
-            <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-              <Briefcase size={48} className="mx-auto text-gray-300 mb-4" />
-              <p className="text-gray-400 font-medium">{t('projects.noResults')}</p>
+            <div className="bg-white border border-[#e5e8ef] p-12 text-center">
+              <Briefcase01Icon size={40} className="mx-auto text-[#b0bac9] mb-4" />
+              <p className="text-[#8892a4] font-medium">{t('projects.noResults')}</p>
               <button
                 onClick={() => setShowCreateModal(true)}
-                className="mt-4 px-4 py-2 bg-[#33cbcc] text-white text-sm font-semibold rounded-xl hover:bg-[#2bb5b6] transition-colors"
+                className="mt-4 px-4 py-2 bg-[#33cbcc] text-white text-xs font-semibold hover:bg-[#2bb5b6] transition-colors"
               >
                 {t('projects.newProject')}
               </button>
             </div>
           )}
-          {filteredProjects.map((project, index) => {
-            const style = STATUS_STYLES[project.status];
-            return (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.08 }}
-                onClick={() => setSelectedProject(project)}
-                className="bg-white rounded-2xl p-6 border border-gray-100 hover:border-[#33cbcc]/30 transition-all cursor-pointer group"
-              >
-                <div className="flex flex-col md:flex-row md:items-center gap-4">
-                  {/* Left: Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-lg font-bold text-gray-800 truncate">{project.name}</h3>
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${style.bg} ${style.text}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+          {filteredProjects.map((project, index) => (
+            <motion.div
+              key={project.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.06 }}
+              onClick={() => setSelectedProject(project)}
+              className="bg-white p-5 border border-[#e5e8ef] hover:border-[#33cbcc]/40 transition-colors cursor-pointer group"
+            >
+              {/* Status accent line */}
+              <div className="h-0.5 w-full mb-4" style={{ backgroundColor: STATUS_DOT[project.status] }} />
+
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                {/* Left: Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-1">
+                    <h3 className="text-sm font-bold text-[#1c2b3a] truncate group-hover:text-[#283852] transition-colors">
+                      {project.name}
+                    </h3>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: STATUS_DOT[project.status] }} />
+                      <span className={`text-xs font-medium ${STATUS_TEXT[project.status]}`}>
                         {t(`projects.${STATUS_I18N[project.status]}`)}
                       </span>
                     </div>
-                    <p className="text-gray-400 text-sm line-clamp-2">{project.description}</p>
-
-                    {/* Progress bar */}
-                    <div className="mt-4">
-                      <div className="flex justify-between items-center mb-1.5 text-sm">
-                        <span className="text-gray-400">{t('projects.progress')}</span>
-                        <span className="font-bold text-gray-700">{project.progress}%</span>
-                      </div>
-                      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${project.progress}%` }}
-                          transition={{ delay: 0.3 + index * 0.08, duration: 1 }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: project.progress === 100 ? '#3b82f6' : '#33cbcc' }}
-                        />
-                      </div>
-                    </div>
                   </div>
+                  <p className="text-[#8892a4] text-xs line-clamp-2">{project.description}</p>
 
-                  {/* Right: Meta */}
-                  <div className="flex flex-row md:flex-col items-center md:items-end gap-4 md:gap-3 shrink-0">
-                    {/* Department */}
-                    <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                      <Building size={14} />
-                      <span className="font-medium">{project.department}</span>
+                  {/* Progress bar */}
+                  <div className="mt-4">
+                    <div className="flex justify-between items-center mb-1.5 text-xs">
+                      <span className="text-[#b0bac9]">{t('projects.progress')}</span>
+                      <span className="font-bold text-[#1c2b3a]">{project.progress}%</span>
                     </div>
-
-                    {/* Tasks count */}
-                    <div className="flex items-center gap-1.5 text-sm text-gray-400">
-                      <CheckCircle size={14} />
-                      <span>{project.tasksDone}/{project.tasksTotal}</span>
-                    </div>
-
-                    {/* Dates */}
-                    <div className="flex items-center gap-1.5 text-sm text-gray-400">
-                      <Calendar size={14} />
-                      <span>{project.endDate}</span>
+                    <div className="h-1.5 w-full bg-[#e5e8ef] overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${project.progress}%` }}
+                        transition={{ delay: 0.2 + index * 0.06, duration: 0.8 }}
+                        className="h-full"
+                        style={{ backgroundColor: project.status === 'completed' ? '#b0bac9' : '#33cbcc' }}
+                      />
                     </div>
                   </div>
                 </div>
-              </motion.div>
-            );
-          })}
+
+                {/* Right: Meta */}
+                <div className="flex flex-row md:flex-col items-center md:items-end gap-4 md:gap-2 shrink-0">
+                  <div className="flex items-center gap-1.5 text-xs text-[#8892a4]">
+                    <Building01Icon size={13} />
+                    <span className="font-medium">{project.department}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-[#b0bac9]">
+                    <Tick01Icon size={13} />
+                    <span>{project.tasksDone}/{project.tasksTotal}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-[#b0bac9]">
+                    <Calendar01Icon size={13} />
+                    <span>{project.endDate}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
 
-      {/* Project Detail Modal */}
+      {/* Detail panel */}
       <AnimatePresence>
         {selectedProject && (
-          <ProjectDetailModal
+          <ProjectDetailPanel
             project={selectedProject}
             onClose={() => setSelectedProject(null)}
             onEdit={() => { setEditProjectId(selectedProject.id); setSelectedProject(null); }}
@@ -1204,29 +1060,26 @@ const Projects = () => {
         )}
       </AnimatePresence>
 
-      {/* Edit Project Modal */}
+      {/* Edit panel */}
       <AnimatePresence>
         {editProjectId && (
-          <EditProjectModal
-            projectId={editProjectId}
-            onClose={() => setEditProjectId(null)}
-          />
+          <EditProjectPanel projectId={editProjectId} onClose={() => setEditProjectId(null)} />
         )}
       </AnimatePresence>
 
-      {/* Create Project Modal */}
+      {/* Create panel */}
       <AnimatePresence>
         {showCreateModal && (
-          <CreateProjectModal onClose={() => setShowCreateModal(false)} hodDepartmentId={isHod ? departmentId : null} />
+          <CreateProjectPanel onClose={() => setShowCreateModal(false)} hodDepartmentId={isHod ? departmentId : null} />
         )}
       </AnimatePresence>
     </div>
   );
 };
 
-/* ─── Project Detail Modal ──────────────────────────────── */
+/* ─── Project Detail Panel ──────────────────────────────── */
 
-const ProjectDetailModal = ({
+const ProjectDetailPanel = ({
   project,
   onClose,
   onEdit,
@@ -1237,13 +1090,9 @@ const ProjectDetailModal = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const style = STATUS_STYLES[project.status];
 
-  // Close on Escape
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handleKey);
     document.body.style.overflow = 'hidden';
     return () => {
@@ -1257,144 +1106,118 @@ const ProjectDetailModal = ({
     : 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 40, scale: 0.95 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl"
-      >
-        {/* Modal Header */}
-        <div className="p-6 border-b border-gray-100">
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#283852] flex items-center justify-center">
-                  <Briefcase size={20} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-gray-800">{project.name}</h2>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${style.bg} ${style.text}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                    {t(`projects.${STATUS_I18N[project.status]}`)}
-                  </span>
-                </div>
-              </div>
+    <Panel onClose={onClose}>
+      {/* Header */}
+      <div className="px-5 py-4 border-b border-[#e5e8ef] flex items-start justify-between shrink-0">
+        <div className="flex-1 min-w-0 pr-3">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-1">
+            {t('projects.title')}
+          </p>
+          <h2 className="text-sm font-bold text-[#1c2b3a] leading-snug">{project.name}</h2>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="w-1.5 h-1.5 shrink-0" style={{ backgroundColor: STATUS_DOT[project.status] }} />
+            <span className={`text-xs font-medium ${STATUS_TEXT[project.status]}`}>
+              {t(`projects.${STATUS_I18N[project.status]}`)}
+            </span>
+          </div>
+        </div>
+        <button onClick={onClose} className="text-[#b0bac9] hover:text-[#1c2b3a] transition-colors shrink-0">
+          <Cancel01Icon size={18} />
+        </button>
+      </div>
+
+      {/* Body */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Description */}
+        {project.description && (
+          <div className="px-5 py-4 border-b border-[#e5e8ef]">
+            <p className="block text-[11px] font-semibold text-[#8892a4] uppercase tracking-widest mb-1">
+              {t('projects.description')}
+            </p>
+            <p className="text-sm text-[#8892a4] leading-relaxed">{project.description}</p>
+          </div>
+        )}
+
+        {/* Info mosaic */}
+        <div className="border-b border-[#e5e8ef]">
+          <div className="grid grid-cols-2 gap-px bg-[#e5e8ef]">
+            <div className="bg-white px-4 py-3">
+              <p className="block text-[11px] font-semibold text-[#8892a4] uppercase tracking-widest mb-1">{t('projects.formDepartment')}</p>
+              <p className="text-sm font-semibold text-[#1c2b3a]">{project.department || '—'}</p>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-xl text-gray-400 transition-colors"
-            >
-              <X size={20} />
-            </button>
+            <div className="bg-white px-4 py-3">
+              <p className="block text-[11px] font-semibold text-[#8892a4] uppercase tracking-widest mb-1">{t('projects.formRevenue')}</p>
+              <p className="text-sm font-semibold text-[#1c2b3a]">{project.revenue || '—'}</p>
+            </div>
+            <div className="bg-white px-4 py-3">
+              <p className="block text-[11px] font-semibold text-[#8892a4] uppercase tracking-widest mb-1">{t('projects.startDate')}</p>
+              <p className="text-sm font-semibold text-[#1c2b3a]">{project.startDate || '—'}</p>
+            </div>
+            <div className="bg-white px-4 py-3">
+              <p className="block text-[11px] font-semibold text-[#8892a4] uppercase tracking-widest mb-1">{t('projects.endDate')}</p>
+              <p className="text-sm font-semibold text-[#1c2b3a]">{project.endDate || '—'}</p>
+            </div>
           </div>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 space-y-6">
-          {/* Description */}
-          <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-gray-500 mb-2">
-              <AlignLeft size={14} />
-              {t('projects.description')}
-            </div>
-            <p className="text-gray-600">{project.description}</p>
-          </div>
-
-          {/* Info Grid */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-400 mb-1">{t('projects.formDepartment')}</p>
-              <p className="font-semibold text-gray-800">{project.department}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-400 mb-1">{t('projects.formCost')}</p>
-              <p className="font-semibold text-gray-800">{project.budget || '—'}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-400 mb-1">{t('projects.formRevenue')}</p>
-              <p className="font-semibold text-gray-800">{project.revenue || '—'}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-400 mb-1">{t('projects.startDate')}</p>
-              <p className="font-semibold text-gray-800">{project.startDate}</p>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs text-gray-400 mb-1">{t('projects.endDate')}</p>
-              <p className="font-semibold text-gray-800">{project.endDate}</p>
-            </div>
-          </div>
-
-          {/* Progress */}
+        {/* Progress */}
+        <div className="px-5 py-4 border-b border-[#e5e8ef] space-y-4">
           <div>
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-semibold text-gray-500">{t('projects.progress')}</span>
-              <span className="text-sm font-bold text-gray-700">{project.progress}%</span>
+              <span className="block text-[11px] font-semibold text-[#8892a4] uppercase tracking-widest">{t('projects.progress')}</span>
+              <span className="text-xs font-bold text-[#1c2b3a]">{project.progress}%</span>
             </div>
-            <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-[#e5e8ef] overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${project.progress}%` }}
-                transition={{ duration: 1 }}
-                className="h-full rounded-full"
-                style={{ backgroundColor: project.progress === 100 ? '#3b82f6' : '#33cbcc' }}
+                transition={{ duration: 0.8 }}
+                className="h-full"
+                style={{ backgroundColor: project.status === 'completed' ? '#b0bac9' : '#33cbcc' }}
               />
             </div>
           </div>
-
-          {/* Tasks */}
           <div>
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-sm font-semibold text-gray-500">{t('projects.tasks')}</span>
-              <span className="text-sm text-gray-400">
-                {project.tasksDone}/{project.tasksTotal} ({taskProgress}%)
-              </span>
+            <div className="flex justify-between items-center mb-2">
+              <span className="block text-[11px] font-semibold text-[#8892a4] uppercase tracking-widest">{t('projects.tasks')}</span>
+              <span className="text-xs text-[#8892a4]">{project.tasksDone}/{project.tasksTotal} ({taskProgress}%)</span>
             </div>
-            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-[#e5e8ef] overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${taskProgress}%` }}
-                transition={{ delay: 0.3, duration: 1 }}
-                className="h-full rounded-full bg-[#283852]"
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="h-full bg-[#283852]"
               />
             </div>
           </div>
-
         </div>
+      </div>
 
-        {/* Modal Footer */}
-        <div className="p-6 border-t border-gray-100 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
-          >
-            {t('projects.close')}
-          </button>
-          <button
-            onClick={onEdit}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors border border-gray-200"
-          >
-            <Pencil size={16} />
-            {t('projects.editTitle')}
-          </button>
-          <button
-            onClick={() => navigate(`/projects/${project.id}`)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
-          >
-            <ArrowUpRight size={16} />
-            {t('projects.viewDetails')}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+      {/* Footer */}
+      <div className="border-t border-[#e5e8ef] px-5 py-3 flex gap-2 shrink-0">
+        <button
+          onClick={onClose}
+          className="flex-1 py-2.5 text-xs font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
+        >
+          {t('projects.close')}
+        </button>
+        <button
+          onClick={onEdit}
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-[#283852] border border-[#283852] hover:bg-[#283852] hover:text-white transition-colors"
+        >
+          <PencilIcon size={13} />
+          {t('projects.editTitle')}
+        </button>
+        <button
+          onClick={() => navigate(`/projects/${project.id}`)}
+          className="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors"
+        >
+          <ArrowUpRight01Icon size={13} />
+          {t('projects.viewDetails')}
+        </button>
+      </div>
+    </Panel>
   );
 };
 

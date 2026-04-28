@@ -1,22 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
- Search,
- Plus,
- X,
- Loader2,
- BookOpen,
- FileText,
- CheckCircle,
- Trash2,
- Eye,
- Calendar,
- Filter,
- AlertTriangle,
- MinusCircle,
- PlusCircle,
-} from 'lucide-react';
+import { Search01Icon, Add01Icon, Cancel01Icon, Loading02Icon, BookOpen01Icon, File01Icon, Tick01Icon, Delete02Icon, ViewIcon, Calendar01Icon, FilterIcon, Alert02Icon, MinusSignIcon } from 'hugeicons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -249,7 +234,7 @@ const CreateEntryModal = ({
  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
- <BookOpen size={20} className="text-[#33cbcc]"/>
+ <BookOpen01Icon size={20} className="text-[#33cbcc]"/>
  </div>
  <h2 className="text-lg font-bold text-gray-800">Nouvelle ecriture comptable</h2>
  </div>
@@ -257,7 +242,7 @@ const CreateEntryModal = ({
  onClick={onClose}
  className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
 
@@ -281,7 +266,7 @@ const CreateEntryModal = ({
  </div>
  <div>
  <label className={labelCls}>
- <Calendar size={12} />
+ <Calendar01Icon size={12} />
  Date
  </label>
  <input
@@ -339,7 +324,7 @@ const CreateEntryModal = ({
  <div className="border-t border-gray-100 pt-5">
  <div className="flex items-center justify-between mb-3">
  <label className={labelCls + ' mb-0'}>
- <FileText size={12} />
+ <File01Icon size={12} />
  Lignes d'ecriture
  </label>
  <button
@@ -347,7 +332,7 @@ const CreateEntryModal = ({
  onClick={addLine}
  className="flex items-center gap-1 text-xs font-semibold text-[#33cbcc] hover:text-[#2bb5b6] transition-colors"
  >
- <PlusCircle size={14} />
+ <Add01Icon size={14} />
  Ajouter une ligne
  </button>
  </div>
@@ -414,7 +399,7 @@ const CreateEntryModal = ({
  onClick={() => removeLine(idx)}
  className="p-1.5 rounded-lg text-gray-400 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
  >
- <MinusCircle size={14} />
+ <MinusSignIcon size={14} />
  </button>
  )}
  </div>
@@ -436,12 +421,12 @@ const CreateEntryModal = ({
  {totalDebit > 0 || totalCredit > 0 ? (
  isBalanced ? (
  <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-2 py-1 rounded-full">
- <CheckCircle size={12} />
+ <Tick01Icon size={12} />
  Equilibre
  </span>
  ) : (
  <span className="inline-flex items-center gap-1 text-xs font-semibold text-[#283852] bg-[#283852]/10 px-2 py-1 rounded-full">
- <AlertTriangle size={12} />
+ <Alert02Icon size={12} />
  Desequilibre: {formatXAF(Math.abs(totalDebit - totalCredit))}
  </span>
  )
@@ -469,7 +454,7 @@ const CreateEntryModal = ({
  : 'bg-gray-300 cursor-not-allowed shadow-none'
  }`}
  >
- {createMut.isPending ? <Loader2 size={16} className="animate-spin"/> : <Plus size={16} />}
+ {createMut.isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Add01Icon size={16} />}
  Creer l'ecriture
  </button>
  </div>
@@ -527,7 +512,7 @@ const EntryDetailModal = ({
  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
- <FileText size={20} className="text-[#33cbcc]"/>
+ <File01Icon size={20} className="text-[#33cbcc]"/>
  </div>
  <div>
  <h2 className="text-lg font-bold text-gray-800">{entry.entryNumber}</h2>
@@ -549,7 +534,7 @@ const EntryDetailModal = ({
  onClick={onClose}
  className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
 
@@ -648,9 +633,9 @@ const EntryDetailModal = ({
  className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
  >
  {deleteMut.isPending ? (
- <Loader2 size={14} className="animate-spin"/>
+ <Loading02Icon size={14} className="animate-spin"/>
  ) : (
- <Trash2 size={14} />
+ <Delete02Icon size={14} />
  )}
  Supprimer
  </button>
@@ -660,9 +645,9 @@ const EntryDetailModal = ({
  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  {validateMut.isPending ? (
- <Loader2 size={14} className="animate-spin"/>
+ <Loading02Icon size={14} className="animate-spin"/>
  ) : (
- <CheckCircle size={14} />
+ <Tick01Icon size={14} />
  )}
  Valider
  </button>
@@ -744,14 +729,14 @@ export default function JournalEntries() {
  onClick={() => setShowCreateInvoiceModal(true)}
  className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
  >
- <FileText size={16} className="text-[#33cbcc]"/>
+ <File01Icon size={16} className="text-[#33cbcc]"/>
  Nouvelle Facture
  </button>
  <button
  onClick={() => setShowCreateModal(true)}
  className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
  >
- <Plus size={16} />
+ <Add01Icon size={16} />
  Nouvelle Ecriture
  </button>
  </div>
@@ -760,19 +745,19 @@ export default function JournalEntries() {
  {/* Filters */}
  <div className="bg-white rounded-2xl p-4">
  <div className="flex items-center gap-2 mb-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
- <Filter size={12} />
+ <FilterIcon size={12} />
  Filtres
  </div>
  <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
- {/* Search */}
- <div className="md:col-span-2 bg-gray-50 rounded-xl p-2 flex items-center focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
- <Search className="text-gray-400 ml-2"size={16} />
+ {/* Search01Icon */}
+ <div className="md:col-span-2 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+ <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
  <input
  type="text"
  placeholder="Rechercher..."
  value={search}
  onChange={(e) => setSearch(e.target.value)}
- className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-2 text-sm"
+ className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
  />
  </div>
 
@@ -895,7 +880,7 @@ export default function JournalEntries() {
  title="Valider"
  className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#2bb5b6] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
- <CheckCircle size={14} />
+ <Tick01Icon size={14} />
  </button>
  <button
  onClick={(e) => {
@@ -906,7 +891,7 @@ export default function JournalEntries() {
  title="Supprimer"
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
- <Trash2 size={14} />
+ <Delete02Icon size={14} />
  </button>
  </>
  )}
@@ -918,7 +903,7 @@ export default function JournalEntries() {
  title="Details"
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
  >
- <Eye size={14} />
+ <ViewIcon size={14} />
  </button>
  </div>
  </motion.div>
@@ -927,7 +912,7 @@ export default function JournalEntries() {
  </div>
  ) : (
  <div className="bg-white rounded-2xl p-12 text-center">
- <BookOpen size={48} className="mx-auto text-gray-300 mb-4"/>
+ <BookOpen01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">Aucune ecriture trouvee</p>
  </div>
  )}

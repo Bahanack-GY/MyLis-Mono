@@ -6,61 +6,7 @@ import { format } from 'date-fns';
 import { useProjectsByDepartment } from '../api/projects';
 import { useCreateTask, useTasksByEmployee, useUpdateTask, useDeleteTask, useTaskHistory, type Task, type TaskHistoryEntry } from '../api/tasks';
 import TaskTimeChart from '../components/TaskTimeChart';
-import {
-    FileText,
-    Clock,
-    CheckCircle2,
-    Circle,
-    ChevronRight,
-    ChevronLeft,
-    Plus,
-    Trash2,
-    Calendar,
-    List,
-    AlertTriangle,
-    GraduationCap,
-    BookOpen,
-    Download,
-    Eye,
-    Check,
-    X,
-    Trophy,
-    Award,
-    Cake,
-    BriefcaseBusiness,
-    Hourglass,
-    Wallet,
-    Repeat,
-    Flag,
-    Gauge,
-    AlignLeft,
-    FolderOpen,
-    Zap,
-    Phone,
-    Mail,
-    MapPin,
-    CalendarCheck,
-    Target,
-    Users,
-    Building2,
-    TrendingUp,
-    Loader2,
-    Pencil,
-    Camera,
-    Upload,
-    User,
-    Briefcase,
-    Building,
-    Save,
-    UserX,
-    UserCheck,
-    ShieldAlert,
-    KeyRound,
-    EyeOff,
-    History,
-    Star,
-    ArrowRight,
-} from 'lucide-react';
+import { File01Icon, Clock01Icon, Tick01Icon, CircleIcon, ArrowRight01Icon, ArrowLeft01Icon, Add01Icon, Delete02Icon, Calendar01Icon, ListViewIcon, Alert02Icon, GraduationScrollIcon, BookOpen01Icon, Download01Icon, ViewIcon, Cancel01Icon, Award01Icon, BirthdayCakeIcon, Briefcase01Icon, HourglassIcon, Wallet01Icon, RepeatIcon, Flag01Icon, DashboardSquare01Icon, AlignLeftIcon, FolderOpenIcon, ZapIcon, CallIcon, Mail01Icon, Location01Icon, Target01Icon, UserGroupIcon, Building02Icon, ArrowUpRight01Icon, Loading02Icon, PencilIcon, Camera01Icon, Upload01Icon, UserIcon, Building01Icon, FloppyDiskIcon, UserBlock01Icon, UserCheck01Icon, Shield01Icon, Key01Icon, ViewOffIcon, Time01Icon, StarIcon } from 'hugeicons-react';
 import { useEmployee, useEmployees, useEmployeeStats, useEmployeeBadges, useUpdateEmployee, useDismissEmployee, useReinstateEmployee, useChangeEmployeePassword, useEmployeeTransferHistory, useEmployeeReports, usePromoteEmployee, useEmployeePromotionHistory, useRemoveFromDepartment } from '../api/employees/hooks';
 import RichTextEditor from '../components/RichTextEditor';
 import RichTextDisplay from '../components/RichTextDisplay';
@@ -135,7 +81,7 @@ interface EmployeeDetailProps {
 
 /* ─── Skills list for suggestions ─────────────────────── */
 const SKILLS = [
-    'Figma', 'Adobe XD', 'Sketch', 'Prototyping', 'User Research', 'Wireframing',
+    'Figma', 'Adobe XD', 'Sketch', 'Prototyping', 'UserIcon Research', 'Wireframing',
     'Design Systems', 'UI Design', 'Illustrator', 'Photoshop', 'Branding',
     'Typography', 'Motion Design', 'CSS', 'React', 'TypeScript', 'Tailwind CSS',
     'Node.js', 'Leadership', 'Project Mgmt', 'Agile', 'After Effects', '3D Design',
@@ -266,12 +212,12 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Pencil size={20} className="text-[#33cbcc]" />
+                            <PencilIcon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{t('employees.edit.title')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -280,7 +226,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                     {/* Profile Picture */}
                     <div>
                         <label className={labelCls}>
-                            <Camera size={12} />
+                            <Camera01Icon size={12} />
                             {t('employees.edit.profilePicture')}
                         </label>
                         <div className="flex items-center gap-5">
@@ -290,7 +236,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                         <img src={avatarPreview} alt="" className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                            <User size={28} className="text-gray-400" />
+                                            <UserIcon size={28} className="text-gray-400" />
                                         </div>
                                     )}
                                 </div>
@@ -299,7 +245,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                     onClick={() => fileInputRef.current?.click()}
                                     className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                    <Camera size={18} className="text-white" />
+                                    <Camera01Icon size={18} className="text-white" />
                                 </button>
                             </div>
                             <div
@@ -308,7 +254,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                 onClick={() => fileInputRef.current?.click()}
                                 className="flex-1 border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-[#33cbcc]/40 transition-colors"
                             >
-                                <Upload size={20} className="mx-auto text-gray-400 mb-1" />
+                                <Upload01Icon size={20} className="mx-auto text-gray-400 mb-1" />
                                 <p className="text-xs text-gray-500">{t('employees.edit.dragOrClick')}</p>
                                 <p className="text-[10px] text-gray-400 mt-0.5">{t('employees.edit.maxSize')}</p>
                             </div>
@@ -335,7 +281,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('employees.create.firstName')}
                             </label>
                             <input
@@ -347,7 +293,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('employees.create.lastName')}
                             </label>
                             <input
@@ -362,7 +308,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                     {/* Email */}
                     <div>
                         <label className={labelCls}>
-                            <Mail size={12} />
+                            <Mail01Icon size={12} />
                             {t('employees.create.email')}
                         </label>
                         <input
@@ -373,11 +319,11 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                         />
                     </div>
 
-                    {/* Phone + Address */}
+                    {/* CallIcon + Address */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Phone size={12} />
+                                <CallIcon size={12} />
                                 {t('employees.create.phone')}
                             </label>
                             <input
@@ -389,7 +335,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <MapPin size={12} />
+                                <Location01Icon size={12} />
                                 {t('employees.create.address')}
                             </label>
                             <input
@@ -404,7 +350,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                     {/* Salary */}
                     <div>
                         <label className={labelCls}>
-                            <Briefcase size={12} />
+                            <Briefcase01Icon size={12} />
                             {t('employees.create.salary')} (XAF)
                         </label>
                         <input
@@ -419,7 +365,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('employees.create.dateOfBirth')}
                             </label>
                             <input
@@ -431,7 +377,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('employees.create.startDate')}
                             </label>
                             <input
@@ -447,7 +393,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Building size={12} />
+                                <Building01Icon size={12} />
                                 {t('employees.create.department')}
                             </label>
                             <select
@@ -463,7 +409,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Briefcase size={12} />
+                                <Briefcase01Icon size={12} />
                                 {t('employees.create.role')}
                             </label>
                             <select
@@ -483,7 +429,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                     {isStagiaire && (
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 Encadreur
                             </label>
                             <select
@@ -510,7 +456,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                     <div className="border-t border-gray-100 pt-5">
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2 text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                <Zap size={14} className="text-[#33cbcc]" />
+                                <ZapIcon size={14} className="text-[#33cbcc]" />
                                 {t('employees.create.skills')}
                             </div>
                             {form.skills.length > 0 && (
@@ -538,7 +484,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             >
-                                <Plus size={14} />
+                                <Add01Icon size={14} />
                             </button>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -577,7 +523,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                 <div className="px-6 pb-5">
                     <div className="border border-gray-100 rounded-xl p-4 space-y-3">
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                            <KeyRound size={11} />
+                            <Key01Icon size={11} />
                             {t('employees.edit.changePassword')}
                         </label>
                         <div className="relative">
@@ -589,7 +535,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                 className="w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 pr-10 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
                             />
                             <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                {showPassword ? <ViewOffIcon size={16} /> : <ViewIcon size={16} />}
                             </button>
                         </div>
                         <div className="flex items-center gap-3">
@@ -603,7 +549,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                     newPassword.length >= 6 ? 'bg-[#283852] hover:bg-[#1e2a3d]' : 'bg-gray-300 cursor-not-allowed'
                                 }`}
                             >
-                                {changePassword.isPending ? <Loader2 size={13} className="animate-spin" /> : <KeyRound size={13} />}
+                                {changePassword.isPending ? <Loading02Icon size={13} className="animate-spin" /> : <Key01Icon size={13} />}
                                 {t('employees.edit.setPassword')}
                             </button>
                             {passwordSuccess && <span className="text-xs text-[#33cbcc] font-medium">{t('employees.edit.passwordUpdated')}</span>}
@@ -625,7 +571,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {updateEmployee.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                        {updateEmployee.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <FloppyDiskIcon size={16} />}
                         {updateEmployee.isPending ? t('employees.edit.saving') : t('employees.edit.save')}
                     </button>
                 </div>
@@ -753,21 +699,21 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 {/* Personal Info Card */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white rounded-2xl p-5 border border-gray-100 space-y-3.5">
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0"><Cake size={16} className="text-[#33cbcc]" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0"><BirthdayCakeIcon size={16} className="text-[#33cbcc]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.personalInfo.birthDate')}</p>
                             <p className="text-sm font-semibold text-gray-800">{employee.birthDate ? new Date(employee.birthDate).toLocaleDateString() : 'N/A'}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><BriefcaseBusiness size={16} className="text-[#283852]" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><Briefcase01Icon size={16} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.personalInfo.hireDate')}</p>
                             <p className="text-sm font-semibold text-gray-800">{employee.hireDate ? new Date(employee.hireDate).toLocaleDateString() : 'N/A'}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0"><Hourglass size={16} className="text-[#33cbcc]" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0"><HourglassIcon size={16} className="text-[#33cbcc]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.personalInfo.yearsInCompany')}</p>
                             <p className="text-sm font-semibold text-gray-800">{yearsInCompany} {t('employeeDetail.personalInfo.years')}</p>
@@ -779,21 +725,21 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 }} className="bg-white rounded-2xl p-5 border border-gray-100 space-y-3.5">
                     <h3 className="font-semibold text-gray-800 text-sm mb-1">{t('employeeDetail.contact.title')}</h3>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0"><Phone size={16} className="text-[#33cbcc]" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0"><CallIcon size={16} className="text-[#33cbcc]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.contact.phone')}</p>
                             <p className="text-sm font-semibold text-gray-800">{contact.phone}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><Mail size={16} className="text-[#283852]" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><Mail01Icon size={16} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.contact.email')}</p>
                             <p className="text-sm font-semibold text-gray-800 truncate">{contact.email}</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><MapPin size={16} className="text-[#283852]" /></div>
+                        <div className="w-8 h-8 rounded-lg bg-[#283852]/10 flex items-center justify-center shrink-0"><Location01Icon size={16} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-gray-400 uppercase tracking-wider font-medium">{t('employeeDetail.contact.address')}</p>
                             <p className="text-sm font-semibold text-gray-800">{contact.address}</p>
@@ -804,7 +750,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 {/* Days Worked This Month */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.09 }} className="bg-white rounded-2xl p-5 border border-gray-100">
                     <div className="flex items-center gap-2 mb-3">
-                        <CalendarCheck size={16} className="text-[#33cbcc]" />
+                        <Calendar01Icon size={16} className="text-[#33cbcc]" />
                         <h3 className="font-semibold text-gray-800 text-sm">{t('employeeDetail.daysWorked.title')}</h3>
                     </div>
                     <div className="flex items-baseline gap-1.5 mb-3">
@@ -848,7 +794,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 {employee.stagiaires && employee.stagiaires.length > 0 && (
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="bg-white rounded-2xl p-5 border border-gray-100">
                         <div className="flex items-center gap-2 mb-4">
-                            <GraduationCap size={16} className="text-[#33cbcc]" />
+                            <GraduationScrollIcon size={16} className="text-[#33cbcc]" />
                             <h3 className="font-semibold text-gray-800 text-sm">Stagiaires</h3>
                             <span className="ml-auto text-[10px] font-bold bg-[#33cbcc]/10 text-[#33cbcc] px-2 py-0.5 rounded-full">{employee.stagiaires.length}</span>
                         </div>
@@ -870,7 +816,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 {/* Skills Card */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white rounded-2xl p-5 border border-gray-100">
                     <div className="flex items-center gap-2 mb-4">
-                        <Zap size={16} className="text-[#33cbcc]" />
+                        <ZapIcon size={16} className="text-[#33cbcc]" />
                         <h3 className="font-semibold text-gray-800 text-sm">{t('employeeDetail.skills.title')}</h3>
                     </div>
                     <div className="space-y-3">
@@ -920,7 +866,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="bg-linear-to-br from-[#1a2740] to-[#283852] rounded-2xl p-5 text-white">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <Wallet size={16} className="text-[#33cbcc]" />
+                            <Wallet01Icon size={16} className="text-[#33cbcc]" />
                             <h3 className="font-semibold text-sm">{t('employeeDetail.salary.title')}</h3>
                         </div>
                         <span className="text-[10px] uppercase tracking-wider text-gray-400">{t('employeeDetail.salary.monthly')}</span>
@@ -996,7 +942,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 {/* Points Card */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-gradient-to-br from-[#33cbcc] to-[#2ab5b6] rounded-2xl p-5 text-white">
                     <div className="flex items-center gap-2 mb-2">
-                        <Zap size={16} className="text-white/80" />
+                        <ZapIcon size={16} className="text-white/80" />
                         <h3 className="font-semibold text-sm">{t('employeeDetail.points.title')}</h3>
                     </div>
                     <p className="text-3xl font-bold">{stats?.points || 0}</p>
@@ -1014,7 +960,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                             <div key={i}>
                                 <div className="flex items-center justify-between mb-1.5">
                                     <div className="flex items-center gap-2">
-                                        <ChevronRight size={14} className="text-[#33cbcc]" />
+                                        <ArrowRight01Icon size={14} className="text-[#33cbcc]" />
                                         <span className="text-sm font-medium text-gray-700">{goal.title}</span>
                                     </div>
                                     <span className="text-sm font-bold text-gray-800">{goal.progress}%</span>
@@ -1038,7 +984,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} onClick={() => setShowTrophiesModal(true)} className="bg-white rounded-2xl p-5 border border-gray-100 cursor-pointer hover:border-[#33cbcc]/30 transition-colors">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <Trophy size={16} className="text-[#33cbcc]" />
+                            <Award01Icon size={16} className="text-[#33cbcc]" />
                             <h3 className="font-semibold text-gray-800 text-sm">{t('employeeDetail.trophies.title')}</h3>
                         </div>
                         <span className="text-xs text-gray-400">{trophies.length}</span>
@@ -1063,7 +1009,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} onClick={() => setShowBadgesModal(true)} className="bg-white rounded-2xl p-5 border border-gray-100 cursor-pointer hover:border-[#33cbcc]/30 transition-colors">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                            <Award size={16} className="text-[#283852]" />
+                            <Award01Icon size={16} className="text-[#283852]" />
                             <h3 className="font-semibold text-gray-800 text-sm">{t('employeeDetail.badges.title')}</h3>
                         </div>
                         <span className="text-xs text-gray-400">{badges.length}</span>
@@ -1074,7 +1020,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                                 {badge.image ? (
                                     <img src={badge.image} alt={badge.title} className="w-5 h-5 rounded-full object-cover" />
                                 ) : (
-                                    <Award size={14} />
+                                    <Award01Icon size={14} />
                                 )}
                                 {badge.title}
                             </div>
@@ -1094,10 +1040,10 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={e => e.stopPropagation()} className="relative bg-white rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
                             <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-2">
-                                    <Trophy size={20} className="text-[#33cbcc]" />
+                                    <Award01Icon size={20} className="text-[#33cbcc]" />
                                     <h2 className="text-lg font-bold text-gray-800">{t('employeeDetail.trophies.title')}</h2>
                                 </div>
-                                <button onClick={() => setShowTrophiesModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
+                                <button onClick={() => setShowTrophiesModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><Cancel01Icon size={18} /></button>
                             </div>
                             <div className="space-y-3">
                                 {trophies.map((trophy, i) => (
@@ -1123,10 +1069,10 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={e => e.stopPropagation()} className="relative bg-white rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
                             <div className="flex items-center justify-between mb-5">
                                 <div className="flex items-center gap-2">
-                                    <Award size={20} className="text-[#283852]" />
+                                    <Award01Icon size={20} className="text-[#283852]" />
                                     <h2 className="text-lg font-bold text-gray-800">{t('employeeDetail.badges.title')}</h2>
                                 </div>
-                                <button onClick={() => setShowBadgesModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
+                                <button onClick={() => setShowBadgesModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><Cancel01Icon size={18} /></button>
                             </div>
                             <div className="grid grid-cols-2 gap-3">
                                 {badges.map((badge, i) => (
@@ -1134,7 +1080,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
                                         {badge.image ? (
                                             <img src={badge.image} alt={badge.title} className="w-12 h-12 rounded-full object-cover" />
                                         ) : (
-                                            <Award size={32} className="text-[#283852]" />
+                                            <Award01Icon size={32} className="text-[#283852]" />
                                         )}
                                         <p className="text-xs font-semibold text-center text-[#283852]">{badge.title}</p>
                                     </motion.div>
@@ -1258,12 +1204,12 @@ const EditTaskModal = ({
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Pencil size={18} className="text-[#33cbcc]" />
+                            <PencilIcon size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('employeeDetail.tasks.editTask')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
                 <div className="px-6 py-5 space-y-4 max-h-[60vh] overflow-y-auto">
@@ -1300,12 +1246,12 @@ const EditTaskModal = ({
                     <div className="flex gap-4">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                            <AlertTriangle size={14} className="text-[#283852]" />
+                            <Alert02Icon size={14} className="text-[#283852]" />
                             <span className="text-sm text-gray-600">{t('tasksPage.urgent')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                            <Star size={14} className="text-[#283852]" />
+                            <StarIcon size={14} className="text-[#283852]" />
                             <span className="text-sm text-gray-600">{t('tasksPage.important')}</span>
                         </label>
                     </div>
@@ -1317,7 +1263,7 @@ const EditTaskModal = ({
                         disabled={!form.title.trim() || isSaving}
                         className="px-5 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb5b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                     >
-                        {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                        {isSaving ? <Loading02Icon size={14} className="animate-spin" /> : <FloppyDiskIcon size={14} />}
                         {t('employeeDetail.save')}
                     </button>
                 </div>
@@ -1326,7 +1272,7 @@ const EditTaskModal = ({
     );
 };
 
-/* ─── Task History Modal ──────────────────────────────── */
+/* ─── Task Time01Icon Modal ──────────────────────────────── */
 
 const TaskHistoryModal = ({
     taskId,
@@ -1358,17 +1304,17 @@ const TaskHistoryModal = ({
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                            <History size={18} className="text-[#283852]" />
+                            <Time01Icon size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('employeeDetail.tasks.historyTitle')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
                 <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
                     {isLoading ? (
-                        <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-[#33cbcc]" /></div>
+                        <div className="flex justify-center py-8"><Loading02Icon size={24} className="animate-spin text-[#33cbcc]" /></div>
                     ) : history.length === 0 ? (
                         <p className="text-center text-sm text-gray-400 py-8">{t('employeeDetail.tasks.historyEmpty')}</p>
                     ) : (
@@ -1522,11 +1468,11 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                 <h2 className="text-xl font-bold text-gray-800">{t('employeeSidebar.tasks')}</h2>
                 <div className="flex items-center gap-3">
                     <div className="flex bg-gray-100 rounded-xl p-1">
-                        <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-[#33cbcc]' : 'text-gray-400'}`}><List size={18} /></button>
-                        <button onClick={() => setViewMode('calendar')} className={`p-2.5 rounded-lg transition-colors ${viewMode === 'calendar' ? 'bg-white shadow-sm text-[#33cbcc]' : 'text-gray-400'}`}><Calendar size={18} /></button>
+                        <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-[#33cbcc]' : 'text-gray-400'}`}><ListViewIcon size={18} /></button>
+                        <button onClick={() => setViewMode('calendar')} className={`p-2.5 rounded-lg transition-colors ${viewMode === 'calendar' ? 'bg-white shadow-sm text-[#33cbcc]' : 'text-gray-400'}`}><Calendar01Icon size={18} /></button>
                     </div>
                     <button onClick={() => { setDrafts([emptyDraft()]); setShowModal(true); }} className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-[#2bb5b6] transition-colors">
-                        <Plus size={16} /> {t('employeeDetail.tasks.add')}
+                        <Add01Icon size={16} /> {t('employeeDetail.tasks.add')}
                     </button>
                 </div>
             </div>
@@ -1538,13 +1484,13 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                 <TaskTimeChart employeeId={employee.id} />
             </div>
 
-            {/* Calendar sub-header */}
+            {/* Calendar01Icon sub-header */}
             {viewMode === 'calendar' && (
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                        <button onClick={() => navigateCalendar(-1)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ChevronLeft size={20} /></button>
+                        <button onClick={() => navigateCalendar(-1)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowLeft01Icon size={20} /></button>
                         <span className="text-sm font-semibold text-gray-800 min-w-[220px] text-center">{calendarLabel}</span>
-                        <button onClick={() => navigateCalendar(1)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ChevronRight size={20} /></button>
+                        <button onClick={() => navigateCalendar(1)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"><ArrowRight01Icon size={20} /></button>
                         <button onClick={() => setSelectedDate(new Date())} className="ml-2 text-xs text-[#33cbcc] font-medium px-3 py-1.5 rounded-lg hover:bg-[#33cbcc]/10 transition-colors border border-[#33cbcc]/20">{t('employeeDetail.tasks.today')}</button>
                     </div>
                     <div className="flex bg-gray-100 rounded-xl p-1">
@@ -1563,7 +1509,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={e => e.stopPropagation()} className="relative bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
                             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                                 <h2 className="text-lg font-bold text-gray-800">{t('employeeDetail.tasks.createTitle')}</h2>
-                                <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
+                                <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><Cancel01Icon size={18} /></button>
                             </div>
                             <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
                                 {drafts.map((draft, idx) => (
@@ -1571,13 +1517,13 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                         {drafts.length > 1 && (
                                             <div className="flex items-center justify-between">
                                                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('employeeDetail.tasks.taskNumber')} {idx + 1}</span>
-                                                <button onClick={() => removeDraftRow(idx)} className="text-gray-300 hover:text-[#283852] transition-colors"><Trash2 size={14} /></button>
+                                                <button onClick={() => removeDraftRow(idx)} className="text-gray-300 hover:text-[#283852] transition-colors"><Delete02Icon size={14} /></button>
                                             </div>
                                         )}
                                         <input value={draft.title} onChange={e => updateDraft(idx, 'title', e.target.value)} placeholder={t('employeeDetail.tasks.titlePlaceholder')} className={inputClass} />
                                         <RichTextEditor value={draft.description} onChange={html => updateDraft(idx, 'description', html)} placeholder={t('employeeDetail.tasks.descriptionPlaceholder')} />
                                         <div>
-                                            <label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><FolderOpen size={10} /> {t('employeeDetail.tasks.project')}</label>
+                                            <label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><FolderOpenIcon size={10} /> {t('employeeDetail.tasks.project')}</label>
                                             <select value={draft.project} onChange={e => updateDraft(idx, 'project', e.target.value)} className={`${selectClass} w-full`}>
                                                 <option value="">{t('employeeDetail.tasks.projectNone')}</option>
                                                 {(departmentProjects || []).map(p => (<option key={p.id} value={p.id}>{p.name}</option>))}
@@ -1590,7 +1536,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                         
                                         {/* Time Duration Section */}
                                         <div>
-                                            <label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-2 flex items-center gap-1"><Clock size={10} /> {t('employeeDetail.tasks.duration')}</label>
+                                            <label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-2 flex items-center gap-1"><Clock01Icon size={10} /> {t('employeeDetail.tasks.duration')}</label>
                                             <div className="flex gap-2 mb-3">
                                                 <button
                                                     type="button"
@@ -1652,25 +1598,25 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                         </div>
                                         
                                         <div className="grid grid-cols-3 gap-3">
-                                            <div><label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><Gauge size={10} /> {t('employeeDetail.tasks.difficulty')}</label><select value={draft.difficulty} onChange={e => updateDraft(idx, 'difficulty', e.target.value)} className={`${selectClass} w-full`}><option value="easy">{t('employeeDetail.tasks.difficultyEasy')}</option><option value="medium">{t('employeeDetail.tasks.difficultyMedium')}</option><option value="hard">{t('employeeDetail.tasks.difficultyHard')}</option></select></div>
-                                            <div><label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><Flag size={10} /> {t('employeeDetail.tasks.priority')}</label><select value={draft.priority} onChange={e => updateDraft(idx, 'priority', e.target.value)} className={`${selectClass} w-full`}><option value="low">{t('employeeDetail.tasks.priorityLow')}</option><option value="medium">{t('employeeDetail.tasks.priorityMedium')}</option><option value="high">{t('employeeDetail.tasks.priorityHigh')}</option><option value="urgent">{t('employeeDetail.tasks.priorityUrgent')}</option></select></div>
-                                            <div><label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><Repeat size={10} /> {t('employeeDetail.tasks.repeat')}</label><select value={draft.repeat} onChange={e => updateDraft(idx, 'repeat', e.target.value)} className={`${selectClass} w-full`}><option value="none">{t('employeeDetail.tasks.repeatNone')}</option><option value="daily">{t('employeeDetail.tasks.repeatDaily')}</option><option value="weekly">{t('employeeDetail.tasks.repeatWeekly')}</option><option value="monthly">{t('employeeDetail.tasks.repeatMonthly')}</option></select></div>
+                                            <div><label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><DashboardSquare01Icon size={10} /> {t('employeeDetail.tasks.difficulty')}</label><select value={draft.difficulty} onChange={e => updateDraft(idx, 'difficulty', e.target.value)} className={`${selectClass} w-full`}><option value="easy">{t('employeeDetail.tasks.difficultyEasy')}</option><option value="medium">{t('employeeDetail.tasks.difficultyMedium')}</option><option value="hard">{t('employeeDetail.tasks.difficultyHard')}</option></select></div>
+                                            <div><label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><Flag01Icon size={10} /> {t('employeeDetail.tasks.priority')}</label><select value={draft.priority} onChange={e => updateDraft(idx, 'priority', e.target.value)} className={`${selectClass} w-full`}><option value="low">{t('employeeDetail.tasks.priorityLow')}</option><option value="medium">{t('employeeDetail.tasks.priorityMedium')}</option><option value="high">{t('employeeDetail.tasks.priorityHigh')}</option><option value="urgent">{t('employeeDetail.tasks.priorityUrgent')}</option></select></div>
+                                            <div><label className="text-[10px] text-gray-400 uppercase tracking-wider font-medium mb-1.5 flex items-center gap-1"><RepeatIcon size={10} /> {t('employeeDetail.tasks.repeat')}</label><select value={draft.repeat} onChange={e => updateDraft(idx, 'repeat', e.target.value)} className={`${selectClass} w-full`}><option value="none">{t('employeeDetail.tasks.repeatNone')}</option><option value="daily">{t('employeeDetail.tasks.repeatDaily')}</option><option value="weekly">{t('employeeDetail.tasks.repeatWeekly')}</option><option value="monthly">{t('employeeDetail.tasks.repeatMonthly')}</option></select></div>
                                         </div>
                                         <div className="flex gap-4">
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input type="checkbox" checked={draft.urgent} onChange={e => updateDraft(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                                                <AlertTriangle size={14} className="text-[#283852]" />
+                                                <Alert02Icon size={14} className="text-[#283852]" />
                                                 <span className="text-sm text-gray-600">{t('tasksPage.urgent')}</span>
                                             </label>
                                             <label className="flex items-center gap-2 cursor-pointer">
                                                 <input type="checkbox" checked={draft.important} onChange={e => updateDraft(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                                                <Star size={14} className="text-[#283852]" />
+                                                <StarIcon size={14} className="text-[#283852]" />
                                                 <span className="text-sm text-gray-600">{t('tasksPage.important')}</span>
                                             </label>
                                         </div>
                                     </motion.div>
                                 ))}
-                                <button onClick={addDraftRow} className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-[#33cbcc]/40 hover:text-[#33cbcc] transition-colors flex items-center justify-center gap-2"><Plus size={16} /> {t('employeeDetail.tasks.addAnother')}</button>
+                                <button onClick={addDraftRow} className="w-full py-3 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-[#33cbcc]/40 hover:text-[#33cbcc] transition-colors flex items-center justify-center gap-2"><Add01Icon size={16} /> {t('employeeDetail.tasks.addAnother')}</button>
                             </div>
                             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50/50">
                                 <span className="text-xs text-gray-400">{drafts.filter(d => d.title.trim()).length} {t('employeeDetail.tasks.tasksReady')}</span>
@@ -1692,7 +1638,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                         <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={e => e.stopPropagation()} className="relative bg-white rounded-2xl p-6 w-full max-w-md">
                             <div className="flex items-center justify-between mb-5">
                                 <h2 className="text-lg font-bold text-gray-800">{t('employeeDetail.tasks.taskDetail')}</h2>
-                                <button onClick={() => setSelectedTask(null)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
+                                <button onClick={() => setSelectedTask(null)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><Cancel01Icon size={18} /></button>
                             </div>
                             <div className="space-y-4">
                                 <div>
@@ -1718,7 +1664,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-bold px-2 py-1 rounded" style={{ backgroundColor: `${difficultyConfig[(selectedTask.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color}15`, color: difficultyConfig[(selectedTask.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color }}>{difficultyConfig[(selectedTask.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].label}</span>
-                                    <span className="text-xs font-bold px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${priorityConfig[selectedTask.priority || 'medium'].color}15`, color: priorityConfig[selectedTask.priority || 'medium'].color }}><Flag size={10} /> {priorityConfig[selectedTask.priority || 'medium'].label}</span>
+                                    <span className="text-xs font-bold px-2 py-1 rounded flex items-center gap-1" style={{ backgroundColor: `${priorityConfig[selectedTask.priority || 'medium'].color}15`, color: priorityConfig[selectedTask.priority || 'medium'].color }}><Flag01Icon size={10} /> {priorityConfig[selectedTask.priority || 'medium'].label}</span>
                                 </div>
                                 <div className="flex items-center gap-2 pt-3 border-t border-gray-100 mt-1">
                                     {!selectedTask.selfAssigned && (
@@ -1726,14 +1672,14 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                             onClick={() => { setEditingTask(selectedTask); setSelectedTask(null); }}
                                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors"
                                         >
-                                            <Pencil size={12} /> {t('employeeDetail.tasks.editTask')}
+                                            <PencilIcon size={12} /> {t('employeeDetail.tasks.editTask')}
                                         </button>
                                     )}
                                     <button
                                         onClick={() => { setShowHistoryTaskId(selectedTask.id); setSelectedTask(null); }}
                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors"
                                     >
-                                        <History size={12} /> {t('employeeDetail.tasks.viewHistory')}
+                                        <Time01Icon size={12} /> {t('employeeDetail.tasks.viewHistory')}
                                     </button>
                                 </div>
                             </div>
@@ -1757,7 +1703,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                 )}
             </AnimatePresence>
 
-            {/* Task History Modal */}
+            {/* Task Time01Icon Modal */}
             <AnimatePresence>
                 {showHistoryTaskId && (
                     <TaskHistoryModal
@@ -1768,20 +1714,20 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                 )}
             </AnimatePresence>
 
-            {/* List View */}
+            {/* ListViewIcon View */}
             {viewMode === 'list' && (
                 <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
                     {apiTasks.map(task => (
                         <div key={task.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 hover:bg-gray-50/50 transition-colors group cursor-pointer" onClick={() => setSelectedTask(task)}>
                             <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                                 <div className="shrink-0">
-                                    {task.state === 'COMPLETED' ? <CheckCircle2 size={22} className="text-[#33cbcc]" /> : <Circle size={22} className="text-gray-300 hover:text-[#33cbcc] transition-colors" />}
+                                    {task.state === 'COMPLETED' ? <Tick01Icon size={22} className="text-[#33cbcc]" /> : <CircleIcon size={22} className="text-gray-300 hover:text-[#33cbcc] transition-colors" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <p className={`text-sm font-medium ${task.state === 'COMPLETED' ? 'text-gray-400 line-through' : 'text-gray-700'}`}>{task.title}</p>
                                     {task.description && <RichTextDisplay content={task.description} truncate maxLines={1} className="text-[11px] text-gray-400 mt-0.5" />}
                                     <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                        <span className="text-[11px] text-gray-400 flex items-center gap-1"><Clock size={11} /> {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}</span>
+                                        <span className="text-[11px] text-gray-400 flex items-center gap-1"><Clock01Icon size={11} /> {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'No deadline'}</span>
                                         {task.assignedTo && <span className="text-[11px] text-gray-500 font-medium">{task.assignedTo.firstName} {task.assignedTo.lastName}</span>}
                                         {task.projectId && (() => { const proj = (departmentProjects || []).find(p => p.id === task.projectId); return proj ? <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full flex items-center gap-1" style={{ backgroundColor: '#33cbcc15', color: '#33cbcc' }}><span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#33cbcc' }} />{proj.name}</span> : null; })()}
                                         {task.startedAt && <span className="text-[11px] text-[#283852] flex items-center gap-1">▶ {new Date(task.startedAt).toLocaleString()}</span>}
@@ -1791,9 +1737,9 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                             </div>
                             <div className="flex items-center gap-2 ml-10 sm:ml-0">
                                 <span className="text-[10px] font-bold px-2 py-1 rounded-lg" style={{ backgroundColor: `${difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color}15`, color: difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].color }}>{difficultyConfig[(task.difficulty?.toLowerCase() as TaskDifficulty) || 'medium'].label}</span>
-                                <span className="text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-0.5" style={{ backgroundColor: `${priorityConfig[task.priority || 'medium'].color}15`, color: priorityConfig[task.priority || 'medium'].color }}><Flag size={9} /> {priorityConfig[task.priority || 'medium'].label}</span>
-                                {task.urgent && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]"><AlertTriangle size={10} />{t('tasksPage.urgent')}</span>}
-                                {task.important && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]"><Star size={10} />{t('tasksPage.important')}</span>}
+                                <span className="text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-0.5" style={{ backgroundColor: `${priorityConfig[task.priority || 'medium'].color}15`, color: priorityConfig[task.priority || 'medium'].color }}><Flag01Icon size={9} /> {priorityConfig[task.priority || 'medium'].label}</span>
+                                {task.urgent && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]"><Alert02Icon size={10} />{t('tasksPage.urgent')}</span>}
+                                {task.important && <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]"><StarIcon size={10} />{t('tasksPage.important')}</span>}
                                 <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${task.state === 'COMPLETED' ? 'bg-[#283852] text-white' : task.state === 'IN_PROGRESS' ? 'bg-[#33cbcc]/10 text-[#33cbcc]' : 'bg-gray-100 text-gray-400'}`}>
                                     {task.state === 'COMPLETED' ? t('employeeDetail.tasks.done') : task.state === 'IN_PROGRESS' ? t('employeeDetail.tasks.inProgress') : t('employeeDetail.tasks.pending')}
                                 </span>
@@ -1804,14 +1750,14 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                             className="p-1.5 rounded-lg hover:bg-[#33cbcc]/10 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                             title={t('employeeDetail.tasks.editTask')}
                                         >
-                                            <Pencil size={14} />
+                                            <PencilIcon size={14} />
                                         </button>
                                         <button
                                             onClick={e => { e.stopPropagation(); if (window.confirm(t('employeeDetail.tasks.confirmDelete'))) { deleteTaskMutation.mutate(task.id); } }}
                                             className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                             title={t('employeeDetail.tasks.deleteTask')}
                                         >
-                                            <Trash2 size={14} />
+                                            <Delete02Icon size={14} />
                                         </button>
                                     </>
                                 )}
@@ -1820,7 +1766,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                                     className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                     title={t('employeeDetail.tasks.viewHistory')}
                                 >
-                                    <History size={14} />
+                                    <Time01Icon size={14} />
                                 </button>
                             </div>
                         </div>
@@ -2050,7 +1996,7 @@ const TasksView = ({ employee }: { employee: Employee }) => {
                             const taskEnd = tk.endDate ? new Date(tk.endDate) : null;
                             const taskDue = tk.dueDate ? new Date(tk.dueDate) : null;
                             
-                            // Check if task starts, ends, or is due in this month
+                            // Tick01Icon if task starts, ends, or is due in this month
                             const checkDate = (date: Date | null) => {
                                 if (!date) return false;
                                 return date.getFullYear() === selectedDate.getFullYear() && date.getMonth() === mIdx;
@@ -2100,21 +2046,21 @@ const DocumentsView = ({ employee: _employee }: { employee: Employee }) => {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800">{t('employeeSidebar.documents')}</h2>
                 <button className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#2bb5b6] transition-colors">
-                    <Plus size={16} /> {t('employeeDetail.documents.add')}
+                    <Add01Icon size={16} /> {t('employeeDetail.documents.add')}
                 </button>
             </div>
             <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
                 {documents.map(doc => (
                     <div key={doc.id} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors group">
-                        <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center shrink-0"><FileText size={20} className="text-[#283852]" /></div>
+                        <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center shrink-0"><File01Icon size={20} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-700">{doc.name}<span className="text-gray-400">{doc.ext}</span></p>
                             <p className="text-[11px] text-gray-400 mt-0.5">{doc.date} &middot; {doc.size}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Eye size={16} /></button>
-                            <button className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download size={16} /></button>
-                            <button onClick={() => removeDoc(doc.id)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-[#283852]/10"><Trash2 size={16} /></button>
+                            <button className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><ViewIcon size={16} /></button>
+                            <button className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download01Icon size={16} /></button>
+                            <button onClick={() => removeDoc(doc.id)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-[#283852]/10"><Delete02Icon size={16} /></button>
                         </div>
                     </div>
                 ))}
@@ -2157,7 +2103,7 @@ const FraisDeVieView = ({ employee }: { employee: Employee }) => {
     const validated = expenses.filter(e => e.status === 'VALIDATED').length;
     const rejected = expenses.filter(e => e.status === 'REJECTED').length;
 
-    if (isLoading) return <div className="flex justify-center py-16"><Loader2 size={28} className="animate-spin text-[#33cbcc]" /></div>;
+    if (isLoading) return <div className="flex justify-center py-16"><Loading02Icon size={28} className="animate-spin text-[#33cbcc]" /></div>;
 
     return (
         <div className="space-y-6">
@@ -2184,7 +2130,7 @@ const FraisDeVieView = ({ employee }: { employee: Employee }) => {
             {/* Expense list */}
             {expenses.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center">
-                    <Wallet size={40} className="mx-auto text-gray-300 mb-3" />
+                    <Wallet01Icon size={40} className="mx-auto text-gray-300 mb-3" />
                     <p className="text-sm text-gray-400">{t('businessExpenses.empty')}</p>
                 </div>
             ) : (
@@ -2210,7 +2156,7 @@ const FraisDeVieView = ({ employee }: { employee: Employee }) => {
                             {/* Receipt */}
                             {exp.receiptPath && (
                                 <a href={exp.receiptPath} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0">
-                                    <Eye size={14} />
+                                    <ViewIcon size={14} />
                                 </a>
                             )}
                         </div>
@@ -2250,7 +2196,7 @@ const SanctionsView = ({ employee }: { employee: Employee }) => {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800">{t('employeeSidebar.sanctions')}</h2>
                 <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#2bb5b6] transition-colors">
-                    <Plus size={16} /> {t('employeeDetail.sanctions.add')}
+                    <Add01Icon size={16} /> {t('employeeDetail.sanctions.add')}
                 </button>
             </div>
 
@@ -2278,7 +2224,7 @@ const SanctionsView = ({ employee }: { employee: Employee }) => {
                             disabled={createSanction.isPending}
                             className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb5b6] disabled:bg-gray-300"
                         >
-                            {createSanction.isPending && <Loader2 size={14} className="animate-spin" />}
+                            {createSanction.isPending && <Loading02Icon size={14} className="animate-spin" />}
                             {t('employeeDetail.save')}
                         </button>
                     </div>
@@ -2286,13 +2232,13 @@ const SanctionsView = ({ employee }: { employee: Employee }) => {
             )}
 
             {isLoading && (
-                <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-[#33cbcc]" /></div>
+                <div className="flex justify-center py-8"><Loading02Icon size={24} className="animate-spin text-[#33cbcc]" /></div>
             )}
 
             <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-50">
                 {sanctions.map(s => (
                     <div key={s.id} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors group">
-                        <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center shrink-0"><AlertTriangle size={20} className="text-[#283852]" /></div>
+                        <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center shrink-0"><Alert02Icon size={20} className="text-[#283852]" /></div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-700">{t(SANCTION_TYPE_LABELS[s.type] || s.type)}</p>
                             <p className="text-[11px] text-gray-400 mt-0.5">{s.reason}{s.date ? ` \u00b7 ${new Date(s.date).toLocaleDateString()}` : ''}</p>
@@ -2306,7 +2252,7 @@ const SanctionsView = ({ employee }: { employee: Employee }) => {
                             onClick={() => deleteSanction.mutate(s.id)}
                             className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#283852] transition-all"
                         >
-                            <Trash2 size={16} />
+                            <Delete02Icon size={16} />
                         </button>
                     </div>
                 ))}
@@ -2375,7 +2321,7 @@ const RecrutementsView = ({ employee }: { employee: Employee }) => {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800">{t('employeeSidebar.recrutements')}</h2>
                 <button onClick={() => setShowAdd(v => !v)} className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] hover:text-[#2bb5b6] transition-colors">
-                    <Plus size={14} />{t('employeeDetail.addDocument')}
+                    <Add01Icon size={14} />{t('employeeDetail.addDocument')}
                 </button>
             </div>
             {showAdd && (
@@ -2391,7 +2337,7 @@ const RecrutementsView = ({ employee }: { employee: Employee }) => {
                     <div className="flex gap-2 justify-end">
                         <button onClick={() => setShowAdd(false)} className="px-3 py-1.5 text-xs rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">{t('employeeDetail.cancel')}</button>
                         <button disabled={!newDoc.name.trim() || !newDoc.file || isUploading} onClick={handleAdd} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[#33cbcc] text-white hover:bg-[#2bb5b6] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
-                            {isUploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}{t('employeeDetail.upload')}
+                            {isUploading ? <Loading02Icon size={12} className="animate-spin" /> : <Upload01Icon size={12} />}{t('employeeDetail.upload')}
                         </button>
                     </div>
                 </div>
@@ -2400,7 +2346,7 @@ const RecrutementsView = ({ employee }: { employee: Employee }) => {
                 {docs.map((doc, i) => (
                     <div key={i} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors group">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${DOC_TYPE_COLORS[doc.type] || 'bg-[#283852]/10 text-[#283852]'}`}>
-                            <FileText size={20} />
+                            <File01Icon size={20} />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-700 truncate">{doc.name || doc.type}</p>
@@ -2408,14 +2354,14 @@ const RecrutementsView = ({ employee }: { employee: Employee }) => {
                         </div>
                         {doc.filePath ? (
                             <div className="flex items-center gap-1">
-                                <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Eye size={16} /></a>
-                                <a href={getFileUrl(doc.filePath)} download className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download size={16} /></a>
-                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                                <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><ViewIcon size={16} /></a>
+                                <a href={getFileUrl(doc.filePath)} download className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download01Icon size={16} /></a>
+                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Delete02Icon size={16} /></button>
                             </div>
                         ) : (
                             <div className="flex items-center gap-1">
                                 <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-[#283852]/10 text-[#283852]">{t('employeeDetail.noFile')}</span>
-                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Delete02Icon size={16} /></button>
                             </div>
                         )}
                     </div>
@@ -2463,7 +2409,7 @@ const EducationView = ({ employee }: { employee: Employee }) => {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800">{t('employeeSidebar.education')}</h2>
                 <button onClick={() => setShowAdd(v => !v)} className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] hover:text-[#2bb5b6] transition-colors">
-                    <Plus size={14} />{t('employeeDetail.addDocument')}
+                    <Add01Icon size={14} />{t('employeeDetail.addDocument')}
                 </button>
             </div>
             {showAdd && (
@@ -2479,7 +2425,7 @@ const EducationView = ({ employee }: { employee: Employee }) => {
                     <div className="flex gap-2 justify-end">
                         <button onClick={() => setShowAdd(false)} className="px-3 py-1.5 text-xs rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">{t('employeeDetail.cancel')}</button>
                         <button disabled={!newDoc.name.trim() || !newDoc.file || isUploading} onClick={handleAdd} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl bg-[#33cbcc] text-white hover:bg-[#2bb5b6] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors">
-                            {isUploading ? <Loader2 size={12} className="animate-spin" /> : <Upload size={12} />}{t('employeeDetail.upload')}
+                            {isUploading ? <Loading02Icon size={12} className="animate-spin" /> : <Upload01Icon size={12} />}{t('employeeDetail.upload')}
                         </button>
                     </div>
                 </div>
@@ -2488,7 +2434,7 @@ const EducationView = ({ employee }: { employee: Employee }) => {
                 {docs.map((doc, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4 group">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${DOC_TYPE_COLORS[doc.type] || 'bg-[#283852]/10 text-[#283852]'}`}>
-                            <GraduationCap size={24} />
+                            <GraduationScrollIcon size={24} />
                         </div>
                         <div className="flex-1 min-w-0">
                             <h3 className="text-sm font-semibold text-gray-800 truncate">{doc.name || doc.type}</h3>
@@ -2496,14 +2442,14 @@ const EducationView = ({ employee }: { employee: Employee }) => {
                         </div>
                         {doc.filePath ? (
                             <div className="flex items-center gap-1">
-                                <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Eye size={16} /></a>
-                                <a href={getFileUrl(doc.filePath)} download className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download size={16} /></a>
-                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                                <a href={getFileUrl(doc.filePath)} target="_blank" rel="noopener noreferrer" className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><ViewIcon size={16} /></a>
+                                <a href={getFileUrl(doc.filePath)} download className="p-2 text-gray-400 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-gray-100"><Download01Icon size={16} /></a>
+                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Delete02Icon size={16} /></button>
                             </div>
                         ) : (
                             <div className="flex items-center gap-1">
                                 <span className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-[#283852]/10 text-[#283852]">{t('employeeDetail.noFile')}</span>
-                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Trash2 size={16} /></button>
+                                <button onClick={() => handleRemove(i)} className="p-2 text-gray-300 hover:text-[#283852] transition-colors rounded-lg hover:bg-gray-100 opacity-0 group-hover:opacity-100"><Delete02Icon size={16} /></button>
                             </div>
                         )}
                     </motion.div>
@@ -2543,7 +2489,7 @@ const FormationsView = ({ employee: _employee }: { employee: Employee }) => {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-gray-800">{t('employeeSidebar.formations')}</h2>
                 <button onClick={() => setShowAdd(true)} className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-[#2bb5b6] transition-colors">
-                    <Plus size={16} /> {t('employeeDetail.formations.add')}
+                    <Add01Icon size={16} /> {t('employeeDetail.formations.add')}
                 </button>
             </div>
 
@@ -2565,7 +2511,7 @@ const FormationsView = ({ employee: _employee }: { employee: Employee }) => {
                 {formations.map(f => (
                     <div key={f.id} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors group">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${f.status === 'completed' ? 'bg-[#283852]' : 'bg-[#33cbcc]/10'}`}>
-                            <BookOpen size={20} className={f.status === 'completed' ? 'text-white' : 'text-[#33cbcc]'} />
+                            <BookOpen01Icon size={20} className={f.status === 'completed' ? 'text-white' : 'text-[#33cbcc]'} />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-700">{f.title}</p>
@@ -2576,10 +2522,10 @@ const FormationsView = ({ employee: _employee }: { employee: Employee }) => {
                         </span>
                         {f.status === 'upcoming' && (
                             <button onClick={() => markCompleted(f.id)} className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-400 hover:text-[#33cbcc] transition-all rounded-lg hover:bg-[#33cbcc]/10" title={t('employeeDetail.formations.markComplete')}>
-                                <Check size={16} />
+                                <Tick01Icon size={16} />
                             </button>
                         )}
-                        <button onClick={() => setFormations(prev => prev.filter(x => x.id !== f.id))} className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-[#283852] transition-all rounded-lg hover:bg-[#283852]/10"><Trash2 size={16} /></button>
+                        <button onClick={() => setFormations(prev => prev.filter(x => x.id !== f.id))} className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-[#283852] transition-all rounded-lg hover:bg-[#283852]/10"><Delete02Icon size={16} /></button>
                     </div>
                 ))}
                 {formations.length === 0 && <p className="p-8 text-center text-gray-400 text-sm">{t('employeeDetail.emptyState')}</p>}
@@ -2670,7 +2616,7 @@ const ProspectsView = ({ employee }: { employee: Employee }) => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-20">
-                <Loader2 className="animate-spin text-[#33cbcc]" size={32} />
+                <Loading02Icon className="animate-spin text-[#33cbcc]" size={32} />
             </div>
         );
     }
@@ -2684,20 +2630,20 @@ const ProspectsView = ({ employee }: { employee: Employee }) => {
                 {/* Header row: title + month navigator */}
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                        <Flag size={15} className="text-[#33cbcc]" />
+                        <Flag01Icon size={15} className="text-[#33cbcc]" />
                         <span className="text-sm font-semibold text-gray-700">
                             {t('employeeDetail.prospects.caGoal', 'Objectif CA mensuel')}
                         </span>
                     </div>
                     <div className="flex items-center gap-1">
                         <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                            <ChevronLeft size={14} />
+                            <ArrowLeft01Icon size={14} />
                         </button>
                         <span className="text-xs font-semibold text-gray-600 min-w-[110px] text-center">
                             {MONTH_LABELS[goalMonth - 1]} {goalYear}
                         </span>
                         <button onClick={nextMonth} disabled={isCurrentMonth} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-30">
-                            <ChevronRight size={14} />
+                            <ArrowRight01Icon size={14} />
                         </button>
                     </div>
                 </div>
@@ -2770,13 +2716,13 @@ const ProspectsView = ({ employee }: { employee: Employee }) => {
                                         disabled={setGoalMutation.isPending}
                                         className="p-1.5 rounded-lg bg-[#33cbcc] text-white hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors"
                                     >
-                                        <Check size={13} />
+                                        <Tick01Icon size={13} />
                                     </button>
                                     <button
                                         onClick={() => setEditingGoal(false)}
                                         className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
                                     >
-                                        <X size={13} />
+                                        <Cancel01Icon size={13} />
                                     </button>
                                 </div>
                             ) : (
@@ -2784,7 +2730,7 @@ const ProspectsView = ({ employee }: { employee: Employee }) => {
                                     onClick={() => { setEditingGoal(true); setGoalInput(employeeGoal?.targetAmount ? String(employeeGoal.targetAmount) : ''); }}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 text-gray-500 hover:border-[#33cbcc]/40 hover:text-[#33cbcc] transition-colors"
                                 >
-                                    <Pencil size={12} />
+                                    <PencilIcon size={12} />
                                     {employeeGoal?.targetAmount
                                         ? t('commercial.goal.editGoal', 'Modifier')
                                         : t('commercial.goal.setGoal', 'Définir objectif')}
@@ -2798,10 +2744,10 @@ const ProspectsView = ({ employee }: { employee: Employee }) => {
             {/* KPI Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { label: t('employeeDetail.prospects.totalLeads', 'Total Leads'), value: totalLeads, icon: Target, color: '#33cbcc' },
-                    { label: t('employeeDetail.prospects.won', 'Won'), value: wonCount, icon: CheckCircle2, color: '#22c55e' },
-                    { label: t('employeeDetail.prospects.pipelineValue', 'Pipeline'), value: formatValue(pipelineValue), icon: TrendingUp, color: '#8b5cf6' },
-                    { label: t('employeeDetail.prospects.winRate', 'Win Rate'), value: `${winRate}%`, icon: Target, color: '#f59e0b' },
+                    { label: t('employeeDetail.prospects.totalLeads', 'Total Leads'), value: totalLeads, icon: Target01Icon, color: '#33cbcc' },
+                    { label: t('employeeDetail.prospects.won', 'Won'), value: wonCount, icon: Tick01Icon, color: '#22c55e' },
+                    { label: t('employeeDetail.prospects.pipelineValue', 'Pipeline'), value: formatValue(pipelineValue), icon: ArrowUpRight01Icon, color: '#8b5cf6' },
+                    { label: t('employeeDetail.prospects.winRate', 'Win Rate'), value: `${winRate}%`, icon: Target01Icon, color: '#f59e0b' },
                 ].map((stat, i) => (
                     <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="bg-white rounded-2xl p-5 border border-gray-100 relative overflow-hidden">
                         <stat.icon size={48} className="absolute -right-2 -bottom-2 opacity-5" style={{ color: stat.color }} />
@@ -2811,7 +2757,7 @@ const ProspectsView = ({ employee }: { employee: Employee }) => {
                 ))}
             </div>
 
-            {/* Leads List */}
+            {/* Leads ListViewIcon */}
             <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden divide-y divide-gray-50">
                 {leads.map((lead, i) => {
                     const stageCfg = stageConfig[lead.saleStage] ?? { color: '#6b7280', bg: '#f3f4f6' };
@@ -2819,12 +2765,12 @@ const ProspectsView = ({ employee }: { employee: Employee }) => {
                     return (
                         <motion.div key={lead.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }} className="flex items-center gap-4 p-4 hover:bg-gray-50/50 transition-colors">
                             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: stageCfg.bg }}>
-                                <Building2 size={18} style={{ color: stageCfg.color }} />
+                                <Building02Icon size={18} style={{ color: stageCfg.color }} />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-gray-800 truncate">{lead.company}</p>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                    <Users size={12} className="text-gray-400" />
+                                    <UserGroupIcon size={12} className="text-gray-400" />
                                     <span className="text-xs text-gray-400 truncate">{lead.contact1Name || lead.activitySector || '-'}</span>
                                 </div>
                             </div>
@@ -2846,7 +2792,7 @@ const ProspectsView = ({ employee }: { employee: Employee }) => {
     );
 };
 
-/* ─── Transfer History View ─────────────────────────── */
+/* ─── Transfer Time01Icon View ─────────────────────────── */
 const TransferHistoryView = ({ employee }: { employee: Employee }) => {
     const { t } = useTranslation();
     const { data: history = [], isLoading } = useEmployeeTransferHistory(employee.id);
@@ -2854,7 +2800,7 @@ const TransferHistoryView = ({ employee }: { employee: Employee }) => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
     }
@@ -2862,7 +2808,7 @@ const TransferHistoryView = ({ employee }: { employee: Employee }) => {
     if (history.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-16">
-                <Building2 className="w-16 h-16 text-gray-300 mb-4" />
+                <Building02Icon className="w-16 h-16 text-gray-300 mb-4" />
                 <p className="text-gray-500 text-sm">{t('employees.transfer.noHistory')}</p>
             </div>
         );
@@ -2885,7 +2831,7 @@ const TransferHistoryView = ({ employee }: { employee: Employee }) => {
 
                     <div className="flex gap-4">
                         <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center">
-                            <Repeat className="w-5 h-5 text-[#283852]" />
+                            <RepeatIcon className="w-5 h-5 text-[#283852]" />
                         </div>
 
                         <div className="flex-1 bg-white rounded-lg p-4 shadow-sm">
@@ -2894,7 +2840,7 @@ const TransferHistoryView = ({ employee }: { employee: Employee }) => {
                                 <span className="text-sm text-gray-600">
                                     {entry.fromDepartment?.name || t('employees.transfer.noDepartment')}
                                 </span>
-                                <ArrowRight className="w-4 h-4 text-gray-400" />
+                                <ArrowRight01Icon className="w-4 h-4 text-gray-400" />
                                 <span className="text-sm font-semibold text-gray-900">
                                     {entry.toDepartment.name}
                                 </span>
@@ -2903,16 +2849,16 @@ const TransferHistoryView = ({ employee }: { employee: Employee }) => {
                             {/* Metadata */}
                             <div className="space-y-1 text-sm text-gray-600">
                                 <div className="flex items-center gap-2">
-                                    <User className="w-4 h-4" />
+                                    <UserIcon className="w-4 h-4" />
                                     <span>{t('employees.transfer.transferredBy')} {entry.transferredByName}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4" />
+                                    <Clock01Icon className="w-4 h-4" />
                                     <span>{format(new Date(entry.createdAt), 'PPp')}</span>
                                 </div>
                                 {entry.reason && (
                                     <div className="flex items-start gap-2 mt-2">
-                                        <FileText className="w-4 h-4 mt-0.5" />
+                                        <File01Icon className="w-4 h-4 mt-0.5" />
                                         <span className="text-gray-700">{entry.reason}</span>
                                     </div>
                                 )}
@@ -2935,7 +2881,7 @@ const ReportsView = ({ employee }: { employee: Employee }) => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
     }
@@ -2943,7 +2889,7 @@ const ReportsView = ({ employee }: { employee: Employee }) => {
     if (reports.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-16">
-                <FileText className="w-16 h-16 text-gray-300 mb-4" />
+                <File01Icon className="w-16 h-16 text-gray-300 mb-4" />
                 <p className="text-gray-500 text-sm">{t('employeeDetail.reports.noReports')}</p>
             </div>
         );
@@ -2976,15 +2922,15 @@ const ReportsView = ({ employee }: { employee: Employee }) => {
                             </div>
                             <div className="space-y-1 text-sm text-gray-600">
                                 <div className="flex items-center gap-2">
-                                    <Calendar className="w-4 h-4" />
+                                    <Calendar01Icon className="w-4 h-4" />
                                     <span>{t('employeeDetail.reports.period')}: {format(new Date(report.startDate), 'PP')} - {format(new Date(report.endDate), 'PP')}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <User className="w-4 h-4" />
+                                    <UserIcon className="w-4 h-4" />
                                     <span>{t('employeeDetail.reports.generatedBy')}: {report.generatedBy?.email || 'N/A'}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4" />
+                                    <Clock01Icon className="w-4 h-4" />
                                     <span>{t('employeeDetail.reports.created')}: {format(new Date(report.createdAt), 'PPp')}</span>
                                 </div>
                             </div>
@@ -2994,7 +2940,7 @@ const ReportsView = ({ employee }: { employee: Employee }) => {
                                 href={`/reports/${report.id}`}
                                 className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-lg hover:bg-[#2bb5b6] transition-colors text-sm font-medium"
                             >
-                                <Eye size={16} />
+                                <ViewIcon size={16} />
                                 {t('employeeDetail.reports.view')}
                             </a>
                         )}
@@ -3061,7 +3007,7 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
                             onClick={() => setShowForm(true)}
                             className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb8b9] transition-colors"
                         >
-                            <Plus size={15} />
+                            <Add01Icon size={15} />
                             Promouvoir
                         </button>
                     ) : (
@@ -3116,11 +3062,11 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
 
             {isLoading ? (
                 <div className="flex items-center justify-center py-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                    <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
                 </div>
             ) : history.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16">
-                    <TrendingUp className="w-16 h-16 text-gray-300 mb-4" />
+                    <ArrowUpRight01Icon className="w-16 h-16 text-gray-300 mb-4" />
                     <p className="text-gray-500 text-sm">Aucune promotion enregistrée</p>
                 </div>
             ) : (
@@ -3138,7 +3084,7 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
                             )}
                             <div className="flex gap-4">
                                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
-                                    <TrendingUp className="w-5 h-5 text-[#33cbcc]" />
+                                    <ArrowUpRight01Icon className="w-5 h-5 text-[#33cbcc]" />
                                 </div>
                                 <div className="flex-1 bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                                     <div className="flex items-center gap-2 mb-3">
@@ -3147,23 +3093,23 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
                                                 {ROLE_LABELS[entry.fromRole] || entry.fromRole}
                                             </span>
                                         )}
-                                        {entry.fromRole && <ArrowRight className="w-4 h-4 text-gray-400" />}
+                                        {entry.fromRole && <ArrowRight01Icon className="w-4 h-4 text-gray-400" />}
                                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${ROLE_COLORS[entry.toRole] || 'bg-gray-100 text-gray-700'}`}>
                                             {ROLE_LABELS[entry.toRole] || entry.toRole}
                                         </span>
                                     </div>
                                     <div className="space-y-1 text-sm text-gray-600">
                                         <div className="flex items-center gap-2">
-                                            <User className="w-4 h-4" />
+                                            <UserIcon className="w-4 h-4" />
                                             <span>Par {entry.promotedByName}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <Clock className="w-4 h-4" />
+                                            <Clock01Icon className="w-4 h-4" />
                                             <span>{format(new Date(entry.createdAt), 'PPp')}</span>
                                         </div>
                                         {entry.reason && (
                                             <div className="flex items-start gap-2 mt-2">
-                                                <FileText className="w-4 h-4 mt-0.5" />
+                                                <File01Icon className="w-4 h-4 mt-0.5" />
                                                 <span className="text-gray-700">{entry.reason}</span>
                                             </div>
                                         )}
@@ -3248,7 +3194,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                     animate={{ opacity: 1, y: 0 }}
                     className="flex items-center gap-3 px-5 py-3 mb-4 rounded-xl bg-[#283852]/10 border border-gray-200"
                 >
-                    <ShieldAlert size={18} className="text-[#283852]" />
+                    <Shield01Icon size={18} className="text-[#283852]" />
                     <span className="text-sm font-medium text-[#283852]">
                         {t('employees.dismissedBanner', 'This employee has been dismissed and can no longer access the system.')}
                         {employee.dismissedAt && (
@@ -3273,7 +3219,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                     : 'bg-[#283852] hover:bg-[#283852]/80 text-white shadow-lg shadow-[#283852]/20'
                             }`}
                         >
-                            {isDismissed ? <UserCheck size={15} /> : <UserX size={15} />}
+                            {isDismissed ? <UserCheck01Icon size={15} /> : <UserBlock01Icon size={15} />}
                             {isDismissed ? t('employees.reinstate', 'Reinstate') : t('employees.dismiss', 'Dismiss')}
                         </button>
                     )}
@@ -3283,7 +3229,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                 onClick={() => setShowTransferModal(true)}
                                 className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-lg hover:bg-[#2bb8b9]"
                             >
-                                <Repeat className="w-4 h-4" />
+                                <RepeatIcon className="w-4 h-4" />
                                 {t('employees.transfer.button')}
                             </button>
                             {employee.departmentId && isManager && (
@@ -3291,7 +3237,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                     onClick={() => setShowRemoveDeptConfirm(true)}
                                     className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors"
                                 >
-                                    <Building className="w-4 h-4" />
+                                    <Building01Icon className="w-4 h-4" />
                                     Retirer du département
                                 </button>
                             )}
@@ -3299,7 +3245,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                 onClick={() => setShowTransferHistory(true)}
                                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
                             >
-                                <History className="w-4 h-4" />
+                                <Time01Icon className="w-4 h-4" />
                                 {t('employees.transfer.viewHistory')}
                             </button>
                         </>
@@ -3308,7 +3254,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                         onClick={() => setShowEditModal(true)}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#33cbcc] hover:bg-[#2bb5b6] text-white text-sm font-semibold transition-colors shadow-lg shadow-[#33cbcc]/20"
                     >
-                        <Pencil size={15} />
+                        <PencilIcon size={15} />
                         {t('employees.edit.title')}
                     </button>
                 </div>
@@ -3343,7 +3289,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                             className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
                         >
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isDismissed ? 'bg-[#33cbcc]/10' : 'bg-[#283852]/10'}`}>
-                                {isDismissed ? <UserCheck size={24} className="text-[#33cbcc]" /> : <UserX size={24} className="text-[#283852]" />}
+                                {isDismissed ? <UserCheck01Icon size={24} className="text-[#33cbcc]" /> : <UserBlock01Icon size={24} className="text-[#283852]" />}
                             </div>
                             <h3 className="text-lg font-bold text-gray-800 mb-2">
                                 {isDismissed
@@ -3372,7 +3318,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                     }`}
                                 >
                                     {(dismissEmployee.isPending || reinstateEmployee.isPending)
-                                        ? <Loader2 size={16} className="animate-spin mx-auto" />
+                                        ? <Loading02Icon size={16} className="animate-spin mx-auto" />
                                         : isDismissed
                                             ? t('employees.reinstate', 'Reinstate')
                                             : t('employees.dismiss', 'Dismiss')}
@@ -3401,7 +3347,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                             className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl"
                         >
                             <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-4">
-                                <Building size={24} className="text-orange-500" />
+                                <Building01Icon size={24} className="text-orange-500" />
                             </div>
                             <h3 className="text-lg font-bold text-gray-800 mb-2">Retirer du département</h3>
                             <p className="text-sm text-gray-500 mb-6">
@@ -3424,7 +3370,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                                     className="flex-1 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-colors disabled:opacity-50"
                                 >
                                     {removeFromDepartment.isPending
-                                        ? <Loader2 size={16} className="animate-spin mx-auto" />
+                                        ? <Loading02Icon size={16} className="animate-spin mx-auto" />
                                         : 'Confirmer'}
                                 </button>
                             </div>

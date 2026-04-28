@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Search, BookOpen, FileText, CreditCard, ChevronDown, AlertCircle, CheckCircle2, Clock, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { Add01Icon, Cancel01Icon, Search01Icon, BookOpen01Icon, File01Icon, CreditCardIcon, ArrowDown01Icon, Alert01Icon, Tick01Icon, Clock01Icon, ArrowUpRight01Icon, ArrowDownRight01Icon, Activity01Icon } from 'hugeicons-react';
 import { useClientStatement, useSalesSummary, useCreatePayment, useClientHealthMetrics } from '../../api/commercial/hooks';
 import type { CreatePaymentDto, PaymentMethod, ClientStatement, HealthStatus } from '../../api/commercial/types';
 import { useClients } from '../../api/clients/hooks';
@@ -19,12 +19,12 @@ const LEDGER_MIN_ROWS = 20;
 
 const getHealthBadgeStyles = (status: HealthStatus) => {
     const styles = {
-        HEALTHY: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: CheckCircle2, border: 'border-gray-200' },
-        GOOD: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: CheckCircle2, border: 'border-gray-200' },
-        NEEDS_FOLLOWUP: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Clock, border: 'border-gray-200' },
-        ATTENTION_NEEDED: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: AlertCircle, border: 'border-gray-200' },
-        AT_RISK: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: AlertCircle, border: 'border-gray-200' },
-        NEW: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: TrendingUp, border: 'border-gray-200' },
+        HEALTHY: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: Tick01Icon, border: 'border-gray-200' },
+        GOOD: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: Tick01Icon, border: 'border-gray-200' },
+        NEEDS_FOLLOWUP: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Clock01Icon, border: 'border-gray-200' },
+        ATTENTION_NEEDED: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Alert01Icon, border: 'border-gray-200' },
+        AT_RISK: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Alert01Icon, border: 'border-gray-200' },
+        NEW: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: ArrowUpRight01Icon, border: 'border-gray-200' },
     };
     return styles[status] || styles.NEW;
 };
@@ -103,13 +103,13 @@ function PaymentModal({
                         {/* Header */}
                         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                             <div className="flex items-center gap-2">
-                                <CreditCard size={20} className="text-[#33cbcc]" />
+                                <CreditCardIcon size={20} className="text-[#33cbcc]" />
                                 <h3 className="text-lg font-semibold text-gray-800">
                                     {t('commercial.followUp.recordPayment')}
                                 </h3>
                             </div>
                             <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-                                <X size={18} className="text-gray-400" />
+                                <Cancel01Icon size={18} className="text-gray-400" />
                             </button>
                         </div>
 
@@ -292,7 +292,7 @@ export default function ClientFollowUp() {
         <div className="p-4 md:p-6 space-y-6">
             {/* Page Header */}
             <div className="flex items-center gap-3">
-                <BookOpen size={24} className="text-[#33cbcc]" />
+                <BookOpen01Icon size={24} className="text-[#33cbcc]" />
                 <h1 className="text-2xl font-bold text-gray-800">{t('commercial.followUp.title')}</h1>
             </div>
 
@@ -315,7 +315,7 @@ export default function ClientFollowUp() {
                                 <span className={selectedClient ? 'text-gray-800' : 'text-gray-400'}>
                                     {selectedClient ? (selectedClient as any).name : t('commercial.followUp.chooseClient')}
                                 </span>
-                                <ChevronDown size={16} className={`text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                                <ArrowDown01Icon size={16} className={`text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                             </button>
 
                             <AnimatePresence>
@@ -326,15 +326,15 @@ export default function ClientFollowUp() {
                                         exit={{ opacity: 0, y: -4 }}
                                         className="absolute z-30 mt-1 w-full bg-white border border-gray-200 rounded-xl lg max-h-60 overflow-hidden"
                                     >
-                                        {/* Search input */}
+                                        {/* Search01Icon input */}
                                         <div className="p-2 border-b border-gray-100">
                                             <div className="relative">
-                                                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                                <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                                                 <input
                                                     type="text"
                                                     value={clientSearch}
                                                     onChange={e => setClientSearch(e.target.value)}
-                                                    className="w-full pl-8 pr-3 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/40"
+                                                    className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                                                     placeholder={t('commercial.followUp.searchClient')}
                                                     autoFocus
                                                 />
@@ -372,7 +372,7 @@ export default function ClientFollowUp() {
                     {!selectedClientId ? (
                         /* No client selected prompt */
                         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                            <FileText size={48} strokeWidth={1.2} className="mb-4" />
+                            <File01Icon size={48} strokeWidth={1.2} className="mb-4" />
                             <p className="text-sm">{t('commercial.followUp.selectClientPrompt')}</p>
                         </div>
                     ) : statementLoading ? (
@@ -445,7 +445,7 @@ export default function ClientFollowUp() {
                                         }`}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <FileText size={16} />
+                                            <File01Icon size={16} />
                                             {t('commercial.followUp.ledgerTab', 'Grand Livre')}
                                         </div>
                                     </button>
@@ -458,7 +458,7 @@ export default function ClientFollowUp() {
                                         }`}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <Activity size={16} />
+                                            <Activity01Icon size={16} />
                                             {t('commercial.followUp.activitiesTab', 'Activités Client')}
                                         </div>
                                     </button>
@@ -579,7 +579,7 @@ export default function ClientFollowUp() {
                                     onClick={() => setPaymentModalOpen(true)}
                                     className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-[#33cbcc] rounded-xl hover:bg-[#2bb5b6] transition-colors sm"
                                 >
-                                    <Plus size={16} />
+                                    <Add01Icon size={16} />
                                     {t('commercial.followUp.recordPayment')}
                                 </button>
                             </div>

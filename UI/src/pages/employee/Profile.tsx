@@ -1,34 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    User,
-    Mail,
-    Phone,
-    MapPin,
-    Calendar,
-    Briefcase,
-    Building,
-    Edit3,
-    X,
-    Save,
-    Plus,
-    Shield,
-    Users,
-    ListChecks,
-    CalendarDays,
-    FolderOpen,
-    GraduationCap,
-    Trash2,
-    Upload,
-    Eye,
-    FileText,
-    Loader2,
-    Trophy,
-    Crown,
-    KeyRound,
-    EyeOff,
-} from 'lucide-react';
+import { UserIcon, Mail01Icon, CallIcon, Location01Icon, Calendar01Icon, Briefcase01Icon, Building01Icon, PencilIcon, Cancel01Icon, FloppyDiskIcon, Add01Icon, Shield01Icon, UserGroupIcon, Task01Icon, FolderOpenIcon, GraduationScrollIcon, Delete02Icon, Upload01Icon, ViewIcon, File01Icon, Loading02Icon, Award01Icon, CrownIcon, Key01Icon, ViewOffIcon } from 'hugeicons-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUpdateProfile, useMyBadges, useChangePassword } from '../../api/auth/hooks';
 import { UserProfileSkeleton } from '../../components/Skeleton';
@@ -149,12 +122,12 @@ const EditProfileModal = ({
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Edit3 size={20} className="text-[#33cbcc]" />
+                            <PencilIcon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{t('profile.editProfile')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -163,7 +136,7 @@ const EditProfileModal = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('profile.personalInfo.firstName')}
                             </label>
                             <input
@@ -175,7 +148,7 @@ const EditProfileModal = ({
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('profile.personalInfo.lastName')}
                             </label>
                             <input
@@ -189,7 +162,7 @@ const EditProfileModal = ({
 
                     <div>
                         <label className={labelCls}>
-                            <Mail size={12} />
+                            <Mail01Icon size={12} />
                             {t('profile.contact.email')}
                         </label>
                         <input
@@ -203,7 +176,7 @@ const EditProfileModal = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Phone size={12} />
+                                <CallIcon size={12} />
                                 {t('profile.personalInfo.phone')}
                             </label>
                             <input
@@ -215,7 +188,7 @@ const EditProfileModal = ({
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('profile.personalInfo.dateOfBirth')}
                             </label>
                             <input
@@ -229,7 +202,7 @@ const EditProfileModal = ({
 
                     <div>
                         <label className={labelCls}>
-                            <MapPin size={12} />
+                            <Location01Icon size={12} />
                             {t('profile.jobInfo.location')}
                         </label>
                         <input
@@ -243,7 +216,7 @@ const EditProfileModal = ({
                     {/* Skills */}
                     <div>
                         <label className={labelCls}>
-                            <Shield size={12} />
+                            <Shield01Icon size={12} />
                             {t('profile.skills.title')}
                         </label>
                         <div className="flex flex-wrap gap-2 mb-3">
@@ -258,7 +231,7 @@ const EditProfileModal = ({
                                         onClick={() => setForm(prev => ({ ...prev, skills: prev.skills.filter((_, idx) => idx !== i) }))}
                                         className="hover:text-[#283852] transition-colors"
                                     >
-                                        <X size={14} />
+                                        <Cancel01Icon size={14} />
                                     </button>
                                 </span>
                             ))}
@@ -294,7 +267,7 @@ const EditProfileModal = ({
                                 }}
                                 className="shrink-0 w-10 h-10 rounded-xl bg-[#33cbcc] text-white flex items-center justify-center hover:bg-[#2bb5b6] transition-colors"
                             >
-                                <Plus size={18} />
+                                <Add01Icon size={18} />
                             </button>
                         </div>
                     </div>
@@ -319,7 +292,7 @@ const EditProfileModal = ({
                         })}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20 transition-colors disabled:opacity-50"
                     >
-                        {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                        {isSaving ? <Loading02Icon size={16} className="animate-spin" /> : <FloppyDiskIcon size={16} />}
                         {t('profile.saveChanges')}
                     </button>
                 </div>
@@ -400,14 +373,14 @@ const EducationSection = ({
         >
             <div className="flex items-center justify-between mb-5">
                 <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                    <GraduationCap size={18} className="text-[#33cbcc]" />
+                    <GraduationScrollIcon size={18} className="text-[#33cbcc]" />
                     {t('profile.education.title')}
                 </h3>
                 <button
                     onClick={() => setShowAdd(!showAdd)}
                     className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] hover:text-[#2bb5b6] transition-colors"
                 >
-                    <Plus size={14} />
+                    <Add01Icon size={14} />
                     {t('profile.education.add')}
                 </button>
             </div>
@@ -443,24 +416,24 @@ const EducationSection = ({
                             {/* File upload */}
                             <div>
                                 <label className="flex items-center gap-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                                    <Upload size={12} />
+                                    <Upload01Icon size={12} />
                                     {t('profile.education.file')}
                                 </label>
                                 {selectedFile ? (
                                     <div className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-gray-200">
-                                        <FileText size={16} className="text-[#33cbcc] shrink-0" />
+                                        <File01Icon size={16} className="text-[#33cbcc] shrink-0" />
                                         <span className="text-sm text-gray-700 truncate flex-1">{selectedFile.name}</span>
                                         <button
                                             type="button"
                                             onClick={() => setSelectedFile(null)}
                                             className="text-gray-400 hover:text-[#283852] transition-colors shrink-0"
                                         >
-                                            <X size={14} />
+                                            <Cancel01Icon size={14} />
                                         </button>
                                     </div>
                                 ) : (
                                     <label className="flex items-center justify-center gap-2 px-4 py-3 bg-white rounded-xl border border-dashed border-gray-300 cursor-pointer hover:border-[#33cbcc] hover:bg-[#33cbcc]/5 transition-all">
-                                        <Upload size={16} className="text-gray-400" />
+                                        <Upload01Icon size={16} className="text-gray-400" />
                                         <span className="text-xs text-gray-400">{t('profile.education.uploadPlaceholder')}</span>
                                         <input
                                             type="file"
@@ -487,7 +460,7 @@ const EducationSection = ({
                                     disabled={!newDoc.name.trim() || busy}
                                     className="flex items-center gap-1.5 px-4 py-2 bg-[#33cbcc] text-white rounded-xl text-xs font-semibold hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
                                 >
-                                    {busy && <Loader2 size={12} className="animate-spin" />}
+                                    {busy && <Loading02Icon size={12} className="animate-spin" />}
                                     {t('profile.education.save')}
                                 </button>
                             </div>
@@ -508,7 +481,7 @@ const EducationSection = ({
                             className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group"
                         >
                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${EDU_TYPE_COLORS[doc.type] || EDU_TYPE_COLORS.other}`}>
-                                <GraduationCap size={18} />
+                                <GraduationScrollIcon size={18} />
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium text-gray-700 truncate">{doc.name}</p>
@@ -521,21 +494,21 @@ const EducationSection = ({
                                     rel="noopener noreferrer"
                                     className="p-1.5 text-gray-300 hover:text-[#33cbcc] transition-colors rounded-lg hover:bg-[#33cbcc]/10"
                                 >
-                                    <Eye size={16} />
+                                    <ViewIcon size={16} />
                                 </a>
                             )}
                             <button
                                 onClick={() => handleRemove(i)}
                                 className="opacity-0 group-hover:opacity-100 p-1.5 text-gray-300 hover:text-[#283852] transition-all rounded-lg hover:bg-[#283852]/10"
                             >
-                                <Trash2 size={14} />
+                                <Delete02Icon size={14} />
                             </button>
                         </motion.div>
                     ))}
                 </div>
             ) : (
                 <div className="py-6 text-center">
-                    <GraduationCap size={28} className="mx-auto text-gray-200 mb-2" />
+                    <GraduationScrollIcon size={28} className="mx-auto text-gray-200 mb-2" />
                     <p className="text-sm text-gray-400">{t('profile.education.empty')}</p>
                 </div>
             )}
@@ -594,10 +567,10 @@ const Profile = () => {
     }
 
     const stats = [
-        { label: t('profile.stats.projects'), value: user?.projectsCount ?? 0, icon: FolderOpen },
-        { label: t('profile.stats.tasks'), value: tasks?.length ?? 0, icon: ListChecks },
-        { label: t('profile.stats.meetings'), value: meetings?.length ?? 0, icon: CalendarDays },
-        { label: t('profile.stats.teamMembers'), value: tickets?.length ?? 0, icon: Users },
+        { label: t('profile.stats.projects'), value: user?.projectsCount ?? 0, icon: FolderOpenIcon, color: '#283852' },
+        { label: t('profile.stats.tasks'), value: tasks?.length ?? 0, icon: Task01Icon, color: '#33cbcc' },
+        { label: t('profile.stats.meetings'), value: meetings?.length ?? 0, icon: Calendar01Icon, color: '#22c55e' },
+        { label: t('profile.stats.teamMembers'), value: tickets?.length ?? 0, icon: UserGroupIcon, color: '#f59e0b' },
     ];
 
     return (
@@ -622,8 +595,8 @@ const Profile = () => {
                                     <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                        <User size={32} className="text-gray-300 md:hidden" />
-                                        <User size={40} className="text-gray-300 hidden md:block" />
+                                        <UserIcon size={32} className="text-gray-300 md:hidden" />
+                                        <UserIcon size={40} className="text-gray-300 hidden md:block" />
                                     </div>
                                 )}
                             </div>
@@ -632,11 +605,11 @@ const Profile = () => {
                                 <p className="text-sm text-gray-500 mt-0.5">{profile.role}</p>
                                 <div className="flex items-center gap-3 mt-2">
                                     <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                                        <Building size={12} />
+                                        <Building01Icon size={12} />
                                         {profile.department || '--'}
                                     </span>
                                     <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                                        <MapPin size={12} />
+                                        <Location01Icon size={12} />
                                         {profile.location || '--'}
                                     </span>
                                 </div>
@@ -646,7 +619,7 @@ const Profile = () => {
                             onClick={() => setShowEditModal(true)}
                             className="flex items-center justify-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 w-full md:w-auto"
                         >
-                            <Edit3 size={16} />
+                            <PencilIcon size={16} />
                             {t('profile.editProfile')}
                         </button>
                     </div>
@@ -666,15 +639,16 @@ const Profile = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-xs md:text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-1 md:mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out text-[#33cbcc]">
-                            <stat.icon size={80} strokeWidth={1.5} className="md:hidden" />
-                            <stat.icon size={100} strokeWidth={1.5} className="hidden md:block" />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -692,16 +666,16 @@ const Profile = () => {
                         className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Briefcase size={18} className="text-[#33cbcc]" />
+                            <Briefcase01Icon size={18} className="text-[#33cbcc]" />
                             {t('profile.jobInfo.title')}
                         </h3>
                         <div className="space-y-4">
                             {[
-                                { label: t('profile.jobInfo.role'), value: profile.positionTitle || profile.role, icon: Shield },
-                                { label: t('profile.jobInfo.department'), value: profile.department, icon: Building },
-                                { label: t('profile.jobInfo.employeeId'), value: profile.employeeId, icon: User },
-                                { label: t('profile.jobInfo.joinDate'), value: profile.joinDate, icon: Calendar },
-                                { label: t('profile.jobInfo.location'), value: profile.location, icon: MapPin },
+                                { label: t('profile.jobInfo.role'), value: profile.positionTitle || profile.role, icon: Shield01Icon },
+                                { label: t('profile.jobInfo.department'), value: profile.department, icon: Building01Icon },
+                                { label: t('profile.jobInfo.employeeId'), value: profile.employeeId, icon: UserIcon },
+                                { label: t('profile.jobInfo.joinDate'), value: profile.joinDate, icon: Calendar01Icon },
+                                { label: t('profile.jobInfo.location'), value: profile.location, icon: Location01Icon },
                             ].map((item, i) => (
                                 <div key={i} className="flex items-start gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 mt-0.5">
@@ -724,14 +698,14 @@ const Profile = () => {
                         className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Phone size={18} className="text-[#33cbcc]" />
+                            <CallIcon size={18} className="text-[#33cbcc]" />
                             {t('profile.contact.title')}
                         </h3>
                         <div className="space-y-4">
                             {[
-                                { label: t('profile.contact.email'), value: profile.email, icon: Mail },
-                                { label: t('profile.contact.phone'), value: profile.phone, icon: Phone },
-                                { label: t('profile.contact.office'), value: profile.location, icon: MapPin },
+                                { label: t('profile.contact.email'), value: profile.email, icon: Mail01Icon },
+                                { label: t('profile.contact.phone'), value: profile.phone, icon: CallIcon },
+                                { label: t('profile.contact.office'), value: profile.location, icon: Location01Icon },
                             ].map((item, i) => (
                                 <div key={i} className="flex items-start gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 mt-0.5">
@@ -757,7 +731,7 @@ const Profile = () => {
                         className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Shield size={18} className="text-[#33cbcc]" />
+                            <Shield01Icon size={18} className="text-[#33cbcc]" />
                             {t('profile.skills.title')}
                         </h3>
                         {profile.skills.length > 0 ? (
@@ -776,7 +750,7 @@ const Profile = () => {
                             </div>
                         ) : (
                             <div className="py-6 text-center">
-                                <Shield size={28} className="mx-auto text-gray-200 mb-2" />
+                                <Shield01Icon size={28} className="mx-auto text-gray-200 mb-2" />
                                 <p className="text-sm text-gray-400">{t('profile.skills.title')}</p>
                             </div>
                         )}
@@ -790,7 +764,7 @@ const Profile = () => {
                         className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Trophy size={18} className="text-[#33cbcc]" />
+                            <Award01Icon size={18} className="text-[#33cbcc]" />
                             {t('profile.leaderboard.title')}
                         </h3>
 
@@ -816,7 +790,7 @@ const Profile = () => {
                                                 ? 'bg-[#283852] text-white'
                                                 : 'bg-gray-100 text-gray-500'
                                         }`}>
-                                            {i === 0 ? <Crown size={16} /> : entry.rank}
+                                            {i === 0 ? <CrownIcon size={16} /> : entry.rank}
                                         </div>
 
                                         {/* Avatar */}
@@ -825,7 +799,7 @@ const Profile = () => {
                                                 <img src={entry.avatarUrl} alt="" className="w-full h-full object-cover" />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
-                                                    <User size={16} className="text-gray-300" />
+                                                    <UserIcon size={16} className="text-gray-300" />
                                                 </div>
                                             )}
                                         </div>
@@ -850,7 +824,7 @@ const Profile = () => {
                             </div>
                         ) : (
                             <div className="py-6 text-center">
-                                <Trophy size={28} className="mx-auto text-gray-200 mb-2" />
+                                <Award01Icon size={28} className="mx-auto text-gray-200 mb-2" />
                                 <p className="text-sm text-gray-400">{t('profile.leaderboard.empty')}</p>
                             </div>
                         )}
@@ -864,7 +838,7 @@ const Profile = () => {
                         className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 p-5 md:p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-2 flex items-center gap-2">
-                            <Trophy size={18} className="text-[#33cbcc]" />
+                            <Award01Icon size={18} className="text-[#33cbcc]" />
                             {t('profile.badges.title')}
                         </h3>
                         <p className="text-xs text-gray-400 mb-5">
@@ -978,7 +952,7 @@ const Profile = () => {
                     >
                         <div className="flex items-center gap-2 mb-4">
                             <div className="w-7 h-7 rounded-lg bg-[#283852]/10 flex items-center justify-center">
-                                <KeyRound size={14} className="text-[#283852]" />
+                                <Key01Icon size={14} className="text-[#283852]" />
                             </div>
                             <h3 className="text-sm font-semibold text-gray-700">{t('profile.changePassword.title')}</h3>
                         </div>
@@ -993,7 +967,7 @@ const Profile = () => {
                                     className="w-full px-3 py-2.5 pr-10 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#33cbcc] focus:ring-1 focus:ring-[#33cbcc]/20"
                                 />
                                 <button type="button" onClick={() => setShowCurrentPwd(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                    {showCurrentPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                                    {showCurrentPwd ? <ViewOffIcon size={15} /> : <ViewIcon size={15} />}
                                 </button>
                             </div>
                             {/* New password */}
@@ -1006,7 +980,7 @@ const Profile = () => {
                                     className="w-full px-3 py-2.5 pr-10 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-[#33cbcc] focus:ring-1 focus:ring-[#33cbcc]/20"
                                 />
                                 <button type="button" onClick={() => setShowNewPwd(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                    {showNewPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                                    {showNewPwd ? <ViewOffIcon size={15} /> : <ViewIcon size={15} />}
                                 </button>
                             </div>
                             {/* Confirm password */}
@@ -1038,7 +1012,7 @@ const Profile = () => {
                                 }}
                                 className="px-4 py-2 text-xs font-semibold bg-[#283852] text-white rounded-xl hover:bg-[#283852]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1.5"
                             >
-                                {changePassword.isPending ? <Loader2 size={13} className="animate-spin" /> : <KeyRound size={13} />}
+                                {changePassword.isPending ? <Loading02Icon size={13} className="animate-spin" /> : <Key01Icon size={13} />}
                                 {t('profile.changePassword.submit')}
                             </button>
                         </div>

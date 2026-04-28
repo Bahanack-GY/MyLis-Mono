@@ -1,22 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
-    DollarSign,
-    Clock,
-    AlertTriangle,
-    Receipt,
-    Briefcase,
-    Building,
-    FileText,
-    Link,
-    CheckCircle,
-    Send,
-    XCircle,
-    TrendingUp,
-    Loader2,
-    Save
-} from 'lucide-react';
+import { DollarCircleIcon, Clock01Icon, Alert02Icon, Invoice01Icon, Briefcase01Icon, Building01Icon, File01Icon, Link01Icon, Tick01Icon, SentIcon, CancelCircleIcon, ArrowUpRight01Icon, Loading02Icon, FloppyDiskIcon } from 'hugeicons-react';
 import type { ClientTab } from '../components/ClientDetailSidebar';
 import type { ClientData } from '../layouts/ClientDetailLayout';
 import { useUpdateClient } from '../api/clients/hooks';
@@ -61,10 +46,10 @@ const OverviewView = ({ client }: { client: ClientData }) => {
     const { t } = useTranslation();
 
     const stats = [
-        { label: t('clientDetail.overview.totalPaid'), value: fmtCurrency(client.totalPaid), icon: DollarSign, color: '#33cbcc' },
-        { label: t('clientDetail.overview.pendingPayments'), value: fmtCurrency(client.totalPending), icon: Clock, color: '#283852' },
-        { label: t('clientDetail.overview.overdue'), value: client.overdueCount, icon: AlertTriangle, color: '#283852' },
-        { label: t('clientDetail.overview.totalInvoices'), value: client.invoices.length, icon: Receipt, color: '#283852' },
+        { label: t('clientDetail.overview.totalPaid'), value: fmtCurrency(client.totalPaid), icon: DollarCircleIcon, color: '#33cbcc' },
+        { label: t('clientDetail.overview.pendingPayments'), value: fmtCurrency(client.totalPending), icon: Clock01Icon, color: '#283852' },
+        { label: t('clientDetail.overview.overdue'), value: client.overdueCount, icon: Alert02Icon, color: '#283852' },
+        { label: t('clientDetail.overview.totalInvoices'), value: client.invoices.length, icon: Invoice01Icon, color: '#283852' },
     ];
 
     /* Revenue over time */
@@ -100,17 +85,16 @@ const OverviewView = ({ client }: { client: ClientData }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-2xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
-                            style={{ color: stat.color }}
-                        >
-                            <stat.icon size={80} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -154,21 +138,21 @@ const OverviewView = ({ client }: { client: ClientData }) => {
 
                     <div className="space-y-3">
                         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                            <Building size={16} className="text-gray-400" />
+                            <Building01Icon size={16} className="text-gray-400" />
                             <div>
                                 <p className="text-[10px] text-gray-400 uppercase tracking-wider">{t('clientDetail.overview.department')}</p>
                                 <p className="text-sm font-medium text-gray-800">{client.department || '—'}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                            <DollarSign size={16} className="text-gray-400" />
+                            <DollarCircleIcon size={16} className="text-gray-400" />
                             <div>
                                 <p className="text-[10px] text-gray-400 uppercase tracking-wider">{t('clientDetail.overview.price')}</p>
                                 <p className="text-sm font-medium text-gray-800">{client.price ? `${client.price} FCFA` : '—'}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                            <Briefcase size={16} className="text-gray-400" />
+                            <Briefcase01Icon size={16} className="text-gray-400" />
                             <div>
                                 <p className="text-[10px] text-gray-400 uppercase tracking-wider">{t('clientDetail.overview.type')}</p>
                                 <p className="text-sm font-medium text-gray-800">
@@ -178,7 +162,7 @@ const OverviewView = ({ client }: { client: ClientData }) => {
                         </div>
                         {client.projectDescription && (
                             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                                <FileText size={16} className="text-gray-400 mt-0.5" />
+                                <File01Icon size={16} className="text-gray-400 mt-0.5" />
                                 <div>
                                     <p className="text-[10px] text-gray-400 uppercase tracking-wider">{t('clientDetail.overview.projectDescription')}</p>
                                     <p className="text-sm text-gray-600">{client.projectDescription}</p>
@@ -189,12 +173,12 @@ const OverviewView = ({ client }: { client: ClientData }) => {
                             <div className="flex items-center gap-3">
                                 {client.srs && (
                                     <a href={client.srs} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-[#33cbcc] hover:underline">
-                                        <Link size={12} /> SRS
+                                        <Link01Icon size={12} /> SRS
                                     </a>
                                 )}
                                 {client.contract && (
                                     <a href={client.contract} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs text-[#33cbcc] hover:underline">
-                                        <Link size={12} /> {t('clientDetail.overview.contract')}
+                                        <Link01Icon size={12} /> {t('clientDetail.overview.contract')}
                                     </a>
                                 )}
                             </div>
@@ -222,7 +206,7 @@ const InvoicesView = ({ client }: { client: ClientData }) => {
 
             {client.invoices.length === 0 ? (
                 <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-                    <Receipt size={48} className="mx-auto text-gray-300 mb-4" />
+                    <Invoice01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-400 font-medium">{t('clientDetail.invoices.empty')}</p>
                 </div>
             ) : (
@@ -241,7 +225,7 @@ const InvoicesView = ({ client }: { client: ClientData }) => {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center">
-                                            <Receipt size={18} className="text-gray-400" />
+                                            <Invoice01Icon size={18} className="text-gray-400" />
                                         </div>
                                         <div>
                                             <p className="text-sm font-semibold text-gray-800">{inv.invoiceNumber}</p>
@@ -275,7 +259,7 @@ const InvoicesView = ({ client }: { client: ClientData }) => {
                                                     className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                     title={t('clientDetail.invoices.send')}
                                                 >
-                                                    <Send size={14} />
+                                                    <SentIcon size={14} />
                                                 </button>
                                             )}
                                             {inv.status === 'SENT' && (
@@ -285,14 +269,14 @@ const InvoicesView = ({ client }: { client: ClientData }) => {
                                                         className="p-1.5 rounded-lg hover:bg-[#33cbcc]/10 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                                         title={t('clientDetail.invoices.markPaid')}
                                                     >
-                                                        <CheckCircle size={14} />
+                                                        <Tick01Icon size={14} />
                                                     </button>
                                                     <button
                                                         onClick={() => rejectInvoice.mutate(inv.id)}
                                                         className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                         title={t('clientDetail.invoices.reject')}
                                                     >
-                                                        <XCircle size={14} />
+                                                        <CancelCircleIcon size={14} />
                                                     </button>
                                                 </>
                                             )}
@@ -321,7 +305,7 @@ const ProjectsView = ({ client }: { client: ClientData }) => {
 
             {client.projects.length === 0 ? (
                 <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-                    <Briefcase size={48} className="mx-auto text-gray-300 mb-4" />
+                    <Briefcase01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-400 font-medium">{t('clientDetail.projects.empty')}</p>
                 </div>
             ) : (
@@ -378,7 +362,7 @@ const ProjectsView = ({ client }: { client: ClientData }) => {
 
                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                                        <TrendingUp size={12} />
+                                        <ArrowUpRight01Icon size={12} />
                                         <span>{done}/{tasks.length} {t('clientDetail.projects.tasks')}</span>
                                     </div>
                                     {members.length > 0 && (
@@ -445,7 +429,7 @@ const SettingsView = ({ client }: { client: ClientData }) => {
                     disabled={updateClient.isPending}
                     className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                 >
-                    {updateClient.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                    {updateClient.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <FloppyDiskIcon size={16} />}
                     {t('clientDetail.settings.save')}
                 </button>
             </div>

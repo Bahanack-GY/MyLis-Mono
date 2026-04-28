@@ -1,17 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
-    FileText,
-    X,
-    Plus,
-    Trash2,
-    Calendar,
-    Briefcase,
-    AlignLeft,
-    Loader2,
-    Layers,
-} from 'lucide-react';
+import { File01Icon, Cancel01Icon, Add01Icon, Delete02Icon, Calendar01Icon, Briefcase01Icon, AlignLeftIcon, Loading02Icon, Layers01Icon } from 'hugeicons-react';
 import { useCreateInvoice } from '../../api/invoices/hooks';
 import { useDepartmentScope } from '../../contexts/AuthContext';
 import { useProjects } from '../../api/projects/hooks';
@@ -108,12 +98,12 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <FileText size={20} className="text-[#33cbcc]" />
+                            <File01Icon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{isProforma ? 'Nouvelle Proforma' : t('invoices.create.title')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -123,7 +113,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                     {!deptScope && (
                         <div>
                             <label className={labelCls}>
-                                <Layers size={12} />
+                                <Layers01Icon size={12} />
                                 {t('invoices.create.department')}
                             </label>
                             <select
@@ -145,7 +135,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                     {/* Project */}
                     <div>
                         <label className={labelCls}>
-                            <Briefcase size={12} />
+                            <Briefcase01Icon size={12} />
                             {t('invoices.create.project')}
                         </label>
                         <select
@@ -174,7 +164,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('invoices.create.issueDate')}
                             </label>
                             <input
@@ -186,7 +176,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('invoices.create.dueDate')}
                             </label>
                             <input
@@ -202,7 +192,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                     <div className="border-t border-gray-100 pt-5">
                         <div className="flex items-center justify-between mb-3">
                             <label className={labelCls + ' mb-0'}>
-                                <FileText size={12} />
+                                <File01Icon size={12} />
                                 {t('invoices.create.items')}
                             </label>
                             <div className="flex items-center gap-3">
@@ -211,7 +201,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                                     onClick={addCustomColumn}
                                     className="flex items-center gap-1 text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors border border-dashed border-gray-300 hover:border-gray-400 rounded-lg px-2.5 py-1"
                                 >
-                                    <Plus size={12} />
+                                    <Add01Icon size={12} />
                                     {t('invoices.create.addColumn', 'Add column')}
                                 </button>
                                 <button
@@ -219,7 +209,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                                     onClick={addItem}
                                     className="flex items-center gap-1 text-xs font-semibold text-[#33cbcc] hover:text-[#2bb5b6] transition-colors"
                                 >
-                                    <Plus size={14} />
+                                    <Add01Icon size={14} />
                                     {t('invoices.create.addItem')}
                                 </button>
                             </div>
@@ -243,7 +233,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                                             onClick={() => removeCustomColumn(col.id)}
                                             className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-[#283852] transition-all shrink-0"
                                         >
-                                            <X size={10} />
+                                            <Cancel01Icon size={10} />
                                         </button>
                                     </div>
                                 ))}
@@ -306,7 +296,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                                                         onClick={() => removeItem(idx)}
                                                         className="p-1.5 rounded-lg text-gray-400 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
                                                     >
-                                                        <Trash2 size={14} />
+                                                        <Delete02Icon size={14} />
                                                     </button>
                                                 )}
                                             </div>
@@ -350,7 +340,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                     {/* Notes */}
                     <div>
                         <label className={labelCls}>
-                            <AlignLeft size={12} />
+                            <AlignLeftIcon size={12} />
                             {t('invoices.create.notes')}
                         </label>
                         <textarea
@@ -398,7 +388,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {createInvoice.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createInvoice.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {isProforma ? 'Créer la proforma' : t('invoices.create.submit')}
                     </button>
                 </div>

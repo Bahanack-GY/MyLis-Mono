@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { Loader2, Pencil, X, Briefcase, AlignLeft, Building, Users, DollarSign, TrendingUp, Calendar, Wrench } from 'lucide-react';
+import { Loading02Icon, PencilIcon, Cancel01Icon, Briefcase01Icon, AlignLeftIcon, Building01Icon, UserGroupIcon, DollarCircleIcon, ArrowUpRight01Icon, Calendar01Icon, Wrench01Icon } from 'hugeicons-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import ProjectDetailSidebar, { type ProjectTab } from '../components/ProjectDetailSidebar';
@@ -56,20 +56,10 @@ export interface ProjectData {
     }[];
 }
 
-function deriveStatus(endDate?: string, milestones?: { completedAt: string | null }[], tasks?: { state: string }[]): ProjectStatus {
-    // Use milestones for status if any are defined
+function deriveStatus(endDate?: string, milestones?: { completedAt: string | null }[]): ProjectStatus {
     const ms = milestones || [];
-    if (ms.length > 0) {
-        const allDone = ms.every(m => m.completedAt != null);
-        if (allDone) return 'completed';
-        if (endDate && new Date(endDate) < new Date()) return 'overdue';
-        return 'active';
-    }
-    // Fall back to task-based status when no milestones
-    const t = tasks || [];
-    const allDone = t.length > 0 && t.every(tk => tk.state === 'COMPLETED' || tk.state === 'REVIEWED');
-    if (allDone && t.length > 0) return 'completed';
-    if (endDate && new Date(endDate) < new Date() && !allDone) return 'overdue';
+    if (ms.length > 0 && ms.every(m => m.completedAt != null)) return 'completed';
+    if (endDate && new Date(endDate) < new Date()) return 'overdue';
     return 'active';
 }
 
@@ -131,12 +121,12 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                            <Pencil size={18} className="text-[#33cbcc]" />
+                            <PencilIcon size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('projects.editTitle')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -144,7 +134,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                 <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
                     {/* Project name */}
                     <div>
-                        <label className={labelCls}><Briefcase size={12} />{t('projects.formName')}</label>
+                        <label className={labelCls}><Briefcase01Icon size={12} />{t('projects.formName')}</label>
                         <input
                             type="text"
                             value={form.name}
@@ -156,7 +146,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
 
                     {/* Description */}
                     <div>
-                        <label className={labelCls}><AlignLeft size={12} />{t('projects.description')}</label>
+                        <label className={labelCls}><AlignLeftIcon size={12} />{t('projects.description')}</label>
                         <textarea
                             value={form.description}
                             onChange={e => update('description', e.target.value)}
@@ -168,7 +158,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
 
                     {/* Department */}
                     <div>
-                        <label className={labelCls}><Building size={12} />{t('projects.formDepartment')}</label>
+                        <label className={labelCls}><Building01Icon size={12} />{t('projects.formDepartment')}</label>
                         <select value={form.departmentId} onChange={e => { update('departmentId', e.target.value); update('serviceIds', []); }} className={selectCls}>
                             <option value="">{t('projects.formDepartmentPlaceholder')}</option>
                             {(apiDepartments || []).map(d => (
@@ -180,7 +170,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                     {/* Services */}
                     {form.departmentId && (
                         <div>
-                            <label className={labelCls}><Wrench size={12} />{t('projects.formServices', 'Services')}</label>
+                            <label className={labelCls}><Wrench01Icon size={12} />{t('projects.formServices', 'Services')}</label>
                             {(departmentServices || []).filter(s => s.isActive).length === 0 ? (
                                 <p className="text-xs text-gray-400 py-2">{t('projects.noServices', 'No active services for this department')}</p>
                             ) : (
@@ -211,7 +201,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
 
                     {/* Client */}
                     <div>
-                        <label className={labelCls}><Users size={12} />{t('projects.formClient')}</label>
+                        <label className={labelCls}><UserGroupIcon size={12} />{t('projects.formClient')}</label>
                         <select value={form.clientId} onChange={e => update('clientId', e.target.value)} className={selectCls}>
                             <option value="">{t('projects.formClientPlaceholder')}</option>
                             {(allClients || []).map(c => (
@@ -223,7 +213,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                     {/* Cost + Revenue */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className={labelCls}><DollarSign size={12} />{t('projects.formCost')}</label>
+                            <label className={labelCls}><DollarCircleIcon size={12} />{t('projects.formCost')}</label>
                             <input
                                 type="text"
                                 value={form.cost}
@@ -233,7 +223,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                             />
                         </div>
                         <div>
-                            <label className={labelCls}><TrendingUp size={12} />{t('projects.formRevenue')}</label>
+                            <label className={labelCls}><ArrowUpRight01Icon size={12} />{t('projects.formRevenue')}</label>
                             <input
                                 type="text"
                                 value={form.revenue}
@@ -247,7 +237,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                     {/* Start date + Due date */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className={labelCls}><Calendar size={12} />{t('projects.startDate')}</label>
+                            <label className={labelCls}><Calendar01Icon size={12} />{t('projects.startDate')}</label>
                             <input
                                 type="date"
                                 value={form.startDate}
@@ -256,7 +246,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                             />
                         </div>
                         <div>
-                            <label className={labelCls}><Calendar size={12} />{t('projects.formDueDate')}</label>
+                            <label className={labelCls}><Calendar01Icon size={12} />{t('projects.formDueDate')}</label>
                             <input
                                 type="date"
                                 value={form.dueDate}
@@ -299,7 +289,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
                             isValid ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {updateProject.isPending ? <Loader2 size={16} className="animate-spin" /> : <Pencil size={16} />}
+                        {updateProject.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <PencilIcon size={16} />}
                         {t('projects.formSave')}
                     </button>
                 </div>
@@ -321,7 +311,7 @@ const ProjectDetailLayout = () => {
     if (isLoading) {
         return (
             <div className="flex h-screen bg-gray-100 items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
     }
@@ -336,13 +326,13 @@ const ProjectDetailLayout = () => {
     const milestonesDone = milestones.filter(m => m.completedAt != null).length;
     const progress = milestones.length > 0
         ? Math.round((milestonesDone / milestones.length) * 100)
-        : (tasks.length > 0 ? Math.round((tasksDone / tasks.length) * 100) : 0);
+        : 0;
 
     const project: ProjectData = {
         id: apiProject.id,
         name: apiProject.name,
         description: apiProject.description || '',
-        status: deriveStatus(apiProject.endDate, milestones, tasks),
+        status: deriveStatus(apiProject.endDate, milestones),
         progress,
         startDate: apiProject.startDate || '',
         endDate: apiProject.endDate || '',

@@ -1,28 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    User,
-    Mail,
-    Phone,
-    MapPin,
-    Calendar,
-    Briefcase,
-    Building,
-    Clock,
-    Edit3,
-    X,
-    Save,
-    Shield,
-    Users,
-    ListChecks,
-    CalendarDays,
-    FolderOpen,
-    Lock,
-    Eye,
-    EyeOff,
-    Loader2,
-} from 'lucide-react';
+import { UserIcon, Mail01Icon, CallIcon, Location01Icon, Calendar01Icon, Briefcase01Icon, Building01Icon, Clock01Icon, PencilIcon, Cancel01Icon, FloppyDiskIcon, Shield01Icon, UserGroupIcon, Task01Icon, FolderOpenIcon, LockPasswordIcon, ViewIcon, ViewOffIcon, Loading02Icon } from 'hugeicons-react';
 import { useProfile, useChangePassword } from '../../api/auth/hooks';
 import { ProfileAdminSkeleton } from '../../components/Skeleton';
 
@@ -89,12 +68,12 @@ const EditProfileModal = ({
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Edit3 size={20} className="text-[#33cbcc]" />
+                            <PencilIcon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{t('profile.editProfile')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -103,7 +82,7 @@ const EditProfileModal = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('profile.personalInfo.firstName')}
                             </label>
                             <input
@@ -115,7 +94,7 @@ const EditProfileModal = ({
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('profile.personalInfo.lastName')}
                             </label>
                             <input
@@ -129,7 +108,7 @@ const EditProfileModal = ({
 
                     <div>
                         <label className={labelCls}>
-                            <Mail size={12} />
+                            <Mail01Icon size={12} />
                             {t('profile.personalInfo.email')}
                         </label>
                         <input
@@ -143,7 +122,7 @@ const EditProfileModal = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Phone size={12} />
+                                <CallIcon size={12} />
                                 {t('profile.personalInfo.phone')}
                             </label>
                             <input
@@ -155,7 +134,7 @@ const EditProfileModal = ({
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('profile.personalInfo.dateOfBirth')}
                             </label>
                             <input
@@ -169,7 +148,7 @@ const EditProfileModal = ({
 
                     <div>
                         <label className={labelCls}>
-                            <MapPin size={12} />
+                            <Location01Icon size={12} />
                             {t('profile.jobInfo.location')}
                         </label>
                         <input
@@ -187,7 +166,7 @@ const EditProfileModal = ({
                         {t('profile.cancel')}
                     </button>
                     <button className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20 transition-colors">
-                        <Save size={16} />
+                        <FloppyDiskIcon size={16} />
                         {t('profile.saveChanges')}
                     </button>
                 </div>
@@ -287,12 +266,12 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Lock size={20} className="text-[#33cbcc]" />
+                            <LockPasswordIcon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{t('profile.changePassword', 'Change Password')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -301,7 +280,7 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Current Password */}
                     <div>
                         <label className={labelCls}>
-                            <Lock size={12} />
+                            <LockPasswordIcon size={12} />
                             {t('profile.password.current', 'Current Password')}
                         </label>
                         <div className="relative">
@@ -317,7 +296,7 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
                                 onClick={() => setShowCurrent(!showCurrent)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                             >
-                                {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                                {showCurrent ? <ViewOffIcon size={16} /> : <ViewIcon size={16} />}
                             </button>
                         </div>
                         {errors.currentPassword && (
@@ -328,7 +307,7 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
                     {/* New Password */}
                     <div>
                         <label className={labelCls}>
-                            <Lock size={12} />
+                            <LockPasswordIcon size={12} />
                             {t('profile.password.new', 'New Password')}
                         </label>
                         <div className="relative">
@@ -344,7 +323,7 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
                                 onClick={() => setShowNew(!showNew)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                             >
-                                {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                                {showNew ? <ViewOffIcon size={16} /> : <ViewIcon size={16} />}
                             </button>
                         </div>
                         {errors.newPassword && (
@@ -380,7 +359,7 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Confirm Password */}
                     <div>
                         <label className={labelCls}>
-                            <Lock size={12} />
+                            <LockPasswordIcon size={12} />
                             {t('profile.password.confirm', 'Confirm Password')}
                         </label>
                         <div className="relative">
@@ -396,7 +375,7 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
                                 onClick={() => setShowConfirm(!showConfirm)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                             >
-                                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                                {showConfirm ? <ViewOffIcon size={16} /> : <ViewIcon size={16} />}
                             </button>
                         </div>
                         {errors.confirmPassword && (
@@ -417,12 +396,12 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
                     >
                         {changePassword.isPending ? (
                             <>
-                                <Loader2 size={16} className="animate-spin" />
+                                <Loading02Icon size={16} className="animate-spin" />
                                 {t('profile.password.changing', 'Changing...')}
                             </>
                         ) : (
                             <>
-                                <Save size={16} />
+                                <FloppyDiskIcon size={16} />
                                 {t('profile.password.change', 'Change Password')}
                             </>
                         )}
@@ -468,10 +447,10 @@ const Profile = () => {
     }
 
     const stats = [
-        { label: t('profile.stats.projects'), value: 0, icon: FolderOpen, color: '#33cbcc' },
-        { label: t('profile.stats.tasks'), value: 0, icon: ListChecks, color: '#3b82f6' },
-        { label: t('profile.stats.meetings'), value: 0, icon: CalendarDays, color: '#8b5cf6' },
-        { label: t('profile.stats.teamMembers'), value: 0, icon: Users, color: '#22c55e' },
+        { label: t('profile.stats.projects'), value: 0, icon: FolderOpenIcon, color: '#33cbcc' },
+        { label: t('profile.stats.tasks'), value: 0, icon: Task01Icon, color: '#3b82f6' },
+        { label: t('profile.stats.meetings'), value: 0, icon: Calendar01Icon, color: '#8b5cf6' },
+        { label: t('profile.stats.teamMembers'), value: 0, icon: UserGroupIcon, color: '#22c55e' },
     ];
 
     return (
@@ -496,7 +475,7 @@ const Profile = () => {
                                     <img src={profile.avatar} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                        <User size={40} className="text-gray-300" />
+                                        <UserIcon size={40} className="text-gray-300" />
                                     </div>
                                 )}
                             </div>
@@ -505,11 +484,11 @@ const Profile = () => {
                                 <p className="text-sm text-gray-500 mt-0.5">{profile.role}</p>
                                 <div className="flex items-center gap-3 mt-2">
                                     <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                                        <Building size={12} />
+                                        <Building01Icon size={12} />
                                         {profile.department}
                                     </span>
                                     <span className="flex items-center gap-1.5 text-xs text-gray-400">
-                                        <MapPin size={12} />
+                                        <Location01Icon size={12} />
                                         {profile.location}
                                     </span>
                                 </div>
@@ -520,14 +499,14 @@ const Profile = () => {
                                 onClick={() => setShowPasswordModal(true)}
                                 className="flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-200 transition-colors"
                             >
-                                <Lock size={16} />
+                                <LockPasswordIcon size={16} />
                                 {t('profile.changePassword', 'Change Password')}
                             </button>
                             <button
                                 onClick={() => setShowEditModal(true)}
                                 className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                             >
-                                <Edit3 size={16} />
+                                <PencilIcon size={16} />
                                 {t('profile.editProfile')}
                             </button>
                         </div>
@@ -546,14 +525,16 @@ const Profile = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out" style={{ color: stat.color }}>
-                            <stat.icon size={100} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -571,17 +552,17 @@ const Profile = () => {
                         className="bg-white rounded-3xl border border-gray-100 p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Briefcase size={18} className="text-[#33cbcc]" />
+                            <Briefcase01Icon size={18} className="text-[#33cbcc]" />
                             {t('profile.jobInfo.title')}
                         </h3>
                         <div className="space-y-4">
                             {[
-                                { label: t('profile.jobInfo.role'), value: profile.role, icon: Shield },
-                                { label: t('profile.jobInfo.department'), value: profile.department, icon: Building },
-                                { label: t('profile.jobInfo.employeeId'), value: profile.employeeId, icon: User },
-                                { label: t('profile.jobInfo.joinDate'), value: profile.joinDate, icon: Calendar },
-                                { label: t('profile.jobInfo.manager'), value: profile.manager, icon: Users },
-                                { label: t('profile.jobInfo.location'), value: profile.location, icon: MapPin },
+                                { label: t('profile.jobInfo.role'), value: profile.role, icon: Shield01Icon },
+                                { label: t('profile.jobInfo.department'), value: profile.department, icon: Building01Icon },
+                                { label: t('profile.jobInfo.employeeId'), value: profile.employeeId, icon: UserIcon },
+                                { label: t('profile.jobInfo.joinDate'), value: profile.joinDate, icon: Calendar01Icon },
+                                { label: t('profile.jobInfo.manager'), value: profile.manager, icon: UserGroupIcon },
+                                { label: t('profile.jobInfo.location'), value: profile.location, icon: Location01Icon },
                             ].map((item, i) => (
                                 <div key={i} className="flex items-start gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 mt-0.5">
@@ -604,15 +585,15 @@ const Profile = () => {
                         className="bg-white rounded-3xl border border-gray-100 p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Phone size={18} className="text-[#33cbcc]" />
+                            <CallIcon size={18} className="text-[#33cbcc]" />
                             {t('profile.contact.title')}
                         </h3>
                         <div className="space-y-4">
                             {[
-                                { label: t('profile.contact.email'), value: profile.email, icon: Mail },
-                                { label: t('profile.contact.phone'), value: profile.phone, icon: Phone },
-                                { label: t('profile.contact.office'), value: profile.location, icon: MapPin },
-                                { label: t('profile.contact.timezone'), value: profile.timezone, icon: Clock },
+                                { label: t('profile.contact.email'), value: profile.email, icon: Mail01Icon },
+                                { label: t('profile.contact.phone'), value: profile.phone, icon: CallIcon },
+                                { label: t('profile.contact.office'), value: profile.location, icon: Location01Icon },
+                                { label: t('profile.contact.timezone'), value: profile.timezone, icon: Clock01Icon },
                             ].map((item, i) => (
                                 <div key={i} className="flex items-start gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0 mt-0.5">
@@ -638,7 +619,7 @@ const Profile = () => {
                         className="bg-white rounded-3xl border border-gray-100 p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Shield size={18} className="text-[#33cbcc]" />
+                            <Shield01Icon size={18} className="text-[#33cbcc]" />
                             {t('profile.skills.title')}
                         </h3>
                         <div className="flex flex-wrap gap-2">
@@ -664,11 +645,11 @@ const Profile = () => {
                         className="bg-white rounded-3xl border border-gray-100 p-6"
                     >
                         <h3 className="text-base font-bold text-gray-800 mb-5 flex items-center gap-2">
-                            <Clock size={18} className="text-[#33cbcc]" />
+                            <Clock01Icon size={18} className="text-[#33cbcc]" />
                             {t('profile.recentActivity.title')}
                         </h3>
                         <div className="py-8 text-center">
-                            <Clock size={32} className="mx-auto text-gray-200 mb-2" />
+                            <Clock01Icon size={32} className="mx-auto text-gray-200 mb-2" />
                             <p className="text-sm text-gray-400">{t('profile.recentActivity.empty', 'No recent activity')}</p>
                         </div>
                     </motion.div>

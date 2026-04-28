@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Award } from 'lucide-react';
+import { Award01Icon } from 'hugeicons-react';
 
 import badge1 from '../assets/badges/1.jpg';
 import badge2 from '../assets/badges/2.jpg';
@@ -38,15 +38,10 @@ const BadgeEarnedModal = ({ badgeNumber, title, milestone, onClose }: BadgeEarne
     const { t } = useTranslation();
 
     useEffect(() => {
-        const handleKey = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose();
-        };
+        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
         document.addEventListener('keydown', handleKey);
         document.body.style.overflow = 'hidden';
-        return () => {
-            document.removeEventListener('keydown', handleKey);
-            document.body.style.overflow = '';
-        };
+        return () => { document.removeEventListener('keydown', handleKey); document.body.style.overflow = ''; };
     }, [onClose]);
 
     const badgeImage = BADGE_IMAGES[badgeNumber];
@@ -56,84 +51,58 @@ const BadgeEarnedModal = ({ badgeNumber, title, milestone, onClose }: BadgeEarne
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/30"
             onClick={onClose}
         >
             <motion.div
-                initial={{ opacity: 0, scale: 0.5, y: 40 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.5, y: 40 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden text-center"
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 24 }}
+                transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+                onClick={e => e.stopPropagation()}
+                className="bg-white border border-[#e5e8ef] w-full max-w-xs overflow-hidden"
             >
-                <div className="h-2 bg-gradient-to-r from-[#33cbcc] to-[#283852]" />
-                <div className="p-8 space-y-4">
-                    {/* Confetti-like decorative dots */}
-                    <div className="relative">
-                        {[...Array(8)].map((_, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, scale: 0 }}
-                                animate={{ opacity: [0, 1, 0], scale: [0, 1, 0.5], x: Math.cos(i * 45 * Math.PI / 180) * 60, y: Math.sin(i * 45 * Math.PI / 180) * 60 }}
-                                transition={{ delay: 0.4 + i * 0.05, duration: 0.8 }}
-                                className="absolute top-1/2 left-1/2 w-2 h-2 rounded-full"
-                                style={{ backgroundColor: ['#33cbcc', '#283852', '#33cbcc99', '#28385280', '#33cbcc', '#283852', '#33cbcc50', '#283852'][i] }}
+                {/* Navy accent top bar */}
+                <div className="h-1 bg-[#283852]" />
+
+                <div className="px-8 py-10 text-center space-y-5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#283852]">
+                        {t('gamification.badgeEarned.title')}
+                    </p>
+
+                    {/* Badge image */}
+                    <motion.div
+                        initial={{ scale: 0.7, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.1, type: 'spring', stiffness: 220, damping: 18 }}
+                        className="mx-auto"
+                    >
+                        {badgeImage ? (
+                            <img
+                                src={badgeImage}
+                                alt={title}
+                                className="w-24 h-24 mx-auto object-cover border-2 border-[#e5e8ef]"
                             />
-                        ))}
-                        <motion.div
-                            initial={{ scale: 0, rotate: -360 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            transition={{ type: 'spring', stiffness: 150, damping: 12, delay: 0.3 }}
-                        >
-                            {badgeImage ? (
-                                <img
-                                    src={badgeImage}
-                                    alt={title}
-                                    className="w-28 h-28 mx-auto rounded-full object-cover border-4 border-[#33cbcc]/30 shadow-lg"
-                                />
-                            ) : (
-                                <div className="w-28 h-28 mx-auto rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                                    <Award size={56} className="text-[#33cbcc]" />
-                                </div>
-                            )}
-                        </motion.div>
+                        ) : (
+                            <div className="w-24 h-24 mx-auto border-2 border-[#e5e8ef] flex items-center justify-center bg-[#f8f9fc]">
+                                <Award01Icon size={44} className="text-[#283852]" />
+                            </div>
+                        )}
+                    </motion.div>
+
+                    <div className="space-y-1">
+                        <p className="text-base font-bold text-[#1c2b3a]">{title}</p>
+                        <p className="text-xs text-[#8892a4]">
+                            {t('gamification.badgeEarned.milestone', { count: milestone })}
+                        </p>
                     </div>
 
-                    <motion.h2
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5 }}
-                        className="text-xl font-bold text-gray-800"
-                    >
-                        {t('gamification.badgeEarned.title')}
-                    </motion.h2>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
-                        className="text-lg font-semibold text-[#33cbcc]"
-                    >
-                        {title}
-                    </motion.p>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.7 }}
-                        className="text-sm text-gray-500"
-                    >
-                        {t('gamification.badgeEarned.milestone', { count: milestone })}
-                    </motion.p>
-
-                    <motion.button
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.8 }}
+                    <button
                         onClick={onClose}
-                        className="mt-4 w-full px-6 py-3 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors cursor-pointer"
+                        className="w-full py-3 text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors"
                     >
                         {t('gamification.badgeEarned.awesome')}
-                    </motion.button>
+                    </button>
                 </div>
             </motion.div>
         </motion.div>

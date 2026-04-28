@@ -1,15 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ArrowLeft,
-    LayoutDashboard,
-    ListChecks,
-    FileText,
-    Wallet,
-    Clock,
-    ChevronLeft,
-    ChevronRight,
-    Pencil
-} from 'lucide-react';
+import { ArrowLeft01Icon, DashboardSquare01Icon, Task01Icon, File01Icon, Wallet01Icon, Clock01Icon, ArrowRight01Icon, PencilIcon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,12 +25,12 @@ const ProjectDetailSidebar = ({ project, activeTab, onTabChange, isOpen, setIsOp
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const tabs: { id: ProjectTab; icon: typeof LayoutDashboard; label: string }[] = [
-        { id: 'overview',  icon: LayoutDashboard, label: t('projectSidebar.overview') },
-        { id: 'tasks',     icon: ListChecks,      label: t('projectSidebar.tasks') },
-        { id: 'budget',    icon: Wallet,           label: t('projectSidebar.budget') },
-        { id: 'documents', icon: FileText,         label: t('projectSidebar.documents') },
-        { id: 'milestones', icon: Clock,            label: t('projectSidebar.milestones') },
+    const tabs: { id: ProjectTab; icon: typeof DashboardSquare01Icon; label: string }[] = [
+        { id: 'overview',  icon: DashboardSquare01Icon, label: t('projectSidebar.overview') },
+        { id: 'tasks',     icon: Task01Icon,      label: t('projectSidebar.tasks') },
+        { id: 'budget',    icon: Wallet01Icon,           label: t('projectSidebar.budget') },
+        { id: 'documents', icon: File01Icon,         label: t('projectSidebar.documents') },
+        { id: 'milestones', icon: Clock01Icon,            label: t('projectSidebar.milestones') },
     ];
 
     const badge = STATUS_BADGE[project.status] || STATUS_BADGE.active;
@@ -57,7 +47,7 @@ const ProjectDetailSidebar = ({ project, activeTab, onTabChange, isOpen, setIsOp
                     onClick={() => navigate('/projects')}
                     className="flex items-center gap-2 p-2 rounded-xl cursor-pointer text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
                 >
-                    <ArrowLeft size={20} className="min-w-[20px]" />
+                    <ArrowLeft01Icon size={20} className="min-w-[20px]" />
                     <AnimatePresence>
                         {isOpen && (
                             <motion.span
@@ -78,7 +68,7 @@ const ProjectDetailSidebar = ({ project, activeTab, onTabChange, isOpen, setIsOp
             <div className="px-4 py-4 border-b border-gray-700/50">
                 <div className="flex items-center gap-3 overflow-hidden">
                     <div className="w-11 h-11 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center flex-shrink-0">
-                        <LayoutDashboard size={20} className="text-[#33cbcc]" />
+                        <DashboardSquare01Icon size={20} className="text-[#33cbcc]" />
                     </div>
                     <AnimatePresence>
                         {isOpen && (
@@ -104,7 +94,7 @@ const ProjectDetailSidebar = ({ project, activeTab, onTabChange, isOpen, setIsOp
                 onClick={() => setIsOpen(!isOpen)}
                 className="absolute -right-3 top-24 bg-[#33cbcc] p-1 rounded-full shadow-lg hover:bg-[#2bb5b6] transition-colors z-50"
             >
-                {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                {isOpen ? <ArrowLeft01Icon size={16} /> : <ArrowRight01Icon size={16} />}
             </button>
 
             {/* Navigation Tabs */}
@@ -156,7 +146,7 @@ const ProjectDetailSidebar = ({ project, activeTab, onTabChange, isOpen, setIsOp
                     onClick={onEdit}
                     className="flex items-center p-3 rounded-xl cursor-pointer transition-all duration-200 group relative text-gray-400 hover:bg-[#33cbcc]/10 hover:text-[#33cbcc]"
                 >
-                    <Pencil size={20} className="min-w-[20px]" />
+                    <PencilIcon size={20} className="min-w-[20px]" />
                     <AnimatePresence>
                         {isOpen && (
                             <motion.span

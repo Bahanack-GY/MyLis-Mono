@@ -1,21 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ArrowLeft,
-    User,
-    ListTodo,
-    FileText,
-    AlertTriangle,
-    FolderOpen,
-    GraduationCap,
-    BookOpen,
-    ChevronLeft,
-    ChevronRight,
-    Target,
-    Banknote,
-    Repeat,
-    FileBarChart,
-    TrendingUp,
-} from 'lucide-react';
+import { ArrowLeft01Icon, UserIcon, Task01Icon, File01Icon, Alert02Icon, FolderOpenIcon, GraduationScrollIcon, BookOpen01Icon, ArrowRight01Icon, Target01Icon, Money01Icon, RepeatIcon, ArrowUpRight01Icon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -43,19 +27,19 @@ const EmployeeDetailSidebar = ({ employee, activeTab, onTabChange, isOpen, setIs
 
     const isCommercial = employee.user?.role === 'COMMERCIAL' || (employee.role || '').toLowerCase().includes('commercial');
 
-    const tabs: { id: EmployeeTab; icon: typeof User; label: string }[] = [
-        { id: 'infos', icon: User, label: t('employeeSidebar.infos') },
-        { id: 'tasks', icon: ListTodo, label: t('employeeSidebar.tasks') },
-        ...(isCommercial ? [{ id: 'commercial' as EmployeeTab, icon: Target, label: t('employeeSidebar.prospects') }] : []),
-        { id: 'fraisDeVie', icon: Banknote, label: t('employeeSidebar.fraisDeVie') },
-        { id: 'documents', icon: FileText, label: t('employeeSidebar.documents') },
-        { id: 'reports', icon: FileBarChart, label: t('employeeSidebar.reports') },
-        { id: 'sanctions', icon: AlertTriangle, label: t('employeeSidebar.sanctions') },
-        { id: 'recrutements', icon: FolderOpen, label: t('employeeSidebar.recrutements') },
-        { id: 'education', icon: GraduationCap, label: t('employeeSidebar.education') },
-        { id: 'formations', icon: BookOpen, label: t('employeeSidebar.formations') },
-        { id: 'transfers', icon: Repeat, label: t('employeeSidebar.transfers') },
-        { id: 'promotions', icon: TrendingUp, label: t('employeeSidebar.promotions', 'Promotions') },
+    const tabs: { id: EmployeeTab; icon: typeof UserIcon; label: string }[] = [
+        { id: 'infos', icon: UserIcon, label: t('employeeSidebar.infos') },
+        { id: 'tasks', icon: Task01Icon, label: t('employeeSidebar.tasks') },
+        ...(isCommercial ? [{ id: 'commercial' as EmployeeTab, icon: Target01Icon, label: t('employeeSidebar.prospects') }] : []),
+        { id: 'fraisDeVie', icon: Money01Icon, label: t('employeeSidebar.fraisDeVie') },
+        { id: 'documents', icon: File01Icon, label: t('employeeSidebar.documents') },
+        { id: 'reports', icon: File01Icon, label: t('employeeSidebar.reports') },
+        { id: 'sanctions', icon: Alert02Icon, label: t('employeeSidebar.sanctions') },
+        { id: 'recrutements', icon: FolderOpenIcon, label: t('employeeSidebar.recrutements') },
+        { id: 'education', icon: GraduationScrollIcon, label: t('employeeSidebar.education') },
+        { id: 'formations', icon: BookOpen01Icon, label: t('employeeSidebar.formations') },
+        { id: 'transfers', icon: RepeatIcon, label: t('employeeSidebar.transfers') },
+        { id: 'promotions', icon: ArrowUpRight01Icon, label: t('employeeSidebar.promotions', 'Promotions') },
     ];
 
     return (
@@ -70,7 +54,7 @@ const EmployeeDetailSidebar = ({ employee, activeTab, onTabChange, isOpen, setIs
                     onClick={() => navigate('/employees')}
                     className="flex items-center gap-2 p-2 rounded-xl cursor-pointer text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
                 >
-                    <ArrowLeft size={20} className="min-w-[20px]" />
+                    <ArrowLeft01Icon size={20} className="min-w-[20px]" />
                     <AnimatePresence>
                         {isOpen && (
                             <motion.span
@@ -115,7 +99,7 @@ const EmployeeDetailSidebar = ({ employee, activeTab, onTabChange, isOpen, setIs
                 onClick={() => setIsOpen(!isOpen)}
                 className="absolute -right-3 top-24 bg-[#33cbcc] p-1 rounded-full shadow-lg hover:bg-[#2bb5b6] transition-colors z-50"
             >
-                {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                {isOpen ? <ArrowLeft01Icon size={16} /> : <ArrowRight01Icon size={16} />}
             </button>
 
             {/* Navigation Tabs */}

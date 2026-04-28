@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Wallet, X, Trash2, Loader2, Paperclip, Calendar, Eye, Upload } from 'lucide-react';
+import { Add01Icon, Wallet01Icon, Cancel01Icon, Delete02Icon, Loading02Icon, Attachment01Icon, Calendar01Icon, ViewIcon, Upload01Icon } from 'hugeicons-react';
 import {
     useMyBusinessExpenses,
     useBusinessExpenseTypes,
@@ -107,7 +107,7 @@ const CreateExpenseModal = ({ onClose }: { onClose: () => void }) => {
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Wallet size={20} className="text-[#33cbcc]" />
+                            <Wallet01Icon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{t('businessExpenses.newExpense')}</h2>
                     </div>
@@ -115,7 +115,7 @@ const CreateExpenseModal = ({ onClose }: { onClose: () => void }) => {
                         onClick={onClose}
                         className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -140,7 +140,7 @@ const CreateExpenseModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Date */}
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                            <Calendar size={10} />
+                            <Calendar01Icon size={10} />
                             {t('businessExpenses.date')}
                         </label>
                         <input
@@ -184,32 +184,32 @@ const CreateExpenseModal = ({ onClose }: { onClose: () => void }) => {
                         />
                     </div>
 
-                    {/* Receipt Upload */}
+                    {/* Receipt Upload01Icon */}
                     <div>
                         <label className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 block">
                             {t('businessExpenses.receipt')}
                         </label>
                         {receiptFile ? (
                             <div className="flex items-center gap-3 p-3 bg-[#33cbcc]/5 border border-[#33cbcc]/20 rounded-xl">
-                                <Paperclip size={18} className="text-[#33cbcc] shrink-0" />
+                                <Attachment01Icon size={18} className="text-[#33cbcc] shrink-0" />
                                 <span className="text-sm text-gray-700 font-medium flex-1 truncate">
                                     {receiptFile.name}
                                 </span>
                                 {isUploading ? (
-                                    <Loader2 size={16} className="animate-spin text-[#33cbcc] shrink-0" />
+                                    <Loading02Icon size={16} className="animate-spin text-[#33cbcc] shrink-0" />
                                 ) : (
                                     <button
                                         type="button"
                                         onClick={() => handleFileChange(null)}
                                         className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors shrink-0"
                                     >
-                                        <X size={14} />
+                                        <Cancel01Icon size={14} />
                                     </button>
                                 )}
                             </div>
                         ) : (
                             <label className="flex items-center gap-3 p-4 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-[#33cbcc]/40 hover:bg-[#33cbcc]/5 transition-all">
-                                <Upload size={20} className="text-gray-400" />
+                                <Upload01Icon size={20} className="text-gray-400" />
                                 <span className="text-sm text-gray-500">{t('businessExpenses.uploadReceipt')}</span>
                                 <span className="text-xs text-gray-400 ml-auto">PDF, PNG, JPG</span>
                                 <input
@@ -236,7 +236,7 @@ const CreateExpenseModal = ({ onClose }: { onClose: () => void }) => {
                         onClick={handleSubmit}
                         className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2ab5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {isSubmitting ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('businessExpenses.submit')}
                     </button>
                 </div>
@@ -277,7 +277,7 @@ const BusinessExpenses = () => {
                     onClick={() => setShowCreateModal(true)}
                     className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2ab5b6] transition-all shadow-lg shadow-[#33cbcc]/20"
                 >
-                    <Plus size={18} />
+                    <Add01Icon size={18} />
                     {t('businessExpenses.newExpense')}
                 </button>
             </div>
@@ -304,19 +304,19 @@ const BusinessExpenses = () => {
             {/* Loading State */}
             {isLoading ? (
                 <div className="flex items-center justify-center h-64">
-                    <Loader2 size={28} className="animate-spin text-[#33cbcc]" />
+                    <Loading02Icon size={28} className="animate-spin text-[#33cbcc]" />
                 </div>
             ) : expenseList.length === 0 ? (
                 /* Empty State */
                 <div className="text-center py-16">
-                    <Wallet size={48} className="mx-auto text-gray-300 mb-4" />
+                    <Wallet01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-500 font-medium">{t('businessExpenses.empty')}</p>
                     <p className="text-gray-400 text-sm mt-1">{t('businessExpenses.emptyHint')}</p>
                     <button
                         onClick={() => setShowCreateModal(true)}
                         className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2ab5b6] transition-all shadow-lg shadow-[#33cbcc]/20"
                     >
-                        <Plus size={16} />
+                        <Add01Icon size={16} />
                         {t('businessExpenses.newExpense')}
                     </button>
                 </div>
@@ -361,7 +361,7 @@ const BusinessExpenses = () => {
 
                                 {/* Date */}
                                 <div className="flex items-center gap-1.5 text-xs text-gray-400 mb-2">
-                                    <Calendar size={12} />
+                                    <Calendar01Icon size={12} />
                                     <span>
                                         {new Date(expense.date).toLocaleDateString('fr-FR', {
                                             day: 'numeric',
@@ -388,8 +388,8 @@ const BusinessExpenses = () => {
                                                 rel="noopener noreferrer"
                                                 className="flex items-center gap-1.5 text-xs text-[#33cbcc] hover:text-[#2ab5b6] font-medium transition-colors"
                                             >
-                                                <Paperclip size={12} />
-                                                <Eye size={12} />
+                                                <Attachment01Icon size={12} />
+                                                <ViewIcon size={12} />
                                                 {t('businessExpenses.viewReceipt')}
                                             </a>
                                         )}
@@ -402,9 +402,9 @@ const BusinessExpenses = () => {
                                             className="p-2 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors disabled:opacity-50"
                                         >
                                             {deleteExpense.isPending ? (
-                                                <Loader2 size={14} className="animate-spin" />
+                                                <Loading02Icon size={14} className="animate-spin" />
                                             ) : (
-                                                <Trash2 size={14} />
+                                                <Delete02Icon size={14} />
                                             )}
                                         </button>
                                     )}

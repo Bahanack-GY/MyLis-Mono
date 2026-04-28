@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { AlertCircle, Clock, Calendar, TrendingUp, DollarSign, ChevronRight, Bell } from 'lucide-react';
+import { Alert01Icon, Clock01Icon, Calendar01Icon, ArrowUpRight01Icon, DollarCircleIcon, ArrowRight01Icon, Notification01Icon } from 'hugeicons-react';
 import { useInvoices } from '../api/invoices/hooks';
 import type { Invoice } from '../api/invoices/types';
 
@@ -34,7 +34,7 @@ const getUrgencyConfig = (urgency: PaymentUrgency) => {
             textColor: 'text-[#283852]',
             bgColor: 'bg-[#283852]/5',
             borderColor: 'border-[#283852]/20',
-            icon: AlertCircle,
+            icon: Alert01Icon,
             label: 'En retard',
         },
         dueSoon: {
@@ -42,7 +42,7 @@ const getUrgencyConfig = (urgency: PaymentUrgency) => {
             textColor: 'text-[#33cbcc]',
             bgColor: 'bg-[#33cbcc]/5',
             borderColor: 'border-[#33cbcc]/20',
-            icon: Clock,
+            icon: Clock01Icon,
             label: 'Échéance proche',
         },
         upcoming: {
@@ -50,7 +50,7 @@ const getUrgencyConfig = (urgency: PaymentUrgency) => {
             textColor: 'text-gray-700',
             bgColor: 'bg-gray-50',
             borderColor: 'border-gray-200',
-            icon: Calendar,
+            icon: Calendar01Icon,
             label: 'À venir',
         },
     };
@@ -76,7 +76,7 @@ const formatDate = (dateStr: string) => {
 function PaymentItem({ invoice, onSelect }: { invoice: Invoice; onSelect: () => void }) {
     const { t } = useTranslation();
     const { urgency, daysUntilDue } = getPaymentUrgency(invoice.dueDate);
-    const config = getUrgencyConfig(urgency);
+    const config = getUrgencyConfig(urgency, t);
     const Icon = config.icon;
 
     const daysText = useMemo(() => {
@@ -84,16 +84,16 @@ function PaymentItem({ invoice, onSelect }: { invoice: Invoice; onSelect: () => 
             const days = Math.abs(daysUntilDue);
             return days === 1
                 ? t('commercial.paymentReminders.overdue1Day', '1 jour de retard')
-                : t('commercial.paymentReminders.overdueNDays', `${days} jours de retard`);
+                : t('commercial.paymentReminders.overdueNDays', '{{days}} jours de retard', { days });
         } else if (urgency === 'dueSoon') {
             return daysUntilDue === 0
-                ? t('commercial.paymentReminders.dueToday', 'Dû aujourd\'hui')
+                ? t('commercial.paymentReminders.dueToday', "Dû aujourd'hui")
                 : daysUntilDue === 1
                 ? t('commercial.paymentReminders.dueTomorrow', 'Dû demain')
-                : t('commercial.paymentReminders.dueInNDays', `Dû dans ${daysUntilDue} jours`);
-        } else {
-            return t('commercial.paymentReminders.dueInNDays', `Dû dans ${daysUntilDue} jours`);
-        }
+                : t('commercial.paymentReminders.dueInNDays', 'Dû dans {{days}} jours', { days: daysUntilDue });
+            } else {
+            return t('commercial.paymentReminders.dueInNDays', 'Dû dans {{days}} jours', { days: daysUntilDue });
+            }
     }, [urgency, daysUntilDue, t]);
 
     return (
@@ -122,7 +122,7 @@ function PaymentItem({ invoice, onSelect }: { invoice: Invoice; onSelect: () => 
                     <div className="text-base font-bold text-gray-800">
                         {formatFCFA(Number(invoice.total) || 0)} <span className="text-xs font-normal text-gray-500">FCFA</span>
                     </div>
-                    <ChevronRight size={14} className="text-gray-400" />
+                    <ArrowRight01Icon size={14} className="text-gray-400" />
                 </div>
             </div>
 
@@ -136,7 +136,9 @@ function PaymentItem({ invoice, onSelect }: { invoice: Invoice; onSelect: () => 
                             ? 'bg-[#283852]/10 text-[#283852]/70'
                             : 'bg-gray-100 text-gray-700'
                     }`}>
-                        {invoice.status}
+                        {invoice.status === 'PAID' ? t('commercial.paymentReminders.statusPaid', 'Payé') 
+                            : invoice.status === 'PENDING' ? t('commercial.paymentReminders.statusPending', 'En attente') 
+                            : invoice.status}
                     </span>
                 )}
             </div>
@@ -220,7 +222,7 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                            <Bell size={20} />
+                            <Notification01Icon size={20} />
                             {t('commercial.paymentReminders.title', 'Rappels de Paiement')}
                         </h2>
                         <p className="text-xs text-white/70 mt-1">
@@ -234,7 +236,7 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
             <div className="grid grid-cols-3 gap-3 p-5 border-b border-gray-100">
                 <div className="bg-[#283852]/5 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
-                        <AlertCircle size={14} className="text-[#283852]" />
+                        <Alert01Icon size={14} className="text-[#283852]" />
                         <span className="text-xs font-medium text-[#283852]">
                             {t('commercial.paymentReminders.overdue')}
                         </span>
@@ -245,7 +247,7 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
 
                 <div className="bg-[#33cbcc]/5 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
-                        <Clock size={14} className="text-[#33cbcc]" />
+                        <Clock01Icon size={14} className="text-[#33cbcc]" />
                         <span className="text-xs font-medium text-[#33cbcc]">
                             {t('commercial.paymentReminders.dueSoon')}
                         </span>
@@ -256,7 +258,7 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
 
                 <div className="bg-gray-50 rounded-xl p-3">
                     <div className="flex items-center gap-2 mb-1">
-                        <TrendingUp size={14} className="text-gray-600" />
+                        <ArrowUpRight01Icon size={14} className="text-gray-600" />
                         <span className="text-xs font-medium text-gray-700">
                             {t('commercial.paymentReminders.upcoming')}
                         </span>
@@ -287,7 +289,7 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
                                 : 'bg-[#283852]/5 text-[#283852] hover:bg-[#283852]/10'
                         }`}
                     >
-                        {t('commercial.paymentReminders.overdue')} ({stats.overdue})
+                        {t('commercial.paymentReminders.overdue', 'En retard')} ({stats.overdue})
                     </button>
                     <button
                         onClick={() => setFilter('dueSoon')}
@@ -297,7 +299,7 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
                                 : 'bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20'
                         }`}
                     >
-                        {t('commercial.paymentReminders.dueSoon')} ({stats.dueSoon})
+                        {t('commercial.paymentReminders.dueSoon', 'Échéance proche')} ({stats.dueSoon})
                     </button>
                     <button
                         onClick={() => setFilter('upcoming')}
@@ -307,7 +309,7 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                     >
-                        {t('commercial.paymentReminders.upcoming')} ({stats.upcoming})
+                        {t('commercial.paymentReminders.upcoming', 'À venir')} ({stats.upcoming})
                     </button>
                 </div>
             </div>
@@ -320,7 +322,7 @@ export default function PaymentRemindersDashboard({ onInvoiceSelect }: PaymentRe
                     </div>
                 ) : displayedInvoices.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                        <DollarSign size={40} strokeWidth={1.2} className="mb-3" />
+                        <DollarCircleIcon size={40} strokeWidth={1.2} className="mb-3" />
                         <p className="text-sm">
                             {filter === 'all'
                                 ? t('commercial.paymentReminders.noInvoices', 'Aucune facture impayée')

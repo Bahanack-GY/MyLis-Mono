@@ -1,4 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
+import type { FC, SVGProps } from 'react';
+type LucideIcon = FC<Omit<SVGProps<SVGSVGElement>, 'ref'> & { size?: number | string }>;
 
 export type ContextMenuEntry =
   | { type: 'item'; label: string; icon?: LucideIcon; onClick: () => void; danger?: boolean; disabled?: boolean; checked?: boolean }

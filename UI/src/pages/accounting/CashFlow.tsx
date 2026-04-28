@@ -1,15 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import {
-    ArrowDownCircle,
-    ArrowUpCircle,
-    TrendingUp,
-    Calendar,
-    Loader2,
-    Wallet,
-    Filter,
-    X,
-} from 'lucide-react';
+import { ArrowDown01Icon, ArrowUp01Icon, ArrowUpRight01Icon, Calendar01Icon, Loading02Icon, Wallet01Icon, FilterIcon, Cancel01Icon } from 'hugeicons-react';
 import { useQuery } from '@tanstack/react-query';
 import {
     LineChart,
@@ -122,7 +113,7 @@ export default function CashFlow() {
     if (fyLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <Loader2 size={24} className="animate-spin text-[#33cbcc]" />
+                <Loading02Icon size={24} className="animate-spin text-[#33cbcc]" />
             </div>
         );
     }
@@ -137,7 +128,7 @@ export default function CashFlow() {
                 </div>
                 {/* Fiscal year selector */}
                 <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-4 py-2.5">
-                    <Calendar size={15} className="text-[#33cbcc]" />
+                    <Calendar01Icon size={15} className="text-[#33cbcc]" />
                     <select
                         value={selectedFiscalYearId}
                         onChange={e => setSelectedFiscalYearId(e.target.value)}
@@ -154,11 +145,11 @@ export default function CashFlow() {
 
             {isLoading ? (
                 <div className="flex items-center justify-center h-64 bg-white rounded-2xl">
-                    <Loader2 size={24} className="animate-spin text-[#33cbcc]" />
+                    <Loading02Icon size={24} className="animate-spin text-[#33cbcc]" />
                 </div>
             ) : !data ? (
                 <div className="flex flex-col items-center justify-center h-64 bg-white rounded-2xl text-gray-400">
-                    <Wallet size={48} className="mb-3 opacity-30" />
+                    <Wallet01Icon size={48} className="mb-3 opacity-30" />
                     <p>Sélectionnez un exercice pour afficher les flux</p>
                 </div>
             ) : (
@@ -171,7 +162,7 @@ export default function CashFlow() {
                         >
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                                    <ArrowDownCircle size={20} className="text-[#33cbcc]" />
+                                    <ArrowDown01Icon size={20} className="text-[#33cbcc]" />
                                 </div>
                                 <span className="text-sm font-medium text-gray-500">Total Entrées</span>
                             </div>
@@ -184,7 +175,7 @@ export default function CashFlow() {
                         >
                             <div className="flex items-center gap-3 mb-3">
                                 <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                                    <ArrowUpCircle size={20} className="text-[#283852]" />
+                                    <ArrowUp01Icon size={20} className="text-[#283852]" />
                                 </div>
                                 <span className="text-sm font-medium text-gray-500">Total Sorties</span>
                             </div>
@@ -197,7 +188,7 @@ export default function CashFlow() {
                         >
                             <div className="flex items-center gap-3 mb-3">
                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${data.netCashFlow >= 0 ? 'bg-[#33cbcc]/20' : 'bg-[#283852]/20'}`}>
-                                    <TrendingUp size={20} className={data.netCashFlow >= 0 ? 'text-[#33cbcc]' : 'text-[#283852]'} />
+                                    <ArrowUpRight01Icon size={20} className={data.netCashFlow >= 0 ? 'text-[#33cbcc]' : 'text-[#283852]'} />
                                 </div>
                                 <span className="text-sm font-medium text-gray-500">Flux Net</span>
                             </div>
@@ -291,7 +282,7 @@ export default function CashFlow() {
 
                         {/* Month filter chips */}
                         <div className="flex items-center gap-1 flex-wrap">
-                            <Filter size={14} className="text-gray-400 mr-1" />
+                            <FilterIcon size={14} className="text-gray-400 mr-1" />
                             {MONTH_LABELS.map((label, idx) => {
                                 const hasData = chartData[idx]?.Entrées > 0 || chartData[idx]?.Sorties > 0;
                                 const isActive = monthFilter === idx + 1;
@@ -319,7 +310,7 @@ export default function CashFlow() {
                                 onClick={() => { setFlowFilter('all'); setMonthFilter(null); }}
                                 className="flex items-center gap-1 px-3 py-1.5 text-xs text-gray-500 hover:text-[#283852] border border-gray-200 rounded-xl transition-colors"
                             >
-                                <X size={12} /> Réinitialiser
+                                <Cancel01Icon size={12} /> Réinitialiser
                             </button>
                         )}
 
@@ -347,7 +338,7 @@ export default function CashFlow() {
                                 {filteredLines.length === 0 ? (
                                     <tr>
                                         <td colSpan={7} className="px-5 py-16 text-center text-gray-400">
-                                            <Wallet size={40} className="mx-auto mb-3 opacity-20" />
+                                            <Wallet01Icon size={40} className="mx-auto mb-3 opacity-20" />
                                             <p>Aucun mouvement{hasFilters ? ' pour ce filtre' : ''}</p>
                                         </td>
                                     </tr>

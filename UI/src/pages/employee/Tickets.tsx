@@ -1,25 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Ticket as TicketIcon,
-    Search,
-    Plus,
-    X,
-    AlertCircle,
-    Clock,
-    CircleDot,
-    Bug,
-    Lightbulb,
-    HelpCircle,
-    MessageSquare,
-    User,
-    AlignLeft,
-    Loader2,
-    Calendar,
-    Building2,
-    Check,
-} from 'lucide-react';
+import { Ticket01Icon as TicketIcon, Search01Icon, Add01Icon, Cancel01Icon, Alert01Icon, Clock01Icon, CircleIcon, Bug01Icon, Idea01Icon, HelpCircleIcon, Message02Icon, UserIcon, AlignLeftIcon, Loading02Icon, Calendar01Icon, Building02Icon, Tick01Icon } from 'hugeicons-react';
 import { useMyTickets, useCreateTicket, useDepartmentTickets, useAcceptTicket } from '../../api/tickets/hooks';
 import { useDepartments } from '../../api/departments/hooks';
 import type { Ticket, CreateTicketDto, TicketPriority } from '../../api/tickets/types';
@@ -85,10 +67,10 @@ const PRIORITY_OPACITY: Record<DisplayPriority, string> = {
 };
 
 const CATEGORY_ICONS: Record<TicketCategory, React.ComponentType<{ size?: number; className?: string }>> = {
-    bug: Bug,
-    feature: Lightbulb,
-    support: HelpCircle,
-    question: MessageSquare,
+    bug: Bug01Icon,
+    feature: Idea01Icon,
+    support: HelpCircleIcon,
+    question: Message02Icon,
 };
 
 const PRIORITIES: DisplayPriority[] = ['low', 'medium', 'high', 'critical'];
@@ -174,9 +156,9 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
 
     const isValid = form.title.trim().length > 0 && form.priority !== '' && form.targetDepartmentId !== '';
 
-    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
-    const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
-    const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
+    const inputCls = 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors';
+    const selectCls = 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors appearance-none cursor-pointer';
+    const labelCls = 'block text-[11px] font-semibold text-[#8892a4] uppercase tracking-widest mb-1.5';
 
     return (
         <motion.div
@@ -184,37 +166,34 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex justify-end bg-black/30"
         >
             <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden max-h-[90vh] flex flex-col"
+                className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef]"
             >
                 {/* Header */}
-                <div className="px-5 md:px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <TicketIcon size={20} className="text-[#33cbcc]" />
-                        </div>
-                        <h2 className="text-lg font-bold text-gray-800">{t('tickets.create.title')}</h2>
+                <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
+                    <div>
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-0.5">
+                            {t('tickets.title')}
+                        </p>
+                        <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('tickets.create.title')}</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                    <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+                        <Cancel01Icon size={20} />
                     </button>
                 </div>
 
-                {/* Content */}
-                <div className="p-5 md:p-6 space-y-5 overflow-y-auto flex-1">
+                {/* Body */}
+                <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
                     {/* Title */}
                     <div>
-                        <label className={labelCls}>
-                            <TicketIcon size={12} />
-                            {t('tickets.create.ticketTitle')}
-                        </label>
+                        <label className={labelCls}>{t('tickets.create.ticketTitle')}</label>
                         <input
                             type="text"
                             value={form.title}
@@ -227,10 +206,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
 
                     {/* Description */}
                     <div>
-                        <label className={labelCls}>
-                            <AlignLeft size={12} />
-                            {t('tickets.create.description')}
-                        </label>
+                        <label className={labelCls}>{t('tickets.create.description')}</label>
                         <textarea
                             value={form.description}
                             onChange={e => setForm(prev => ({ ...prev, description: e.target.value }))}
@@ -242,10 +218,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
 
                     {/* Department */}
                     <div>
-                        <label className={labelCls}>
-                            <Building2 size={12} />
-                            {t('tickets.create.department')}
-                        </label>
+                        <label className={labelCls}>{t('tickets.create.department')}</label>
                         <select
                             value={form.targetDepartmentId}
                             onChange={e => setForm(prev => ({ ...prev, targetDepartmentId: e.target.value }))}
@@ -260,25 +233,20 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
 
                     {/* Priority */}
                     <div>
-                        <label className={labelCls}>
-                            <AlertCircle size={12} />
-                            {t('tickets.create.priority')}
-                        </label>
-                        <div className="flex flex-wrap gap-2">
+                        <label className={labelCls}>{t('tickets.create.priority')}</label>
+                        <div className="flex border border-[#e5e8ef] overflow-hidden">
                             {PRIORITIES.map(p => (
                                 <button
                                     key={p}
                                     type="button"
                                     onClick={() => setForm(prev => ({ ...prev, priority: p }))}
-                                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                                    className={`flex-1 py-2.5 text-xs font-semibold transition-colors border-r last:border-r-0 border-[#e5e8ef] ${
                                         form.priority === p
-                                            ? 'bg-[#283852] text-white shadow-lg shadow-[#283852]/20'
-                                            : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                                            ? 'bg-[#283852] text-white'
+                                            : 'bg-[#f8f9fc] text-[#8892a4] hover:bg-[#f0f2f5]'
                                     }`}
                                 >
-                                    <span className={`text-[#283852] ${form.priority === p ? '!text-white' : PRIORITY_OPACITY[p]}`}>
-                                        {t(`tickets.priority.${p}`)}
-                                    </span>
+                                    {t(`tickets.priority.${p}`)}
                                 </button>
                             ))}
                         </div>
@@ -286,11 +254,8 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
 
                     {/* Category */}
                     <div>
-                        <label className={labelCls}>
-                            <CircleDot size={12} />
-                            {t('tickets.create.category')}
-                        </label>
-                        <div className="flex flex-wrap gap-2">
+                        <label className={labelCls}>{t('tickets.create.category')}</label>
+                        <div className="flex border border-[#e5e8ef] overflow-hidden">
                             {CATEGORIES.map(c => {
                                 const CatIcon = CATEGORY_ICONS[c];
                                 return (
@@ -298,10 +263,10 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                                         key={c}
                                         type="button"
                                         onClick={() => setForm(prev => ({ ...prev, category: c }))}
-                                        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
+                                        className={`flex-1 flex flex-col items-center gap-1 py-3 text-[10px] font-semibold transition-colors border-r last:border-r-0 border-[#e5e8ef] ${
                                             form.category === c
-                                                ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
-                                                : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
+                                                ? 'bg-[#33cbcc] text-white'
+                                                : 'bg-[#f8f9fc] text-[#8892a4] hover:bg-[#f0f2f5]'
                                         }`}
                                     >
                                         <CatIcon size={14} />
@@ -314,10 +279,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
 
                     {/* Due Date */}
                     <div>
-                        <label className={labelCls}>
-                            <Calendar size={12} />
-                            {t('tickets.create.dueDate')}
-                        </label>
+                        <label className={labelCls}>{t('tickets.create.dueDate')}</label>
                         <input
                             type="datetime-local"
                             value={form.dueDate}
@@ -328,10 +290,10 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="px-5 md:px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+                <div className="px-6 py-4 border-t border-[#e5e8ef] flex justify-end gap-3 shrink-0">
                     <button
                         onClick={onClose}
-                        className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                        className="px-4 py-2.5 text-sm font-medium text-[#8892a4] bg-[#f8f9fc] border border-[#e5e8ef] hover:bg-[#f0f2f5] transition-colors"
                     >
                         {t('tickets.create.cancel')}
                     </button>
@@ -349,13 +311,11 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                                 createTicket.mutate(dto, { onSuccess: () => onClose() });
                             }
                         }}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors ${
-                            isValid
-                                ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'
-                                : 'bg-gray-300 cursor-not-allowed shadow-none'
+                        className={`flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white transition-colors ${
+                            isValid ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-gray-300 cursor-not-allowed'
                         }`}
                     >
-                        {createTicket.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createTicket.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('tickets.create.submit')}
                     </button>
                 </div>
@@ -390,7 +350,7 @@ const TicketCard = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + index * 0.05 }}
             onClick={onClick}
-            className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100 group hover:border-[#33cbcc]/30 transition-all cursor-pointer"
+            className="bg-white p-5 md:p-6 border border-gray-100 group hover:border-[#33cbcc]/30 transition-all cursor-pointer"
         >
             {/* Icon area */}
             <div className="flex items-start justify-between mb-4">
@@ -399,7 +359,7 @@ const TicketCard = ({
                 </div>
                 {ticket.dueDate && (
                     <div className={`flex items-center gap-1 text-xs ${ticket.isOverdue ? 'text-[#283852] font-semibold' : 'text-gray-400'}`}>
-                        <Calendar size={12} />
+                        <Calendar01Icon size={12} />
                         <span>{ticket.dueDate}</span>
                     </div>
                 )}
@@ -432,7 +392,7 @@ const TicketCard = ({
                                 <img src={ticket.reporter.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
                             ) : (
                                 <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                    <User size={12} className="text-gray-400" />
+                                    <UserIcon size={12} className="text-gray-400" />
                                 </div>
                             )}
                             <span className="text-xs text-gray-500 truncate max-w-[120px]">{ticket.reporter.name.split('@')[0]}</span>
@@ -447,7 +407,7 @@ const TicketCard = ({
                         disabled={isAccepting}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors shadow-sm"
                     >
-                        {isAccepting ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                        {isAccepting ? <Loading02Icon size={12} className="animate-spin" /> : <Tick01Icon size={12} />}
                         {t('tickets.accept')}
                     </button>
                 ) : (
@@ -521,7 +481,7 @@ const TicketDetailModal = ({
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -559,7 +519,7 @@ const TicketDetailModal = ({
                                     <img src={ticket.reporter.avatar} alt="" className="w-6 h-6 rounded-full" />
                                 ) : (
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                        <User size={12} className="text-gray-400" />
+                                        <UserIcon size={12} className="text-gray-400" />
                                     </div>
                                 )}
                                 <span className="text-sm text-gray-700 font-medium">
@@ -576,7 +536,7 @@ const TicketDetailModal = ({
                                         <img src={ticket.assignedTo.avatar} alt="" className="w-6 h-6 rounded-full" />
                                     ) : (
                                         <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                            <User size={12} className="text-gray-400" />
+                                            <UserIcon size={12} className="text-gray-400" />
                                         </div>
                                     )}
                                     <span className="text-sm text-gray-700 font-medium">{ticket.assignedTo.name}</span>
@@ -622,7 +582,7 @@ const TicketDetailModal = ({
                             disabled={isAccepting}
                             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors shadow-lg shadow-[#33cbcc]/20"
                         >
-                            {isAccepting ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                            {isAccepting ? <Loading02Icon size={16} className="animate-spin" /> : <Tick01Icon size={16} />}
                             {t('tickets.accept')}
                         </button>
                     </div>
@@ -637,7 +597,7 @@ const TicketDetailModal = ({
 /* ═══════════════════════════════════════════════════════════ */
 
 const Tickets = () => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState<DisplayStatus | 'all'>('all');
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -670,10 +630,10 @@ const Tickets = () => {
     const acceptedCount = currentTickets.filter(t => t.status === 'accepted').length;
     const inProgressCount = currentTickets.filter(t => t.status === 'in_progress').length;
     const stats = [
-        { label: t('tickets.stats.total'), value: currentTickets.length, icon: TicketIcon },
-        { label: t('tickets.stats.open'), value: openCount, icon: CircleDot },
-        { label: t('tickets.stats.accepted'), value: acceptedCount, icon: Check },
-        { label: t('tickets.stats.inProgress'), value: inProgressCount, icon: Clock },
+        { label: t('tickets.stats.total'), value: currentTickets.length, icon: TicketIcon, color: '#283852' },
+        { label: t('tickets.stats.open'), value: openCount, icon: CircleIcon, color: '#33cbcc' },
+        { label: t('tickets.stats.accepted'), value: acceptedCount, icon: Tick01Icon, color: '#22c55e' },
+        { label: t('tickets.stats.inProgress'), value: inProgressCount, icon: Clock01Icon, color: '#f59e0b' },
     ];
 
     /* ── Status filters ── */
@@ -702,29 +662,55 @@ const Tickets = () => {
                 </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="flex items-center justify-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 w-full md:w-auto"
+                    className="flex items-center justify-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 text-sm font-semibold hover:bg-[#2bb5b6] transition-colors w-full md:w-auto"
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     {t('tickets.newTicket')}
                 </button>
             </div>
 
             {/* ── Tabs ── */}
-            <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
-                {tabs.map(tab => (
-                    <button
-                        key={tab.key}
-                        onClick={() => { setActiveTab(tab.key); setFilterStatus('all'); setSearchQuery(''); }}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            activeTab === tab.key
-                                ? 'bg-white text-gray-800 shadow-sm'
-                                : 'text-gray-500 hover:text-gray-700'
-                        }`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
+            <div className="flex gap-px bg-gray-200 p-px">
+                {tabs.map(tab => {
+                    const count = tab.key === 'my' ? myTickets.length : deptTickets.length;
+                    return (
+                        <button
+                            key={tab.key}
+                            onClick={() => { setActiveTab(tab.key); setFilterStatus('all'); setSearchQuery(''); }}
+                            className={`flex-1 flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-semibold transition-all ${
+                                activeTab === tab.key
+                                    ? 'bg-white text-gray-800'
+                                    : 'bg-gray-100 text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            <span>{tab.label}</span>
+                            <span className={`min-w-[22px] text-center text-xs font-bold px-1.5 py-0.5 transition-colors ${
+                                activeTab === tab.key
+                                    ? 'bg-[#283852] text-white'
+                                    : 'bg-gray-200 text-gray-500'
+                            }`}>
+                                {count}
+                            </span>
+                        </button>
+                    );
+                })}
             </div>
+
+            {/* ── Cross-tab hint ── */}
+            {activeTab === 'my' && deptTickets.filter(t => t.status === 'open').length > 0 && (
+                <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 bg-[#33cbcc]/8 px-4 py-3 cursor-pointer"
+                    onClick={() => { setActiveTab('department'); setFilterStatus('all'); setSearchQuery(''); }}
+                >
+                    <Building02Icon size={16} className="text-[#33cbcc] shrink-0" />
+                    <p className="text-sm text-[#1c2b3a] flex-1">
+                        {deptTickets.filter(t => t.status === 'open').length} {t('tickets.tabs.departmentTickets').toLowerCase()} {i18n.language === 'fr' ? 'en attente d\'action' : 'awaiting action'}
+                    </p>
+                    <span className="text-xs font-semibold text-[#33cbcc]">{i18n.language === 'fr' ? 'Voir →' : 'View →'}</span>
+                </motion.div>
+            )}
 
             {/* ── Stat Cards ── */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -734,29 +720,30 @@ const Tickets = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-xs md:text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-1 md:mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out text-[#33cbcc]">
-                            <stat.icon size={80} strokeWidth={1.5} className="md:hidden" />
-                            <stat.icon size={100} strokeWidth={1.5} className="hidden md:block" />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
             </div>
 
-            {/* ── Search Bar ── */}
-            <div className="bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                <Search className="text-gray-400 ml-3" size={20} />
+            {/* ── Search01Icon Bar ── */}
+            <div className="flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                 <input
                     type="text"
                     placeholder={t('tickets.searchPlaceholder')}
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                    className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                 />
             </div>
 

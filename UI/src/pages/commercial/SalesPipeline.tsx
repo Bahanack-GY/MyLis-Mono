@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Plus, Search, Pencil, X, Filter, ChevronLeft, ChevronRight, ArrowRight,
-    Clock, MessageSquare, ListTodo, Building2, MapPin, User, Phone, Mail,
-    ArrowRightCircle, CheckCircle2, LayoutDashboard, Table2, TrendingUp,
-    Target, Award, DollarSign, Users, BarChart3, ChevronRight as ChevronRightIcon, Calendar
-} from 'lucide-react';
+import { Add01Icon, Search01Icon, PencilIcon, Cancel01Icon, FilterIcon, ArrowLeft01Icon, ArrowRight01Icon, Clock01Icon, Message02Icon, Task01Icon, Building02Icon, Location01Icon, UserIcon, CallIcon, Mail01Icon, Tick01Icon, DashboardSquare01Icon, TableIcon, ArrowUpRight01Icon, Target01Icon, Award01Icon, DollarCircleIcon, UserGroupIcon, BarChartHorizontalIcon, ArrowRight01Icon as ChevronRightIcon, Calendar01Icon } from 'hugeicons-react';
 import { useLeads, useUpdateLead, useLeadStats, useCreateLeadActivity, useLead, useLeadActivities } from '../../api/commercial/hooks';
 import type { Lead, SaleStage, CreateLeadActivityDto, ActivityType } from '../../api/commercial/types';
 import StageChangeModal, { isForwardMove, STAGE_ORDER } from '../../components/commercial/StageChangeModal';
@@ -138,7 +133,7 @@ const PipelineEditModal = ({
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <ArrowRight size={20} className="text-[#33cbcc]" />
+                            <ArrowRight01Icon size={20} className="text-[#33cbcc]" />
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-gray-800">
@@ -148,7 +143,7 @@ const PipelineEditModal = ({
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -381,7 +376,7 @@ const PipelineEditModal = ({
                                         : 'bg-gray-50 text-gray-300 cursor-not-allowed'
                                 }`}
                             >
-                                <MessageSquare size={14} />
+                                <Message02Icon size={14} />
                                 {t('commercial.pipeline.logActivity')}
                             </button>
                         </div>
@@ -390,7 +385,7 @@ const PipelineEditModal = ({
                     {/* ── Linked Tasks ── */}
                     <div className={sectionCls}>
                         <label className={labelCls}>
-                            <ListTodo size={10} />
+                            <Task01Icon size={10} />
                             {t('commercial.leads.linkedTasks', 'Taches liees')}
                         </label>
                         {linkedTasks && linkedTasks.length > 0 ? (
@@ -443,7 +438,7 @@ const PipelineEditModal = ({
                         {updateLead.isPending ? (
                             <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         ) : (
-                            <Plus size={16} />
+                            <Add01Icon size={16} />
                         )}
                         {t('commercial.pipeline.save')}
                     </button>
@@ -481,7 +476,7 @@ function QuickLogActivityModal({ lead, type, onClose }: { lead: Lead, type: Acti
                     <h3 className="font-bold text-gray-800">
                         {t('commercial.pipeline.logActivity')} ({t(`commercial.pipeline.activityTypes.${type}`)}) - {lead.company}
                     </h3>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={18} /></button>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><Cancel01Icon size={18} /></button>
                 </div>
                 <div className="p-5 space-y-4">
                     <textarea
@@ -639,21 +634,21 @@ const PipelineDashboard = ({
         {
             label: t('commercial.pipeline.dashboard.pipelineValue'),
             value: formatFCFA(stats.totalPipelineValue || 0),
-            icon: DollarSign,
+            icon: DollarCircleIcon,
             bgLight: 'bg-[#283852]/10',
             textColor: 'text-[#283852]',
         },
         {
             label: t('commercial.pipeline.dashboard.weightedValue'),
             value: formatFCFA(stats.weightedPipelineValue || 0),
-            icon: Target,
+            icon: Target01Icon,
             bgLight: 'bg-[#283852]/10',
             textColor: 'text-[#283852]',
         },
         {
             label: t('commercial.pipeline.dashboard.winRate'),
             value: `${stats.winRate || 0}%`,
-            icon: Award,
+            icon: Award01Icon,
             bgLight: 'bg-[#33cbcc]/10',
             textColor: 'text-[#33cbcc]',
             sub: `${stats.wonCount || 0} / ${(stats.wonCount || 0) + (stats.lostCount || 0)}`,
@@ -661,7 +656,7 @@ const PipelineDashboard = ({
         {
             label: t('commercial.pipeline.dashboard.avgDealSize'),
             value: formatFCFA(stats.averageDealSize || 0),
-            icon: TrendingUp,
+            icon: ArrowUpRight01Icon,
             bgLight: 'bg-[#283852]/10',
             textColor: 'text-[#283852]',
         },
@@ -770,7 +765,7 @@ const PipelineDashboard = ({
                     className="bg-white rounded-2xl sm border border-gray-100 p-5 flex items-center gap-4"
                 >
                     <div className="p-3 rounded-xl bg-gray-50">
-                        <Users size={20} className="text-gray-500" />
+                        <UserGroupIcon size={20} className="text-gray-500" />
                     </div>
                     <div>
                         <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('commercial.pipeline.dashboard.totalLeads')}</p>
@@ -784,7 +779,7 @@ const PipelineDashboard = ({
                     className="bg-white rounded-2xl sm border border-gray-100 p-5 flex items-center gap-4"
                 >
                     <div className="p-3 rounded-xl bg-[#33cbcc]/10">
-                        <CheckCircle2 size={20} className="text-[#33cbcc]" />
+                        <Tick01Icon size={20} className="text-[#33cbcc]" />
                     </div>
                     <div>
                         <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('commercial.pipeline.dashboard.wonDeals')}</p>
@@ -798,7 +793,7 @@ const PipelineDashboard = ({
                     className="bg-white rounded-2xl sm border border-gray-100 p-5 flex items-center gap-4"
                 >
                     <div className="p-3 rounded-xl bg-gray-100">
-                        <X size={20} className="text-gray-500" />
+                        <Cancel01Icon size={20} className="text-gray-500" />
                     </div>
                     <div>
                         <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">{t('commercial.pipeline.dashboard.lostDeals')}</p>
@@ -816,7 +811,7 @@ const PipelineDashboard = ({
             >
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-2">
-                        <BarChart3 size={18} className="text-gray-400" />
+                        <BarChartHorizontalIcon size={18} className="text-gray-400" />
                         <h3 className="text-sm font-semibold text-gray-700">{t('commercial.pipeline.dashboard.funnelTitle')}</h3>
                     </div>
                     <div className="flex items-center gap-4 text-xs text-gray-400">
@@ -1043,7 +1038,7 @@ const SalesPipeline = () => {
                                 : 'text-gray-500 hover:text-gray-700'
                         }`}
                     >
-                        <Table2 size={16} />
+                        <TableIcon size={16} />
                         {t('commercial.pipeline.viewTable')}
                     </button>
                     <button
@@ -1054,7 +1049,7 @@ const SalesPipeline = () => {
                                 : 'text-gray-500 hover:text-gray-700'
                         }`}
                     >
-                        <LayoutDashboard size={16} />
+                        <DashboardSquare01Icon size={16} />
                         {t('commercial.pipeline.viewDashboard')}
                     </button>
                 </div>
@@ -1094,16 +1089,16 @@ const SalesPipeline = () => {
                 })}
             </div>
 
-            {/* ── Search + Active Filter ── */}
+            {/* ── Search01Icon + Active FilterIcon ── */}
             <div className="flex flex-col md:flex-row gap-3 items-start md:items-center">
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
+                <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                    <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                     <input
                         type="text"
                         placeholder={t('commercial.pipeline.searchPlaceholder')}
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                        className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                     />
                 </div>
                 {stageFilter !== 'ALL' && (
@@ -1111,7 +1106,7 @@ const SalesPipeline = () => {
                         onClick={() => setStageFilter('ALL')}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors shrink-0"
                     >
-                        <X size={14} />
+                        <Cancel01Icon size={14} />
                         {t(`commercial.pipeline.stages.${stageFilter}`)}
                     </button>
                 )}
@@ -1150,7 +1145,7 @@ const SalesPipeline = () => {
                             ) : leads.length === 0 ? (
                                 <tr>
                                     <td colSpan={10} className="px-4 py-12 text-center">
-                                        <Filter size={32} className="mx-auto text-gray-300 mb-3" />
+                                        <FilterIcon size={32} className="mx-auto text-gray-300 mb-3" />
                                         <p className="text-gray-400 font-medium">{t('commercial.pipeline.noResults')}</p>
                                     </td>
                                 </tr>
@@ -1235,7 +1230,7 @@ const SalesPipeline = () => {
                                                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${lead.saleStage === 'GAGNE' ? 'cursor-default' : 'cursor-pointer hover:opacity-80'} ${colors.bg} ${colors.text}`}
                                                     >
                                                         {t(`commercial.pipeline.stages.${lead.saleStage}`)}
-                                                        {lead.saleStage !== 'GAGNE' && <ArrowRight size={10} />}
+                                                        {lead.saleStage !== 'GAGNE' && <ArrowRight01Icon size={10} />}
                                                     </button>
                                                     <AnimatePresence>
                                                         {quickStageLeadId === lead.id && (
@@ -1257,7 +1252,7 @@ const SalesPipeline = () => {
                                                     </span>
                                                     {lead.nextActionDeadline && (
                                                         <span className={`text-xs flex items-center gap-1 mt-0.5 ${overdue ? 'text-[#283852]' : 'text-gray-400'}`}>
-                                                            <Clock size={10} />
+                                                            <Clock01Icon size={10} />
                                                             {new Date(lead.nextActionDeadline).toLocaleDateString('fr-FR')}
                                                         </span>
                                                     )}
@@ -1272,21 +1267,21 @@ const SalesPipeline = () => {
                                                         className="p-1.5 rounded-lg hover:bg-[#33cbcc]/10 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                                         title={t('commercial.pipeline.activityTypes.APPEL')}
                                                     >
-                                                        <Phone size={14} />
+                                                        <CallIcon size={14} />
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setQuickLog({ lead, type: 'EMAIL' }); }}
                                                         className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                         title={t('commercial.pipeline.activityTypes.EMAIL')}
                                                     >
-                                                        <Mail size={14} />
+                                                        <Mail01Icon size={14} />
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setQuickLog({ lead, type: 'REUNION' }); }}
                                                         className="p-1.5 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                         title={t('commercial.pipeline.activityTypes.REUNION')}
                                                     >
-                                                        <Calendar size={14} />
+                                                        <Calendar01Icon size={14} />
                                                     </button>
                                                     <div className="w-px h-4 bg-gray-200 mx-1" />
                                                     <button
@@ -1294,7 +1289,7 @@ const SalesPipeline = () => {
                                                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                                         title={t('commercial.pipeline.editPipeline')}
                                                     >
-                                                        <Pencil size={14} />
+                                                        <PencilIcon size={14} />
                                                     </button>
                                                 </div>
                                             </td>
@@ -1322,7 +1317,7 @@ const SalesPipeline = () => {
                                 disabled={page <= 1}
                                 className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronLeft size={16} />
+                                <ArrowLeft01Icon size={16} />
                             </button>
                             {Array.from({ length: totalPages }, (_, i) => i + 1)
                                 .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
@@ -1353,7 +1348,7 @@ const SalesPipeline = () => {
                                 disabled={page >= totalPages}
                                 className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronRight size={16} />
+                                <ArrowRight01Icon size={16} />
                             </button>
                         </div>
                     </div>

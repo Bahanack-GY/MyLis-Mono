@@ -495,6 +495,7 @@
     "suppliers": "Suppliers",
     "cashFlow": "Cash Flow",
     "fundMovements": "Partner Current Account",
+    "carwashDashboard": "LIS Carwash",
     "monthlyRankings": "Rankings",
     "aiReports": "AI Reports",
     "commercialDashboard": "Commercial",
@@ -503,6 +504,7 @@
     "leadFollowUp": "Lead Follow-Up",
     "clientFollowUp": "Follow-Up",
     "businessExpenses": "Living Expenses",
+    "reminders": "Reminders",
     "sections": {
       "work": "Work",
       "people": "People",
@@ -510,7 +512,8 @@
       "requests": "Requests",
       "comms": "Comms",
       "commercial": "Commercial",
-      "accounting": "Accounting"
+      "accounting": "Accounting",
+      "carwash": "Carwash"
     }
   },
   "planning": {
@@ -520,8 +523,13 @@
     "noTasks": "No tasks for this day",
     "today": "Today",
     "allEmployees": "All Employees",
+    "allStatuses": "All statuses",
     "weekProgress": "Week Progress",
-    "tasksCompleted": "tasks completed"
+    "tasksCompleted": "tasks completed",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "transferred": "Transferred",
+    "legend": "Legend"
   },
   "salaries": {
     "pageSubtitle": "{{count}} employees · {{withSalary}} with salary set",
@@ -601,7 +609,7 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "subtitle": "Overview of your organization's performance",
+    "subtitle": "Overview of your performance",
     "sortBy": "Sort by: Latest",
     "stats": {
       "totalEmployees": "Total Employees",
@@ -813,7 +821,42 @@
     "minShort": "m",
     "attachments": "Attachments",
     "addFiles": "Add files",
-    "deleteAttachmentConfirm": "Delete this attachment?"
+    "deleteAttachmentConfirm": "Delete this attachment?",
+    "activityType": "Activity Type",
+    "activityTypeNone": "Select a type",
+    "commercialNatures": {
+      "VENTE_ACTIVE":           "Active Sales",
+      "VENTE_PROSPECTION":      "Prospecting",
+      "RESOLUTION_PROBLEMES":   "Problem Resolution",
+      "TACHES_ADMINISTRATIVES": "Administrative Tasks",
+      "TEMPS_IMPRODUCTIF":      "Unproductive Time",
+      "MARKETING_DIGITAL":      "Digital Marketing",
+      "AUTRE":                  "Other"
+    },
+    "commercialActivityTypes": {
+      "VISITE_CLIENT":          "Client Visit",
+      "TEL_CLIENT":             "Client Call",
+      "CLOSING":                "Closing",
+      "REUNION_CLIENT":         "Client Meeting",
+      "PRESTATION":             "Service Delivery",
+      "LIVRAISON":              "Delivery",
+      "VISITE_PROSPECT":        "Prospect Visit",
+      "TEL_PROSPECT":           "Prospect Call",
+      "SALON_EXPOSITION":       "Trade Show",
+      "REUNION_PROSPECT":       "Prospect Meeting",
+      "SAV":                    "After-Sales Service",
+      "RAPPROCHEMENT_COMPTES":  "Account Reconciliation",
+      "PAPERASSE":              "Paperwork",
+      "EMAIL":                  "Email",
+      "TEL_INTERNE":            "Internal Call",
+      "REUNION_INTERNE":        "Internal Meeting",
+      "PAUSE":                  "Break",
+      "MALADIE":                "Sick Leave",
+      "CONGES":                 "Vacation",
+      "CREATION_CONTENU":       "Content Creation",
+      "POST_RESEAUX_SOCIAUX":   "Social Media Post",
+      "AUTRE":                  "Other"
+    }
   },
   "tasks": {
     "title": "Tasks",
@@ -936,11 +979,20 @@
       "adminWarningTitle": "Weekly Compliance Issue",
       "adminWarningMessage": "{{name}} has pending tasks from last week that need status updates. Task creation is blocked until these are resolved."
     },
+    "states": {
+      "created": "Created",
+      "assigned": "Assigned",
+      "in_progress": "In Progress",
+      "blocked": "Blocked",
+      "completed": "Completed",
+      "reviewed": "Reviewed"
+    },
     "subtasks": {
       "title": "Subtasks",
       "complete": "complete",
       "addPlaceholder": "Add a subtask..."
-    }
+    },
+    "file": "file(s)"
   },
   "projectSidebar": {
     "back": "Back to projects",
@@ -2927,9 +2979,27 @@
     },
     "paymentReminders": {
       "title": "Payment Reminders",
+      "subtitle": "Unpaid invoices to monitor",
+      "overdueLabel": "Overdue",
+      "dueSoonLabel": "Due soon",
+      "upcomingLabel": "Upcoming",
+      "overdue1Day": "1 day overdue",
+      "overdueNDays": "{{days}} days overdue",
+      "dueToday": "Due today",
+      "dueTomorrow": "Due tomorrow",
+      "dueInNDays": "Due in {{days}} days",
+      "dueDate": "Due date",
+      "statusPaid": "Paid",
+      "statusPending": "Pending",
       "overdue": "Overdue",
-      "dueSoon": "Due Soon",
-      "upcoming": "Upcoming"
+      "dueSoon": "Due soon",
+      "7days": "7 days",
+      "upcoming": "Upcoming",
+      "gt7days": "> 7 days",
+      "all": "All",
+      "noInvoices": "No unpaid invoices",
+      "noInvoicesInCategory": "No invoices in this category",
+      "totalOutstanding": "Total outstanding"
     },
     "toast": {
       "leadCreated": "Lead created successfully",
@@ -3002,5 +3072,49 @@
     "namePlaceholder": "e.g. Meals, Transport, Accommodation...",
     "add": "Add",
     "noTypes": "No expense types yet."
+  },
+  "remindersPage": {
+    "urgency": {
+      "done": "Done",
+      "overdue": "{{days}}d overdue",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "inDays": "In {{days}} days"
+    },
+    "newReminder": "New Reminder",
+    "title": "Title",
+    "titlePlaceholder": "What do you want to be reminded of?",
+    "description": "Description",
+    "descriptionPlaceholder": "Additional details (optional)...",
+    "dueDate": "Due Date",
+    "create": "Create",
+    "completedOn": "Done",
+    "markDone": "Mark as done",
+    "pageTitle": "Reminders",
+    "pending": "pending",
+    "urgent": "urgent",
+    "new": "New",
+    "urgentBanner1": "1 reminder is due today or overdue",
+    "urgentBannerN": "{{count}} reminders are due today or overdue",
+    "filterPending": "Pending",
+    "filterDone": "Done",
+    "filterAll": "All",
+    "noDone": "No completed reminders yet",
+    "noPending": "No reminders — you're all caught up!",
+    "createFirst": "Create your first reminder",
+    "legendTitle": "Legend:",
+    "legend": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "leq5Days": "≤ 5 days",
+      "leq10Days": "≤ 10 days",
+      "later": "Later"
+    },
+    "popup": {
+      "single": "1 reminder coming up",
+      "multiple": "{{count}} reminders coming up",
+      "viewAll": "View all reminders →"
+    }
   }
 }

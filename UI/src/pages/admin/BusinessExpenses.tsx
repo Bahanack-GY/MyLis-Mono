@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Wallet, Search, X, Check, Loader2, Settings, Eye, Calendar, Ban } from 'lucide-react';
+import { Wallet01Icon, Search01Icon, Cancel01Icon, Tick01Icon, Loading02Icon, Settings01Icon, ViewIcon, Calendar01Icon } from 'hugeicons-react';
 import {
     useBusinessExpenses,
     useBusinessExpenseStats,
@@ -22,10 +22,10 @@ const STATUS_BG: Record<BusinessExpenseStatus, string> = {
     REJECTED: 'bg-gray-100 text-gray-400',
 };
 
-const STATUS_ICON: Record<BusinessExpenseStatus, typeof Loader2> = {
-    PENDING: Loader2,
-    VALIDATED: Check,
-    REJECTED: Ban,
+const STATUS_ICON: Record<BusinessExpenseStatus, typeof Loading02Icon> = {
+    PENDING: Loading02Icon,
+    VALIDATED: Tick01Icon,
+    REJECTED: Cancel01Icon,
 };
 
 const formatFCFA = (amount: number) =>
@@ -74,7 +74,7 @@ const ValidationModal = ({
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Check size={18} className="text-[#33cbcc]" />
+                            <Tick01Icon size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">
                             {t('businessExpenses.confirmValidate')}
@@ -84,7 +84,7 @@ const ValidationModal = ({
                         onClick={onCancel}
                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -132,9 +132,9 @@ const ValidationModal = ({
                             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50"
                         >
                             {isLoading ? (
-                                <Loader2 size={16} className="animate-spin" />
+                                <Loading02Icon size={16} className="animate-spin" />
                             ) : (
-                                <Check size={16} />
+                                <Tick01Icon size={16} />
                             )}
                             {t('businessExpenses.validate')}
                         </button>
@@ -177,7 +177,7 @@ const DetailModal = ({
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Wallet size={18} className="text-[#33cbcc]" />
+                            <Wallet01Icon size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">
                             {t('businessExpenses.detail')}
@@ -187,7 +187,7 @@ const DetailModal = ({
                         onClick={onClose}
                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -267,7 +267,7 @@ const DetailModal = ({
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
                             >
-                                <Eye size={16} />
+                                <ViewIcon size={16} />
                                 {t('businessExpenses.viewReceipt')}
                             </a>
                         </div>
@@ -311,7 +311,7 @@ const RejectionModal = ({
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center">
-                            <Ban size={18} className="text-[#283852]" />
+                            <Cancel01Icon size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">
                             {t('businessExpenses.reject')}
@@ -321,7 +321,7 @@ const RejectionModal = ({
                         onClick={onCancel}
                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -353,9 +353,9 @@ const RejectionModal = ({
                             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20 disabled:opacity-50"
                         >
                             {isLoading ? (
-                                <Loader2 size={16} className="animate-spin" />
+                                <Loading02Icon size={16} className="animate-spin" />
                             ) : (
-                                <Ban size={16} />
+                                <Cancel01Icon size={16} />
                             )}
                             {t('businessExpenses.confirmReject')}
                         </button>
@@ -417,28 +417,28 @@ const BusinessExpenses = () => {
         {
             label: t('businessExpenses.stats.pending'),
             value: stats?.totalPending ?? 0,
-            icon: Loader2,
+            icon: Loading02Icon,
             color: '#283852',
             bgColor: 'bg-[#283852]/10',
         },
         {
             label: t('businessExpenses.stats.validated'),
             value: stats?.totalValidated ?? 0,
-            icon: Check,
+            icon: Tick01Icon,
             color: '#33cbcc',
             bgColor: 'bg-[#33cbcc]/10',
         },
         {
             label: t('businessExpenses.stats.rejected'),
             value: stats?.totalRejected ?? 0,
-            icon: Ban,
+            icon: Cancel01Icon,
             color: '#283852',
             bgColor: 'bg-gray-100',
         },
         {
             label: t('businessExpenses.stats.totalAmount'),
             value: formatFCFA(stats?.totalAmount ?? 0),
-            icon: Wallet,
+            icon: Wallet01Icon,
             color: '#33cbcc',
             bgColor: 'bg-[#33cbcc]/5',
         },
@@ -498,7 +498,7 @@ const BusinessExpenses = () => {
                         className="p-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 hover:border-[#33cbcc]/40 text-gray-500 hover:text-[#33cbcc] transition-colors"
                         title={t('businessExpenses.settings')}
                     >
-                        <Settings size={18} />
+                        <Settings01Icon size={18} />
                     </button>
                 </div>
             </div>
@@ -534,15 +534,15 @@ const BusinessExpenses = () => {
             {/* Filter Bar */}
             <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
                 <div className="flex flex-col lg:flex-row gap-3">
-                    {/* Search */}
+                    {/* Search01Icon */}
                     <div className="flex-1 relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Search01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                         <input
                             type="text"
                             placeholder={t('businessExpenses.searchPlaceholder')}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] transition-all bg-white"
+                            className="w-full bg-white border border-[#e5e8ef] rounded-2xl py-3.5 pl-11 pr-4 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors"
                         />
                     </div>
 
@@ -577,7 +577,7 @@ const BusinessExpenses = () => {
                     {/* Date range */}
                     <div className="flex items-center gap-2">
                         <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+                            <Calendar01Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                             <input
                                 type="date"
                                 value={dateFrom}
@@ -587,7 +587,7 @@ const BusinessExpenses = () => {
                         </div>
                         <span className="text-gray-400 text-xs">-</span>
                         <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+                            <Calendar01Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                             <input
                                 type="date"
                                 value={dateTo}
@@ -732,7 +732,7 @@ const BusinessExpenses = () => {
                                                     className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
                                                     title={t('businessExpenses.viewReceipt')}
                                                 >
-                                                    <Eye size={14} />
+                                                    <ViewIcon size={14} />
                                                     {t('businessExpenses.viewReceipt')}
                                                 </a>
                                             ) : (
@@ -754,7 +754,7 @@ const BusinessExpenses = () => {
                                                         className="p-2 rounded-lg text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
                                                         title={t('businessExpenses.validate')}
                                                     >
-                                                        <Check size={15} />
+                                                        <Tick01Icon size={15} />
                                                     </button>
                                                     <button
                                                         onClick={(e) => {
@@ -764,7 +764,7 @@ const BusinessExpenses = () => {
                                                         className="p-2 rounded-lg text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors"
                                                         title={t('businessExpenses.reject')}
                                                     >
-                                                        <X size={15} />
+                                                        <Cancel01Icon size={15} />
                                                     </button>
                                                 </div>
                                             ) : (
@@ -785,7 +785,7 @@ const BusinessExpenses = () => {
                                     <td colSpan={7} className="px-6 py-16 text-center">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <Wallet
+                                                <Wallet01Icon
                                                     size={24}
                                                     className="text-gray-300"
                                                 />

@@ -1,11 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Phone, Mail, MapPin, Users, Monitor, RefreshCw, Activity,
-    Plus, Search, ChevronLeft, ChevronRight, Clock, AlertTriangle, CheckCircle2,
-    TrendingUp, Calendar, MessageSquare, X, Loader2,
-} from 'lucide-react';
+import { CallIcon, Mail01Icon, Location01Icon, UserGroupIcon, ComputerIcon, RefreshIcon, Activity01Icon, Add01Icon, Search01Icon, ArrowLeft01Icon, ArrowRight01Icon, Clock01Icon, Alert02Icon, Tick01Icon, ArrowUpRight01Icon, Calendar01Icon, Message02Icon, Cancel01Icon, Loading02Icon } from 'hugeicons-react';
 import { useLeads } from '../../api/commercial/hooks';
 import { useLeadActivities, useCreateLeadActivity } from '../../api/commercial/hooks';
 import { useAuth } from '../../contexts/AuthContext';
@@ -15,14 +11,14 @@ import { STAGE_COLORS } from '../../components/commercial/StageChangeModal';
 /* ── Constants ──────────────────────────────────────────── */
 
 const ACTIVITY_TYPE_META: Record<ActivityType, { icon: any; label: string; color: string }> = {
-    VISITE_PROSPECT: { icon: MapPin,       label: 'Visite Prospect',  color: '#33cbcc' },
-    VISITE_CLIENT:   { icon: Users,        label: 'Visite Client',    color: '#33cbcc' },
-    APPEL:           { icon: Phone,        label: 'Appel',            color: '#283852' },
-    EMAIL:           { icon: Mail,         label: 'Email',            color: '#283852' },
-    REUNION:         { icon: Users,        label: 'Réunion',          color: '#283852' },
-    DEMO:            { icon: Monitor,      label: 'Démo',             color: '#33cbcc' },
-    RELANCE:         { icon: RefreshCw,    label: 'Relance',          color: '#283852' },
-    AUTRE:           { icon: Activity,     label: 'Autre',            color: '#6b7280' },
+    VISITE_PROSPECT: { icon: Location01Icon,       label: 'Visite Prospect',  color: '#33cbcc' },
+    VISITE_CLIENT:   { icon: UserGroupIcon,        label: 'Visite Client',    color: '#33cbcc' },
+    APPEL:           { icon: CallIcon,        label: 'Appel',            color: '#283852' },
+    EMAIL:           { icon: Mail01Icon,         label: 'Email',            color: '#283852' },
+    REUNION:         { icon: UserGroupIcon,        label: 'Réunion',          color: '#283852' },
+    DEMO:            { icon: ComputerIcon,      label: 'Démo',             color: '#33cbcc' },
+    RELANCE:         { icon: RefreshIcon,    label: 'Relance',          color: '#283852' },
+    AUTRE:           { icon: Activity01Icon,     label: 'Autre',            color: '#6b7280' },
 };
 
 const HEALTH_META: Record<HealthStatus, { label: string; color: string; dot: string }> = {
@@ -70,7 +66,7 @@ function daysAgo(d: string | null | undefined): string | null {
     return `il y a ${days}j`;
 }
 
-/* ── Log Activity Modal ─────────────────────────────────── */
+/* ── Log Activity01Icon Modal ─────────────────────────────────── */
 
 function LogActivityModal({
     lead,
@@ -138,7 +134,7 @@ function LogActivityModal({
                             <p className="text-xs text-gray-400 mt-0.5">{lead.company}</p>
                         </div>
                         <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400">
-                            <X size={16} />
+                            <Cancel01Icon size={16} />
                         </button>
                     </div>
 
@@ -228,7 +224,7 @@ function LogActivityModal({
                         </button>
                         <button onClick={submit} disabled={create.isPending || !form.date}
                             className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                            {create.isPending && <Loader2 size={14} className="animate-spin" />}
+                            {create.isPending && <Loading02Icon size={14} className="animate-spin" />}
                             Enregistrer
                         </button>
                     </div>
@@ -238,7 +234,7 @@ function LogActivityModal({
     );
 }
 
-/* ── Activity Item ──────────────────────────────────────── */
+/* ── Activity01Icon Item ──────────────────────────────────────── */
 
 function ActivityItem({ activity }: { activity: LeadActivity }) {
     const meta = ACTIVITY_TYPE_META[activity.type] || ACTIVITY_TYPE_META.AUTRE;
@@ -336,14 +332,14 @@ function LeadCard({
                         className="shrink-0 w-7 h-7 rounded-lg bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 text-[#33cbcc] flex items-center justify-center transition-colors"
                         title="Enregistrer une activité"
                     >
-                        <Plus size={13} />
+                        <Add01Icon size={13} />
                     </button>
                 )}
             </div>
 
             {lead.nextAction && (
                 <div className={`flex items-center gap-1 mt-2 text-[11px] ${isOverdue ? 'text-[#283852]' : 'text-gray-500'}`}>
-                    {isOverdue ? <AlertTriangle size={10} className="shrink-0" /> : <Calendar size={10} className="shrink-0" />}
+                    {isOverdue ? <Alert02Icon size={10} className="shrink-0" /> : <Calendar01Icon size={10} className="shrink-0" />}
                     <span className="truncate">{lead.nextAction}</span>
                     {lead.nextActionDeadline && (
                         <span className="shrink-0 font-medium ml-auto">{formatDate(lead.nextActionDeadline)}</span>
@@ -353,7 +349,7 @@ function LeadCard({
 
             {lead.lastActionDate && (
                 <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
-                    <Clock size={9} className="shrink-0" />
+                    <Clock01Icon size={9} className="shrink-0" />
                     Dernier contact : {daysAgo(lead.lastActionDate)}
                 </p>
             )}
@@ -361,7 +357,7 @@ function LeadCard({
     );
 }
 
-/* ── Activity Panel ─────────────────────────────────────── */
+/* ── Activity01Icon Panel ─────────────────────────────────────── */
 
 function ActivityPanel({
     lead,
@@ -389,7 +385,7 @@ function ActivityPanel({
             <div className="px-5 py-4 border-b border-gray-100 bg-white">
                 <div className="flex items-center gap-3">
                     <button onClick={onBack} className="md:hidden p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
-                        <ChevronLeft size={16} />
+                        <ArrowLeft01Icon size={16} />
                     </button>
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -408,7 +404,7 @@ function ActivityPanel({
                             onClick={onLog}
                             className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#33cbcc] text-white text-xs font-semibold hover:bg-[#2bb5b6] transition-colors"
                         >
-                            <Plus size={13} />
+                            <Add01Icon size={13} />
                             <span className="hidden sm:inline">Activité</span>
                         </button>
                     )}
@@ -420,14 +416,14 @@ function ActivityPanel({
                         {primaryContact.phone && (
                             <a href={`tel:${primaryContact.phone}`}
                                 className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#33cbcc] transition-colors">
-                                <Phone size={11} />
+                                <CallIcon size={11} />
                                 {primaryContact.phone}
                             </a>
                         )}
                         {primaryContact.email && (
                             <a href={`mailto:${primaryContact.email}`}
                                 className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#33cbcc] transition-colors">
-                                <Mail size={11} />
+                                <Mail01Icon size={11} />
                                 <span className="truncate max-w-[140px]">{primaryContact.email}</span>
                             </a>
                         )}
@@ -442,8 +438,8 @@ function ActivityPanel({
                             : 'bg-[#33cbcc]/10 text-[#33cbcc]'
                     }`}>
                         {lead.nextActionDeadline && new Date(lead.nextActionDeadline) < new Date()
-                            ? <AlertTriangle size={12} className="shrink-0" />
-                            : <Calendar size={12} className="shrink-0" />
+                            ? <Alert02Icon size={12} className="shrink-0" />
+                            : <Calendar01Icon size={12} className="shrink-0" />
                         }
                         <span className="font-medium truncate">{lead.nextAction}</span>
                         {lead.nextActionDeadline && (
@@ -453,16 +449,16 @@ function ActivityPanel({
                 )}
             </div>
 
-            {/* Activity timeline */}
+            {/* Activity01Icon timeline */}
             <div className="flex-1 overflow-y-auto px-5 py-4">
                 {isLoading ? (
                     <div className="flex justify-center py-12">
-                        <Loader2 size={22} className="animate-spin text-[#33cbcc]" />
+                        <Loading02Icon size={22} className="animate-spin text-[#33cbcc]" />
                     </div>
                 ) : activities.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
                         <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
-                            <MessageSquare size={22} className="text-gray-300" />
+                            <Message02Icon size={22} className="text-gray-300" />
                         </div>
                         <p className="text-sm text-gray-400">Aucune activité enregistrée</p>
                         {!isTerminal && (
@@ -571,7 +567,7 @@ export default function LeadFollowUp() {
                 </div>
                 {/* Date filters */}
                 <div className="flex items-center gap-2">
-                    <Calendar size={12} className="text-gray-400 shrink-0" />
+                    <Calendar01Icon size={12} className="text-gray-400 shrink-0" />
                     <input
                         type="date"
                         value={dateFrom}
@@ -591,7 +587,7 @@ export default function LeadFollowUp() {
                             className="p-1 rounded-md hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                             title="Effacer les dates"
                         >
-                            <X size={12} />
+                            <Cancel01Icon size={12} />
                         </button>
                     )}
                 </div>
@@ -602,15 +598,15 @@ export default function LeadFollowUp() {
 
                 {/* ── Lead List ── */}
                 <div className={`${mobileShowPanel ? 'hidden' : 'flex'} md:flex flex-col w-full md:w-80 lg:w-96 shrink-0 bg-white border-r border-gray-100 overflow-hidden`}>
-                    {/* Search */}
+                    {/* Search01Icon */}
                     <div className="px-4 py-3 border-b border-gray-50">
                         <div className="relative">
-                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                             <input
                                 value={search}
                                 onChange={e => setSearch(e.target.value)}
                                 placeholder="Rechercher un lead..."
-                                className="w-full pl-8 pr-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:outline-none focus:border-[#33cbcc] transition-colors"
+                                className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                             />
                         </div>
                     </div>
@@ -638,11 +634,11 @@ export default function LeadFollowUp() {
                     <div className="flex-1 overflow-y-auto">
                         {isLoading ? (
                             <div className="flex justify-center py-16">
-                                <Loader2 size={22} className="animate-spin text-[#33cbcc]" />
+                                <Loading02Icon size={22} className="animate-spin text-[#33cbcc]" />
                             </div>
                         ) : sortedLeads.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-16 gap-2 text-center px-4">
-                                <TrendingUp size={28} className="text-gray-200" />
+                                <ArrowUpRight01Icon size={28} className="text-gray-200" />
                                 <p className="text-sm text-gray-400">Aucun lead trouvé</p>
                             </div>
                         ) : (
@@ -668,7 +664,7 @@ export default function LeadFollowUp() {
                                 disabled={page <= 1}
                                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronLeft size={13} />
+                                <ArrowLeft01Icon size={13} />
                                 Préc.
                             </button>
                             <span className="text-xs text-gray-500">{page} / {totalPages}</span>
@@ -678,14 +674,14 @@ export default function LeadFollowUp() {
                                 className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                             >
                                 Suiv.
-                                <ChevronRight size={13} />
+                                <ArrowRight01Icon size={13} />
                             </button>
                         </div>
                     )}
 
                 </div>
 
-                {/* ── Activity Panel ── */}
+                {/* ── Activity01Icon Panel ── */}
                 <div className={`${!mobileShowPanel ? 'hidden' : 'flex'} md:flex flex-1 flex-col overflow-hidden bg-white`}>
                     {selectedLead ? (
                         <ActivityPanel
@@ -697,7 +693,7 @@ export default function LeadFollowUp() {
                     ) : (
                         <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center px-8">
                             <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center">
-                                <CheckCircle2 size={28} className="text-gray-300" />
+                                <Tick01Icon size={28} className="text-gray-300" />
                             </div>
                             <p className="text-sm font-semibold text-gray-500">Sélectionner un lead</p>
                             <p className="text-xs text-gray-400">Cliquez sur un lead pour voir ses activités et enregistrer un suivi</p>
@@ -706,7 +702,7 @@ export default function LeadFollowUp() {
                 </div>
             </div>
 
-            {/* ── Log Activity Modal ── */}
+            {/* ── Log Activity01Icon Modal ── */}
             {logFor && (
                 <LogActivityModal
                     lead={logFor}

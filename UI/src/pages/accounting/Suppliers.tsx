@@ -1,10 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Plus, Search, ChevronDown, ChevronUp, X, Truck, FileText,
-    CheckCircle, Clock, AlertCircle, Ban, Eye, Edit2, Trash2,
-    Building2, Phone, Mail, CreditCard, Calendar,
-} from 'lucide-react';
+import { Add01Icon, Search01Icon, ArrowDown01Icon, ArrowUp01Icon, Cancel01Icon, DeliveryTruck01Icon, File01Icon, Tick01Icon, Clock01Icon, Alert01Icon, ViewIcon, PencilIcon, Delete02Icon, Building02Icon, CallIcon, Mail01Icon, CreditCardIcon, Calendar01Icon } from 'hugeicons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { useDepartments } from '../../api/departments/hooks';
@@ -98,10 +94,10 @@ const fmt = (n: number) => new Intl.NumberFormat('fr-FR').format(Math.round(n));
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('fr-FR');
 
 const STATUS_CONFIG = {
-    DRAFT:      { label: 'Brouillon',  color: 'bg-[#283852]/10 text-[#283852]/70', icon: Clock },
-    VALIDATED:  { label: 'Validée',    color: 'bg-[#33cbcc]/10 text-[#33cbcc]',   icon: CheckCircle },
-    PAID:       { label: 'Payée',      color: 'bg-[#283852] text-white',           icon: CheckCircle },
-    CANCELLED:  { label: 'Annulée',    color: 'bg-gray-100 text-gray-400',         icon: Ban },
+    DRAFT:      { label: 'Brouillon',  color: 'bg-[#283852]/10 text-[#283852]/70', icon: Clock01Icon },
+    VALIDATED:  { label: 'Validée',    color: 'bg-[#33cbcc]/10 text-[#33cbcc]',   icon: Tick01Icon },
+    PAID:       { label: 'Payée',      color: 'bg-[#283852] text-white',           icon: Tick01Icon },
+    CANCELLED:  { label: 'Annulée',    color: 'bg-gray-100 text-gray-400',         icon: Cancel01Icon },
 };
 
 /* ─── SupplierModal ─── */
@@ -133,7 +129,7 @@ function SupplierModal({ supplier, onClose }: { supplier: Supplier | null; onClo
                 className="bg-white rounded-2xl w-full max-w-lg shadow-2xl">
                 <div className="flex items-center justify-between p-6 border-b">
                     <h2 className="text-lg font-semibold">{supplier ? 'Modifier fournisseur' : 'Nouveau fournisseur'}</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><Cancel01Icon size={18} /></button>
                 </div>
                 <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                     <div>
@@ -252,7 +248,7 @@ function InvoiceFormModal({ invoice, suppliers, onClose }: {
                 className="bg-white rounded-2xl w-full max-w-3xl shadow-2xl flex flex-col max-h-[90vh]">
                 <div className="flex items-center justify-between p-6 border-b">
                     <h2 className="text-lg font-semibold">{invoice ? 'Modifier la facture' : 'Nouvelle facture fournisseur'}</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><Cancel01Icon size={18} /></button>
                 </div>
                 <div className="overflow-y-auto flex-1 p-6 space-y-5">
                     {/* Header fields */}
@@ -296,7 +292,7 @@ function InvoiceFormModal({ invoice, suppliers, onClose }: {
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="font-medium text-sm">Lignes</h3>
                             <button onClick={addItem} className="text-xs text-[#283852] hover:underline flex items-center gap-1">
-                                <Plus size={14} /> Ajouter une ligne
+                                <Add01Icon size={14} /> Ajouter une ligne
                             </button>
                         </div>
                         <div className="border rounded-lg overflow-hidden">
@@ -335,7 +331,7 @@ function InvoiceFormModal({ invoice, suppliers, onClose }: {
                                             <td className="px-3 py-2">
                                                 {items.length > 1 && (
                                                     <button onClick={() => removeItem(idx)} className="text-gray-400 hover:text-[#283852]">
-                                                        <X size={14} />
+                                                        <Cancel01Icon size={14} />
                                                     </button>
                                                 )}
                                             </td>
@@ -404,7 +400,7 @@ function InvoiceDetailModal({ invoice, onClose }: { invoice: SupplierInvoice; on
                         </div>
                         <p className="text-sm text-gray-500 mt-0.5">{invoice.supplier.name}</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
+                    <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg"><Cancel01Icon size={18} /></button>
                 </div>
                 <div className="overflow-y-auto flex-1 p-6 space-y-5">
                     <div className="grid grid-cols-3 gap-4 text-sm">
@@ -454,7 +450,7 @@ function InvoiceDetailModal({ invoice, onClose }: { invoice: SupplierInvoice; on
                         {showPayDate && (
                             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
                                 className="bg-[#283852]/10 rounded-lg p-4 flex items-center gap-3">
-                                <Calendar size={16} className="text-[#283852]" />
+                                <Calendar01Icon size={16} className="text-[#283852]" />
                                 <label className="text-sm font-medium text-[#283852]">Date de paiement:</label>
                                 <input type="date" value={payDate} onChange={e => setPayDate(e.target.value)}
                                     className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30" />
@@ -462,7 +458,7 @@ function InvoiceDetailModal({ invoice, onClose }: { invoice: SupplierInvoice; on
                                     className="ml-auto px-3 py-1.5 bg-[#33cbcc] text-white text-sm rounded-lg hover:bg-[#2bb5b6] disabled:opacity-50">
                                     {pay.isPending ? '...' : 'Confirmer paiement'}
                                 </button>
-                                <button onClick={() => setShowPayDate(false)} className="text-gray-400 hover:text-gray-600"><X size={16} /></button>
+                                <button onClick={() => setShowPayDate(false)} className="text-gray-400 hover:text-gray-600"><Cancel01Icon size={16} /></button>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -536,7 +532,7 @@ export default function Suppliers() {
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                            <Truck size={18} className="text-[#283852]" />
+                            <DeliveryTruck01Icon size={18} className="text-[#283852]" />
                         </div>
                         <div>
                             <h1 className="text-xl font-bold text-gray-900">Fournisseurs</h1>
@@ -545,7 +541,7 @@ export default function Suppliers() {
                     </div>
                     <button onClick={() => tab === 'invoices' ? setEditInvoice('new') : setEditSupplier('new')}
                         className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-xl text-sm hover:bg-[#2bb5b6]">
-                        <Plus size={16} />
+                        <Add01Icon size={16} />
                         {tab === 'invoices' ? 'Nouvelle facture' : 'Nouveau fournisseur'}
                     </button>
                 </div>
@@ -553,8 +549,8 @@ export default function Suppliers() {
                 {/* Tabs */}
                 <div className="flex gap-1 mt-4">
                     {[
-                        { key: 'invoices', label: 'Factures', icon: FileText },
-                        { key: 'suppliers', label: 'Fournisseurs', icon: Building2 },
+                        { key: 'invoices', label: 'Factures', icon: File01Icon },
+                        { key: 'suppliers', label: 'Fournisseurs', icon: Building02Icon },
                     ].map(t => (
                         <button key={t.key} onClick={() => setTab(t.key as any)}
                             className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${tab === t.key ? 'bg-[#283852]/10 text-[#283852]' : 'text-gray-600 hover:bg-gray-100'}`}>
@@ -630,7 +626,7 @@ export default function Suppliers() {
                                                 <td className="px-4 py-3 text-gray-600">{fmtDate(inv.date)}</td>
                                                 <td className={`px-4 py-3 ${overdue ? 'text-[#283852] font-medium' : 'text-gray-600'}`}>
                                                     {fmtDate(inv.dueDate)}
-                                                    {overdue && <AlertCircle size={12} className="inline ml-1" />}
+                                                    {overdue && <Alert01Icon size={12} className="inline ml-1" />}
                                                 </td>
                                                 <td className="px-4 py-3 text-right font-semibold">{fmt(Number(inv.totalTTC))} FCFA</td>
                                                 <td className="px-4 py-3 text-center">
@@ -641,12 +637,12 @@ export default function Suppliers() {
                                                 <td className="px-4 py-3 text-right" onClick={e => e.stopPropagation()}>
                                                     <button onClick={() => setViewInvoice(inv)}
                                                         className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500" title="Voir">
-                                                        <Eye size={15} />
+                                                        <ViewIcon size={15} />
                                                     </button>
                                                     {inv.status === 'DRAFT' && (
                                                         <button onClick={() => setEditInvoice(inv)}
                                                             className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 ml-1" title="Modifier">
-                                                            <Edit2 size={15} />
+                                                            <PencilIcon size={15} />
                                                         </button>
                                                     )}
                                                 </td>
@@ -659,11 +655,11 @@ export default function Suppliers() {
                     </>
                 ) : (
                     <>
-                        {/* Search */}
+                        {/* Search01Icon */}
                         <div className="relative mb-4 max-w-xs">
-                            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
-                                className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30" />
+                                className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors" />
                         </div>
 
                         {/* Supplier cards */}
@@ -673,7 +669,7 @@ export default function Suppliers() {
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                                                <Truck size={18} className="text-[#283852]" />
+                                                <DeliveryTruck01Icon size={18} className="text-[#283852]" />
                                             </div>
                                             <div>
                                                 <h3 className="font-semibold text-gray-900">{s.name}</h3>
@@ -682,24 +678,24 @@ export default function Suppliers() {
                                         </div>
                                         <div className="flex gap-1">
                                             <button onClick={() => setEditSupplier(s)}
-                                                className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400"><Edit2 size={14} /></button>
+                                                className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400"><PencilIcon size={14} /></button>
                                             <button onClick={() => { if (confirm('Supprimer ce fournisseur ?')) deleteSupplier.mutate(s.id); }}
-                                                className="p-1.5 hover:bg-[#283852]/10 rounded-lg text-gray-400 hover:text-[#283852]"><Trash2 size={14} /></button>
+                                                className="p-1.5 hover:bg-[#283852]/10 rounded-lg text-gray-400 hover:text-[#283852]"><Delete02Icon size={14} /></button>
                                         </div>
                                     </div>
                                     <div className="space-y-1.5 text-sm text-gray-600">
-                                        {s.email && <div className="flex items-center gap-2"><Mail size={13} className="text-gray-400" />{s.email}</div>}
-                                        {s.phone && <div className="flex items-center gap-2"><Phone size={13} className="text-gray-400" />{s.phone}</div>}
-                                        {s.niu && <div className="flex items-center gap-2"><CreditCard size={13} className="text-gray-400" />NIU: {s.niu}</div>}
+                                        {s.email && <div className="flex items-center gap-2"><Mail01Icon size={13} className="text-gray-400" />{s.email}</div>}
+                                        {s.phone && <div className="flex items-center gap-2"><CallIcon size={13} className="text-gray-400" />{s.phone}</div>}
+                                        {s.niu && <div className="flex items-center gap-2"><CreditCardIcon size={13} className="text-gray-400" />NIU: {s.niu}</div>}
                                         <div className="flex items-center gap-2 text-gray-400 text-xs mt-2">
-                                            <Calendar size={12} />Délai paiement: {s.paymentTermsDays}j
+                                            <Calendar01Icon size={12} />Délai paiement: {s.paymentTermsDays}j
                                         </div>
                                     </div>
                                 </div>
                             ))}
                             {filteredSuppliers.length === 0 && (
                                 <div className="col-span-3 py-16 text-center text-gray-400">
-                                    <Truck size={40} className="mx-auto mb-3 opacity-30" />
+                                    <DeliveryTruck01Icon size={40} className="mx-auto mb-3 opacity-30" />
                                     <p>Aucun fournisseur</p>
                                 </div>
                             )}

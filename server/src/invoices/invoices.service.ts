@@ -9,7 +9,7 @@ import { Client } from '../models/client.model';
 import { User } from '../models/user.model';
 import { DepartmentGoalsService } from '../organization/department-goals.service';
 import { JournalEngineService } from '../accounting/journal-engine.service';
-import { Op } from 'sequelize';
+import { Op, QueryTypes } from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 
 @Injectable()
@@ -418,6 +418,39 @@ export class InvoicesService {
             const entry = map.get(inv.departmentId) ?? { name: inv.department.name, revenue: 0 };
             entry.revenue += contribution;
             map.set(inv.departmentId, entry);
+        }
+
+        // Merge carwash journal-entry revenue (sourceType = CARWASH_REVENUE, credit on class-7 accounts)
+        try {
+            const dateConditions = [
+                from ? `AND je.date >= :from` : '',
+                to   ? `AND je.date <= :to`   : '',
+            ].join(' ');
+            const carwashRows: Array<{ departmentId: string; deptName: string; revenue: string }> =
+                await (this.sequelize as any).query(`
+                    SELECT jel."departmentId", d.name AS "deptName", SUM(jel.credit) AS revenue
+                    FROM journal_entry_lines jel
+                    JOIN journal_entries je ON je.id = jel."journalEntryId"
+                    JOIN "Departments" d ON d.id = jel."departmentId"
+                    JOIN accounts a ON a.id = jel."accountId"
+                    WHERE je."sourceType" = 'CARWASH_REVENUE'
+                      AND a.code LIKE '7%'
+                      AND jel.credit > 0
+                      ${dateConditions}
+                    GROUP BY jel."departmentId", d.name
+                `, { replacements: { from, to }, type: QueryTypes.SELECT });
+
+            for (const row of carwashRows) {
+                const existing = map.get(row.departmentId);
+                if (existing) {
+                    existing.revenue += Number(row.revenue) || 0;
+                } else {
+                    map.set(row.departmentId, { name: row.deptName, revenue: Number(row.revenue) || 0 });
+                }
+            }
+        } catch (err: any) {
+            // Non-fatal: log and continue so regular invoice data still returns
+            console.warn('[getRevenueByDepartment] carwash journal query failed:', err?.message);
         }
 
         return Array.from(map.entries())

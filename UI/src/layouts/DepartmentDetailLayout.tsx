@@ -1,14 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import {
-    Code,
-    Palette,
-    Megaphone,
-    DollarSign,
-    Heart,
-    PieChart as PieChartIcon,
-    Loader2
-} from 'lucide-react';
+import { CodeIcon, PaintBoardIcon, Megaphone01Icon, DollarCircleIcon, FavouriteIcon, PieChartIcon, Loading02Icon } from 'hugeicons-react';
 import DepartmentDetailSidebar, { type DepartmentTab } from '../components/DepartmentDetailSidebar';
 import Header from '../components/Header';
 import DepartmentDetail from '../pages/DepartmentDetail';
@@ -37,7 +29,7 @@ export interface Department {
     projects: DeptProject[];
     budget: number;
     color: string;
-    icon: typeof Code;
+    icon: typeof CodeIcon;
 }
 
 const DepartmentDetailLayout = () => {
@@ -49,7 +41,7 @@ const DepartmentDetailLayout = () => {
     const { data: apiDepartments, isLoading } = useDepartments();
 
     const DEPT_COLORS = ['#283852'];
-    const DEPT_ICONS = [Code, Palette, Megaphone, DollarSign, Heart, PieChartIcon];
+    const DEPT_ICONS = [CodeIcon, PaintBoardIcon, Megaphone01Icon, DollarCircleIcon, FavouriteIcon, PieChartIcon];
 
     const DEPARTMENTS: Department[] = (apiDepartments || []).map((d, i) => ({
         id: d.id,
@@ -86,7 +78,7 @@ const DepartmentDetailLayout = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <Loader2 className="w-8 h-8 animate-spin text-[#283852]" />
+                <Loading02Icon className="w-8 h-8 animate-spin text-[#283852]" />
             </div>
         );
     }

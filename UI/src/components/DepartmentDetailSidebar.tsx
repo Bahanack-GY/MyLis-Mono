@@ -1,23 +1,12 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ArrowLeft,
-    LayoutDashboard,
-    Users,
-    FolderKanban,
-    Wallet,
-    Settings,
-    ChevronLeft,
-    ChevronRight,
-    Code,
-    Briefcase,
-} from 'lucide-react';
+import { ArrowLeft01Icon, DashboardSquare01Icon, UserGroupIcon, Folder01Icon, Wallet01Icon, Settings01Icon, ArrowRight01Icon, CodeIcon, Briefcase01Icon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 export type DepartmentTab = 'overview' | 'members' | 'projects' | 'budget' | 'services' | 'settings';
 
 interface DepartmentDetailSidebarProps {
-    department: { id: number | string; name: string; color: string; icon: typeof Code };
+    department: { id: number | string; name: string; color: string; icon: typeof CodeIcon };
     activeTab: DepartmentTab;
     onTabChange: (tab: DepartmentTab) => void;
     isOpen: boolean;
@@ -28,13 +17,13 @@ const DepartmentDetailSidebar = ({ department, activeTab, onTabChange, isOpen, s
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const tabs: { id: DepartmentTab; icon: typeof LayoutDashboard; label: string }[] = [
-        { id: 'overview', icon: LayoutDashboard, label: t('departmentSidebar.overview') },
-        { id: 'members',  icon: Users,           label: t('departmentSidebar.members') },
-        { id: 'projects', icon: FolderKanban,    label: t('departmentSidebar.projects') },
-        { id: 'budget',    icon: Wallet,     label: t('departmentSidebar.budget') },
-        { id: 'services',  icon: Briefcase,  label: t('departmentSidebar.services') },
-        { id: 'settings',  icon: Settings,   label: t('departmentSidebar.settings') },
+    const tabs: { id: DepartmentTab; icon: typeof DashboardSquare01Icon; label: string }[] = [
+        { id: 'overview', icon: DashboardSquare01Icon, label: t('departmentSidebar.overview') },
+        { id: 'members',  icon: UserGroupIcon,           label: t('departmentSidebar.members') },
+        { id: 'projects', icon: Folder01Icon,    label: t('departmentSidebar.projects') },
+        { id: 'budget',    icon: Wallet01Icon,     label: t('departmentSidebar.budget') },
+        { id: 'services',  icon: Briefcase01Icon,  label: t('departmentSidebar.services') },
+        { id: 'settings',  icon: Settings01Icon,   label: t('departmentSidebar.settings') },
     ];
 
     return (
@@ -49,7 +38,7 @@ const DepartmentDetailSidebar = ({ department, activeTab, onTabChange, isOpen, s
                     onClick={() => navigate('/departments')}
                     className="flex items-center gap-2 p-2 rounded-xl cursor-pointer text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
                 >
-                    <ArrowLeft size={20} className="min-w-[20px]" />
+                    <ArrowLeft01Icon size={20} className="min-w-[20px]" />
                     <AnimatePresence>
                         {isOpen && (
                             <motion.span
@@ -96,7 +85,7 @@ const DepartmentDetailSidebar = ({ department, activeTab, onTabChange, isOpen, s
                 onClick={() => setIsOpen(!isOpen)}
                 className="absolute -right-3 top-24 bg-white p-1 rounded-full shadow-lg hover:bg-gray-100 transition-colors z-50 text-[#283852]"
             >
-                {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                {isOpen ? <ArrowLeft01Icon size={16} /> : <ArrowRight01Icon size={16} />}
             </button>
 
             {/* Navigation Tabs */}

@@ -1,24 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ChevronLeft,
-    ChevronRight,
-    Plus,
-    Calendar,
-    Clock,
-    Briefcase,
-    Tag,
-    X,
-    Loader2,
-    AlertCircle,
-    User,
-    Paperclip,
-    FileText,
-    Target,
-    RotateCcw,
-    Flag,
-} from 'lucide-react';
+import { ArrowLeft01Icon, ArrowRight01Icon, Add01Icon, Calendar01Icon, Clock01Icon, Briefcase01Icon, Tag01Icon, Cancel01Icon, Loading02Icon, Alert01Icon, UserIcon, Attachment01Icon, File01Icon, Target01Icon, RefreshIcon, Flag01Icon } from 'hugeicons-react';
 import { useQuery } from '@tanstack/react-query';
 import {
     useAllWeekTasks,
@@ -56,6 +39,20 @@ const formatDate = (date: Date): string => {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+};
+
+const formatDisplayDate = (dateStr: string | undefined, lang: string) => {
+    if (!dateStr) return '';
+    try {
+        return new Date(dateStr).toLocaleDateString(lang, { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch {
+        return dateStr;
+    }
+};
+
+const formatDisplayTime = (timeStr: string | undefined) => {
+    if (!timeStr) return '';
+    return timeStr.split(':').slice(0, 2).join(':');
 };
 
 const isSameDay = (date1: Date, date2: Date): boolean => {
@@ -158,7 +155,7 @@ const AddTaskModal = ({
                 <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-2 sm:gap-3">
                         <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Plus size={16} className="sm:w-[18px] sm:h-[18px] text-[#33cbcc]" />
+                            <Add01Icon size={16} className="sm:w-[18px] sm:h-[18px] text-[#33cbcc]" />
                         </div>
                         <h3 className="text-sm sm:text-base font-bold text-gray-800">
                             {t('tasksPage.addTask')}
@@ -168,7 +165,7 @@ const AddTaskModal = ({
                         onClick={onClose}
                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <X size={16} className="sm:w-[18px] sm:h-[18px]" />
+                        <Cancel01Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </button>
                 </div>
 
@@ -177,7 +174,7 @@ const AddTaskModal = ({
                     {/* Employee selector */}
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                            <User size={10} />
+                            <UserIcon size={10} />
                             {t('tasksPage.assignee')}
                         </label>
                         <div className="relative">
@@ -208,14 +205,14 @@ const AddTaskModal = ({
                     {/* Weekly compliance warning */}
                     {complianceLoading && form.assignedToId && (
                         <div className="flex items-center gap-2 text-xs text-gray-400 px-1">
-                            <Loader2 size={12} className="animate-spin" />
+                            <Loading02Icon size={12} className="animate-spin" />
                             {t('tasks.weeklyCompliance.checking')}
                         </div>
                     )}
                     {isNonCompliant && (
                         <div className="bg-[#283852]/10 border border-gray-200 rounded-xl p-4 space-y-3">
                             <div className="flex items-center gap-2">
-                                <AlertCircle size={14} className="text-[#283852] shrink-0" />
+                                <Alert01Icon size={14} className="text-[#283852] shrink-0" />
                                 <p className="text-sm font-semibold text-[#283852]">
                                     {t('tasks.weeklyCompliance.adminWarningTitle')}
                                 </p>
@@ -298,7 +295,7 @@ const AddTaskModal = ({
                     {/* Project */}
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                            <Briefcase size={10} />
+                            <Briefcase01Icon size={10} />
                             {t('tasks.selfAssign.projectLabel')}
                         </label>
                         <select
@@ -318,7 +315,7 @@ const AddTaskModal = ({
                     {/* Nature */}
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                            <Tag size={10} />
+                            <Tag01Icon size={10} />
                             {t('tasks.selfAssign.natureLabel')}
                         </label>
                         <select
@@ -339,7 +336,7 @@ const AddTaskModal = ({
                     {isSelectedCommercial && leads.length > 0 && (
                         <div>
                             <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                                <Target size={10} />
+                                <Target01Icon size={10} />
                                 {t('tasksPage.lead', 'Lead')}
                             </label>
                             <select
@@ -359,7 +356,7 @@ const AddTaskModal = ({
                     <div className="grid grid-cols-3 gap-3">
                         <div>
                             <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                                <Calendar size={10} />
+                                <Calendar01Icon size={10} />
                                 {t('tasks.selfAssign.startDateLabel')}
                             </label>
                             <input
@@ -371,7 +368,7 @@ const AddTaskModal = ({
                         </div>
                         <div>
                             <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                                <Calendar size={10} />
+                                <Calendar01Icon size={10} />
                                 {t('tasks.selfAssign.endDateLabel')}
                             </label>
                             <input
@@ -383,7 +380,7 @@ const AddTaskModal = ({
                         </div>
                         <div>
                             <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                                <Clock size={10} />
+                                <Clock01Icon size={10} />
                                 {t('tasks.selfAssign.timeLabel')}
                             </label>
                             <input
@@ -404,7 +401,7 @@ const AddTaskModal = ({
                                 onChange={e => update('urgent', e.target.checked)}
                                 className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30"
                             />
-                            <AlertCircle size={14} className="text-[#283852]" />
+                            <Alert01Icon size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -414,7 +411,7 @@ const AddTaskModal = ({
                                 onChange={e => update('important', e.target.checked)}
                                 className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30"
                             />
-                            <Flag size={14} className="text-[#283852]" />
+                            <Flag01Icon size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
                         </label>
                     </div>
@@ -422,11 +419,11 @@ const AddTaskModal = ({
                     {/* File attachments */}
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                            <Paperclip size={10} />
+                            <Attachment01Icon size={10} />
                             {t('tasksPage.attachments', 'Attachments')}
                         </label>
                         <label className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
-                            <Plus size={14} />
+                            <Add01Icon size={14} />
                             {t('tasksPage.addFiles', 'Add files')}
                             <input
                                 type="file"
@@ -443,7 +440,7 @@ const AddTaskModal = ({
                             <div className="mt-2 space-y-1.5">
                                 {files.map((file, fi) => (
                                     <div key={fi} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                                        <FileText size={14} className="text-gray-400 shrink-0" />
+                                        <File01Icon size={14} className="text-gray-400 shrink-0" />
                                         <span className="flex-1 text-sm text-gray-700 truncate">{file.name}</span>
                                         <span className="text-[10px] text-gray-400 shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
                                         <button
@@ -451,7 +448,7 @@ const AddTaskModal = ({
                                             onClick={() => setFiles(prev => prev.filter((_, i) => i !== fi))}
                                             className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
                                         >
-                                            <X size={14} />
+                                            <Cancel01Icon size={14} />
                                         </button>
                                     </div>
                                 ))}
@@ -504,9 +501,9 @@ const AddTaskModal = ({
                         }`}
                     >
                         {createTask.isPending ? (
-                            <Loader2 size={14} className="sm:w-4 sm:h-4 animate-spin" />
+                            <Loading02Icon size={14} className="sm:w-4 sm:h-4 animate-spin" />
                         ) : (
-                            <Plus size={14} className="sm:w-4 sm:h-4" />
+                            <Add01Icon size={14} className="sm:w-4 sm:h-4" />
                         )}
                         {t('tasks.selfAssign.submit')}
                     </button>
@@ -537,7 +534,7 @@ const STATE_BORDER_COLOR: Record<string, string> = {
 };
 
 const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const difficultyColors: Record<TaskDifficulty, string> = {
         EASY: 'bg-[#33cbcc]/10 text-[#33cbcc] border-[#33cbcc]/20',
@@ -583,7 +580,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                             )}
                             {task.important && (
                                 <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-[#283852]/10 text-[#283852] uppercase tracking-wide flex items-center gap-0.5">
-                                    <Flag size={8} />
+                                    <Flag01Icon size={8} />
                                     {t('tasks.important')}
                                 </span>
                             )}
@@ -594,7 +591,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                         onClick={onClose}
                         className="shrink-0 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                     >
-                        <X size={16} />
+                        <Cancel01Icon size={16} />
                     </button>
                 </div>
 
@@ -610,7 +607,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                         </span>
                         {task.transferredFromWeek && (
                             <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
-                                <RotateCcw size={8} />
+                                <RefreshIcon size={8} />
                                 {t('planning.transferred', 'Transferred')}
                             </span>
                         )}
@@ -638,7 +635,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                     {task.description && (
                         <div>
                             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                                <FileText size={10} />
+                                <File01Icon size={10} />
                                 {t('tasks.description')}
                             </p>
                             <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{task.description}</p>
@@ -650,14 +647,14 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                         {task.startDate && (
                             <div className="bg-gray-50 rounded-xl p-3">
                                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                                    <Calendar size={10} />
+                                    <Calendar01Icon size={10} />
                                     {t('planning.startDate', 'Start')}
                                 </p>
-                                <p className="text-sm font-semibold text-gray-700">{task.startDate}</p>
+                                <p className="text-sm font-semibold text-gray-700">{formatDisplayDate(task.startDate, i18n.language)}</p>
                                 {task.startTime && (
                                     <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                                        <Clock size={10} />
-                                        {task.startTime}
+                                        <Clock01Icon size={10} />
+                                        {formatDisplayTime(task.startTime)}
                                     </p>
                                 )}
                             </div>
@@ -665,10 +662,16 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                         {task.endDate && (
                             <div className="bg-gray-50 rounded-xl p-3">
                                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
-                                    <Target size={10} />
+                                    <Target01Icon size={10} />
                                     {t('planning.endDate', 'End')}
                                 </p>
-                                <p className="text-sm font-semibold text-gray-700">{task.endDate}</p>
+                                <p className="text-sm font-semibold text-gray-700">{formatDisplayDate(task.endDate, i18n.language)}</p>
+                                {task.endTime && (
+                                    <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                                        <Clock01Icon size={10} />
+                                        {formatDisplayTime(task.endTime)}
+                                    </p>
+                                )}
                             </div>
                         )}
                     </div>
@@ -676,7 +679,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                     {/* Project */}
                     {task.project && (
                         <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
-                            <Briefcase size={14} className="text-gray-400 shrink-0" />
+                            <Briefcase01Icon size={14} className="text-gray-400 shrink-0" />
                             <div>
                                 <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">{t('tasksPage.project')}</p>
                                 <p className="text-sm font-semibold text-gray-700">{task.project.name}</p>
@@ -687,7 +690,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                     {/* Nature */}
                     {task.nature && (
                         <div className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
-                            <Tag size={14} style={{ color: task.nature.color || '#6b7280' }} className="shrink-0" />
+                            <Tag01Icon size={14} style={{ color: task.nature.color || '#6b7280' }} className="shrink-0" />
                             <div>
                                 <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">{t('tasks.nature')}</p>
                                 <p className="text-sm font-semibold" style={{ color: task.nature.color || '#374151' }}>{task.nature.name}</p>
@@ -700,13 +703,13 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
                         <div className="flex gap-3">
                             {task.subtasks && task.subtasks.length > 0 && (
                                 <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 rounded-lg px-2.5 py-1.5">
-                                    <AlertCircle size={12} className="text-gray-400" />
-                                    <span>{task.subtasks.length} {t('tasks.subtasks', 'subtask(s)')}</span>
+                                    <Alert01Icon size={12} className="text-gray-400" />
+                                    <span>{task.subtasks.length} {t('tasks.subtasks.title', 'subtask(s)')}</span>
                                 </div>
                             )}
                             {task.attachments && task.attachments.length > 0 && (
                                 <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 rounded-lg px-2.5 py-1.5">
-                                    <Paperclip size={12} className="text-gray-400" />
+                                    <Attachment01Icon size={12} className="text-gray-400" />
                                     <span>{task.attachments.length} {t('tasks.file', 'file(s)')}</span>
                                 </div>
                             )}
@@ -721,6 +724,7 @@ const TaskDetailModal = ({ task, onClose }: { task: Task; onClose: () => void })
 /* ─── Task Card Component ────────────────────────────────── */
 
 const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
+    const { i18n } = useTranslation();
     const difficultyColors: Record<TaskDifficulty, string> = {
         EASY: 'bg-[#33cbcc]/10 text-[#33cbcc] border-[#33cbcc]/20',
         MEDIUM: 'bg-[#283852]/10 text-[#283852] border-[#283852]/20',
@@ -756,7 +760,7 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
                     <h4 className="text-sm font-semibold text-gray-800 line-clamp-2">{task.title}</h4>
                     {task.transferredFromWeek && (
                         <span className="inline-flex items-center gap-0.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] mt-1">
-                            <RotateCcw size={8} />
+                            <RefreshIcon size={8} />
                             TR
                         </span>
                     )}
@@ -772,22 +776,22 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
 
             {task.startTime && (
                 <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
-                    <Clock size={12} />
-                    <span>{task.startTime}</span>
+                    <Clock01Icon size={12} />
+                    <span>{formatDisplayTime(task.startTime)}</span>
                 </div>
             )}
 
             <div className="flex flex-col gap-1">
                 {task.project && (
                     <div className="flex items-center gap-1.5 text-xs text-gray-600">
-                        <Briefcase size={12} className="text-gray-400" />
+                        <Briefcase01Icon size={12} className="text-gray-400" />
                         <span className="truncate">{task.project.name}</span>
                     </div>
                 )}
 
                 {task.nature && (
                     <div className="flex items-center gap-1.5 text-xs">
-                        <Tag size={12} className="text-gray-400" />
+                        <Tag01Icon size={12} className="text-gray-400" />
                         <span
                             className="truncate"
                             style={{
@@ -801,7 +805,7 @@ const TaskCard = ({ task, onClick }: { task: Task; onClick: () => void }) => {
 
                 {task.attachments && task.attachments.length > 0 && (
                     <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-1">
-                        <Paperclip size={10} />
+                        <Attachment01Icon size={10} />
                         <span>{task.attachments.length}</span>
                     </div>
                 )}
@@ -872,7 +876,7 @@ const DayColumn = ({
                         onClick={onAddTask}
                         className="w-full py-2 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 hover:border-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-all flex items-center justify-center gap-1.5 text-xs font-medium"
                     >
-                        <Plus size={13} />
+                        <Add01Icon size={13} />
                         <span className="hidden sm:inline">{t('planning.addTask')}</span>
                         <span className="sm:hidden">+</span>
                     </button>
@@ -885,7 +889,7 @@ const DayColumn = ({
 /* ─── Main Planning Component ────────────────────────────── */
 
 export default function Planning() {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const deptScope = useDepartmentScope();
     const [currentMonday, setCurrentMonday] = useState(() => getMonday(new Date()));
     const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
@@ -952,9 +956,9 @@ export default function Planning() {
     };
 
     const weekEnd = addDays(currentMonday, 6);
-    const weekRange = `${currentMonday.getDate()} ${currentMonday.toLocaleDateString('en', {
+    const weekRange = `${currentMonday.getDate()} ${currentMonday.toLocaleDateString(i18n.language, {
         month: 'short',
-    })} - ${weekEnd.getDate()} ${weekEnd.toLocaleDateString('en', { month: 'short' })} ${weekEnd.getFullYear()}`;
+    })} - ${weekEnd.getDate()} ${weekEnd.toLocaleDateString(i18n.language, { month: 'short' })} ${weekEnd.getFullYear()}`;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -974,7 +978,7 @@ export default function Planning() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-0 mb-2">
                         <div>
                             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2 sm:gap-3">
-                                <Calendar className="text-[#33cbcc] sm:w-8 sm:h-8" size={24} />
+                                <Calendar01Icon className="text-[#33cbcc] sm:w-8 sm:h-8" size={24} />
                                 <span>{t('planning.title')}</span>
                             </h1>
                             <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">{t('planning.subtitle')}</p>
@@ -1016,7 +1020,7 @@ export default function Planning() {
                             onClick={goToPrevWeek}
                             className="p-1.5 sm:p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
                         >
-                            <ChevronLeft size={18} className="sm:w-5 sm:h-5 text-gray-600" />
+                            <ArrowLeft01Icon size={18} className="sm:w-5 sm:h-5 text-gray-600" />
                         </button>
 
                         <div className="flex-1 text-center">
@@ -1034,7 +1038,7 @@ export default function Planning() {
                             onClick={goToNextWeek}
                             className="p-1.5 sm:p-2 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 transition-colors"
                         >
-                            <ChevronRight size={18} className="sm:w-5 sm:h-5 text-gray-600" />
+                            <ArrowRight01Icon size={18} className="sm:w-5 sm:h-5 text-gray-600" />
                         </button>
                     </div>
 
@@ -1090,7 +1094,7 @@ export default function Planning() {
                 {/* Week Grid */}
                 {isLoading ? (
                     <div className="flex items-center justify-center h-64 sm:h-96">
-                        <Loader2 size={28} className="sm:w-8 sm:h-8 animate-spin text-[#33cbcc]" />
+                        <Loading02Icon size={28} className="sm:w-8 sm:h-8 animate-spin text-[#33cbcc]" />
                     </div>
                 ) : (
                     <>

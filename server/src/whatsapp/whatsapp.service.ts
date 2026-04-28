@@ -11,6 +11,7 @@ import makeWASocket, {
 import { Boom } from '@hapi/boom';
 import * as QRCode from 'qrcode';
 import { join } from 'path';
+import { AiChatService, ChatMessage } from '../ai-chat/ai-chat.service';
 
 export interface SentMessage {
     phone: string;
@@ -47,6 +48,11 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
     private destroyed = false;
     private readonly authDir = join(process.cwd(), 'whatsapp-auth');
 
+    // Per-JID conversation history for the AI assistant (max 20 turns kept)
+    private readonly waHistory = new Map<string, ChatMessage[]>();
+
+    constructor(private readonly aiChatService: AiChatService) {}
+
     async onModuleInit() {
         await this.connect();
     }
@@ -79,6 +85,45 @@ export class WhatsAppService implements OnModuleInit, OnModuleDestroy {
             });
 
             this.sock.ev.on('creds.update', saveCreds);
+
+            this.sock.ev.on('messages.upsert', async ({ messages, type }) => {
+                if (type !== 'notify') return;
+                for (const msg of messages) {
+                    // Skip outbound, broadcasts, groups, and status updates
+                    if (msg.key.fromMe) continue;
+                    const jid = msg.key.remoteJid ?? '';
+                    if (!jid.endsWith('@s.whatsapp.net')) continue;
+
+                    const text = msg.message?.conversation
+                        ?? msg.message?.extendedTextMessage?.text
+                        ?? '';
+                    if (!text.trim()) continue;
+
+                    // Strict authorization: CEO or MANAGER phone only
+                    const authorized = await this.aiChatService.isAuthorizedWhatsAppUser(jid);
+                    if (!authorized) continue; // silently ignore
+
+                    const phone = jid.replace('@s.whatsapp.net', '');
+                    this.logger.log(`WhatsApp AI ← ${phone}: "${text.slice(0, 60)}"`);
+
+                    try {
+                        const history = this.waHistory.get(jid) ?? [];
+                        const reply = await this.aiChatService.chat(text, history);
+
+                        // Update history (keep last 20 turns to avoid token bloat)
+                        const updated: ChatMessage[] = [
+                            ...history,
+                            { role: 'user', parts: text },
+                            { role: 'model', parts: reply },
+                        ];
+                        this.waHistory.set(jid, updated.slice(-20));
+
+                        this.enqueue(phone, reply);
+                    } catch (err: any) {
+                        this.logger.error(`WhatsApp AI error for ${phone}: ${err.message}`);
+                    }
+                }
+            });
 
             this.sock.ev.on('connection.update', async (update) => {
                 const { connection, lastDisconnect, qr } = update;

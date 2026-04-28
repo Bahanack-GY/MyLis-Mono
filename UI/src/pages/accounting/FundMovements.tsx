@@ -1,10 +1,6 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Plus, Trash2, TrendingUp, TrendingDown, Scale, X,
-    ArrowUpCircle, ArrowDownCircle, BookOpen, Loader2,
-    Paperclip, FileText, Upload, Eye,
-} from 'lucide-react';
+import { Add01Icon, Delete02Icon, ArrowUpRight01Icon, ArrowDownRight01Icon, JusticeScale01Icon, Cancel01Icon, ArrowUp01Icon, ArrowDown01Icon, BookOpen01Icon, Loading02Icon, Attachment01Icon, File01Icon, Upload01Icon, ViewIcon } from 'hugeicons-react';
 import { useFundMovements, useCreateFundMovement, useDeleteFundMovement } from '../../api/fund-movements/hooks';
 import { fundMovementsApi } from '../../api/fund-movements/api';
 import type { FundMovement, JustificationFile } from '../../api/fund-movements/types';
@@ -44,16 +40,16 @@ function FileChip({ file, onRemove }: { file: JustificationFile; onRemove?: () =
     return (
         <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 group">
             {isPdf
-                ? <FileText size={14} className="text-[#283852] shrink-0" />
+                ? <File01Icon size={14} className="text-[#283852] shrink-0" />
                 : <img src={url} alt={file.originalName} className="w-6 h-6 rounded-md object-cover border border-gray-100 shrink-0" />
             }
             <span className="text-xs text-gray-700 truncate max-w-[140px]">{file.originalName}</span>
             <a href={url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0">
-                <Eye size={12} />
+                <ViewIcon size={12} />
             </a>
             {onRemove && (
                 <button onClick={onRemove} className="text-gray-300 hover:text-red-400 transition-colors shrink-0">
-                    <X size={12} />
+                    <Cancel01Icon size={12} />
                 </button>
             )}
         </div>
@@ -73,12 +69,12 @@ function PendingFileChip({ file, onRemove }: { file: File; onRemove: () => void 
     return (
         <div className="flex items-center gap-2 bg-[#33cbcc]/5 border border-[#33cbcc]/30 rounded-xl px-3 py-2">
             {isPdf
-                ? <FileText size={14} className="text-[#33cbcc] shrink-0" />
+                ? <File01Icon size={14} className="text-[#33cbcc] shrink-0" />
                 : preview && <img src={preview} alt={file.name} className="w-6 h-6 rounded-md object-cover shrink-0" />
             }
             <span className="text-xs text-gray-700 truncate max-w-[140px]">{file.name}</span>
             <button onClick={onRemove} className="text-gray-300 hover:text-red-400 transition-colors shrink-0">
-                <X size={12} />
+                <Cancel01Icon size={12} />
             </button>
         </div>
     );
@@ -184,7 +180,7 @@ export default function FundMovements() {
                     onClick={() => setShowModal(true)}
                     className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     Nouveau mouvement
                 </button>
             </div>
@@ -195,7 +191,7 @@ export default function FundMovements() {
                     {
                         label: 'Total Apports',
                         value: stats.totalApport,
-                        icon: TrendingUp,
+                        icon: ArrowUpRight01Icon,
                         color: 'text-[#33cbcc]',
                         bg: 'bg-[#33cbcc]/10',
                         border: 'border-[#33cbcc]/20',
@@ -203,7 +199,7 @@ export default function FundMovements() {
                     {
                         label: 'Total Retraits',
                         value: stats.totalRetrait,
-                        icon: TrendingDown,
+                        icon: ArrowDownRight01Icon,
                         color: 'text-[#283852]',
                         bg: 'bg-[#283852]/10',
                         border: 'border-[#283852]/20',
@@ -211,7 +207,7 @@ export default function FundMovements() {
                     {
                         label: 'Solde Net (461000)',
                         value: Math.abs(Number(stats.solde)),
-                        icon: Scale,
+                        icon: JusticeScale01Icon,
                         color: soldePositive ? 'text-[#33cbcc]' : 'text-red-500',
                         bg: soldePositive ? 'bg-[#33cbcc]/10' : 'bg-red-50',
                         border: soldePositive ? 'border-[#33cbcc]/20' : 'border-red-200',
@@ -270,11 +266,11 @@ export default function FundMovements() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-md overflow-hidden">
                 {isLoading ? (
                     <div className="flex justify-center py-16">
-                        <Loader2 className="animate-spin text-[#33cbcc]" size={28} />
+                        <Loading02Icon className="animate-spin text-[#33cbcc]" size={28} />
                     </div>
                 ) : movements.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                        <Scale size={40} className="mb-3 opacity-30" />
+                        <JusticeScale01Icon size={40} className="mb-3 opacity-30" />
                         <p className="text-sm font-medium">Aucun mouvement enregistré</p>
                         <p className="text-xs mt-1">Cliquez sur "Nouveau mouvement" pour commencer</p>
                     </div>
@@ -320,9 +316,9 @@ export default function FundMovements() {
                                             }`}
                                         >
                                             {m.type === 'APPORT' ? (
-                                                <ArrowUpCircle size={11} />
+                                                <ArrowUp01Icon size={11} />
                                             ) : (
-                                                <ArrowDownCircle size={11} />
+                                                <ArrowDown01Icon size={11} />
                                             )}
                                             {m.type === 'APPORT' ? 'Apport' : 'Retrait'}
                                         </span>
@@ -333,7 +329,7 @@ export default function FundMovements() {
                                         </p>
                                         {m.journalEntryRef && (
                                             <p className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
-                                                <BookOpen size={9} />
+                                                <BookOpen01Icon size={9} />
                                                 {m.journalEntryRef}
                                             </p>
                                         )}
@@ -386,7 +382,7 @@ export default function FundMovements() {
                                                 onClick={() => setConfirmDelete(m.id)}
                                                 className="text-gray-400 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
                                             >
-                                                <Trash2 size={14} />
+                                                <Delete02Icon size={14} />
                                             </button>
                                         )}
                                     </div>
@@ -426,7 +422,7 @@ export default function FundMovements() {
                                     onClick={() => { setShowModal(false); setPendingFiles([]); }}
                                     className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
                                 >
-                                    <X size={18} />
+                                    <Cancel01Icon size={18} />
                                 </button>
                             </div>
 
@@ -450,9 +446,9 @@ export default function FundMovements() {
                                                 }`}
                                             >
                                                 {t === 'APPORT' ? (
-                                                    <ArrowUpCircle size={24} />
+                                                    <ArrowUp01Icon size={24} />
                                                 ) : (
-                                                    <ArrowDownCircle size={24} />
+                                                    <ArrowDown01Icon size={24} />
                                                 )}
                                                 <span className="text-sm font-bold">
                                                     {t === 'APPORT' ? 'Apport' : 'Retrait'}
@@ -547,7 +543,7 @@ export default function FundMovements() {
                                         onClick={() => fileInputRef.current?.click()}
                                         className="border-2 border-dashed border-gray-200 rounded-xl p-4 flex flex-col items-center gap-2 cursor-pointer hover:border-[#33cbcc]/50 hover:bg-[#33cbcc]/5 transition-all"
                                     >
-                                        <Upload size={20} className="text-gray-300" />
+                                        <Upload01Icon size={20} className="text-gray-300" />
                                         <p className="text-xs text-gray-400">Glisser-déposer ou cliquer pour ajouter</p>
                                         <input
                                             ref={fileInputRef}
@@ -619,11 +615,11 @@ export default function FundMovements() {
                                     }`}
                                 >
                                     {createMutation.isPending || isUploading ? (
-                                        <Loader2 size={16} className="animate-spin" />
+                                        <Loading02Icon size={16} className="animate-spin" />
                                     ) : form.type === 'APPORT' ? (
-                                        <ArrowUpCircle size={16} />
+                                        <ArrowUp01Icon size={16} />
                                     ) : (
-                                        <ArrowDownCircle size={16} />
+                                        <ArrowDown01Icon size={16} />
                                     )}
                                     Enregistrer le {form.type === 'APPORT' ? 'apport' : 'retrait'}
                                 </button>

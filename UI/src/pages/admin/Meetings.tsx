@@ -1,35 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Calendar,
-    CalendarPlus,
-    Search,
-    Plus,
-    X,
-    Eye,
-    Trash2,
-    LayoutGrid,
-    List,
-    Users,
-    ClipboardCheck,
-    RotateCcw,
-    Briefcase,
-    UserPlus,
-    MapPin,
-    Clock,
-    FileText,
-    CheckCircle,
-    ArrowRight,
-    CalendarDays,
-    Building,
-    User,
-    Loader2,
-    AlignLeft,
-    Check,
-    Download,
-    MessageSquare,
-} from 'lucide-react';
+import { Calendar01Icon, Search01Icon, Add01Icon, Cancel01Icon, ViewIcon, Delete02Icon, DashboardSquare01Icon, ListViewIcon, UserGroupIcon, ClipboardIcon, RefreshIcon, Briefcase01Icon, UserAdd01Icon, Location01Icon, Clock01Icon, File01Icon, Tick01Icon, ArrowRight01Icon, Building01Icon, UserIcon, Loading02Icon, AlignLeftIcon, Download01Icon, Message02Icon } from 'hugeicons-react';
 import logoSrc from '../../assets/logo-lis.png';
 import { exportMeetingReportPdf, loadMeetingReportLogo } from '../../utils/exportMeetingReportPdf';
 import { useMeetings, useCreateMeeting, useDeleteMeeting, useStartMeeting, useEndMeeting, useAttendMeeting } from '../../api/meetings/hooks';
@@ -98,12 +70,12 @@ const TYPE_COLORS: Record<MeetingType, string> = {
 };
 
 const TYPE_ICONS: Record<MeetingType, React.ComponentType<{ size?: number; className?: string; style?: React.CSSProperties }>> = {
-    standup: Users,
-    review: ClipboardCheck,
-    planning: CalendarPlus,
-    retrospective: RotateCcw,
-    client: Briefcase,
-    onboarding: UserPlus,
+    standup: UserGroupIcon,
+    review: ClipboardIcon,
+    planning: Calendar01Icon,
+    retrospective: RefreshIcon,
+    client: Briefcase01Icon,
+    onboarding: UserAdd01Icon,
 };
 
 const STATUSES: MeetingStatus[] = ['scheduled', 'in_progress', 'completed', 'cancelled'];
@@ -204,7 +176,7 @@ const MeetingDetailModal = ({
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -214,7 +186,7 @@ const MeetingDetailModal = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-gray-50 rounded-xl p-4">
                             <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                <CalendarDays size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('meetings.detail.dateTime')}
                             </div>
                             <p className="text-sm font-medium text-gray-800">{meeting.date}</p>
@@ -222,7 +194,7 @@ const MeetingDetailModal = ({
                         </div>
                         <div className="bg-gray-50 rounded-xl p-4">
                             <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                <MapPin size={12} />
+                                <Location01Icon size={12} />
                                 {t('meetings.detail.location')}
                             </div>
                             <p className="text-sm font-medium text-gray-800">{meeting.location || '—'}</p>
@@ -237,7 +209,7 @@ const MeetingDetailModal = ({
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                    <User size={14} className="text-gray-400" />
+                                    <UserIcon size={14} className="text-gray-400" />
                                 </div>
                                 <span className="text-sm font-medium text-gray-800">{meeting.organizer.name}</span>
                             </div>
@@ -249,7 +221,7 @@ const MeetingDetailModal = ({
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full border border-gray-200 bg-[#33cbcc]/10 flex items-center justify-center">
-                                        <ClipboardCheck size={14} className="text-[#33cbcc]" />
+                                        <ClipboardIcon size={14} className="text-[#33cbcc]" />
                                     </div>
                                     <span className="text-sm font-medium text-gray-800">{meeting.secretary.name}</span>
                                 </div>
@@ -276,11 +248,11 @@ const MeetingDetailModal = ({
                                         <img src={p.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200 shrink-0" />
                                     ) : (
                                         <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center shrink-0">
-                                            <User size={10} className="text-gray-400" />
+                                            <UserIcon size={10} className="text-gray-400" />
                                         </div>
                                     )}
                                     <span className="text-xs text-gray-600 truncate">{p.name}</span>
-                                    {p.attended && <Check size={11} className="text-emerald-500 shrink-0" />}
+                                    {p.attended && <Tick01Icon size={11} className="text-emerald-500 shrink-0" />}
                                 </div>
                             ))}
                             {meeting.participants.length === 0 && (
@@ -296,7 +268,7 @@ const MeetingDetailModal = ({
                                 onClick={() => setShowTranscript(v => !v)}
                                 className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 hover:text-gray-600 transition-colors"
                             >
-                                <AlignLeft size={11} />
+                                <AlignLeftIcon size={11} />
                                 {t('meetings.detail.transcript')}
                                 <span className="ml-1 text-gray-300">{showTranscript ? '▲' : '▼'}</span>
                             </button>
@@ -311,7 +283,7 @@ const MeetingDetailModal = ({
                     {/* Report */}
                     <div className="border-t border-gray-100 pt-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <FileText size={18} className="text-[#33cbcc]" />
+                            <File01Icon size={18} className="text-[#33cbcc]" />
                             <h3 className="text-base font-bold text-gray-800">{t('meetings.detail.report')}</h3>
                             {meeting.report && (
                                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -322,7 +294,7 @@ const MeetingDetailModal = ({
                                     disabled={exportingPdf}
                                     className="ml-auto flex items-center gap-1.5 px-3 py-1.5 bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 text-[#33cbcc] rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
                                 >
-                                    {exportingPdf ? <Loader2 size={12} className="animate-spin" /> : <Download size={12} />}
+                                    {exportingPdf ? <Loading02Icon size={12} className="animate-spin" /> : <Download01Icon size={12} />}
                                     {t('meetings.detail.exportPdf')}
                                 </button>
                             )}
@@ -339,7 +311,7 @@ const MeetingDetailModal = ({
                                 {meeting.report.whatWasSaid && (
                                     <div>
                                         <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                            <MessageSquare size={11} />
+                                            <Message02Icon size={11} />
                                             {t('meetings.detail.whatWasSaid')}
                                         </div>
                                         <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed whitespace-pre-line">
@@ -352,7 +324,7 @@ const MeetingDetailModal = ({
                                     <div className="space-y-2">
                                         {meeting.report.decisions.map((d, i) => (
                                             <div key={i} className="flex items-start gap-2.5">
-                                                <CheckCircle size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+                                                <Tick01Icon size={16} className="text-emerald-500 shrink-0 mt-0.5" />
                                                 <span className="text-sm text-gray-700">{d}</span>
                                             </div>
                                         ))}
@@ -363,7 +335,7 @@ const MeetingDetailModal = ({
                                     <div className="space-y-2">
                                         {meeting.report.actionItems.map((ai, i) => (
                                             <div key={i} className="flex items-start gap-2.5 bg-[#33cbcc]/5 rounded-xl px-4 py-3">
-                                                <ArrowRight size={14} className="text-[#33cbcc] shrink-0 mt-0.5" />
+                                                <ArrowRight01Icon size={14} className="text-[#33cbcc] shrink-0 mt-0.5" />
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm text-gray-700">{ai.task}</p>
                                                     <p className="text-xs text-gray-400 mt-0.5">{ai.assignee}{ai.deadline ? ` — ${ai.deadline}` : ''}</p>
@@ -375,7 +347,7 @@ const MeetingDetailModal = ({
                             </div>
                         ) : (
                             <div className="bg-gray-50 rounded-xl p-8 text-center">
-                                <FileText size={32} className="mx-auto text-gray-300 mb-3" />
+                                <File01Icon size={32} className="mx-auto text-gray-300 mb-3" />
                                 <p className="text-sm text-gray-400">{t('meetings.detail.reportPending')}</p>
                             </div>
                         )}
@@ -402,7 +374,7 @@ const MeetingDetailModal = ({
                                 onClick={() => { if (selectedSecretaryId) onStart(selectedSecretaryId); }}
                                 className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-colors ${selectedSecretaryId ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20' : 'bg-gray-300 cursor-not-allowed'}`}
                             >
-                                <ArrowRight size={14} />
+                                <ArrowRight01Icon size={14} />
                                 {t('meetings.start.button')}
                             </button>
                         </div>
@@ -414,7 +386,7 @@ const MeetingDetailModal = ({
                             onClick={onEnd}
                             className="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors"
                         >
-                            <X size={14} />
+                            <Cancel01Icon size={14} />
                             {t('meetings.end.button')}
                         </button>
                     )}
@@ -426,7 +398,7 @@ const MeetingDetailModal = ({
                             onClick={onAttend}
                             className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${alreadyAttended ? 'bg-emerald-50 text-emerald-600 cursor-default' : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'}`}
                         >
-                            <Check size={14} />
+                            <Tick01Icon size={14} />
                             {alreadyAttended ? t('meetings.attend.attended') : t('meetings.attend.button')}
                         </button>
                     )}
@@ -546,12 +518,12 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <CalendarPlus size={20} className="text-[#33cbcc]" />
+                            <Calendar01Icon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{t('meetings.schedule.title')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -560,7 +532,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Title */}
                     <div>
                         <label className={labelCls}>
-                            <Calendar size={12} />
+                            <Calendar01Icon size={12} />
                             {t('meetings.schedule.meetingTitle')}
                         </label>
                         <input
@@ -576,7 +548,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Description */}
                     <div>
                         <label className={labelCls}>
-                            <AlignLeft size={12} />
+                            <AlignLeftIcon size={12} />
                             {t('meetings.schedule.description')}
                         </label>
                         <textarea
@@ -620,7 +592,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                     <div className="grid grid-cols-3 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <CalendarDays size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('meetings.schedule.date')}
                             </label>
                             <input
@@ -632,7 +604,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Clock size={12} />
+                                <Clock01Icon size={12} />
                                 {t('meetings.schedule.startTime')}
                             </label>
                             <input
@@ -644,7 +616,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Clock size={12} />
+                                <Clock01Icon size={12} />
                                 {t('meetings.schedule.endTime')}
                             </label>
                             <input
@@ -659,7 +631,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Location */}
                     <div>
                         <label className={labelCls}>
-                            <MapPin size={12} />
+                            <Location01Icon size={12} />
                             {t('meetings.schedule.location')}
                         </label>
                         <input
@@ -674,7 +646,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                     {/* ── Participants Section ── */}
                     <div>
                         <label className={labelCls}>
-                            <Users size={12} />
+                            <UserGroupIcon size={12} />
                             {t('meetings.schedule.participants')}
                             {selectedEmployeeIds.size > 0 && (
                                 <span className="ml-1 text-[#33cbcc]">
@@ -694,7 +666,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                                         : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
                                 }`}
                             >
-                                <Users size={12} />
+                                <UserGroupIcon size={12} />
                                 {t('meetings.schedule.allEmployees')}
                             </button>
                             <button
@@ -706,7 +678,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                                         : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
                                 }`}
                             >
-                                <Building size={12} />
+                                <Building01Icon size={12} />
                                 {t('meetings.schedule.selectDepartment')}
                             </button>
                             <button
@@ -718,7 +690,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                                         : 'bg-white text-gray-600 border border-gray-200 hover:border-gray-300'
                                 }`}
                             >
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('meetings.schedule.selectIndividual')}
                             </button>
                         </div>
@@ -743,13 +715,13 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                         {participantMode === 'individual' && (
                             <div className="mb-2">
                                 <div className="relative mb-2">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                                    <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                                     <input
                                         type="text"
                                         value={employeeSearch}
                                         onChange={e => setEmployeeSearch(e.target.value)}
                                         placeholder={t('meetings.schedule.participantsHint')}
-                                        className={inputCls + ' pl-9'}
+                                        className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                                     />
                                 </div>
                             </div>
@@ -770,13 +742,13 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                                                 ? 'bg-[#33cbcc] border-[#33cbcc]'
                                                 : 'border-gray-300'
                                         }`}>
-                                            {selectedEmployeeIds.has(emp.id) && <Check size={12} className="text-white" />}
+                                            {selectedEmployeeIds.has(emp.id) && <Tick01Icon size={12} className="text-white" />}
                                         </div>
                                         {emp.avatarUrl ? (
                                             <img src={emp.avatarUrl} alt="" className="w-6 h-6 rounded-full" />
                                         ) : (
                                             <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                                <User size={10} className="text-gray-400" />
+                                                <UserIcon size={10} className="text-gray-400" />
                                             </div>
                                         )}
                                         <span className="flex-1 text-left truncate">{emp.firstName} {emp.lastName}</span>
@@ -798,7 +770,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                                     <span key={emp.id} className="flex items-center gap-1 bg-[#33cbcc]/10 text-[#33cbcc] text-[10px] font-medium px-2 py-1 rounded-full">
                                         {emp.firstName} {emp.lastName}
                                         <button type="button" onClick={() => toggleEmployee(emp.id)} className="hover:text-red-500">
-                                            <X size={10} />
+                                            <Cancel01Icon size={10} />
                                         </button>
                                     </span>
                                 ))}
@@ -824,7 +796,7 @@ const ScheduleMeetingModal = ({ onClose }: { onClose: () => void }) => {
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {createMeeting.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createMeeting.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('meetings.schedule.submit')}
                     </button>
                 </div>
@@ -917,10 +889,10 @@ const Meetings = () => {
     const reportsCount = meetings.filter(m => m.report !== null).length;
 
     const stats = [
-        { label: t('meetings.stats.total'), value: meetings.length, icon: Calendar, color: '#33cbcc' },
-        { label: t('meetings.stats.scheduled'), value: scheduledCount, icon: CalendarPlus, color: '#3b82f6' },
-        { label: t('meetings.stats.completed'), value: completedCount, icon: CheckCircle, color: '#22c55e' },
-        { label: t('meetings.stats.reports'), value: reportsCount, icon: FileText, color: '#8b5cf6' },
+        { label: t('meetings.stats.total'), value: meetings.length, icon: Calendar01Icon, color: '#33cbcc' },
+        { label: t('meetings.stats.scheduled'), value: scheduledCount, icon: Calendar01Icon, color: '#3b82f6' },
+        { label: t('meetings.stats.completed'), value: completedCount, icon: Tick01Icon, color: '#22c55e' },
+        { label: t('meetings.stats.reports'), value: reportsCount, icon: File01Icon, color: '#8b5cf6' },
     ];
 
     /* Status filters */
@@ -948,7 +920,7 @@ const Meetings = () => {
                     onClick={() => setShowScheduleModal(true)}
                     className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                 >
-                    <CalendarPlus size={16} />
+                    <Calendar01Icon size={16} />
                     {t('meetings.scheduleMeeting')}
                 </button>
             </div>
@@ -961,14 +933,16 @@ const Meetings = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out" style={{ color: stat.color }}>
-                            <stat.icon size={100} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -1001,16 +975,16 @@ const Meetings = () => {
                 </div>
             </motion.div>
 
-            {/* ── Search + View Toggle ── */}
+            {/* ── Search01Icon + View Toggle ── */}
             <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
+                <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                    <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                     <input
                         type="text"
                         placeholder={t('meetings.searchPlaceholder')}
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                        className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                     />
                 </div>
                 <div className="flex bg-white rounded-xl border border-gray-100 p-1 self-start">
@@ -1018,13 +992,13 @@ const Meetings = () => {
                         onClick={() => setViewMode('grid')}
                         className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                        <LayoutGrid size={18} />
+                        <DashboardSquare01Icon size={18} />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
                         className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                        <List size={18} />
+                        <ListViewIcon size={18} />
                     </button>
                 </div>
             </div>
@@ -1070,10 +1044,10 @@ const Meetings = () => {
                                     </div>
                                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button onClick={e => { e.stopPropagation(); setSelectedMeetingId(meeting.id); }} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                            <Eye size={16} />
+                                            <ViewIcon size={16} />
                                         </button>
                                         <button onClick={e => handleDelete(e, meeting.id)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors">
-                                            <Trash2 size={16} />
+                                            <Delete02Icon size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -1091,7 +1065,7 @@ const Meetings = () => {
                                     </span>
                                     {meeting.report && (
                                         <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">
-                                            <FileText size={10} />
+                                            <File01Icon size={10} />
                                             Report
                                         </span>
                                     )}
@@ -1100,12 +1074,12 @@ const Meetings = () => {
                                 {/* Date + Location */}
                                 <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
                                     <span className="flex items-center gap-1">
-                                        <CalendarDays size={12} />
+                                        <Calendar01Icon size={12} />
                                         {meeting.date}
                                     </span>
                                     {meeting.startTime && (
                                         <span className="flex items-center gap-1">
-                                            <Clock size={12} />
+                                            <Clock01Icon size={12} />
                                             {meeting.startTime}
                                         </span>
                                     )}
@@ -1115,7 +1089,7 @@ const Meetings = () => {
                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <div className="flex items-center gap-2">
                                         <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                            <User size={10} className="text-gray-400" />
+                                            <UserIcon size={10} className="text-gray-400" />
                                         </div>
                                         <span className="text-xs text-gray-500">{meeting.organizer.name.split('@')[0]}</span>
                                     </div>
@@ -1126,7 +1100,7 @@ const Meetings = () => {
                                                     <img key={p.id} src={p.avatar} alt="" className="w-5 h-5 rounded-full border-2 border-white" />
                                                 ) : (
                                                     <div key={p.id} className="w-5 h-5 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center">
-                                                        <User size={8} className="text-gray-400" />
+                                                        <UserIcon size={8} className="text-gray-400" />
                                                     </div>
                                                 )
                                             ))}
@@ -1142,7 +1116,7 @@ const Meetings = () => {
                 </div>
             )}
 
-            {/* ── List View ── */}
+            {/* ── ListViewIcon View ── */}
             {viewMode === 'list' && filteredMeetings.length > 0 && (
                 <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
                     {/* Table header */}
@@ -1174,7 +1148,7 @@ const Meetings = () => {
                                     </div>
                                     <div className="min-w-0">
                                         <span className="text-sm font-medium text-gray-800 truncate block">{meeting.title}</span>
-                                        {meeting.report && <span className="text-[9px] text-emerald-500 font-medium flex items-center gap-0.5"><FileText size={8} /> Report</span>}
+                                        {meeting.report && <span className="text-[9px] text-emerald-500 font-medium flex items-center gap-0.5"><File01Icon size={8} /> Report</span>}
                                     </div>
                                 </div>
                                 {/* Type */}
@@ -1193,23 +1167,23 @@ const Meetings = () => {
                                 <div className="col-span-1 text-xs text-gray-500">{meeting.date}</div>
                                 {/* Location */}
                                 <div className="col-span-2 flex items-center gap-1.5 text-xs text-gray-500">
-                                    <MapPin size={12} />
+                                    <Location01Icon size={12} />
                                     <span className="truncate">{meeting.location || '—'}</span>
                                 </div>
                                 {/* Organizer */}
                                 <div className="col-span-2 flex items-center gap-2">
                                     <div className="w-7 h-7 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                        <User size={12} className="text-gray-400" />
+                                        <UserIcon size={12} className="text-gray-400" />
                                     </div>
                                     <span className="text-xs text-gray-500 truncate">{meeting.organizer.name.split('@')[0]}</span>
                                 </div>
                                 {/* Actions */}
                                 <div className="col-span-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button onClick={e => { e.stopPropagation(); setSelectedMeetingId(meeting.id); }} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                        <Eye size={14} />
+                                        <ViewIcon size={14} />
                                     </button>
                                     <button onClick={e => handleDelete(e, meeting.id)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-rose-500 transition-colors">
-                                        <Trash2 size={14} />
+                                        <Delete02Icon size={14} />
                                     </button>
                                 </div>
                             </motion.div>
@@ -1221,7 +1195,7 @@ const Meetings = () => {
             {/* ── Empty State ── */}
             {filteredMeetings.length === 0 && (
                 <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-                    <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
+                    <Calendar01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-400 font-medium">{t('meetings.noResults')}</p>
                     <button
                         onClick={() => setShowScheduleModal(true)}

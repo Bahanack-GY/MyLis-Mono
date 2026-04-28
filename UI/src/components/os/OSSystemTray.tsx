@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wifi, Volume2, Battery } from 'lucide-react';
+import { Wifi01Icon, VolumeHighIcon, BatteryFullIcon } from 'hugeicons-react';
 
 function formatTime(date: Date) {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -19,9 +19,9 @@ export default function OSSystemTray() {
 
   return (
     <div className="flex items-center gap-3 text-gray-300 px-3">
-      <Wifi size={14} />
-      <Volume2 size={14} />
-      <Battery size={14} />
+      <Wifi01Icon size={14} />
+      <VolumeHighIcon size={14} />
+      <BatteryFullIcon size={14} />
       <div className="text-xs text-right leading-tight ml-1">
         <div>{formatTime(now)}</div>
         <div className="text-gray-400">{formatDate(now)}</div>

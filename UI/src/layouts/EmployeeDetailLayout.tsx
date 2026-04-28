@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loading02Icon } from 'hugeicons-react';
 import EmployeeDetailSidebar, { type EmployeeTab } from '../components/EmployeeDetailSidebar';
 import Header from '../components/Header';
 import EmployeeDetail, { type EmployeeUI } from '../pages/EmployeeDetail';
@@ -57,7 +57,7 @@ const EmployeeDetailLayout = () => {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
     }

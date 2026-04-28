@@ -1,18 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
- BookOpen,
- Scale,
- PieChart,
- TrendingUp,
- Calendar,
- CheckCircle,
- AlertTriangle,
- ArrowUp,
- ArrowDown,
- Loader2,
-} from 'lucide-react';
+import { BookOpen01Icon, JusticeScale01Icon, PieChartIcon, ArrowUpRight01Icon, Calendar01Icon, Tick01Icon, Alert02Icon, ArrowUp01Icon, ArrowDown01Icon, Loading02Icon } from 'hugeicons-react';
 import { useQuery } from '@tanstack/react-query';
 import {
  getFiscalYears,
@@ -47,13 +36,13 @@ const formatDate = (dateStr: string | null | undefined) => {
 };
 
 const SECTION_RAPPORTS = [
- { key: 'grand-livre', label: 'Grand Livre', icon: BookOpen },
- { key: 'balance', label: 'Balance', icon: Scale },
+ { key: 'grand-livre', label: 'Grand Livre', icon: BookOpen01Icon },
+ { key: 'balance', label: 'Balance', icon: JusticeScale01Icon },
 ] as const;
 
 const SECTION_ETATS = [
- { key: 'bilan', label: 'Bilan', icon: PieChart },
- { key: 'resultat', label: 'Compte de Résultat', icon: TrendingUp },
+ { key: 'bilan', label: 'Bilan', icon: PieChartIcon },
+ { key: 'resultat', label: 'Compte de Résultat', icon: ArrowUpRight01Icon },
 ] as const;
 
 type TabKey = 'grand-livre' | 'balance' | 'bilan' | 'resultat';
@@ -106,7 +95,7 @@ const GrandLivreTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; d
  if (isLoading) {
  return (
  <div className="flex items-center justify-center py-16">
- <Loader2 size={24} className="animate-spin text-[#33cbcc]"/>
+ <Loading02Icon size={24} className="animate-spin text-[#33cbcc]"/>
  </div>
  );
  }
@@ -114,7 +103,7 @@ const GrandLivreTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; d
  if (!data || data.length === 0) {
  return (
  <div className="text-center py-16">
- <BookOpen size={48} className="mx-auto text-gray-300 mb-4"/>
+ <BookOpen01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">Aucune donnee pour cet exercice</p>
  </div>
  );
@@ -214,7 +203,7 @@ const BalanceTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; depa
  if (isLoading) {
  return (
  <div className="flex items-center justify-center py-16">
- <Loader2 size={24} className="animate-spin text-[#33cbcc]"/>
+ <Loading02Icon size={24} className="animate-spin text-[#33cbcc]"/>
  </div>
  );
  }
@@ -222,7 +211,7 @@ const BalanceTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; depa
  if (!data || !data.accounts || data.accounts.length === 0) {
  return (
  <div className="text-center py-16">
- <Scale size={48} className="mx-auto text-gray-300 mb-4"/>
+ <JusticeScale01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">Aucune donnee pour cet exercice</p>
  </div>
  );
@@ -235,12 +224,12 @@ const BalanceTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; depa
  <h3 className="text-sm font-bold text-gray-800">Balance des comptes</h3>
  {data.totals.isBalanced ? (
  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-3 py-1 rounded-full">
- <CheckCircle size={12} />
+ <Tick01Icon size={12} />
  Equilibree
  </span>
  ) : (
  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#283852] bg-[#283852]/10 px-3 py-1 rounded-full">
- <AlertTriangle size={12} />
+ <Alert02Icon size={12} />
  Desequilibree
  </span>
  )}
@@ -323,7 +312,7 @@ const BilanTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  if (isLoading) {
  return (
  <div className="flex items-center justify-center py-16">
- <Loader2 size={24} className="animate-spin text-[#33cbcc]"/>
+ <Loading02Icon size={24} className="animate-spin text-[#33cbcc]"/>
  </div>
  );
  }
@@ -331,7 +320,7 @@ const BilanTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  if (!data) {
  return (
  <div className="text-center py-16">
- <PieChart size={48} className="mx-auto text-gray-300 mb-4"/>
+ <PieChartIcon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">Aucune donnee pour cet exercice</p>
  </div>
  );
@@ -393,12 +382,12 @@ const BilanTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  <div className="flex justify-center">
  {data.isBalanced ? (
  <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-4 py-2 rounded-full">
- <CheckCircle size={16} />
+ <Tick01Icon size={16} />
  Bilan équilibré
  </span>
  ) : (
  <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#283852] bg-[#283852]/10 px-4 py-2 rounded-full">
- <AlertTriangle size={16} />
+ <Alert02Icon size={16} />
  Bilan déséquilibré — écart : {formatXAF(Math.abs(data.totalAssets - data.totalLiabilities))}
  </span>
  )}
@@ -427,7 +416,7 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  if (isLoading) {
  return (
  <div className="flex items-center justify-center py-16">
- <Loader2 size={24} className="animate-spin text-[#33cbcc]"/>
+ <Loading02Icon size={24} className="animate-spin text-[#33cbcc]"/>
  </div>
  );
  }
@@ -435,7 +424,7 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  if (!data) {
  return (
  <div className="text-center py-16">
- <TrendingUp size={48} className="mx-auto text-gray-300 mb-4"/>
+ <ArrowUpRight01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">Aucune donnee pour cet exercice</p>
  </div>
  );
@@ -502,7 +491,7 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  title="Produits (Revenus)"
  items={data.revenues || []}
  total={data.totalRevenue}
- icon={ArrowUp}
+ icon={ArrowUp01Icon}
  color="emerald"
  />
 
@@ -510,7 +499,7 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  title="Charges (Depenses)"
  items={data.expenses || []}
  total={data.totalExpenses}
- icon={ArrowDown}
+ icon={ArrowDown01Icon}
  color="red"
  />
 
@@ -530,9 +519,9 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  }`}
  >
  {isPositive ? (
- <ArrowUp size={24} className="text-[#33cbcc]"/>
+ <ArrowUp01Icon size={24} className="text-[#33cbcc]"/>
  ) : (
- <ArrowDown size={24} className="text-[#283852]"/>
+ <ArrowDown01Icon size={24} className="text-[#283852]"/>
  )}
  </div>
  <div>
@@ -598,7 +587,7 @@ export default function Reports() {
  <div className="bg-white rounded-2xl p-4 flex items-center gap-6 flex-wrap">
  <div className="flex items-center gap-2">
  <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
- <Calendar size={16} className="text-[#33cbcc]"/>
+ <Calendar01Icon size={16} className="text-[#33cbcc]"/>
  Exercice fiscal
  </div>
  <select
@@ -692,7 +681,7 @@ export default function Reports() {
  </motion.div>
  ) : (
  <div className="bg-white rounded-2xl p-12 text-center">
- <Calendar size={48} className="mx-auto text-gray-300 mb-4"/>
+ <Calendar01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">
  Selectionnez un exercice fiscal pour afficher les rapports
  </p>

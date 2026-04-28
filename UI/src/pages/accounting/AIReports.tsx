@@ -1,20 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    FileText,
-    Plus,
-    Loader2,
-    Download,
-    Calendar,
-    TrendingUp,
-    X,
-    ChevronDown,
-    ChevronUp,
-    Trash2,
-    FileBarChart,
-    AlertCircle
-} from 'lucide-react';
+import { File01Icon, Add01Icon, Loading02Icon, Download01Icon, Calendar01Icon, ArrowUpRight01Icon, Cancel01Icon, ArrowDown01Icon, ArrowUp01Icon, Delete02Icon, Alert01Icon } from 'hugeicons-react';
 import { useReports, useGenerateReport, useDeleteReport } from '../../api/reports/hooks';
 import { useFiscalYears } from '../../api/accounting/hooks';
 import type { Report, AccountingReportData } from '../../api/reports/types';
@@ -126,7 +113,7 @@ const AIReports = () => {
         if (report.status === 'GENERATING') {
             return (
                 <div className="flex items-center gap-3 p-6 bg-[#283852]/10 rounded-lg">
-                    <Loader2 className="animate-spin text-[#283852]" size={24} />
+                    <Loading02Icon className="animate-spin text-[#283852]" size={24} />
                     <div>
                         <p className="font-semibold text-[#283852]">{t('reports.generating')}</p>
                         <p className="text-sm text-[#283852]">{t('reports.generatingDesc')}</p>
@@ -138,7 +125,7 @@ const AIReports = () => {
         if (report.status === 'FAILED') {
             return (
                 <div className="flex items-center gap-3 p-6 bg-gray-100 rounded-lg">
-                    <AlertCircle className="text-gray-400" size={24} />
+                    <Alert01Icon className="text-gray-400" size={24} />
                     <div>
                         <p className="font-semibold text-gray-400">{t('reports.failed')}</p>
                         <p className="text-sm text-gray-400">{t('reports.failedDesc')}</p>
@@ -171,7 +158,7 @@ const AIReports = () => {
                 >
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex items-center gap-3">
-                            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                            {isExpanded ? <ArrowUp01Icon size={20} /> : <ArrowDown01Icon size={20} />}
                             <span className="font-medium">{isExpanded ? t('reports.hideDetails') : t('reports.showDetails')}</span>
                         </div>
                         <button
@@ -181,7 +168,7 @@ const AIReports = () => {
                             }}
                             className="flex items-center gap-2 px-4 py-2 bg-[#33cbcc] text-white rounded-lg hover:bg-[#2bb5b6] transition-colors"
                         >
-                            <Download size={18} />
+                            <Download01Icon size={18} />
                             <span>{t('reports.exportPDF')}</span>
                         </button>
                     </div>
@@ -226,7 +213,7 @@ const AIReports = () => {
                                         className="w-full flex items-center justify-between mb-4"
                                     >
                                         <h3 className="text-lg font-semibold text-gray-900">{t('reports.sections.charts')}</h3>
-                                        {isSectionExpanded(report.id, 'charts') ? <ChevronUp /> : <ChevronDown />}
+                                        {isSectionExpanded(report.id, 'charts') ? <ArrowUp01Icon /> : <ArrowDown01Icon />}
                                     </button>
                                     <AnimatePresence>
                                         {isSectionExpanded(report.id, 'charts') && (
@@ -266,7 +253,7 @@ const AIReports = () => {
                                         className="w-full flex items-center justify-between mb-4"
                                     >
                                         <h3 className="text-lg font-semibold text-gray-900">{t('reports.sections.aiInsights')}</h3>
-                                        {isSectionExpanded(report.id, 'ai') ? <ChevronUp /> : <ChevronDown />}
+                                        {isSectionExpanded(report.id, 'ai') ? <ArrowUp01Icon /> : <ArrowDown01Icon />}
                                     </button>
                                     <AnimatePresence>
                                         {isSectionExpanded(report.id, 'ai') && (
@@ -296,7 +283,7 @@ const AIReports = () => {
                                         className="w-full flex items-center justify-between mb-4"
                                     >
                                         <h3 className="text-lg font-semibold text-gray-900">{t('reports.sections.budgetAnalysis')}</h3>
-                                        {isSectionExpanded(report.id, 'budget') ? <ChevronUp /> : <ChevronDown />}
+                                        {isSectionExpanded(report.id, 'budget') ? <ArrowUp01Icon /> : <ArrowDown01Icon />}
                                     </button>
                                     <AnimatePresence>
                                         {isSectionExpanded(report.id, 'budget') && (
@@ -332,7 +319,7 @@ const AIReports = () => {
                                         className="w-full flex items-center justify-between mb-4"
                                     >
                                         <h3 className="text-lg font-semibold text-gray-900">{t('reports.sections.taxStatus')}</h3>
-                                        {isSectionExpanded(report.id, 'tax') ? <ChevronUp /> : <ChevronDown />}
+                                        {isSectionExpanded(report.id, 'tax') ? <ArrowUp01Icon /> : <ArrowDown01Icon />}
                                     </button>
                                     <AnimatePresence>
                                         {isSectionExpanded(report.id, 'tax') && (
@@ -376,7 +363,7 @@ const AIReports = () => {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                        <FileBarChart className="text-[#33cbcc]" size={32} />
+                        <File01Icon className="text-[#33cbcc]" size={32} />
                         {t('accounting.aiReports.title')}
                     </h1>
                     <p className="text-gray-600 mt-1">{t('accounting.aiReports.subtitle')}</p>
@@ -385,7 +372,7 @@ const AIReports = () => {
                     onClick={() => setShowGenerateForm(true)}
                     className="flex items-center gap-2 px-6 py-3 bg-[#33cbcc] text-white rounded-lg hover:bg-[#2bb5b6] transition-colors shadow-lg"
                 >
-                    <Plus size={20} />
+                    <Add01Icon size={20} />
                     <span>{t('accounting.aiReports.generate')}</span>
                 </button>
             </div>
@@ -393,11 +380,11 @@ const AIReports = () => {
             {/* Reports List */}
             {isLoading ? (
                 <div className="flex items-center justify-center p-12">
-                    <Loader2 className="animate-spin text-[#33cbcc]" size={40} />
+                    <Loading02Icon className="animate-spin text-[#33cbcc]" size={40} />
                 </div>
             ) : accountingReports.length === 0 ? (
                 <div className="text-center p-12 bg-gray-50 rounded-lg border-2 border-dashed">
-                    <FileText className="mx-auto text-gray-400 mb-4" size={64} />
+                    <File01Icon className="mx-auto text-gray-400 mb-4" size={64} />
                     <h3 className="text-xl font-semibold text-gray-700 mb-2">{t('reports.noReports')}</h3>
                     <p className="text-gray-600">{t('reports.noReportsDesc')}</p>
                 </div>
@@ -410,7 +397,7 @@ const AIReports = () => {
                                     <h3 className="text-xl font-semibold text-gray-900">{report.title}</h3>
                                     <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
                                         <span className="flex items-center gap-1">
-                                            <Calendar size={16} />
+                                            <Calendar01Icon size={16} />
                                             {new Date(report.createdAt).toLocaleDateString()}
                                         </span>
                                         <span className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -430,7 +417,7 @@ const AIReports = () => {
                                     }}
                                     className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors"
                                 >
-                                    <Trash2 size={20} />
+                                    <Delete02Icon size={20} />
                                 </button>
                             </div>
                             {renderReport(report)}
@@ -459,7 +446,7 @@ const AIReports = () => {
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-gray-900">{t('accounting.aiReports.generate')}</h2>
                                 <button onClick={() => setShowGenerateForm(false)} className="text-gray-400 hover:text-gray-600">
-                                    <X size={24} />
+                                    <Cancel01Icon size={24} />
                                 </button>
                             </div>
 
@@ -574,7 +561,7 @@ const AIReports = () => {
                                     >
                                         {generateReport.isPending ? (
                                             <>
-                                                <Loader2 className="animate-spin" size={18} />
+                                                <Loading02Icon className="animate-spin" size={18} />
                                                 {t('accounting.aiReports.generating')}
                                             </>
                                         ) : (

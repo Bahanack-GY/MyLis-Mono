@@ -35,6 +35,9 @@ import { SseModule } from './sse/sse.module';
 import { WhatsAppModule } from './whatsapp/whatsapp.module';
 import { ChargeNaturesModule } from './charge-natures/charge-natures.module';
 import { FundMovementsModule } from './fund-movements/fund-movements.module';
+import { CarwashModule } from './carwash/carwash.module';
+import { AiChatModule } from './ai-chat/ai-chat.module';
+import { RemindersModule } from './reminders/reminders.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RolesGuard } from './auth/roles.guard';
 import { ActivityInterceptor } from './logs/activity.interceptor';
@@ -91,6 +94,9 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     SuppliersModule,
     ChargeNaturesModule,
     FundMovementsModule,
+    CarwashModule,
+    AiChatModule,
+    RemindersModule,
   ],
   controllers: [AppController],
   providers: [

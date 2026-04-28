@@ -1,14 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ArrowLeft,
-    LayoutDashboard,
-    Receipt,
-    Briefcase,
-    Settings,
-    ChevronLeft,
-    ChevronRight,
-    UserCircle
-} from 'lucide-react';
+import { ArrowLeft01Icon, DashboardSquare01Icon, Invoice01Icon, Briefcase01Icon, Settings01Icon, ArrowRight01Icon, UserCircleIcon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -31,11 +22,11 @@ const ClientDetailSidebar = ({ client, activeTab, onTabChange, isOpen, setIsOpen
     const { t } = useTranslation();
     const navigate = useNavigate();
 
-    const tabs: { id: ClientTab; icon: typeof LayoutDashboard; label: string }[] = [
-        { id: 'overview', icon: LayoutDashboard, label: t('clientSidebar.overview') },
-        { id: 'invoices', icon: Receipt, label: t('clientSidebar.invoices') },
-        { id: 'projects', icon: Briefcase, label: t('clientSidebar.projects') },
-        { id: 'settings', icon: Settings, label: t('clientSidebar.settings') },
+    const tabs: { id: ClientTab; icon: typeof DashboardSquare01Icon; label: string }[] = [
+        { id: 'overview', icon: DashboardSquare01Icon, label: t('clientSidebar.overview') },
+        { id: 'invoices', icon: Invoice01Icon, label: t('clientSidebar.invoices') },
+        { id: 'projects', icon: Briefcase01Icon, label: t('clientSidebar.projects') },
+        { id: 'settings', icon: Settings01Icon, label: t('clientSidebar.settings') },
     ];
 
     const badge = TYPE_BADGE[client.type] || TYPE_BADGE.one_time;
@@ -52,7 +43,7 @@ const ClientDetailSidebar = ({ client, activeTab, onTabChange, isOpen, setIsOpen
                     onClick={() => navigate('/clients')}
                     className="flex items-center gap-2 p-2 rounded-xl cursor-pointer text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
                 >
-                    <ArrowLeft size={20} className="min-w-[20px]" />
+                    <ArrowLeft01Icon size={20} className="min-w-[20px]" />
                     <AnimatePresence>
                         {isOpen && (
                             <motion.span
@@ -73,7 +64,7 @@ const ClientDetailSidebar = ({ client, activeTab, onTabChange, isOpen, setIsOpen
             <div className="px-4 py-4 border-b border-gray-700/50">
                 <div className="flex items-center gap-3 overflow-hidden">
                     <div className="w-11 h-11 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center flex-shrink-0">
-                        <UserCircle size={20} className="text-[#33cbcc]" />
+                        <UserCircleIcon size={20} className="text-[#33cbcc]" />
                     </div>
                     <AnimatePresence>
                         {isOpen && (
@@ -99,7 +90,7 @@ const ClientDetailSidebar = ({ client, activeTab, onTabChange, isOpen, setIsOpen
                 onClick={() => setIsOpen(!isOpen)}
                 className="absolute -right-3 top-24 bg-[#33cbcc] p-1 rounded-full shadow-lg hover:bg-[#2bb5b6] transition-colors z-50"
             >
-                {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                {isOpen ? <ArrowLeft01Icon size={16} /> : <ArrowRight01Icon size={16} />}
             </button>
 
             {/* Navigation Tabs */}

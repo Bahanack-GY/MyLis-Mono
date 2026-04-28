@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, ArrowRight, Building2, AlertTriangle } from 'lucide-react';
+import { Cancel01Icon, ArrowRight01Icon, Building02Icon, Alert02Icon } from 'hugeicons-react';
 import Modal from '../Modal';
 import { useTransferEmployee } from '../../api/employees/hooks';
 import { useDepartments } from '../../api/departments/hooks';
@@ -48,7 +48,7 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
                         {t('employees.transfer.title')}
                     </h2>
                     <button onClick={handleClose} className="text-gray-400 hover:text-gray-600">
-                        <X className="w-5 h-5" />
+                        <Cancel01Icon className="w-5 h-5" />
                     </button>
                 </div>
 
@@ -67,7 +67,7 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
                             {t('employees.transfer.currentDepartment')}
                         </label>
                         <div className="flex items-center gap-2 p-3 bg-[#283852]/10 rounded-lg border border-gray-200">
-                            <Building2 className="w-5 h-5 text-[#283852]" />
+                            <Building02Icon className="w-5 h-5 text-[#283852]" />
                             <span className="text-[#283852] font-medium">
                                 {currentDepartment?.name || t('employees.transfer.noDepartment')}
                             </span>
@@ -75,7 +75,7 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
                     </div>
 
                     <div className="flex justify-center">
-                        <ArrowRight className="w-6 h-6 text-gray-400" />
+                        <ArrowRight01Icon className="w-6 h-6 text-gray-400" />
                     </div>
 
                     {/* Target Department */}
@@ -101,7 +101,7 @@ const TransferEmployeeModal = ({ open, onClose, employee }: TransferEmployeeModa
                     {/* Warning for department heads */}
                     {employee.department?.headId === employee.id && (
                         <div className="flex items-start gap-3 p-4 bg-[#283852]/10 border border-gray-200 rounded-lg">
-                            <AlertTriangle className="w-5 h-5 text-[#283852] flex-shrink-0 mt-0.5" />
+                            <Alert02Icon className="w-5 h-5 text-[#283852] flex-shrink-0 mt-0.5" />
                             <div className="text-sm text-[#283852]">
                                 <p className="font-semibold mb-1">{t('employees.transfer.headWarning')}</p>
                                 <p>{t('employees.transfer.headWarningDesc')}</p>

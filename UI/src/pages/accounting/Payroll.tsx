@@ -1,35 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
- Plus,
- X,
- Loader2,
- Calendar,
- CheckCircle,
- Calculator,
- CreditCard,
- Eye,
- ArrowLeft,
- Users,
- Wallet,
- TrendingUp,
- AlertTriangle,
- DollarSign,
- Search,
- Pencil,
- Check,
- HandCoins,
- Banknote,
- ChevronDown,
- Download,
- Settings,
- Trash2,
- ListFilter,
- CheckSquare,
- Square,
- MinusSquare,
-} from 'lucide-react';
+import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, Tick01Icon, CalculatorIcon, CreditCardIcon, ViewIcon, ArrowLeft01Icon, UserGroupIcon, Wallet01Icon, ArrowUpRight01Icon, Alert02Icon, DollarCircleIcon, Search01Icon, PencilIcon, Money01Icon, ArrowDown01Icon, Download01Icon, Settings01Icon, Delete02Icon, FilterIcon, Task01Icon, SquareIcon, MinusSignIcon } from 'hugeicons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../api/config';
@@ -472,7 +444,7 @@ const CreateRunModal = ({ onClose }: { onClose: () => void }) => {
  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
- <Wallet size={20} className="text-[#33cbcc]"/>
+ <Wallet01Icon size={20} className="text-[#33cbcc]"/>
  </div>
  <h2 className="text-lg font-bold text-gray-800">Nouvelle paie</h2>
  </div>
@@ -480,7 +452,7 @@ const CreateRunModal = ({ onClose }: { onClose: () => void }) => {
  onClick={onClose}
  className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
 
@@ -522,7 +494,7 @@ const CreateRunModal = ({ onClose }: { onClose: () => void }) => {
  onClick={handleSubmit}
  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
- {createMut.isPending ? <Loader2 size={16} className="animate-spin"/> : <Plus size={16} />}
+ {createMut.isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Add01Icon size={16} />}
  Creer
  </button>
  </div>
@@ -569,7 +541,7 @@ const PayConfirmModal = ({
  >
  <div className="flex items-center gap-3 mb-4">
  <div className="p-2.5 rounded-xl bg-[#33cbcc]/10">
- <CreditCard size={20} className="text-[#33cbcc]"/>
+ <CreditCardIcon size={20} className="text-[#33cbcc]"/>
  </div>
  <h3 className="text-base font-semibold text-gray-800">Confirmer le paiement</h3>
  </div>
@@ -588,7 +560,7 @@ const PayConfirmModal = ({
  disabled={isPending}
  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
  >
- {isPending && <Loader2 size={14} className="animate-spin"/>}
+ {isPending && <Loading02Icon size={14} className="animate-spin"/>}
  Payer
  </button>
  </div>
@@ -704,7 +676,7 @@ const BulkActionBar = ({
  <div className="flex items-center justify-between flex-wrap gap-3">
  <div className="flex items-center gap-3">
  <div className="flex items-center gap-2 text-sm font-semibold text-[#33cbcc]">
- <CheckSquare size={16} />
+ <Task01Icon size={16} />
  {selectedIds.size} employe{selectedIds.size > 1 ? 's' : ''} selectionne{selectedIds.size > 1 ? 's' : ''}
  </div>
  <button
@@ -723,7 +695,7 @@ const BulkActionBar = ({
 
  {departments.length > 0 && (
  <div className="flex items-center gap-2">
- <ListFilter size={14} className="text-gray-400"/>
+ <FilterIcon size={14} className="text-gray-400"/>
  <select
  onChange={(e) => {
  if (e.target.value) selectByDepartment(e.target.value);
@@ -824,7 +796,7 @@ const BulkActionBar = ({
  disabled={bulkMut.isPending}
  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors border border-gray-200 disabled:opacity-50"
  >
- <Plus size={12} />
+ <Add01Icon size={12} />
  Retenue
  </button>
  {showAddDeduction && (
@@ -891,7 +863,7 @@ const BulkActionBar = ({
 
  {bulkMut.isPending && (
  <div className="flex items-center gap-2 text-xs text-gray-500">
- <Loader2 size={14} className="animate-spin"/>
+ <Loading02Icon size={14} className="animate-spin"/>
  Mise a jour en cours...
  </div>
  )}
@@ -940,7 +912,7 @@ const PayOneModal = ({
  >
  <div className="flex items-center gap-3 mb-5">
  <div className="w-10 h-10 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
- <CreditCard size={18} className="text-[#33cbcc]"/>
+ <CreditCardIcon size={18} className="text-[#33cbcc]"/>
  </div>
  <div>
  <h3 className="font-bold text-gray-800">Payer le salaire</h3>
@@ -972,7 +944,7 @@ const PayOneModal = ({
  disabled={payOneMut.isPending || !date}
  className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
  >
- {payOneMut.isPending ? <Loader2 size={14} className="animate-spin"/> : <Check size={14}/>}
+ {payOneMut.isPending ? <Loading02Icon size={14} className="animate-spin"/> : <Tick01Icon size={14}/>}
  Confirmer
  </button>
  </div>
@@ -1015,7 +987,7 @@ const PayrollDetail = ({
  if (isLoading || !run) {
  return (
  <div className="flex items-center justify-center py-16">
- <Loader2 size={24} className="animate-spin text-[#33cbcc]"/>
+ <Loading02Icon size={24} className="animate-spin text-[#33cbcc]"/>
  </div>
  );
  }
@@ -1051,7 +1023,7 @@ const PayrollDetail = ({
  onClick={onBack}
  className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
- <ArrowLeft size={20} />
+ <ArrowLeft01Icon size={20} />
  </button>
  <div className="flex-1">
  <h2 className="text-xl font-bold text-gray-800">
@@ -1069,7 +1041,7 @@ const PayrollDetail = ({
  className="p-2.5 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
  title="Gerer les types de retenues"
  >
- <Settings size={18} />
+ <Settings01Icon size={18} />
  </button>
  {(run.status === 'DRAFT' || run.status === 'CALCULATED') && (
  <button
@@ -1078,9 +1050,9 @@ const PayrollDetail = ({
  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors disabled:opacity-50"
  >
  {calculateMut.isPending ? (
- <Loader2 size={16} className="animate-spin"/>
+ <Loading02Icon size={16} className="animate-spin"/>
  ) : (
- <Calculator size={16} />
+ <CalculatorIcon size={16} />
  )}
  {run.status === 'DRAFT' ? 'Calculer' : 'Re-calculer'}
  </button>
@@ -1092,9 +1064,9 @@ const PayrollDetail = ({
  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
  >
  {validateMut.isPending ? (
- <Loader2 size={16} className="animate-spin"/>
+ <Loading02Icon size={16} className="animate-spin"/>
  ) : (
- <CheckCircle size={16} />
+ <Tick01Icon size={16} />
  )}
  Valider
  </button>
@@ -1104,7 +1076,7 @@ const PayrollDetail = ({
  onClick={() => setShowPayConfirm(true)}
  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors"
  >
- <CreditCard size={16} />
+ <CreditCardIcon size={16} />
  {hasPartialPayments ? `Payer le reste (${unpaidCount})` : 'Payer tout'}
  </button>
  )}
@@ -1187,11 +1159,11 @@ const PayrollDetail = ({
  className="text-gray-400 hover:text-[#33cbcc] transition-colors"
  >
  {selectedIds.size === payslips.length ? (
- <CheckSquare size={15} />
+ <Task01Icon size={15} />
  ) : selectedIds.size > 0 ? (
- <MinusSquare size={15} />
+ <MinusSignIcon size={15} />
  ) : (
- <Square size={15} />
+ <SquareIcon size={15} />
  )}
  </button>
  </th>
@@ -1226,9 +1198,9 @@ const PayrollDetail = ({
  className="text-gray-400 hover:text-[#33cbcc] transition-colors"
  >
  {selectedIds.has(ps.id) ? (
- <CheckSquare size={15} className="text-[#33cbcc]"/>
+ <Task01Icon size={15} className="text-[#33cbcc]"/>
  ) : (
- <Square size={15} />
+ <SquareIcon size={15} />
  )}
  </button>
  </td>
@@ -1288,7 +1260,7 @@ const PayrollDetail = ({
  className="p-1 rounded-md text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 opacity-0 group-hover/row:opacity-100 transition-all"
  title="Modifier retenue manuelle"
  >
- <Pencil size={12} />
+ <PencilIcon size={12} />
  </button>
  )}
  </div>
@@ -1300,7 +1272,7 @@ const PayrollDetail = ({
  <td className="px-4 py-2.5 text-center">
  {ps.paymentDate ? (
  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] text-[11px] font-semibold">
- <Check size={10}/>
+ <Tick01Icon size={10}/>
  {new Date(ps.paymentDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
  </span>
  ) : (
@@ -1308,7 +1280,7 @@ const PayrollDetail = ({
  onClick={() => setPayingPayslip(ps)}
  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors"
  >
- <CreditCard size={11}/>
+ <CreditCardIcon size={11}/>
  Payer
  </button>
  )}
@@ -1322,7 +1294,7 @@ const PayrollDetail = ({
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all"
  title="Modifier les retenues"
  >
- <Settings size={13} />
+ <Settings01Icon size={13} />
  </button>
  )}
  {(run.status === 'CALCULATED' || run.status === 'VALIDATED' || run.status === 'PAID') && (
@@ -1333,8 +1305,8 @@ const PayrollDetail = ({
  title="Telecharger la fiche de paie"
  >
  {downloadingId === ps.id
- ? <Loader2 size={13} className="animate-spin"/>
- : <Download size={13} />}
+ ? <Loading02Icon size={13} className="animate-spin"/>
+ : <Download01Icon size={13} />}
  </button>
  )}
  </div>
@@ -1383,7 +1355,7 @@ const PayrollDetail = ({
  </div>
  ) : (
  <div className="bg-white rounded-2xl p-12 text-center">
- <Users size={48} className="mx-auto text-gray-300 mb-4"/>
+ <UserGroupIcon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">Aucun bulletin de paie</p>
  <p className="text-sm text-gray-400 mt-1">
  Cliquez sur"Calculer"pour generer les bulletins.
@@ -1468,7 +1440,7 @@ const ManualDeductionModal = ({
  >
  <div className="flex items-center gap-3 mb-5">
  <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center">
- <Pencil size={18} className="text-[#283852]"/>
+ <PencilIcon size={18} className="text-[#283852]"/>
  </div>
  <div>
  <h3 className="font-bold text-gray-800">Retenue manuelle</h3>
@@ -1589,7 +1561,7 @@ const PayslipEditModal = ({
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
- <Settings size={20} className="text-[#33cbcc]"/>
+ <Settings01Icon size={20} className="text-[#33cbcc]"/>
  </div>
  <div>
  <h2 className="text-lg font-bold text-gray-800">Retenues</h2>
@@ -1597,7 +1569,7 @@ const PayslipEditModal = ({
  </div>
  </div>
  <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
  </div>
@@ -1649,7 +1621,7 @@ const PayslipEditModal = ({
  onClick={() => removeCustomDeduction(i)}
  className="p-1 rounded-md text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 opacity-0 group-hover:opacity-100 transition-all"
  >
- <Trash2 size={13} />
+ <Delete02Icon size={13} />
  </button>
  </div>
  ))}
@@ -1690,7 +1662,7 @@ const PayslipEditModal = ({
  disabled={!selectedType || !customAmount}
  className="px-3 py-2 rounded-xl text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
- <Plus size={16} />
+ <Add01Icon size={16} />
  </button>
  </div>
  ) : (
@@ -1710,7 +1682,7 @@ const PayslipEditModal = ({
  disabled={togglesMut.isPending}
  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
- {togglesMut.isPending ? <Loader2 size={16} className="animate-spin"/> : <Check size={16} />}
+ {togglesMut.isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Tick01Icon size={16} />}
  Enregistrer
  </button>
  </div>
@@ -1773,18 +1745,18 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
- <Settings size={20} className="text-gray-600"/>
+ <Settings01Icon size={20} className="text-gray-600"/>
  </div>
  <h2 className="text-lg font-bold text-gray-800">Types de retenues</h2>
  </div>
  <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
 
  <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
  {isLoading ? (
- <div className="flex justify-center py-4"><Loader2 size={20} className="animate-spin text-gray-400"/></div>
+ <div className="flex justify-center py-4"><Loading02Icon size={20} className="animate-spin text-gray-400"/></div>
  ) : types.length === 0 ? (
  <p className="text-sm text-gray-400 text-center py-4">Aucun type de retenue</p>
  ) : (
@@ -1808,11 +1780,11 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
  </label>
  <button onClick={saveEdit} disabled={updateMut.isPending}
  className="p-1.5 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors">
- <Check size={14} />
+ <Tick01Icon size={14} />
  </button>
  <button onClick={() => setEditingId(null)}
  className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
- <X size={14} />
+ <Cancel01Icon size={14} />
  </button>
  </div>
  ) : (
@@ -1826,11 +1798,11 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
  <button onClick={() => startEdit(dt)}
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all">
- <Pencil size={14} />
+ <PencilIcon size={14} />
  </button>
  <button onClick={() => deleteMut.mutate(dt.id)} disabled={deleteMut.isPending}
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-all">
- <Trash2 size={14} />
+ <Delete02Icon size={14} />
  </button>
  </div>
  </div>
@@ -1862,7 +1834,7 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
  disabled={!name.trim() || !amount || createMut.isPending}
  className="px-3 py-2 rounded-xl text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
- <Plus size={16} />
+ <Add01Icon size={16} />
  </button>
  </div>
  </div>
@@ -1873,7 +1845,7 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
 };
 
 /* ------------------------------------------------------------------ */
-/* Preview Calculator */
+/* Preview CalculatorIcon */
 /* ------------------------------------------------------------------ */
 
 const PreviewCalculator = () => {
@@ -1884,7 +1856,7 @@ const PreviewCalculator = () => {
  return (
  <div className="bg-white rounded-2xl p-6">
  <div className="flex items-center gap-2 mb-4">
- <Calculator size={18} className="text-[#33cbcc]"/>
+ <CalculatorIcon size={18} className="text-[#33cbcc]"/>
  <h3 className="text-sm font-bold text-gray-800">Simulateur de salaire</h3>
  </div>
 
@@ -1906,7 +1878,7 @@ const PreviewCalculator = () => {
 
  {isLoading && gross > 0 && (
  <div className="flex items-center justify-center py-6">
- <Loader2 size={20} className="animate-spin text-[#33cbcc]"/>
+ <Loading02Icon size={20} className="animate-spin text-[#33cbcc]"/>
  </div>
  )}
 
@@ -2003,7 +1975,7 @@ const AdvanceModal = ({ emp, onClose }: { emp: SalaryEmployee; onClose: () => vo
  >
  <div className="flex items-center gap-3 mb-5">
  <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center">
- <HandCoins size={18} className="text-[#283852]"/>
+ <Money01Icon size={18} className="text-[#283852]"/>
  </div>
  <div>
  <h3 className="font-bold text-gray-800">Avance sur salaire</h3>
@@ -2096,10 +2068,10 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  className="w-36 px-3 py-1.5 text-sm border border-[#33cbcc] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30"
  />
  <button onClick={save} disabled={updateSalary.isPending} className="p-1.5 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors">
- <Check size={14} />
+ <Tick01Icon size={14} />
  </button>
  <button onClick={cancel} className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
- <X size={14} />
+ <Cancel01Icon size={14} />
  </button>
  </div>
  ) : (
@@ -2109,7 +2081,7 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  </span>
  <button onClick={() => setEditing(true)}
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 opacity-0 group-hover/sal:opacity-100 transition-all">
- <Pencil size={13} />
+ <PencilIcon size={13} />
  </button>
  </div>
  )}
@@ -2120,7 +2092,7 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  onClick={() => setShowAdvanceModal(true)}
  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors"
  >
- <HandCoins size={13} />
+ <Money01Icon size={13} />
  Avance
  </button>
  </div>
@@ -2188,11 +2160,11 @@ const EmployeesTab = () => {
  <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
  <h2 className="font-semibold text-gray-700">Salaires des employes</h2>
  <div className="relative">
- <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"/>
+ <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none"/>
  <input
- type="text"value={search} onChange={(e) => setSearch(e.target.value)}
+ type="text" value={search} onChange={(e) => setSearch(e.target.value)}
  placeholder="Rechercher..."
- className="pl-8 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] w-56"
+ className="w-56 bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
  />
  </div>
  </div>
@@ -2246,8 +2218,8 @@ export default function Payroll() {
  const allRuns = runs || [];
 
  const tabs = [
- { key: 'payroll' as const, label: 'Bulletins de paie', icon: Wallet },
- { key: 'employees' as const, label: 'Employes & Salaires', icon: Users },
+ { key: 'payroll' as const, label: 'Bulletins de paie', icon: Wallet01Icon },
+ { key: 'employees' as const, label: 'Employes & Salaires', icon: UserGroupIcon },
  ];
 
  return (
@@ -2265,7 +2237,7 @@ export default function Payroll() {
  onClick={() => setShowCreateModal(true)}
  className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
  >
- <Plus size={16} />
+ <Add01Icon size={16} />
  Nouvelle Paie
  </button>
  )}
@@ -2357,7 +2329,7 @@ export default function Payroll() {
  title="Calculer"
  className="p-1.5 rounded-lg text-[#283852] hover:text-[#283852] hover:bg-[#283852]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
- <Calculator size={14} />
+ <CalculatorIcon size={14} />
  </button>
  )}
  {run.status === 'CALCULATED' && (
@@ -2370,7 +2342,7 @@ export default function Payroll() {
  title="Valider"
  className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
- <CheckCircle size={14} />
+ <Tick01Icon size={14} />
  </button>
  )}
  {run.status === 'VALIDATED' && (
@@ -2382,7 +2354,7 @@ export default function Payroll() {
  title="Payer"
  className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
- <CreditCard size={14} />
+ <CreditCardIcon size={14} />
  </button>
  )}
  <button
@@ -2393,7 +2365,7 @@ export default function Payroll() {
  title="Details"
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
  >
- <Eye size={14} />
+ <ViewIcon size={14} />
  </button>
  </div>
  </motion.div>
@@ -2402,13 +2374,13 @@ export default function Payroll() {
  </div>
  ) : (
  <div className="bg-white rounded-2xl p-12 text-center">
- <Wallet size={48} className="mx-auto text-gray-300 mb-4"/>
+ <Wallet01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-500 font-medium mb-2">Aucune paie creee</p>
  <p className="text-sm text-gray-400">Creez votre premiere paie pour commencer.</p>
  </div>
  )}
 
- {/* Preview Calculator */}
+ {/* Preview CalculatorIcon */}
  <PreviewCalculator />
  </>
  )}

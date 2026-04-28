@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { X, Plus, Loader2, Briefcase, Trash2 } from 'lucide-react';
+import { Cancel01Icon, Add01Icon, Loading02Icon, Briefcase01Icon, Delete02Icon } from 'hugeicons-react';
 import { useCreatePosition } from '../../api/positions/hooks';
 import { useDepartments } from '../../api/departments/hooks';
 
@@ -95,12 +95,12 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                            <Briefcase size={18} className="text-[#33cbcc]" />
+                            <Briefcase01Icon size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 id="create-role-modal-title" className="text-base font-bold text-gray-800">{t('positions.create.title', 'Create Role')}</h3>
                     </div>
                     <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} aria-hidden="true" />
+                        <Cancel01Icon size={18} aria-hidden="true" />
                     </button>
                 </div>
 
@@ -162,7 +162,7 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                                         aria-label={`${t('common.remove', 'Remove')} ${mission}`}
                                         className="text-gray-400 hover:text-[#283852] transition-colors p-1"
                                     >
-                                        <Trash2 size={14} aria-hidden="true" />
+                                        <Delete02Icon size={14} aria-hidden="true" />
                                     </button>
                                 </div>
                             ))}
@@ -183,7 +183,7 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                                 aria-label={t('positions.create.addMission', 'Add mission')}
                                 className="px-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <Plus size={18} aria-hidden="true" />
+                                <Add01Icon size={18} aria-hidden="true" />
                             </button>
                         </div>
                     </div>
@@ -206,7 +206,7 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {createPosition.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createPosition.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('common.create', 'Create Role')}
                     </button>
                 </div>

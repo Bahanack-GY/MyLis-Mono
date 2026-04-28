@@ -1,26 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
-import {
-    TrendingUp,
-    CheckCircle,
-    Wallet,
-    Clock,
-    Building,
-    Calendar,
-    Upload,
-    FileText,
-    Download,
-    Eye,
-    CircleDot,
-    Circle,
-    Users,
-    Pencil,
-    Plus,
-    Trash2,
-    Loader2,
-    Wrench
-} from 'lucide-react';
+import { ArrowUpRight01Icon, Tick01Icon, Wallet01Icon, Clock01Icon, Building01Icon, Calendar01Icon, Upload01Icon, File01Icon, Download01Icon, ViewIcon, CircleIcon, UserGroupIcon, PencilIcon, Add01Icon, Delete02Icon, Loading02Icon, Wrench01Icon } from 'hugeicons-react';
 import {
     XAxis,
     YAxis,
@@ -114,11 +95,11 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
 
     const profit = project.revenue - project.budget;
     const stats = [
-        { label: t('projectDetail.overview.progress'), value: `${project.progress}%`, icon: TrendingUp, color: '#33cbcc' },
-        { label: t('projectDetail.overview.tasksDone'), value: `${project.tasksDone}/${project.tasksTotal}`, icon: CheckCircle, color: '#33cbcc' },
-        { label: t('projects.formCost'), value: project.budget > 0 ? fmtCurrency(project.budget) : '—', icon: Wallet, color: '#283852' },
-        { label: t('projects.formRevenue'), value: project.revenue > 0 ? fmtCurrency(project.revenue) : '—', icon: TrendingUp, color: profit >= 0 ? '#33cbcc' : '#283852' },
-        { label: t('projectDetail.overview.daysLeft'), value: `${daysRemaining}`, icon: Clock, color: project.status === 'overdue' ? '#283852' : '#283852' },
+        { label: t('projectDetail.overview.progress'), value: `${project.progress}%`, icon: ArrowUpRight01Icon, color: '#33cbcc' },
+        { label: t('projectDetail.overview.tasksDone'), value: `${project.tasksDone}/${project.tasksTotal}`, icon: Tick01Icon, color: '#33cbcc' },
+        { label: t('projects.formCost'), value: project.budget > 0 ? fmtCurrency(project.budget) : '—', icon: Wallet01Icon, color: '#283852' },
+        { label: t('projects.formRevenue'), value: project.revenue > 0 ? fmtCurrency(project.revenue) : '—', icon: ArrowUpRight01Icon, color: profit >= 0 ? '#33cbcc' : '#283852' },
+        { label: t('projectDetail.overview.daysLeft'), value: `${daysRemaining}`, icon: Clock01Icon, color: project.status === 'overdue' ? '#283852' : '#283852' },
     ];
 
     const style = STATUS_STYLES[project.status] || STATUS_STYLES.active;
@@ -141,13 +122,13 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
                     onClick={onEdit}
                     className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#33cbcc] text-white text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 shrink-0"
                 >
-                    <Pencil size={15} />
+                    <PencilIcon size={15} />
                     {t('projects.editTitle')}
                 </button>
                 {/* Members avatars */}
                 {project.members.length > 0 && (
                     <div className="flex items-center gap-2">
-                        <Users size={16} className="text-gray-400" />
+                        <UserGroupIcon size={16} className="text-gray-400" />
                         <div className="flex -space-x-2">
                             {project.members.slice(0, 5).map(m => (
                                 <img
@@ -176,17 +157,16 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
-                            style={{ color: stat.color }}
-                        >
-                            <stat.icon size={100} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -278,7 +258,7 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
             {project.services && project.services.length > 0 && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="bg-white rounded-2xl p-5 border border-gray-100">
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
-                        <Wrench size={14} />
+                        <Wrench01Icon size={14} />
                         <span className="font-semibold uppercase tracking-wider">Services</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -298,28 +278,28 @@ const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () =>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white rounded-2xl p-5 border border-gray-100">
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                        <Building size={14} />
+                        <Building01Icon size={14} />
                         {t('projects.formDepartment')}
                     </div>
                     <p className="font-semibold text-gray-800">{project.department || '—'}</p>
                 </motion.div>
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="bg-white rounded-2xl p-5 border border-gray-100">
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                        <Calendar size={14} />
+                        <Calendar01Icon size={14} />
                         {t('projects.startDate')}
                     </div>
                     <p className="font-semibold text-gray-800">{fmtDate(project.startDate)}</p>
                 </motion.div>
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="bg-white rounded-2xl p-5 border border-gray-100">
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                        <Calendar size={14} />
+                        <Calendar01Icon size={14} />
                         {t('projects.formDueDate')}
                     </div>
                     <p className="font-semibold text-gray-800">{fmtDate(project.endDate)}</p>
                 </motion.div>
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }} className="bg-white rounded-2xl p-5 border border-gray-100">
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                        <TrendingUp size={14} />
+                        <ArrowUpRight01Icon size={14} />
                         {t('projects.progress')}
                     </div>
                     <div className="flex items-center gap-3">
@@ -363,10 +343,10 @@ const STATE_TO_KANBAN: Record<string, KanbanStatus> = {
 const TasksView = ({ project }: { project: ProjectData }) => {
     const { t } = useTranslation();
 
-    const columns: { key: KanbanStatus; label: string; icon: typeof Circle; color: string }[] = [
-        { key: 'todo',        label: t('projectDetail.tasks.todo'),       icon: Circle,      color: '#283852' },
-        { key: 'in_progress', label: t('projectDetail.tasks.inProgress'), icon: CircleDot,   color: '#33cbcc' },
-        { key: 'done',        label: t('projectDetail.tasks.done'),       icon: CheckCircle, color: '#283852' },
+    const columns: { key: KanbanStatus; label: string; icon: typeof CircleIcon; color: string }[] = [
+        { key: 'todo',        label: t('projectDetail.tasks.todo'),       icon: CircleIcon,      color: '#283852' },
+        { key: 'in_progress', label: t('projectDetail.tasks.inProgress'), icon: CircleIcon,   color: '#33cbcc' },
+        { key: 'done',        label: t('projectDetail.tasks.done'),       icon: Tick01Icon, color: '#283852' },
     ];
 
     return (
@@ -414,7 +394,7 @@ const TasksView = ({ project }: { project: ProjectData }) => {
                                             </div>
                                             {task.dueDate && (
                                                 <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-400">
-                                                    <Calendar size={12} />
+                                                    <Calendar01Icon size={12} />
                                                     <span>{fmtDate(task.dueDate)}</span>
                                                 </div>
                                             )}
@@ -464,9 +444,9 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
     const profit = revenue - totalExpenses;
 
     const summaryStats = [
-        { label: t('projects.formRevenue'), value: revenue > 0 ? fmtCurrency(revenue) : '—', color: '#33cbcc', icon: TrendingUp },
-        { label: t('projectDetail.budget.expenses'), value: totalExpenses > 0 ? fmtCurrency(totalExpenses) : '—', color: '#283852', icon: Wallet },
-        { label: t('projectDetail.budget.profit'), value: (revenue > 0 || totalExpenses > 0) ? fmtCurrency(profit) : '—', color: profit >= 0 ? '#33cbcc' : '#283852', icon: TrendingUp },
+        { label: t('projects.formRevenue'), value: revenue > 0 ? fmtCurrency(revenue) : '—', color: '#33cbcc', icon: ArrowUpRight01Icon },
+        { label: t('projectDetail.budget.expenses'), value: totalExpenses > 0 ? fmtCurrency(totalExpenses) : '—', color: '#283852', icon: Wallet01Icon },
+        { label: t('projectDetail.budget.profit'), value: (revenue > 0 || totalExpenses > 0) ? fmtCurrency(profit) : '—', color: profit >= 0 ? '#33cbcc' : '#283852', icon: ArrowUpRight01Icon },
     ];
 
     const donutData = [
@@ -506,14 +486,16 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out" style={{ color: stat.color }}>
-                            <stat.icon size={80} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -582,7 +564,7 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
                             onClick={() => setShowForm(v => !v)}
                             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors"
                         >
-                            <Plus size={13} />
+                            <Add01Icon size={13} />
                             {t('projectDetail.budget.addExpense')}
                         </button>
                     </div>
@@ -624,7 +606,7 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
                                         Annuler
                                     </button>
                                     <button type="submit" disabled={createExpense.isPending} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-50">
-                                        {createExpense.isPending ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                                        {createExpense.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <Add01Icon size={12} />}
                                         Enregistrer
                                     </button>
                                 </div>
@@ -635,7 +617,7 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
                     {/* List */}
                     <div className="flex-1 overflow-y-auto space-y-2 max-h-64">
                         {expensesLoading ? (
-                            <div className="flex justify-center py-6"><Loader2 size={20} className="animate-spin text-[#33cbcc]" /></div>
+                            <div className="flex justify-center py-6"><Loading02Icon size={20} className="animate-spin text-[#33cbcc]" /></div>
                         ) : expenses.length === 0 ? (
                             <div className="flex items-center justify-center h-20 text-gray-400 text-sm">{t('projectDetail.tasks.noTasks')}</div>
                         ) : (
@@ -651,7 +633,7 @@ const BudgetView = ({ project }: { project: ProjectData }) => {
                                             onClick={() => deleteExpense.mutate(exp.id)}
                                             className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-[#283852] transition-all"
                                         >
-                                            <Trash2 size={14} />
+                                            <Delete02Icon size={14} />
                                         </button>
                                     </div>
                                 </div>
@@ -695,7 +677,7 @@ const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
             <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.documents.title')}</h2>
                 <label className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors cursor-pointer shadow-lg shadow-[#33cbcc]/20">
-                    <Upload size={16} />
+                    <Upload01Icon size={16} />
                     {t('projectDetail.documents.upload')}
                     <input type="file" className="hidden" multiple />
                 </label>
@@ -714,7 +696,7 @@ const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
                             className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
                             style={{ backgroundColor: `${DOC_COLORS[doc.type] || '#283852'}15` }}
                         >
-                            <FileText size={22} style={{ color: DOC_COLORS[doc.type] || '#283852' }} />
+                            <File01Icon size={22} style={{ color: DOC_COLORS[doc.type] || '#283852' }} />
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-800 text-sm truncate">{doc.name}</p>
@@ -735,10 +717,10 @@ const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                <Eye size={16} />
+                                <ViewIcon size={16} />
                             </button>
                             <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                <Download size={16} />
+                                <Download01Icon size={16} />
                             </button>
                         </div>
                     </motion.div>
@@ -747,7 +729,7 @@ const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
 
             {docs.length === 0 && (
                 <div className="text-center py-16 text-gray-400">
-                    <FileText size={48} className="mx-auto mb-4 opacity-30" />
+                    <File01Icon size={48} className="mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">{t('projectDetail.documents.empty')}</p>
                 </div>
             )}
@@ -811,7 +793,7 @@ const MilestonesView = ({ project }: { project: ProjectData }) => {
                         onClick={() => setShowAdd(v => !v)}
                         className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#33cbcc] text-white text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                     >
-                        <Plus size={16} />
+                        <Add01Icon size={16} />
                         {t('projectDetail.milestones.add')}
                     </button>
                 )}
@@ -851,7 +833,7 @@ const MilestonesView = ({ project }: { project: ProjectData }) => {
                         <div className="flex gap-2 justify-end">
                             <button onClick={() => { setShowAdd(false); setAddForm(emptyMsForm()); }} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{t('projectDetail.milestones.cancel')}</button>
                             <button onClick={handleAdd} disabled={createMs.isPending || !addForm.title.trim()} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-50">
-                                {createMs.isPending ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                                {createMs.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <Add01Icon size={12} />}
                                 {t('projectDetail.milestones.save')}
                             </button>
                         </div>
@@ -892,7 +874,7 @@ const MilestonesView = ({ project }: { project: ProjectData }) => {
                                         <div className="flex gap-2 justify-end">
                                             <button onClick={() => setEditId(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{t('projectDetail.milestones.cancel')}</button>
                                             <button onClick={() => handleEdit(ms.id)} disabled={updateMs.isPending} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-50">
-                                                {updateMs.isPending ? <Loader2 size={12} className="animate-spin" /> : <Pencil size={12} />}
+                                                {updateMs.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <PencilIcon size={12} />}
                                                 {t('projectDetail.milestones.save')}
                                             </button>
                                         </div>
@@ -904,13 +886,13 @@ const MilestonesView = ({ project }: { project: ProjectData }) => {
                                             {ms.description && <p className="text-sm text-gray-500 mt-1">{ms.description}</p>}
                                             {ms.dueDate && (
                                                 <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-400">
-                                                    <Calendar size={12} />
+                                                    <Calendar01Icon size={12} />
                                                     <span>{fmtDate(ms.dueDate)}</span>
                                                 </div>
                                             )}
                                             {isDone && ms.completedAt && (
                                                 <div className="flex items-center gap-1.5 mt-2 text-xs text-[#283852]/60">
-                                                    <CheckCircle size={12} />
+                                                    <Tick01Icon size={12} />
                                                     <span>
                                                         {t('projectDetail.milestones.completedOn', { date: fmtDate(ms.completedAt) })}
                                                         {ms.completedByName && (
@@ -930,13 +912,13 @@ const MilestonesView = ({ project }: { project: ProjectData }) => {
                                                         onClick={() => { setEditId(ms.id); setEditForm({ title: ms.title, description: ms.description || '', dueDate: ms.dueDate ? ms.dueDate.slice(0, 10) : '' }); }}
                                                         className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors"
                                                     >
-                                                        <Pencil size={14} />
+                                                        <PencilIcon size={14} />
                                                     </button>
                                                     <button
                                                         onClick={() => deleteMs.mutate(ms.id)}
                                                         className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
                                                     >
-                                                        <Trash2 size={14} />
+                                                        <Delete02Icon size={14} />
                                                     </button>
                                                 </div>
                                             )}
@@ -951,7 +933,7 @@ const MilestonesView = ({ project }: { project: ProjectData }) => {
 
             {milestones.length === 0 && !showAdd && (
                 <div className="text-center py-16 text-gray-400">
-                    <Clock size={48} className="mx-auto mb-4 opacity-30" />
+                    <Clock01Icon size={48} className="mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">{t('projectDetail.milestones.empty')}</p>
                 </div>
             )}

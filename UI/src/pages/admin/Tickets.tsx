@@ -1,29 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Ticket as TicketIcon,
-    Search,
-    Plus,
-    X,
-    LayoutGrid,
-    List,
-    AlertCircle,
-    Clock,
-    CheckCircle,
-    CircleDot,
-    Bug,
-    Lightbulb,
-    HelpCircle,
-    MessageSquare,
-    User,
-    AlignLeft,
-    Loader2,
-    Building,
-    UserCheck,
-    XCircle,
-    Calendar,
-} from 'lucide-react';
+import { Ticket01Icon as TicketIcon, Search01Icon, Add01Icon, Cancel01Icon, DashboardSquare01Icon, ListViewIcon, Alert01Icon, Clock01Icon, Tick01Icon, CircleIcon, Bug01Icon, Idea01Icon, HelpCircleIcon, Message02Icon, UserIcon, AlignLeftIcon, Loading02Icon, Building01Icon, UserCheck01Icon, CancelCircleIcon, Calendar01Icon } from 'hugeicons-react';
 import { useTickets, useCreateTicket, useTakeTicket, useCloseTicket } from '../../api/tickets/hooks';
 import { TicketsAdminSkeleton } from '../../components/Skeleton';
 import { useDepartments } from '../../api/departments/hooks';
@@ -83,10 +61,10 @@ const STATUS_COLORS: Record<TicketStatus, string> = {
 };
 
 const CATEGORY_ICONS: Record<TicketCategory, React.ComponentType<{ size?: number; className?: string; color?: string; style?: React.CSSProperties }>> = {
-    bug: Bug,
-    feature: Lightbulb,
-    support: HelpCircle,
-    question: MessageSquare,
+    bug: Bug01Icon,
+    feature: Idea01Icon,
+    support: HelpCircleIcon,
+    question: Message02Icon,
 };
 
 const PRIORITIES: TicketPriority[] = ['low', 'medium', 'high', 'critical'];
@@ -147,7 +125,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                         <h2 className="text-lg font-bold text-gray-800">{t('tickets.create.title')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -172,7 +150,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Description */}
                     <div>
                         <label className={labelCls}>
-                            <AlignLeft size={12} />
+                            <AlignLeftIcon size={12} />
                             {t('tickets.create.description')}
                         </label>
                         <textarea
@@ -187,7 +165,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Priority */}
                     <div>
                         <label className={labelCls}>
-                            <AlertCircle size={12} />
+                            <Alert01Icon size={12} />
                             {t('tickets.create.priority')}
                         </label>
                         <div className="flex gap-2">
@@ -213,7 +191,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Category */}
                     <div>
                         <label className={labelCls}>
-                            <CircleDot size={12} />
+                            <CircleIcon size={12} />
                             {t('tickets.create.category')}
                         </label>
                         <div className="flex gap-2">
@@ -241,7 +219,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Department */}
                     <div>
                         <label className={labelCls}>
-                            <Building size={12} />
+                            <Building01Icon size={12} />
                             {t('tickets.create.department')}
                         </label>
                         <select
@@ -259,7 +237,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Due Date */}
                     <div>
                         <label className={labelCls}>
-                            <Calendar size={12} />
+                            <Calendar01Icon size={12} />
                             {t('tickets.create.dueDate')}
                         </label>
                         <input
@@ -301,7 +279,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {createTicket.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createTicket.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('tickets.create.submit')}
                     </button>
                 </div>
@@ -355,7 +333,7 @@ const TicketDetailModal = ({ ticket, onClose }: { ticket: TicketItem; onClose: (
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -377,7 +355,7 @@ const TicketDetailModal = ({ ticket, onClose }: { ticket: TicketItem; onClose: (
                         </span>
                         {ticket.department && (
                             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-600 flex items-center gap-1">
-                                <Building size={12} />
+                                <Building01Icon size={12} />
                                 {ticket.department}
                             </span>
                         )}
@@ -403,7 +381,7 @@ const TicketDetailModal = ({ ticket, onClose }: { ticket: TicketItem; onClose: (
                                             <img src={ticket.assignee.avatar} alt="" className="w-7 h-7 rounded-full border border-gray-200" />
                                         ) : (
                                             <div className="w-7 h-7 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                                <User size={14} className="text-gray-400" />
+                                                <UserIcon size={14} className="text-gray-400" />
                                             </div>
                                         )}
                                         <span className="text-sm text-gray-700 font-medium">{ticket.assignee.name}</span>
@@ -419,7 +397,7 @@ const TicketDetailModal = ({ ticket, onClose }: { ticket: TicketItem; onClose: (
                             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{t('tickets.table.created')}</p>
                             <div className="flex items-center gap-2">
                                 <div className="w-7 h-7 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                    <User size={14} className="text-gray-400" />
+                                    <UserIcon size={14} className="text-gray-400" />
                                 </div>
                                 <span className="text-sm text-gray-700 font-medium">{ticket.reporter.name || '—'}</span>
                             </div>
@@ -430,7 +408,7 @@ const TicketDetailModal = ({ ticket, onClose }: { ticket: TicketItem; onClose: (
                             <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">{t('tickets.table.dueDate')}</p>
                             {ticket.dueDate ? (
                                 <div className={`flex items-center gap-1.5 text-sm ${ticket.isOverdue ? 'text-red-500 font-semibold' : 'text-gray-700'}`}>
-                                    <Calendar size={14} />
+                                    <Calendar01Icon size={14} />
                                     <span>{ticket.dueDate}</span>
                                     {ticket.isOverdue && <span className="text-[10px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded-full ml-1">{t('tickets.overdue')}</span>}
                                 </div>
@@ -538,9 +516,9 @@ const Tickets = () => {
 
     const stats = [
         { label: t('tickets.stats.total'), value: tickets.length, icon: TicketIcon, color: '#33cbcc' },
-        { label: t('tickets.stats.open'), value: openCount, icon: CircleDot, color: '#3b82f6' },
-        { label: t('tickets.stats.inProgress'), value: inProgressCount, icon: Clock, color: '#f59e0b' },
-        { label: t('tickets.stats.resolved'), value: resolvedThisWeek, icon: CheckCircle, color: '#22c55e' },
+        { label: t('tickets.stats.open'), value: openCount, icon: CircleIcon, color: '#3b82f6' },
+        { label: t('tickets.stats.inProgress'), value: inProgressCount, icon: Clock01Icon, color: '#f59e0b' },
+        { label: t('tickets.stats.resolved'), value: resolvedThisWeek, icon: Tick01Icon, color: '#22c55e' },
     ];
 
     /* Ticket activity data — group tickets by month */
@@ -594,7 +572,7 @@ const Tickets = () => {
                     onClick={() => setShowCreateModal(true)}
                     className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     {t('tickets.newTicket')}
                 </button>
             </div>
@@ -607,17 +585,16 @@ const Tickets = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
-                            style={{ color: stat.color }}
-                        >
-                            <stat.icon size={100} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -678,16 +655,16 @@ const Tickets = () => {
                 </motion.div>
             </div>
 
-            {/* ── Search + View Toggle ── */}
+            {/* ── Search01Icon + View Toggle ── */}
             <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
+                <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                    <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                     <input
                         type="text"
                         placeholder={t('tickets.searchPlaceholder')}
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                        className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                     />
                 </div>
 
@@ -696,13 +673,13 @@ const Tickets = () => {
                         onClick={() => setViewMode('grid')}
                         className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                        <LayoutGrid size={18} />
+                        <DashboardSquare01Icon size={18} />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
                         className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                        <List size={18} />
+                        <ListViewIcon size={18} />
                     </button>
                 </div>
             </div>
@@ -756,7 +733,7 @@ const Tickets = () => {
                                                 className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                                 title={t('tickets.takeTicket')}
                                             >
-                                                <UserCheck size={16} />
+                                                <UserCheck01Icon size={16} />
                                             </button>
                                         )}
                                         {ticket.status === 'in_progress' && (
@@ -765,7 +742,7 @@ const Tickets = () => {
                                                 className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                                 title={t('tickets.closeTicket')}
                                             >
-                                                <XCircle size={16} />
+                                                <CancelCircleIcon size={16} />
                                             </button>
                                         )}
                                     </div>
@@ -790,7 +767,7 @@ const Tickets = () => {
                                     </span>
                                     {ticket.department && (
                                         <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 flex items-center gap-1.5">
-                                            <Building size={12} />
+                                            <Building01Icon size={12} />
                                             {ticket.department}
                                         </span>
                                     )}
@@ -799,7 +776,7 @@ const Tickets = () => {
                                 {/* Due Date */}
                                 {ticket.dueDate && (
                                     <div className={`flex items-center gap-1.5 mb-4 text-xs ${ticket.isOverdue ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
-                                        <Calendar size={12} />
+                                        <Calendar01Icon size={12} />
                                         <span>{ticket.dueDate}</span>
                                         {ticket.isOverdue && <span className="text-[10px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded-full">{t('tickets.overdue')}</span>}
                                     </div>
@@ -823,7 +800,7 @@ const Tickets = () => {
                                                         <img src={emp.avatarUrl} alt="" className="w-5 h-5 rounded-full" />
                                                     ) : (
                                                         <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center">
-                                                            <User size={10} className="text-gray-400" />
+                                                            <UserIcon size={10} className="text-gray-400" />
                                                         </div>
                                                     )}
                                                     {emp.firstName} {emp.lastName}
@@ -845,7 +822,7 @@ const Tickets = () => {
                                                     <img src={ticket.assignee.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
                                                 ) : (
                                                     <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                                        <User size={12} className="text-gray-400" />
+                                                        <UserIcon size={12} className="text-gray-400" />
                                                     </div>
                                                 )}
                                                 <span className="text-xs text-gray-500">{ticket.assignee.name.split(' ')[0]}</span>
@@ -862,7 +839,7 @@ const Tickets = () => {
                 </div>
             )}
 
-            {/* ── List View ── */}
+            {/* ── ListViewIcon View ── */}
             {viewMode === 'list' && filteredTickets.length > 0 && (
                 <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
                     {/* Table header */}
@@ -915,7 +892,7 @@ const Tickets = () => {
                                 </div>
                                 {/* Department */}
                                 <div className="col-span-1 flex items-center gap-1.5 text-xs text-gray-500">
-                                    <Building size={12} />
+                                    <Building01Icon size={12} />
                                     <span className="truncate">{ticket.department || t('tickets.noDepartment')}</span>
                                 </div>
                                 {/* Assignee */}
@@ -926,7 +903,7 @@ const Tickets = () => {
                                                 <img src={ticket.assignee.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
                                             ) : (
                                                 <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                                    <User size={12} className="text-gray-400" />
+                                                    <UserIcon size={12} className="text-gray-400" />
                                                 </div>
                                             )}
                                             <span className="text-xs text-gray-500 truncate">{ticket.assignee.name}</span>
@@ -939,7 +916,7 @@ const Tickets = () => {
                                 <div className={`col-span-1 flex items-center gap-1 text-xs ${ticket.isOverdue ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
                                     {ticket.dueDate ? (
                                         <>
-                                            <Calendar size={10} />
+                                            <Calendar01Icon size={10} />
                                             {ticket.dueDate}
                                         </>
                                     ) : (
@@ -956,7 +933,7 @@ const Tickets = () => {
                                                 onClick={(e) => { e.stopPropagation(); setAssigningTicketId(assigningTicketId === ticket.id ? null : ticket.id); }}
                                                 className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                                             >
-                                                <UserCheck size={12} />
+                                                <UserCheck01Icon size={12} />
                                                 {t('tickets.takeTicket')}
                                             </button>
                                             {assigningTicketId === ticket.id && ticket.departmentId && (
@@ -974,7 +951,7 @@ const Tickets = () => {
                                                                 <img src={emp.avatarUrl} alt="" className="w-5 h-5 rounded-full" />
                                                             ) : (
                                                                 <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center">
-                                                                    <User size={10} className="text-gray-400" />
+                                                                    <UserIcon size={10} className="text-gray-400" />
                                                                 </div>
                                                             )}
                                                             <span className="truncate">{emp.firstName} {emp.lastName}</span>
@@ -989,7 +966,7 @@ const Tickets = () => {
                                             onClick={(e) => { e.stopPropagation(); closeTicket.mutate(ticket.id); }}
                                             className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                                         >
-                                            <XCircle size={12} />
+                                            <CancelCircleIcon size={12} />
                                             {t('tickets.closeTicket')}
                                         </button>
                                     )}

@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    X, Plus, Loader2, Briefcase, Trash2, Pencil, Check, ChevronRight, Search, Building,
-} from 'lucide-react';
+import { Cancel01Icon, Add01Icon, Loading02Icon, Briefcase01Icon, Delete02Icon, PencilIcon, Tick01Icon, ArrowRight01Icon, Search01Icon, Building01Icon } from 'hugeicons-react';
 import { usePositions, useCreatePosition, useUpdatePosition, useDeletePosition } from '../../api/positions/hooks';
 import { useDepartments } from '../../api/departments/hooks';
 import type { Position } from '../../api/positions/types';
@@ -119,7 +117,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                            <Briefcase size={18} className="text-[#33cbcc]" />
+                            <Briefcase01Icon size={18} className="text-[#33cbcc]" />
                         </div>
                         <div>
                             <h3 id="roles-modal-title" className="text-base font-bold text-gray-800">
@@ -144,7 +142,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                             </button>
                         )}
                         <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                            <X size={18} aria-hidden="true" />
+                            <Cancel01Icon size={18} aria-hidden="true" />
                         </button>
                     </div>
                 </div>
@@ -159,24 +157,24 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                             exit={{ opacity: 0, x: -10 }}
                             className="flex flex-col flex-1 min-h-0"
                         >
-                            {/* Search + Add */}
+                            {/* Search01Icon + Add */}
                             <div className="px-6 pt-3 pb-2 border-b border-gray-50 space-y-2 shrink-0">
                                 <div className="flex gap-3">
-                                    <div className="flex-1 flex items-center gap-2 bg-gray-50 rounded-xl px-3 border border-gray-100">
-                                        <Search size={15} className="text-gray-400 shrink-0" />
+                                    <div className="relative flex-1">
+                                        <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                                         <input
                                             type="text"
                                             value={search}
                                             onChange={e => setSearch(e.target.value)}
                                             placeholder={t('roles.modal.search', 'Search roles...')}
-                                            className="flex-1 bg-transparent py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none"
+                                            className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                                         />
                                     </div>
                                     <button
                                         onClick={openCreate}
                                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#33cbcc] text-white text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20"
                                     >
-                                        <Plus size={15} />
+                                        <Add01Icon size={15} />
                                         {t('roles.modal.new', 'New')}
                                     </button>
                                 </div>
@@ -202,7 +200,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                                     : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                             }`}
                                         >
-                                            <Building size={11} />
+                                            <Building01Icon size={11} />
                                             {dept.name}
                                         </button>
                                     ))}
@@ -213,11 +211,11 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                             <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
                                 {isLoading ? (
                                     <div className="flex justify-center py-12">
-                                        <Loader2 size={24} className="animate-spin text-[#33cbcc]" />
+                                        <Loading02Icon size={24} className="animate-spin text-[#33cbcc]" />
                                     </div>
                                 ) : filtered.length === 0 ? (
                                     <div className="py-12 text-center">
-                                        <Briefcase size={36} className="mx-auto text-gray-200 mb-3" />
+                                        <Briefcase01Icon size={36} className="mx-auto text-gray-200 mb-3" />
                                         <p className="text-sm text-gray-400">{t('roles.modal.empty', 'No roles found')}</p>
                                     </div>
                                 ) : filtered.map(pos => {
@@ -226,14 +224,14 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                     return (
                                         <div key={pos.id} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/60 transition-colors group">
                                             <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                                                <Briefcase size={18} className="text-[#33cbcc]" />
+                                                <Briefcase01Icon size={18} className="text-[#33cbcc]" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-semibold text-gray-800 truncate">{pos.title}</p>
                                                 <div className="flex items-center gap-2 mt-0.5">
                                                     {dept && (
                                                         <span className="flex items-center gap-1 text-[11px] text-gray-400">
-                                                            <Building size={10} />{dept.name}
+                                                            <Building01Icon size={10} />{dept.name}
                                                         </span>
                                                     )}
                                                     {missions.length > 0 && (
@@ -250,17 +248,17 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                                     aria-label={`${t('common.edit', 'Edit')} ${pos.title}`}
                                                     className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                                 >
-                                                    <Pencil size={15} aria-hidden="true" />
+                                                    <PencilIcon size={15} aria-hidden="true" />
                                                 </button>
                                                 <button
                                                     onClick={() => setConfirmDeleteId(pos.id)}
                                                     aria-label={`${t('common.delete', 'Delete')} ${pos.title}`}
                                                     className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#283852] transition-colors"
                                                 >
-                                                    <Trash2 size={15} aria-hidden="true" />
+                                                    <Delete02Icon size={15} aria-hidden="true" />
                                                 </button>
                                             </div>
-                                            <ChevronRight size={15} className="text-gray-200 group-hover:text-gray-300 transition-colors shrink-0" />
+                                            <ArrowRight01Icon size={15} className="text-gray-200 group-hover:text-gray-300 transition-colors shrink-0" />
                                         </div>
                                     );
                                 })}
@@ -334,7 +332,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                                     aria-label={`${t('common.remove', 'Remove')} ${m}`}
                                                     className="text-gray-400 hover:text-[#283852] transition-colors p-1"
                                                 >
-                                                    <Trash2 size={13} aria-hidden="true" />
+                                                    <Delete02Icon size={13} aria-hidden="true" />
                                                 </button>
                                             </div>
                                         ))}
@@ -355,7 +353,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                             aria-label={t('positions.create.addMission', 'Add mission')}
                                             className="px-3 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                         >
-                                            <Plus size={17} aria-hidden="true" />
+                                            <Add01Icon size={17} aria-hidden="true" />
                                         </button>
                                     </div>
                                 </div>
@@ -378,7 +376,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                             : 'bg-gray-300 cursor-not-allowed shadow-none'
                                     }`}
                                 >
-                                    {isPending ? <Loader2 size={15} className="animate-spin" /> : <Check size={15} />}
+                                    {isPending ? <Loading02Icon size={15} className="animate-spin" /> : <Tick01Icon size={15} />}
                                     {view === 'create' ? t('common.create', 'Create') : t('common.save', 'Save changes')}
                                 </button>
                             </div>
@@ -405,7 +403,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                             className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm"
                         >
                             <div className="w-12 h-12 rounded-full bg-[#283852]/10 flex items-center justify-center mx-auto mb-4">
-                                <Trash2 size={22} className="text-[#283852]" />
+                                <Delete02Icon size={22} className="text-[#283852]" />
                             </div>
                             <h4 className="text-center font-bold text-gray-800 mb-2">{t('roles.modal.deleteTitle', 'Delete Role')}</h4>
                             <p className="text-center text-sm text-gray-500 mb-6">
@@ -423,7 +421,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
                                     disabled={deletePosition.isPending}
                                     className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852]/90 disabled:opacity-60 transition-colors"
                                 >
-                                    {deletePosition.isPending ? <Loader2 size={14} className="animate-spin" /> : null}
+                                    {deletePosition.isPending ? <Loading02Icon size={14} className="animate-spin" /> : null}
                                     {t('common.delete', 'Delete')}
                                 </button>
                             </div>

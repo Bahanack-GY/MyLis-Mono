@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mic, Square, Upload, CheckCircle, X } from 'lucide-react';
+import { Mic01Icon, SquareIcon, Upload01Icon, Tick01Icon, Cancel01Icon } from 'hugeicons-react';
 import { useSocket } from '../contexts/SocketContext';
 import { useUploadRecording } from '../api/meetings/hooks';
 import { toast } from 'sonner';
@@ -150,7 +150,7 @@ const MeetingRecordingPrompt = () => {
                             <div className="flex items-start justify-between mb-3">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                                        <Mic size={20} className="text-[#33cbcc]" />
+                                        <Mic01Icon size={20} className="text-[#33cbcc]" />
                                     </div>
                                     <div className="min-w-0">
                                         <p className="text-sm font-semibold text-gray-800">You're the Secretary</p>
@@ -158,7 +158,7 @@ const MeetingRecordingPrompt = () => {
                                     </div>
                                 </div>
                                 <button onClick={dismiss} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors shrink-0">
-                                    <X size={14} />
+                                    <Cancel01Icon size={14} />
                                 </button>
                             </div>
                             <p className="text-xs text-gray-500 mb-3 leading-relaxed">
@@ -168,7 +168,7 @@ const MeetingRecordingPrompt = () => {
                                 onClick={startRecording}
                                 className="w-full flex items-center justify-center gap-2 bg-[#33cbcc] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                             >
-                                <Mic size={15} />
+                                <Mic01Icon size={15} />
                                 Start Recording
                             </button>
                         </>
@@ -192,8 +192,8 @@ const MeetingRecordingPrompt = () => {
                                 onClick={stopRecording}
                                 className="w-full flex items-center justify-center gap-2 bg-[#283852] text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-[#283852]/90 transition-colors"
                             >
-                                <Square size={13} />
-                                Stop & Upload
+                                <SquareIcon size={13} />
+                                Stop & Upload01Icon
                             </button>
                         </>
                     )}
@@ -201,7 +201,7 @@ const MeetingRecordingPrompt = () => {
                     {state === 'uploading' && (
                         <div className="text-center py-3">
                             <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center mx-auto mb-3">
-                                <Upload size={20} className="text-[#33cbcc] animate-bounce" />
+                                <Upload01Icon size={20} className="text-[#33cbcc] animate-bounce" />
                             </div>
                             <p className="text-sm font-semibold text-gray-800">Transcribing…</p>
                             <p className="text-xs text-gray-500 mt-1">Generating meeting minutes, please wait</p>
@@ -211,7 +211,7 @@ const MeetingRecordingPrompt = () => {
                     {state === 'done' && (
                         <div className="text-center py-3">
                             <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center mx-auto mb-3">
-                                <CheckCircle size={20} className="text-[#33cbcc]" />
+                                <Tick01Icon size={20} className="text-[#33cbcc]" />
                             </div>
                             <p className="text-sm font-semibold text-gray-800">Minutes Generated</p>
                             <p className="text-xs text-gray-500 mt-1">Report saved to the meeting record</p>

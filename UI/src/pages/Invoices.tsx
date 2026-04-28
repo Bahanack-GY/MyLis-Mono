@@ -1,27 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    FileText,
-    Search,
-    Plus,
-    X,
-    TrendingUp,
-    Clock,
-    AlertTriangle,
-    Loader2,
-    Calendar,
-    Trash2,
-    Send,
-    CheckCircle,
-    XCircle,
-    Download,
-    Eye,
-    Briefcase,
-    AlignLeft,
-    Image,
-    Receipt,
-} from 'lucide-react';
+import { File01Icon, Search01Icon, Add01Icon, Cancel01Icon, ArrowUpRight01Icon, Clock01Icon, Alert02Icon, Loading02Icon, Calendar01Icon, Delete02Icon, SentIcon, Tick01Icon, CancelCircleIcon, Download01Icon, ViewIcon, Briefcase01Icon, AlignLeftIcon, Image01Icon, Invoice01Icon } from 'hugeicons-react';
 
 import lisdevImg from '../assets/entete/lisdev.png';
 import lisappImg from '../assets/entete/lisapp.png';
@@ -224,7 +204,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: isProforma ? '#f59e0b15' : `${STATUS_COLORS[invoice.status]}15` }}>
-                            <FileText size={20} style={{ color: isProforma ? '#f59e0b' : STATUS_COLORS[invoice.status] }} />
+                            <File01Icon size={20} style={{ color: isProforma ? '#f59e0b' : STATUS_COLORS[invoice.status] }} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
@@ -241,7 +221,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -325,13 +305,13 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                         </span>
                                         {editItems.length > 1 && (
                                             <button onClick={() => removeEditItem(idx)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
-                                                <Trash2 size={14} />
+                                                <Delete02Icon size={14} />
                                             </button>
                                         )}
                                     </div>
                                 ))}
                                 <button onClick={addEditItem} className="flex items-center gap-1 text-xs font-semibold text-[#33cbcc] hover:text-[#2bb5b6] mt-1">
-                                    <Plus size={12} /> Ajouter une ligne
+                                    <Add01Icon size={12} /> Ajouter une ligne
                                 </button>
                                 <div className="flex justify-between text-sm font-bold text-gray-800 pt-2 border-t border-gray-200">
                                     <span>Sous-total</span>
@@ -409,7 +389,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                 disabled={updateInvoice.isPending}
                                 className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
                             >
-                                {updateInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                {updateInvoice.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Tick01Icon size={14} />}
                                 Enregistrer
                             </button>
                         </div>
@@ -418,7 +398,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                             {/* Letterhead selector */}
                             <div className="flex items-center gap-2 flex-wrap">
                                 <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider shrink-0">
-                                    <Image size={12} />
+                                    <Image01Icon size={12} />
                                     {t('invoices.detail.letterhead')}
                                 </div>
                                 <button
@@ -454,7 +434,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                         disabled={isExporting || sendInvoice.isPending}
                                         className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50"
                                     >
-                                        {(isExporting || sendInvoice.isPending) ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                                        {(isExporting || sendInvoice.isPending) ? <Loading02Icon size={14} className="animate-spin" /> : <Download01Icon size={14} />}
                                         {isProforma ? 'Télécharger proforma' : t('invoices.detail.exportPdf')}
                                     </button>
                                     {invoice.status === 'PAID' && (
@@ -463,7 +443,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                             disabled={isExportingReceipt}
                                             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
                                         >
-                                            {isExportingReceipt ? <Loader2 size={14} className="animate-spin" /> : <Receipt size={14} />}
+                                            {isExportingReceipt ? <Loading02Icon size={14} className="animate-spin" /> : <Invoice01Icon size={14} />}
                                             {t('invoices.detail.exportReceipt')}
                                         </button>
                                     )}
@@ -477,7 +457,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                                 disabled={deleteInvoice.isPending}
                                                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
                                             >
-                                                {deleteInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                                                {deleteInvoice.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Delete02Icon size={14} />}
                                                 Supprimer
                                             </button>
                                             <button
@@ -485,7 +465,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                                 disabled={validateProforma.isPending}
                                                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50"
                                             >
-                                                {validateProforma.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                                {validateProforma.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Tick01Icon size={14} />}
                                                 Valider en facture
                                             </button>
                                         </>
@@ -497,7 +477,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                                 disabled={deleteInvoice.isPending}
                                                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
                                             >
-                                                {deleteInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                                                {deleteInvoice.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Delete02Icon size={14} />}
                                                 {t('invoices.detail.delete')}
                                             </button>
                                             <button
@@ -505,7 +485,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                                 disabled={sendInvoice.isPending}
                                                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852]/80 transition-colors shadow-lg shadow-[#283852]/20 disabled:opacity-50"
                                             >
-                                                {sendInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                                                {sendInvoice.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <SentIcon size={14} />}
                                                 {t('invoices.detail.send')}
                                             </button>
                                         </>
@@ -516,7 +496,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                                 onClick={() => setShowAcompteModal(true)}
                                                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
                                             >
-                                                <Plus size={14} />
+                                                <Add01Icon size={14} />
                                                 Acompte
                                             </button>
                                             <button
@@ -524,7 +504,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                                 disabled={rejectInvoice.isPending}
                                                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
                                             >
-                                                {rejectInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                                                {rejectInvoice.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <CancelCircleIcon size={14} />}
                                                 {t('invoices.detail.reject')}
                                             </button>
                                             <button
@@ -532,7 +512,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                                 disabled={payInvoice.isPending}
                                                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50"
                                             >
-                                                {payInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                                {payInvoice.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Tick01Icon size={14} />}
                                                 {t('invoices.detail.pay')}
                                             </button>
                                         </>
@@ -559,7 +539,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                         >
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2.5 rounded-xl bg-[#33cbcc]/10">
-                                    <Plus size={20} className="text-[#33cbcc]" />
+                                    <Add01Icon size={20} className="text-[#33cbcc]" />
                                 </div>
                                 <h3 className="text-base font-semibold text-white">Facture d'acompte</h3>
                             </div>
@@ -591,7 +571,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                     }}
                                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {createAcompte.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                    {createAcompte.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Tick01Icon size={14} />}
                                     Générer
                                 </button>
                             </div>
@@ -619,7 +599,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                         >
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2.5 rounded-xl bg-[#33cbcc]/10">
-                                    <CheckCircle size={20} className="text-[#33cbcc]" />
+                                    <Tick01Icon size={20} className="text-[#33cbcc]" />
                                 </div>
                                 <h3 className="text-base font-semibold text-white">{t('invoices.detail.pay')}</h3>
                             </div>
@@ -636,7 +616,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                     disabled={payInvoice.isPending}
                                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50"
                                 >
-                                    {payInvoice.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                    {payInvoice.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Tick01Icon size={14} />}
                                     {t('invoices.detail.pay')}
                                 </button>
                             </div>
@@ -660,7 +640,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                         >
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2.5 rounded-xl bg-[#33cbcc]/10">
-                                    <CheckCircle size={20} className="text-[#33cbcc]" />
+                                    <Tick01Icon size={20} className="text-[#33cbcc]" />
                                 </div>
                                 <h3 className="text-base font-semibold text-white">Valider la proforma</h3>
                             </div>
@@ -677,7 +657,7 @@ const InvoiceDetailModal = ({ invoice: initialInvoice, onClose }: { invoice: Inv
                                     disabled={validateProforma.isPending}
                                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 disabled:opacity-50"
                                 >
-                                    {validateProforma.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                    {validateProforma.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Tick01Icon size={14} />}
                                     Valider
                                 </button>
                             </div>
@@ -697,7 +677,7 @@ const InvoiceTable = ({ rows, onSelect }: { rows: Invoice[]; onSelect: (inv: Inv
     if (rows.length === 0) {
         return (
             <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-                <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+                <File01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                 <p className="text-gray-400 font-medium">{t('invoices.noResults')}</p>
             </div>
         );
@@ -742,16 +722,16 @@ const InvoiceTable = ({ rows, onSelect }: { rows: Invoice[]; onSelect: (inv: Inv
                             )}
                         </div>
                         <div className={`col-span-2 flex items-center gap-1.5 text-xs ${isOverdue ? 'text-[#283852] font-semibold' : 'text-gray-400'}`}>
-                            <Calendar size={12} />
+                            <Calendar01Icon size={12} />
                             {formatDate(invoice.dueDate)}
-                            {isOverdue && <AlertTriangle size={12} className="text-[#283852]" />}
+                            {isOverdue && <Alert02Icon size={12} className="text-[#283852]" />}
                         </div>
                         <div className="col-span-1 flex justify-end">
                             <button
                                 onClick={e => { e.stopPropagation(); onSelect(invoice); }}
                                 className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
                             >
-                                <Eye size={14} />
+                                <ViewIcon size={14} />
                             </button>
                         </div>
                     </motion.div>
@@ -845,10 +825,10 @@ const Invoices = () => {
     if (isLoading) return <InvoicesSkeleton />;
 
     const statCards = [
-        { label: t('invoices.stats.total'), value: stats?.total || 0, icon: FileText, color: '#33cbcc', isCurrency: false },
-        { label: t('invoices.stats.revenue'), value: stats?.totalRevenue || 0, icon: TrendingUp, color: '#33cbcc', isCurrency: true },
-        { label: t('invoices.stats.pending'), value: stats?.totalPending || 0, icon: Clock, color: '#283852', isCurrency: true },
-        { label: t('invoices.stats.overdue'), value: stats?.overdue || 0, icon: AlertTriangle, color: '#283852', isCurrency: false },
+        { label: t('invoices.stats.total'), value: stats?.total || 0, icon: File01Icon, color: '#33cbcc', isCurrency: false },
+        { label: t('invoices.stats.revenue'), value: stats?.totalRevenue || 0, icon: ArrowUpRight01Icon, color: '#33cbcc', isCurrency: true },
+        { label: t('invoices.stats.pending'), value: stats?.totalPending || 0, icon: Clock01Icon, color: '#283852', isCurrency: true },
+        { label: t('invoices.stats.overdue'), value: stats?.overdue || 0, icon: Alert02Icon, color: '#283852', isCurrency: false },
     ];
 
     const statusFilters: { key: InvoiceStatus | 'all'; label: string }[] = [
@@ -866,12 +846,12 @@ const Invoices = () => {
                 </div>
                 {activeTab === 'invoices' && (
                     <button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20">
-                        <Plus size={16} />{t('invoices.newInvoice')}
+                        <Add01Icon size={16} />{t('invoices.newInvoice')}
                     </button>
                 )}
                 {activeTab === 'proformas' && (
                     <button onClick={() => setShowCreateProformaModal(true)} className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20">
-                        <Plus size={16} />Nouvelle Proforma
+                        <Add01Icon size={16} />Nouvelle Proforma
                     </button>
                 )}
             </div>
@@ -886,7 +866,7 @@ const Invoices = () => {
                             : 'text-gray-500 hover:text-gray-700'
                     }`}
                 >
-                    <FileText size={14} />
+                    <File01Icon size={14} />
                     Factures
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === 'invoices' ? 'bg-[#33cbcc]/10 text-[#33cbcc]' : 'bg-gray-200 text-gray-500'}`}>
                         {onlyInvoices.length}
@@ -900,7 +880,7 @@ const Invoices = () => {
                             : 'text-gray-500 hover:text-gray-700'
                     }`}
                 >
-                    <Briefcase size={14} />
+                    <Briefcase01Icon size={14} />
                     Proformas
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === 'proformas' ? 'text-[#33cbcc]' : 'bg-gray-200 text-gray-500'}`}>
                         {onlyProformas.length}
@@ -910,7 +890,7 @@ const Invoices = () => {
                     onClick={() => switchTab('acomptes')}
                     className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'acomptes' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                 >
-                    <Receipt size={14} />
+                    <Invoice01Icon size={14} />
                     Acomptes
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${activeTab === 'acomptes' ? 'text-[#33cbcc]' : 'bg-gray-200 text-gray-500'}`}>
                         {onlyAcomptes.length}
@@ -982,10 +962,10 @@ const Invoices = () => {
                         </motion.div>
                     </div>
 
-                    {/* ── Search ── */}
-                    <div className="bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                        <Search className="text-gray-400 ml-3" size={20} />
-                        <input type="text" placeholder={t('invoices.searchPlaceholder')} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm" />
+                    {/* ── Search01Icon ── */}
+                    <div className="flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                        <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
+                        <input type="text" placeholder={t('invoices.searchPlaceholder')} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]" />
                     </div>
 
                     {/* ── Status Filters ── */}
@@ -1008,9 +988,9 @@ const Invoices = () => {
 
             {activeTab === 'proformas' && (
                 <>
-                    <div className="bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                        <Search className="text-gray-400 ml-3" size={20} />
-                        <input type="text" placeholder="Rechercher une proforma..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm" />
+                    <div className="flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                        <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
+                        <input type="text" placeholder="Rechercher une proforma..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]" />
                     </div>
                     <InvoiceTable rows={filteredProformas} onSelect={setSelectedInvoice} />
                 </>
@@ -1018,9 +998,9 @@ const Invoices = () => {
 
             {activeTab === 'acomptes' && (
                 <>
-                    <div className="bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                        <Search className="text-gray-400 ml-3" size={20} />
-                        <input type="text" placeholder="Rechercher un acompte..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm" />
+                    <div className="flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                        <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
+                        <input type="text" placeholder="Rechercher un acompte..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]" />
                     </div>
                     <InvoiceTable rows={filteredAcomptes} onSelect={setSelectedInvoice} />
                 </>

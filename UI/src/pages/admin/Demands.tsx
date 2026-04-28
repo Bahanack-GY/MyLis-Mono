@@ -2,25 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    HandCoins,
-    Search,
-    X,
-    Clock,
-    CheckCircle,
-    XCircle,
-    Loader2,
-    Building,
-    User,
-    DollarSign,
-    LayoutGrid,
-    List,
-    FileText,
-    Package,
-    ExternalLink,
-    AlertTriangle,
-    MessageSquare,
-} from 'lucide-react';
+import { Money01Icon, Search01Icon, Cancel01Icon, Clock01Icon, Tick01Icon, CancelCircleIcon, Loading02Icon, Building01Icon, UserIcon, DollarCircleIcon, DashboardSquare01Icon, ListViewIcon, File01Icon, PackageIcon, LinkSquare01Icon, Alert02Icon, Message02Icon } from 'hugeicons-react';
 import { useDemands, useDemandStats, useValidateDemand, useRejectDemand } from '../../api/demands/hooks';
 import { DemandsAdminSkeleton } from '../../components/Skeleton';
 import { useCreateDM, useSendMessage } from '../../api/chat/hooks';
@@ -132,7 +114,7 @@ const DemandDetailModal = ({
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <HandCoins size={20} className="text-[#33cbcc]" />
+                            <Money01Icon size={20} className="text-[#33cbcc]" />
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-gray-800">
@@ -142,7 +124,7 @@ const DemandDetailModal = ({
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -154,12 +136,12 @@ const DemandDetailModal = ({
                             {t(`demands.status.${demand.status.toLowerCase()}`)}
                         </span>
                         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 ${IMPORTANCE_COLORS[demand.importance]}`}>
-                            {demand.importance === 'URGENT' && <AlertTriangle size={10} />}
+                            {demand.importance === 'URGENT' && <Alert02Icon size={10} />}
                             {t(`demands.importance.${demand.importance.toLowerCase()}`)}
                         </span>
                         {demand.department && (
                             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-600 flex items-center gap-1">
-                                <Building size={12} />
+                                <Building01Icon size={12} />
                                 {demand.department.name}
                             </span>
                         )}
@@ -222,9 +204,9 @@ const DemandDetailModal = ({
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-3 p-3 bg-[#283852]/10 border border-gray-200 rounded-xl text-[#283852] hover:bg-[#283852]/20 transition-colors"
                             >
-                                <FileText size={18} />
+                                <File01Icon size={18} />
                                 <span className="text-sm font-medium">{t('demands.viewProforma')}</span>
-                                <ExternalLink size={14} className="ml-auto" />
+                                <LinkSquare01Icon size={14} className="ml-auto" />
                             </a>
                         </div>
                     )}
@@ -237,7 +219,7 @@ const DemandDetailModal = ({
                                 <img src={demand.employee.avatarUrl} alt="" className="w-8 h-8 rounded-full border border-gray-200" />
                             ) : (
                                 <div className="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                    <User size={14} className="text-gray-400" />
+                                    <UserIcon size={14} className="text-gray-400" />
                                 </div>
                             )}
                             <span className="text-sm font-medium text-gray-700">
@@ -287,7 +269,7 @@ const DemandDetailModal = ({
                             onClick={handleStartChat}
                             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors mr-auto"
                         >
-                            {startingChat ? <Loader2 size={16} className="animate-spin" /> : <MessageSquare size={16} />}
+                            {startingChat ? <Loading02Icon size={16} className="animate-spin" /> : <Message02Icon size={16} />}
                             {t('demands.startChat')}
                         </button>
                     )}
@@ -298,7 +280,7 @@ const DemandDetailModal = ({
                                 onClick={() => setShowRejectInput(true)}
                                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors"
                             >
-                                <XCircle size={16} />
+                                <CancelCircleIcon size={16} />
                                 {t('demands.reject')}
                             </button>
                             <button
@@ -306,7 +288,7 @@ const DemandDetailModal = ({
                                 onClick={() => validateDemand.mutate(demand.id, { onSuccess: () => onClose() })}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                             >
-                                {validateDemand.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                                {validateDemand.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Tick01Icon size={16} />}
                                 {t('demands.validate')}
                             </button>
                         </>
@@ -324,7 +306,7 @@ const DemandDetailModal = ({
                                 onClick={() => rejectDemand.mutate({ id: demand.id, reason: rejectReason }, { onSuccess: () => onClose() })}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20"
                             >
-                                {rejectDemand.isPending ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+                                {rejectDemand.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <CancelCircleIcon size={16} />}
                                 {t('demands.confirmReject')}
                             </button>
                         </>
@@ -354,7 +336,7 @@ const DemandDetailModal = ({
                             onClick={() => setLightboxUrl(null)}
                             className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
                         >
-                            <X size={20} />
+                            <Cancel01Icon size={20} />
                         </button>
                         <motion.img
                             initial={{ scale: 0.9, opacity: 0 }}
@@ -400,11 +382,11 @@ const Demands = () => {
     }, [demands, searchQuery, filterStatus]);
 
     const statCards = [
-        { label: t('demands.stats.total'), value: stats?.total ?? 0, icon: HandCoins, color: '#33cbcc' },
-        { label: t('demands.stats.pending'), value: stats?.totalPending ?? 0, icon: Clock, color: '#283852' },
-        { label: t('demands.stats.validated'), value: stats?.totalValidated ?? 0, icon: CheckCircle, color: '#33cbcc' },
-        { label: t('demands.stats.rejected'), value: stats?.totalRejected ?? 0, icon: XCircle, color: '#283852' },
-        { label: t('demands.stats.totalExpense'), value: formatFCFA(stats?.totalExpense ?? 0), icon: DollarSign, color: '#283852' },
+        { label: t('demands.stats.total'), value: stats?.total ?? 0, icon: Money01Icon, color: '#33cbcc' },
+        { label: t('demands.stats.pending'), value: stats?.totalPending ?? 0, icon: Clock01Icon, color: '#283852' },
+        { label: t('demands.stats.validated'), value: stats?.totalValidated ?? 0, icon: Tick01Icon, color: '#33cbcc' },
+        { label: t('demands.stats.rejected'), value: stats?.totalRejected ?? 0, icon: CancelCircleIcon, color: '#283852' },
+        { label: t('demands.stats.totalExpense'), value: formatFCFA(stats?.totalExpense ?? 0), icon: DollarCircleIcon, color: '#283852' },
     ];
 
     const statusFilters: { key: DemandStatusKey | 'all'; label: string }[] = [
@@ -458,16 +440,16 @@ const Demands = () => {
                 ))}
             </div>
 
-            {/* Search + View Toggle */}
+            {/* Search01Icon + View Toggle */}
             <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
+                <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                    <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                     <input
                         type="text"
                         placeholder={t('demands.searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                        className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                     />
                 </div>
 
@@ -476,13 +458,13 @@ const Demands = () => {
                         onClick={() => setViewMode('grid')}
                         className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                        <LayoutGrid size={18} />
+                        <DashboardSquare01Icon size={18} />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
                         className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                        <List size={18} />
+                        <ListViewIcon size={18} />
                     </button>
                 </div>
             </div>
@@ -524,7 +506,7 @@ const Demands = () => {
                         >
                             <div className="flex items-start justify-between mb-3">
                                 <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                                    <HandCoins size={20} className="text-[#33cbcc]" />
+                                    <Money01Icon size={20} className="text-[#33cbcc]" />
                                 </div>
                                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_BG[demand.status as DemandStatusKey]}`}>
                                     {t(`demands.status.${demand.status.toLowerCase()}`)}
@@ -533,11 +515,11 @@ const Demands = () => {
 
                             <h3 className="font-semibold text-gray-800 text-sm truncate mb-1">{getDemandLabel(demand)}</h3>
                             <div className="flex items-center gap-2 mb-3">
-                                <Package size={12} className="text-gray-400" />
+                                <PackageIcon size={12} className="text-gray-400" />
                                 <span className="text-xs text-gray-400">{demand.items?.length || 0} {t('demands.items')}</span>
                                 {demand.proformaUrl && (
                                     <span className="text-xs text-[#283852] flex items-center gap-1">
-                                        <FileText size={10} />
+                                        <File01Icon size={10} />
                                         {t('demands.proforma')}
                                     </span>
                                 )}
@@ -549,7 +531,7 @@ const Demands = () => {
                                         <img src={demand.employee.avatarUrl} alt="" className="w-6 h-6 rounded-full" />
                                     ) : (
                                         <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center">
-                                            <User size={12} className="text-gray-400" />
+                                            <UserIcon size={12} className="text-gray-400" />
                                         </div>
                                     )}
                                     <span className="text-xs text-gray-500">
@@ -565,7 +547,7 @@ const Demands = () => {
                 </div>
             )}
 
-            {/* List View */}
+            {/* ListViewIcon View */}
             {viewMode === 'list' && filteredDemands.length > 0 && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -594,7 +576,7 @@ const Demands = () => {
                                         <td className="py-4 pl-6">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-9 h-9 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                                                    <HandCoins size={16} className="text-[#33cbcc]" />
+                                                    <Money01Icon size={16} className="text-[#33cbcc]" />
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-semibold text-gray-800 truncate max-w-[200px]">{getDemandLabel(demand)}</p>
@@ -608,7 +590,7 @@ const Demands = () => {
                                                     <img src={demand.employee.avatarUrl} alt="" className="w-7 h-7 rounded-full" />
                                                 ) : (
                                                     <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
-                                                        <User size={14} className="text-gray-400" />
+                                                        <UserIcon size={14} className="text-gray-400" />
                                                     </div>
                                                 )}
                                                 <span className="text-sm text-gray-700">
@@ -641,7 +623,7 @@ const Demands = () => {
             {/* No Results */}
             {filteredDemands.length === 0 && (
                 <div className="text-center py-16">
-                    <HandCoins size={48} className="mx-auto text-gray-300 mb-4" />
+                    <Money01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-500 font-medium">{t('demands.noResults')}</p>
                 </div>
             )}

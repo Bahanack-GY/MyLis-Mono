@@ -6,7 +6,7 @@ import { useLogin } from '../api/auth/hooks';
 import logo from '../assets/Logo.png';
 import bg1 from '../assets/images/bg1.png';
 import bg2 from '../assets/images/bg2.png';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { ViewIcon, ViewOffIcon, Loading02Icon } from 'hugeicons-react';
 
 const BG_IMAGES = [bg1, bg2];
 
@@ -17,10 +17,16 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [bgIndex, setBgIndex] = useState(0);
+    const [featureIndex, setFeatureIndex] = useState(0);
     const login = useLogin();
 
     useEffect(() => {
         const timer = setInterval(() => setBgIndex(i => (i + 1) % BG_IMAGES.length), 5000);
+        return () => clearInterval(timer);
+    }, []);
+
+    useEffect(() => {
+        const timer = setInterval(() => setFeatureIndex(i => (i + 1) % 5), 2600);
         return () => clearInterval(timer);
     }, []);
 
@@ -38,11 +44,14 @@ const Login = () => {
 
     const inputCls = 'w-full px-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#33cbcc] focus:ring-2 focus:ring-[#33cbcc]/20 focus:bg-white transition-all outline-none text-gray-700 placeholder-gray-400 text-sm';
 
+    const features = i18n.language === 'fr'
+        ? ['Gestion RH', 'CRM & Clients', 'Projets', 'Comptabilité', '12+ Modules']
+        : ['HR Management', 'CRM & Clients', 'Projects', 'Accounting', '12+ Modules'];
+
     return (
         <>
-            {/* ── MOBILE layout (unchanged) ─────────────────────────── */}
+            {/* ── MOBILE layout ─────────────────────────── */}
             <div className="md:hidden min-h-screen bg-[#283852] flex flex-col relative overflow-hidden">
-                {/* Top Section with Logo */}
                 <div className="h-[30vh] w-full flex items-center justify-center relative">
                     <div className="absolute top-4 right-4 z-10">
                         <button
@@ -52,7 +61,6 @@ const Login = () => {
                             {i18n.language === 'en' ? 'FR' : 'EN'}
                         </button>
                     </div>
-
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -61,11 +69,8 @@ const Login = () => {
                     >
                         <img src={logo} alt="Logo" className="w-12 h-12 object-contain" />
                     </motion.div>
-
-                    <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-white to-transparent pointer-events-none" />
                 </div>
 
-                {/* Bottom Section with Form */}
                 <motion.div
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
@@ -76,12 +81,9 @@ const Login = () => {
                         <h1 className="text-3xl font-bold text-center text-gray-800 mb-12">
                             {t('login.title')}
                         </h1>
-
                         <form className="space-y-8" onSubmit={handleSubmit}>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-600 block pl-1">
-                                    {t('login.email')}
-                                </label>
+                                <label className="text-sm font-medium text-gray-600 block pl-1">{t('login.email')}</label>
                                 <input
                                     type="email"
                                     value={email}
@@ -90,11 +92,8 @@ const Login = () => {
                                     className="w-full px-4 py-3 rounded-xl bg-gray-50 border-none focus:ring-2 focus:ring-[#33cbcc]/20 focus:bg-white transition-all outline-none text-gray-700 placeholder-gray-400"
                                 />
                             </div>
-
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-600 block pl-1">
-                                    {t('login.password')}
-                                </label>
+                                <label className="text-sm font-medium text-gray-600 block pl-1">{t('login.password')}</label>
                                 <div className="relative">
                                     <input
                                         type={showPassword ? 'text' : 'password'}
@@ -108,18 +107,16 @@ const Login = () => {
                                         onClick={() => setShowPassword(!showPassword)}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                                     >
-                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                                        {showPassword ? <ViewOffIcon className="w-5 h-5" /> : <ViewIcon className="w-5 h-5" />}
                                     </button>
                                 </div>
                             </div>
-
                             {isAccessDenied && (
                                 <p className="text-[#283852] text-sm text-center">{t('login.accessDenied')}</p>
                             )}
                             {login.isError && !isAccessDenied && (
                                 <p className="text-[#283852] text-sm text-center">{t('login.error')}</p>
                             )}
-
                             <motion.button
                                 type="submit"
                                 disabled={login.isPending}
@@ -136,189 +133,200 @@ const Login = () => {
             </div>
 
             {/* ── DESKTOP layout ─────────────────────────────────────── */}
-            <div className="hidden md:flex min-h-screen overflow-hidden">
+            <div className="hidden md:flex min-h-screen bg-[#283852] overflow-hidden relative">
 
-                {/* Left panel — background image slideshow */}
-                <div className="relative flex-1 flex flex-col items-center justify-center p-12 overflow-hidden">
+                {/* Full-screen crossfading background images */}
+                <AnimatePresence initial={false}>
+                    <motion.img
+                        key={bgIndex}
+                        src={BG_IMAGES[bgIndex]}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.35 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 1.5 }}
+                        className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                        aria-hidden
+                    />
+                </AnimatePresence>
+                <div className="absolute inset-0 bg-[#283852]/20 pointer-events-none" />
 
-                    {/* Crossfading background images */}
-                    <AnimatePresence initial={false}>
-                        <motion.img
-                            key={bgIndex}
-                            src={BG_IMAGES[bgIndex]}
+                {/* ── LEFT branding area ── */}
+                <div className="flex-1 flex flex-col justify-center relative px-14 py-10 overflow-hidden">
+
+                    {/* Logo */}
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="flex items-center gap-3 relative z-10"
+                    >
+                        <div className="w-12 h-12 rounded-xl bg-white flex items-center justify-center shadow-md">
+                            <img src={logo} alt="MyLiS" className="w-8 h-8 object-contain" />
+                        </div>
+                        <span className="text-white font-bold text-2xl tracking-tight">MyLiS</span>
+                    </motion.div>
+
+                    {/* Branding copy */}
+                    <div className="flex flex-col mt-12 max-w-xl relative z-10">
+                        <motion.div
+                            initial={{ opacity: 0, y: 24 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.65, delay: 0.25 }}
+                        >
+                            <h2 className="text-white text-5xl xl:text-6xl font-bold leading-[1.1] mb-6">
+                                {i18n.language === 'fr' ? (
+                                    <>Votre ERP &amp; CRM<br /><span className="text-[#33cbcc]">tout-en-un</span></>
+                                ) : (
+                                    <>Your all-in-one<br /><span className="text-[#33cbcc]">ERP &amp; CRM</span></>
+                                )}
+                            </h2>
+                            <p className="text-white/50 text-xl leading-relaxed max-w-md">
+                                {i18n.language === 'fr'
+                                    ? 'Gérez vos équipes, clients et projets depuis une seule plateforme intelligente.'
+                                    : 'Manage your teams, clients and projects from a single intelligent platform.'}
+                            </p>
+                        </motion.div>
+
+                        {/* Animated cycling feature */}
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 1.2 }}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            aria-hidden
-                        />
-                    </AnimatePresence>
+                            transition={{ duration: 0.5, delay: 0.5 }}
+                            className="mt-12"
+                        >
+                            <p className="text-white/30 text-sm uppercase tracking-[0.18em] font-semibold mb-4">
+                                {i18n.language === 'fr' ? 'Inclut' : 'Includes'}
+                            </p>
+                            <div className="relative h-20 overflow-hidden">
+                                <AnimatePresence mode="wait">
+                                    <motion.span
+                                        key={`${featureIndex}-${i18n.language}`}
+                                        initial={{ y: 64, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        exit={{ y: -64, opacity: 0 }}
+                                        transition={{ duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
+                                        className="absolute left-0 text-[#33cbcc] text-6xl xl:text-7xl font-bold whitespace-nowrap"
+                                    >
+                                        {features[featureIndex]}
+                                    </motion.span>
+                                </AnimatePresence>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
 
-                    {/* Dark overlay for legibility */}
-                    <div className="absolute inset-0 bg-black/40" />
-
-                    {/* Logo + App Name */}
-                    <motion.div
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="absolute top-8 left-8 flex items-center gap-3"
-                    >
-                        <img src={logo} alt="MyLiS Logo" className="w-8 h-8 object-contain" />
-                        <span className="text-white font-bold text-xl tracking-tight">MyLiS</span>
-                    </motion.div>
+                {/* ── RIGHT floating card ── */}
+                <div className="flex items-center justify-center p-8 relative z-10">
 
                     {/* Language toggle */}
                     <div className="absolute top-8 right-8">
                         <button
                             onClick={toggleLanguage}
-                            className="text-white/60 hover:text-white text-sm font-medium transition-colors"
+                            className="text-white/50 hover:text-white text-sm font-medium transition-colors"
                         >
                             {i18n.language === 'en' ? 'FR' : 'EN'}
                         </button>
                     </div>
 
-
                     <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.5 }}
-                        className="relative z-10 text-center mt-2"
+                        initial={{ x: 60, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ duration: 0.6, delay: 0.1, type: 'spring', stiffness: 180, damping: 28 }}
+                        className="w-[500px] bg-white rounded-3xl shadow-2xl shadow-black/50 relative overflow-hidden"
                     >
-                        <h2 className="text-white text-2xl font-bold mb-2">
-                            {i18n.language === 'fr' ? 'Votre ERP & CRM tout-en-un' : 'Your all-in-one ERP & CRM'}
-                        </h2>
-                        <p className="text-white/50 text-sm max-w-xs mx-auto">
-                            {i18n.language === 'fr'
-                                ? 'Gérez vos équipes, clients et projets depuis une seule plateforme.'
-                                : 'Manage your teams, clients and projects from a single platform.'}
-                        </p>
-                    </motion.div>
-
-                    {/* Bottom stats pills */}
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.6, delay: 0.7 }}
-                        className="relative z-10 flex gap-4 mt-8"
-                    >
-                        {[
-                            { label: i18n.language === 'fr' ? 'Employés' : 'Employees', value: '∞' },
-                            { label: 'Modules', value: '12+' },
-                            { label: i18n.language === 'fr' ? 'Sécurisé' : 'Secure', value: '✓' },
-                        ].map((stat) => (
-                            <div key={stat.label} className="flex items-center gap-2 px-4 py-2">
-                                <span className="text-[#33cbcc] font-bold text-sm">{stat.value}</span>
-                                <span className="text-white/50 text-xs">{stat.label}</span>
+                        <div className="px-12 pt-10 pb-8">
+                            {/* Card logo */}
+                            <div className="flex justify-center mb-6">
+                                <img src={logo} alt="MyLiS" className="w-20 h-20 object-contain" />
                             </div>
-                        ))}
+
+                            {/* Title */}
+                            <div className="mb-6">
+                                <h1 className="text-[2.5rem] font-bold text-gray-800 leading-tight">
+                                    {t('login.title')}
+                                </h1>
+                                <p className="text-gray-400 text-sm mt-2">
+                                    {i18n.language === 'fr'
+                                        ? 'Connectez-vous à votre espace de travail'
+                                        : 'Sign in to your workspace'}
+                                </p>
+                            </div>
+
+                            {/* Form */}
+                            <form className="space-y-5" onSubmit={handleSubmit}>
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+                                        {t('login.email')}
+                                    </label>
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder={t('login.emailPlaceholder')}
+                                        className={inputCls}
+                                        autoComplete="email"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
+                                        {t('login.password')}
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            type={showPassword ? 'text' : 'password'}
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder={t('login.passwordPlaceholder')}
+                                            className={`${inputCls} pr-12`}
+                                            autoComplete="current-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        >
+                                            {showPassword ? <ViewOffIcon size={16} /> : <ViewIcon size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {isAccessDenied && (
+                                    <motion.p
+                                        initial={{ opacity: 0, y: -4 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-red-600 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-3"
+                                    >
+                                        {t('login.accessDenied')}
+                                    </motion.p>
+                                )}
+                                {login.isError && !isAccessDenied && (
+                                    <motion.p
+                                        initial={{ opacity: 0, y: -4 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-red-600 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-3"
+                                    >
+                                        {t('login.error')}
+                                    </motion.p>
+                                )}
+
+                                <motion.button
+                                    type="submit"
+                                    disabled={login.isPending}
+                                    whileHover={{ scale: 1.02, filter: 'brightness(1.1)' }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-white text-sm shadow-lg shadow-black/20 disabled:opacity-60 transition-all mt-2"
+                                    style={{ backgroundColor: '#283852' }}
+                                >
+                                    {login.isPending ? (
+                                        <><Loading02Icon size={16} className="animate-spin" /> {i18n.language === 'fr' ? 'Connexion...' : 'Signing in...'}</>
+                                    ) : t('login.submit')}
+                                </motion.button>
+
+                            </form>
+                        </div>
                     </motion.div>
                 </div>
-
-                {/* Right panel — form */}
-                <motion.div
-                    initial={{ x: 60, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ duration: 0.6, delay: 0.1, type: 'spring', stiffness: 200, damping: 30 }}
-                    className="w-full max-w-[480px] bg-white flex flex-col justify-center px-12 py-16 relative"
-                    style={{ borderRadius: '40px 0 0 40px' }}
-                >
-                    {/* Form header */}
-                    <div className="mb-10">
-                        <div className="flex items-center gap-2 mb-8">
-                            <div className="w-1.5 h-6 rounded-full bg-[#33cbcc]" />
-                            <span className="text-[#33cbcc] text-sm font-semibold uppercase tracking-widest">MyLiS</span>
-                        </div>
-                        <h1 className="text-4xl font-bold text-gray-800 leading-tight">
-                            {t('login.title')}
-                        </h1>
-                        <p className="text-gray-400 mt-2 text-sm">
-                            {i18n.language === 'fr'
-                                ? 'Connectez-vous à votre espace de travail'
-                                : 'Sign in to your workspace'}
-                        </p>
-                    </div>
-
-                    {/* Form */}
-                    <form className="space-y-5" onSubmit={handleSubmit}>
-                        {/* Email */}
-                        <div>
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
-                                {t('login.email')}
-                            </label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder={t('login.emailPlaceholder')}
-                                className={inputCls}
-                                autoComplete="email"
-                            />
-                        </div>
-
-                        {/* Password */}
-                        <div>
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-2">
-                                {t('login.password')}
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder={t('login.passwordPlaceholder')}
-                                    className={`${inputCls} pr-12`}
-                                    autoComplete="current-password"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                                >
-                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Errors */}
-                        {isAccessDenied && (
-                            <motion.p
-                                initial={{ opacity: 0, y: -4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-[#283852] text-sm bg-[#283852]/10 border border-gray-200 rounded-xl px-4 py-3"
-                            >
-                                {t('login.accessDenied')}
-                            </motion.p>
-                        )}
-                        {login.isError && !isAccessDenied && (
-                            <motion.p
-                                initial={{ opacity: 0, y: -4 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="text-[#283852] text-sm bg-[#283852]/10 border border-gray-200 rounded-xl px-4 py-3"
-                            >
-                                {t('login.error')}
-                            </motion.p>
-                        )}
-
-                        {/* Submit */}
-                        <motion.button
-                            type="submit"
-                            disabled={login.isPending}
-                            whileHover={{ scale: 1.02, filter: 'brightness(1.08)' }}
-                            whileTap={{ scale: 0.98 }}
-                            className="w-full flex items-center justify-center gap-2 py-4 rounded-xl font-semibold text-white text-sm shadow-lg shadow-[#283852]/30 disabled:opacity-60 transition-all mt-2"
-                            style={{ backgroundColor: '#283852' }}
-                        >
-                            {login.isPending ? (
-                                <><Loader2 size={16} className="animate-spin" /> {i18n.language === 'fr' ? 'Connexion...' : 'Signing in...'}</>
-                            ) : t('login.submit')}
-                        </motion.button>
-                    </form>
-
-                    {/* Decorative teal accent line at bottom */}
-                    <div className="absolute bottom-0 left-12 right-12 h-1 rounded-t-full bg-linear-to-r from-[#33cbcc]/0 via-[#33cbcc] to-[#33cbcc]/0" />
-                </motion.div>
             </div>
         </>
     );

@@ -5,7 +5,6 @@ import { Op } from 'sequelize';
 import { Employee } from '../models/employee.model';
 import { EmployeeMonthlyRanking } from '../models/employee-monthly-ranking.model';
 import { Task } from '../models/task.model';
-import { User } from '../models/user.model';
 import { Department } from '../models/department.model';
 import { Position } from '../models/position.model';
 
@@ -23,33 +22,33 @@ export class MonthlyRankingsService {
     ) {}
 
     /**
-     * Runs every day at 8:00 PM.
-     * If today is the last day of the month, snapshot the top-3.
+     * Runs every 5th of the month at 8:00 AM.
+     * Snapshots the previous month's top-3 and resets all employee points to 0.
      */
-    @Cron('0 20 * * *')
-    async checkAndSnapshotMonthlyRankings() {
+    @Cron('0 8 5 * *')
+    async autoSnapshotPreviousMonth() {
         const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+        // Target: previous month
+        const target = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const year  = target.getFullYear();
+        const month = target.getMonth() + 1;
 
-        // Only proceed on the last day of the month
-        if (tomorrow.getDate() !== 1) return;
-
-        this.logger.log(`Last day of month — snapshotting top-3 employee rankings`);
-        await this.snapshotMonthlyRankings(now.getFullYear(), now.getMonth() + 1);
+        this.logger.log(`5th of month — snapshotting ${year}/${month} and resetting points`);
+        await this.snapshotMonthlyRankings(year, month, true);
     }
 
     /**
      * Core logic: find top-3 active employees by points + task stats and save.
+     * If resetPoints=true, reset all active employees' points to 0 after saving.
      */
-    async snapshotMonthlyRankings(year: number, month: number): Promise<EmployeeMonthlyRanking[]> {
+    async snapshotMonthlyRankings(year: number, month: number, resetPoints = false): Promise<EmployeeMonthlyRanking[]> {
         // Start/end of target month for task queries
         const monthStart = new Date(year, month - 1, 1);
         const monthEnd   = new Date(year, month, 1);
 
         // Get top 3 active employees ordered by points
         const top3 = await this.employeeModel.findAll({
-            where: { dismissed: false },
+            where: { dismissedAt: null },
             order: [['points', 'DESC']],
             limit: 3,
         });
@@ -70,7 +69,7 @@ export class MonthlyRankingsService {
             // Count tasks completed this month
             const tasksCompleted = await this.taskModel.count({
                 where: {
-                    assigneeId: emp.id,
+                    assignedToId: emp.id,
                     state: { [Op.in]: ['COMPLETED', 'REVIEWED'] },
                     completedAt: { [Op.gte]: monthStart, [Op.lt]: monthEnd },
                 },
@@ -79,7 +78,7 @@ export class MonthlyRankingsService {
             // Count tasks reviewed this month
             const tasksReviewed = await this.taskModel.count({
                 where: {
-                    assigneeId: emp.id,
+                    assignedToId: emp.id,
                     state: 'REVIEWED',
                     completedAt: { [Op.gte]: monthStart, [Op.lt]: monthEnd },
                 },
@@ -99,6 +98,16 @@ export class MonthlyRankingsService {
         }
 
         this.logger.log(`Monthly rankings saved: ${results.length} entries for ${year}/${month}`);
+
+        // Reset all active employees' points to 0
+        if (resetPoints) {
+            await this.employeeModel.update(
+                { points: 0 },
+                { where: { dismissedAt: null } },
+            );
+            this.logger.log(`Employee points reset to 0 for all active employees`);
+        }
+
         return results;
     }
 
@@ -112,8 +121,8 @@ export class MonthlyRankingsService {
             include: [
                 {
                     model: Employee,
+                    attributes: ['id', 'firstName', 'lastName', 'avatarUrl'],
                     include: [
-                        { model: User, attributes: ['firstName', 'lastName', 'avatarUrl'] },
                         { model: Department, attributes: ['id', 'name'] },
                         { model: Position, attributes: ['title'] },
                     ],
@@ -134,9 +143,9 @@ export class MonthlyRankingsService {
                 tasksReviewed: plain.tasksReviewed,
                 employee: {
                     id: plain.employee?.id,
-                    firstName: plain.employee?.user?.firstName || plain.employee?.firstName || '',
-                    lastName: plain.employee?.user?.lastName || plain.employee?.lastName || '',
-                    avatarUrl: plain.employee?.user?.avatarUrl || plain.employee?.avatarUrl || null,
+                    firstName: plain.employee?.firstName || '',
+                    lastName: plain.employee?.lastName || '',
+                    avatarUrl: plain.employee?.avatarUrl || null,
                     department: plain.employee?.department?.name || '',
                     position: plain.employee?.position?.title || '',
                 },
@@ -159,8 +168,8 @@ export class MonthlyRankingsService {
             include: [
                 {
                     model: Employee,
+                    attributes: ['id', 'firstName', 'lastName', 'avatarUrl'],
                     include: [
-                        { model: User, attributes: ['firstName', 'lastName', 'avatarUrl'] },
                         { model: Department, attributes: ['id', 'name'] },
                         { model: Position, attributes: ['title'] },
                     ],
@@ -184,9 +193,9 @@ export class MonthlyRankingsService {
             if (!empStats[empId]) {
                 empStats[empId] = {
                     employeeId: empId,
-                    firstName: plain.employee?.user?.firstName || plain.employee?.firstName || '',
-                    lastName: plain.employee?.user?.lastName || plain.employee?.lastName || '',
-                    avatarUrl: plain.employee?.user?.avatarUrl || plain.employee?.avatarUrl || null,
+                    firstName: plain.employee?.firstName || '',
+                    lastName: plain.employee?.lastName || '',
+                    avatarUrl: plain.employee?.avatarUrl || null,
                     department: plain.employee?.department?.name || '',
                     position: plain.employee?.position?.title || '',
                     rank1: 0, rank2: 0, rank3: 0, totalPoints: 0,

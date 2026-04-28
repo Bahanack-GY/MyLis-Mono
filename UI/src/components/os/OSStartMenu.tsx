@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, LogOut } from 'lucide-react';
+import { Search01Icon, Logout01Icon } from 'hugeicons-react';
 import { appRegistry } from './osAppRegistry';
 import OSMacIcon from './OSMacIcon';
 import { useAuth } from '../../contexts/AuthContext';
@@ -54,12 +54,12 @@ export default function OSStartMenu({ isOpen, onClose, onOpenApp }: OSStartMenuP
           >
             <div className="p-4 pb-3">
               <div className="flex items-center gap-2 bg-white/10 rounded-lg px-3 h-9">
-                <Search size={14} className="text-gray-400" />
+                <Search01Icon size={14} className="text-gray-400" />
                 <input
                   type="text"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
-                  placeholder="Search apps..."
+                  placeholder="Search01Icon apps..."
                   className="flex-1 bg-transparent text-sm text-white placeholder-gray-500 outline-none"
                   autoFocus
                 />
@@ -105,7 +105,7 @@ export default function OSStartMenu({ isOpen, onClose, onOpenApp }: OSStartMenuP
                 onClick={handleLogout}
                 className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-xs text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
               >
-                <LogOut size={14} />
+                <Logout01Icon size={14} />
                 Logout
               </button>
             </div>

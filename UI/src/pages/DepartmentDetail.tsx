@@ -2,34 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Users,
-    FolderKanban,
-    Wallet,
-    TrendingUp,
-    Crown,
-    Briefcase,
-    Building,
-    ChevronRight,
-    ChevronDown,
-    Plus,
-    X,
-    Search,
-    Calendar,
-    DollarSign,
-    Upload,
-    FileText,
-    Trash2,
-    Loader2,
-    AlignLeft,
-    Check,
-    UserCog,
-    Pencil,
-    ToggleLeft,
-    ToggleRight,
-    Target,
-    ChevronLeft,
-} from 'lucide-react';
+import { UserGroupIcon, Folder01Icon, Wallet01Icon, ArrowUpRight01Icon, CrownIcon, Briefcase01Icon, Building01Icon, ArrowRight01Icon, ArrowDown01Icon, Add01Icon, Cancel01Icon, Search01Icon, Calendar01Icon, DollarCircleIcon, Upload01Icon, File01Icon, Delete02Icon, Loading02Icon, AlignLeftIcon, Tick01Icon, AccountSetting01Icon, PencilIcon, ToggleOffIcon, ToggleOnIcon, Target01Icon, ArrowLeft01Icon, Car01Icon, RefreshIcon, Wrench01Icon, Location01Icon } from 'hugeicons-react';
 import {
     AreaChart,
     Area,
@@ -53,6 +26,209 @@ import { useInvoices, useInvoiceStats } from '../api/invoices/hooks';
 import { useClients, useCreateClient } from '../api/clients/hooks';
 import { useDepartmentScope } from '../contexts/AuthContext';
 import { useUpdateDepartment, useDepartmentServices, useCreateDepartmentService, useUpdateDepartmentService, useDeleteDepartmentService, useMonthlyStats, useUpsertMonthlyTarget } from '../api/departments/hooks';
+import { useCarwashOverview, useCarwashDailyStats, useCarwashStations, useTriggerCarwashSync, useCarwashSyncStatus } from '../api/carwash/hooks';
+import ExpenseModal from './ExpenseModal';
+
+const LIS_CARWASH_DEPT_ID = '7610e7a2-8ace-4d02-bd68-8394b71615e7';
+
+function formatFCFA(n: number) {
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XAF', maximumFractionDigits: 0 }).format(n || 0);
+}
+
+/** Tiny bar chart (no dependencies beyond recharts which is already imported) */
+function MiniRevChart({ data }: { data: { date: string; revenue: number }[] }) {
+    if (!data.length) return <div className="h-20 flex items-center justify-center text-gray-400 text-xs">Aucune donnée</div>;
+    const max = Math.max(...data.map(d => d.revenue), 1);
+    return (
+        <div className="flex items-end gap-0.5 h-20">
+            {data.slice(-30).map((d, i) => (
+                <div key={i} title={`${d.date}: ${formatFCFA(d.revenue)}`}
+                    className="flex-1 bg-[#33cbcc] rounded-sm opacity-70 hover:opacity-100 transition-opacity"
+                    style={{ height: Math.max(2, (d.revenue / max) * 72) }} />
+            ))}
+        </div>
+    );
+}
+
+const CARWASH_PERIODS = [
+    { key: 'today', label: "Aujourd'hui" },
+    { key: 'week',  label: '7 jours' },
+    { key: 'month', label: 'Ce mois' },
+    { key: 'year',  label: 'Cette année' },
+];
+
+function buildRange(period: string) {
+    const today = new Date();
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    if (period === 'today') return { startDate: fmt(today), endDate: fmt(today) };
+    if (period === 'week')  { const s = new Date(today); s.setDate(today.getDate() - 6); return { startDate: fmt(s), endDate: fmt(today) }; }
+    if (period === 'year')  return { startDate: `${today.getFullYear()}-01-01`, endDate: fmt(today) };
+    return { startDate: new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0], endDate: fmt(today) };
+}
+
+/** Carwash stats block — shown in budget + overview for LIS CARWASH dept */
+const CarwashDeptBlock = () => {
+    const [activePeriod, setActivePeriod]           = useState('month');
+    const [selectedStationId, setSelectedStationId] = useState<number | undefined>(undefined);
+    const [showExpenseModal, setShowExpenseModal]    = useState(false);
+
+    const { data: stations = [] } = useCarwashStations();
+    const { data: syncStatus }    = useCarwashSyncStatus();
+    const triggerSync             = useTriggerCarwashSync();
+
+    const queryParams = useMemo(() => ({
+        ...buildRange(activePeriod),
+        ...(selectedStationId !== undefined ? { stationId: selectedStationId } : {}),
+    }), [activePeriod, selectedStationId]);
+
+    const { data: overview, isLoading } = useCarwashOverview(queryParams);
+    const { data: dailyStats = [] }     = useCarwashDailyStats(queryParams);
+
+    const revenueChartData = useMemo(() =>
+        dailyStats.map(s => ({ date: s.date, revenue: Number(s.revenue) || 0 })),
+    [dailyStats]);
+
+    const lastSyncLabel = useMemo(() => {
+        if (!syncStatus?.lastSync) return 'Jamais';
+        return new Date(syncStatus.lastSync.syncedAt).toLocaleString('fr-FR', {
+            day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+        });
+    }, [syncStatus]);
+
+    const toggleStation = (id: number) =>
+        setSelectedStationId(prev => prev === id ? undefined : id);
+
+    return (
+        <div className="space-y-5">
+            {/* Header row */}
+            <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2">
+                    <Car01Icon className="w-5 h-5 text-[#33cbcc]" />
+                    <h3 className="text-lg font-bold text-[#283852]">Performance LIS CARWASH</h3>
+                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                        Synchro {lastSyncLabel}
+                    </span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => triggerSync.mutate()}
+                        disabled={syncStatus?.syncing || triggerSync.isPending}
+                        className="flex items-center gap-1 text-xs bg-[#33cbcc] text-white px-3 py-1.5 rounded-lg hover:bg-[#2ab5b6] disabled:opacity-50 transition-colors">
+                        <RefreshIcon className={`w-3.5 h-3.5 ${syncStatus?.syncing ? 'animate-spin' : ''}`} />
+                        Actualiser
+                    </button>
+                    <button onClick={() => setShowExpenseModal(true)}
+                        className="flex items-center gap-1 text-xs bg-[#283852] text-white px-3 py-1.5 rounded-lg hover:bg-[#1e2d3d] transition-colors">
+                        <Add01Icon className="w-3.5 h-3.5" />
+                        Ajouter charge
+                    </button>
+                </div>
+            </div>
+
+            {/* Filter row: period + stations */}
+            <div className="flex flex-wrap items-center gap-2">
+                {/* Period tabs */}
+                <div className="flex bg-gray-100 rounded-xl p-0.5 gap-0.5">
+                    {CARWASH_PERIODS.map(p => (
+                        <button key={p.key} onClick={() => setActivePeriod(p.key)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${activePeriod === p.key ? 'bg-white text-[#283852] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+                            {p.label}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Station chips */}
+                {stations.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs text-gray-400 font-medium">Station :</span>
+                        <button onClick={() => setSelectedStationId(undefined)}
+                            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${selectedStationId === undefined ? 'bg-[#283852] text-white border-[#283852]' : 'bg-white text-gray-500 border-gray-200 hover:border-[#283852] hover:text-[#283852]'}`}>
+                            Toutes
+                        </button>
+                        {stations.map(st => (
+                            <button key={st.id} onClick={() => toggleStation(st.id)}
+                                className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${selectedStationId === st.id ? 'bg-[#33cbcc] text-white border-[#33cbcc]' : 'bg-white text-gray-500 border-gray-200 hover:border-[#33cbcc] hover:text-[#33cbcc]'}`}>
+                                {st.nom}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* KPI cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                    { label: 'CA Réalisé',      value: isLoading ? '…' : formatFCFA(overview?.totalRevenue ?? 0),                                                   icon: ArrowUpRight01Icon, color: 'text-[#33cbcc]',    bg: 'bg-[#33cbcc]/10' },
+                    { label: 'Charges',          value: isLoading ? '…' : formatFCFA(overview?.totalExpenses ?? 0),                                                  icon: Wrench01Icon,     color: 'text-orange-500',  bg: 'bg-orange-50' },
+                    { label: 'Voitures lavées',  value: isLoading ? '…' : String(overview?.totalVehicles ?? 0),                                                      icon: Car01Icon,        color: 'text-[#283852]',   bg: 'bg-[#283852]/10' },
+                    { label: 'Résultat',         value: isLoading ? '…' : formatFCFA((overview?.totalRevenue ?? 0) - (overview?.totalExpenses ?? 0)),                icon: DollarCircleIcon, color: 'text-green-600',   bg: 'bg-green-50' },
+                ].map((s, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                        className="bg-white rounded-2xl border border-gray-100 p-4 flex items-start gap-3 shadow-sm">
+                        <div className={`${s.bg} p-2.5 rounded-xl flex-shrink-0`}>
+                            <s.icon className={`w-5 h-5 ${s.color}`} />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500">{s.label}</p>
+                            <p className="text-lg font-bold text-[#283852] mt-0.5">{s.value}</p>
+                        </div>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* Revenue chart */}
+            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+                <p className="text-sm font-semibold text-[#283852] mb-3">
+                    Évolution des recettes
+                    {selectedStationId !== undefined && (
+                        <span className="ml-2 text-xs font-normal text-[#33cbcc]">
+                            — {stations.find(s => s.id === selectedStationId)?.nom}
+                        </span>
+                    )}
+                </p>
+                <MiniRevChart data={revenueChartData} />
+            </div>
+
+            {/* Station cards — clickable to filter */}
+            {stations.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {stations.map(st => {
+                        const isSelected = selectedStationId === st.id;
+                        return (
+                            <button key={st.id} onClick={() => toggleStation(st.id)} className="text-left w-full">
+                                <div className={`bg-white rounded-2xl border-2 p-4 shadow-sm transition-all ${isSelected ? 'border-[#33cbcc] shadow-[#33cbcc]/20' : 'border-gray-100 hover:border-gray-200'}`}>
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="font-semibold text-[#283852]">{st.nom}</p>
+                                            {st.town && <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5"><Location01Icon className="w-3 h-3" />{st.adresse ? `${st.adresse}, ` : ''}{st.town}</p>}
+                                        </div>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full ${st.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                            {st.status === 'active' ? 'Active' : st.status}
+                                        </span>
+                                    </div>
+                                    <div className="mt-3 flex gap-4 text-sm">
+                                        <span><strong>{st.employeeCount}</strong> <span className="text-gray-400 text-xs">employés</span></span>
+                                        {st.managerName && <span className="text-gray-500 text-xs">Manager: <strong>{st.managerName}</strong></span>}
+                                    </div>
+                                    {isSelected && (
+                                        <p className="mt-2 text-[10px] text-[#33cbcc] font-medium">Filtre actif — cliquez pour tout afficher</p>
+                                    )}
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+
+            {showExpenseModal && (
+                <ExpenseModal
+                    isOpen={showExpenseModal}
+                    onClose={() => setShowExpenseModal(false)}
+                    defaultDepartmentId={LIS_CARWASH_DEPT_ID}
+                />
+            )}
+        </div>
+    );
+};
 
 /* ─── Status helpers ────────────────────────────────────── */
 
@@ -136,20 +312,20 @@ const AddMemberModal = ({
                 <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-gray-800">{t('departmentDetail.members.addMemberTitle')}</h2>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
-                {/* Search */}
+                {/* Search01Icon */}
                 <div className="p-4 border-b border-gray-100">
                     <div className="relative">
-                        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                         <input
                             type="text"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             placeholder={t('departmentDetail.members.searchEmployee')}
-                            className="w-full bg-gray-50 rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#283852]/30 focus:border-[#283852] transition-all"
+                            className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                             autoFocus
                         />
                     </div>
@@ -179,7 +355,7 @@ const AddMemberModal = ({
                         ))
                     ) : (
                         <div className="text-center py-10 text-gray-400">
-                            <Users size={32} className="mx-auto mb-3 opacity-30" />
+                            <UserGroupIcon size={32} className="mx-auto mb-3 opacity-30" />
                             <p className="text-sm">{t('departmentDetail.members.noAvailable')}</p>
                         </div>
                     )}
@@ -251,17 +427,17 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center">
-                            <Users size={18} className="text-[#283852]" />
+                            <UserGroupIcon size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('clients.createTitle')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
                 <div className="px-6 py-5 space-y-4">
                     <div>
-                        <label className={labelCls}><Users size={12} />{t('clients.name')}</label>
+                        <label className={labelCls}><UserGroupIcon size={12} />{t('clients.name')}</label>
                         <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder={t('clients.namePlaceholder')} className={inputCls} autoFocus />
                     </div>
                     <div>
@@ -284,7 +460,7 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
                         }}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#283852]/20 ${isValid && !createClient.isPending ? 'bg-[#283852] hover:bg-[#1e2d42]' : 'bg-gray-300 cursor-not-allowed shadow-none'}`}
                     >
-                        {createClient.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createClient.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('clients.create')}
                     </button>
                 </div>
@@ -374,12 +550,12 @@ const AddProjectModal = ({
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center shrink-0">
-                            <Plus size={18} className="text-[#283852]" />
+                            <Add01Icon size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('projects.createTitle')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -387,7 +563,7 @@ const AddProjectModal = ({
                 <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
                     {/* Department (read-only, pre-filled) */}
                     <div>
-                        <label className={labelCls}><Building size={12} />{t('projects.formDepartment')}</label>
+                        <label className={labelCls}><Building01Icon size={12} />{t('projects.formDepartment')}</label>
                         <div
                             className="flex items-center gap-3 w-full bg-gray-50 rounded-xl border border-gray-200 px-4 py-2.5"
                         >
@@ -398,19 +574,19 @@ const AddProjectModal = ({
 
                     {/* Project name */}
                     <div>
-                        <label className={labelCls}><Briefcase size={12} />{t('projects.formName')}</label>
+                        <label className={labelCls}><Briefcase01Icon size={12} />{t('projects.formName')}</label>
                         <input type="text" value={form.name} onChange={e => update('name', e.target.value)} placeholder={t('projects.formNamePlaceholder')} className={inputCls} autoFocus />
                     </div>
 
                     {/* Description */}
                     <div>
-                        <label className={labelCls}><AlignLeft size={12} />{t('projects.description')}</label>
+                        <label className={labelCls}><AlignLeftIcon size={12} />{t('projects.description')}</label>
                         <textarea value={form.description} onChange={e => update('description', e.target.value)} placeholder={t('projects.formDescriptionPlaceholder')} rows={3} className={`${inputCls} resize-none`} />
                     </div>
 
                     {/* Client */}
                     <div>
-                        <label className={labelCls}><Users size={12} />{t('projects.formClient')}</label>
+                        <label className={labelCls}><UserGroupIcon size={12} />{t('projects.formClient')}</label>
                         <div className="flex gap-2">
                             <select value={form.client} onChange={e => update('client', e.target.value)} className={selectCls}>
                                 <option value="">{t('projects.formClientPlaceholder')}</option>
@@ -419,7 +595,7 @@ const AddProjectModal = ({
                                 ))}
                             </select>
                             <button type="button" onClick={() => setShowCreateClient(true)} className="shrink-0 w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-[#283852] hover:bg-[#283852]/5 hover:border-[#283852]/30 transition-colors" title={t('clients.createTitle')}>
-                                <Plus size={16} />
+                                <Add01Icon size={16} />
                             </button>
                         </div>
                     </div>
@@ -436,11 +612,11 @@ const AddProjectModal = ({
                     {/* Cost + Revenue */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className={labelCls}><DollarSign size={12} />{t('projects.formCost')}</label>
+                            <label className={labelCls}><DollarCircleIcon size={12} />{t('projects.formCost')}</label>
                             <input type="text" value={form.cost} onChange={e => update('cost', e.target.value)} placeholder="0 FCFA" className={inputCls} />
                         </div>
                         <div>
-                            <label className={labelCls}><TrendingUp size={12} />{t('projects.formRevenue')}</label>
+                            <label className={labelCls}><ArrowUpRight01Icon size={12} />{t('projects.formRevenue')}</label>
                             <input type="text" value={form.revenue} onChange={e => update('revenue', e.target.value)} placeholder="0 FCFA" className={inputCls} />
                         </div>
                     </div>
@@ -448,18 +624,18 @@ const AddProjectModal = ({
                     {/* Start + Due dates */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className={labelCls}><Calendar size={12} />{t('projects.startDate')}</label>
+                            <label className={labelCls}><Calendar01Icon size={12} />{t('projects.startDate')}</label>
                             <input type="date" value={form.startDate} onChange={e => update('startDate', e.target.value)} className={inputCls} />
                         </div>
                         <div>
-                            <label className={labelCls}><Calendar size={12} />{t('projects.formDueDate')}</label>
+                            <label className={labelCls}><Calendar01Icon size={12} />{t('projects.formDueDate')}</label>
                             <input type="date" value={form.dueDate} onChange={e => update('dueDate', e.target.value)} className={inputCls} />
                         </div>
                     </div>
 
                     {/* Documents */}
                     <div className="space-y-4">
-                        <p className={`${labelCls} mb-0`}><FileText size={12} />{t('projects.formDocuments')}</p>
+                        <p className={`${labelCls} mb-0`}><File01Icon size={12} />{t('projects.formDocuments')}</p>
 
                         {/* Contract */}
                         <div>
@@ -467,15 +643,15 @@ const AddProjectModal = ({
                             {form.contract ? (
                                 <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                                     <div className="flex items-center gap-2 text-sm">
-                                        <FileText size={14} className="text-[#283852]" />
+                                        <File01Icon size={14} className="text-[#283852]" />
                                         <span className="font-medium text-gray-700">{form.contract.name}</span>
                                         <span className="text-gray-400">{form.contract.size}</span>
                                     </div>
-                                    <button onClick={() => update('contract', null)} className="text-gray-400 hover:text-[#283852] transition-colors"><Trash2 size={14} /></button>
+                                    <button onClick={() => update('contract', null)} className="text-gray-400 hover:text-[#283852] transition-colors"><Delete02Icon size={14} /></button>
                                 </div>
                             ) : (
                                 <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#283852]/40 hover:bg-[#283852]/5 transition-all text-sm text-gray-400">
-                                    <Upload size={16} />{t('projects.formUpload')}
+                                    <Upload01Icon size={16} />{t('projects.formUpload')}
                                     <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={e => handleFileSelect('contract', e)} />
                                 </label>
                             )}
@@ -487,15 +663,15 @@ const AddProjectModal = ({
                             {form.srs ? (
                                 <div className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                                     <div className="flex items-center gap-2 text-sm">
-                                        <FileText size={14} className="text-[#283852]" />
+                                        <File01Icon size={14} className="text-[#283852]" />
                                         <span className="font-medium text-gray-700">{form.srs.name}</span>
                                         <span className="text-gray-400">{form.srs.size}</span>
                                     </div>
-                                    <button onClick={() => update('srs', null)} className="text-gray-400 hover:text-[#283852] transition-colors"><Trash2 size={14} /></button>
+                                    <button onClick={() => update('srs', null)} className="text-gray-400 hover:text-[#283852] transition-colors"><Delete02Icon size={14} /></button>
                                 </div>
                             ) : (
                                 <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#283852]/40 hover:bg-[#283852]/5 transition-all text-sm text-gray-400">
-                                    <Upload size={16} />{t('projects.formUpload')}
+                                    <Upload01Icon size={16} />{t('projects.formUpload')}
                                     <input type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={e => handleFileSelect('srs', e)} />
                                 </label>
                             )}
@@ -509,17 +685,17 @@ const AddProjectModal = ({
                                     {form.otherDocs.map((doc, i) => (
                                         <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-4 py-3">
                                             <div className="flex items-center gap-2 text-sm">
-                                                <FileText size={14} className="text-[#283852]" />
+                                                <File01Icon size={14} className="text-[#283852]" />
                                                 <span className="font-medium text-gray-700">{doc.name}</span>
                                                 <span className="text-gray-400">{doc.size}</span>
                                             </div>
-                                            <button onClick={() => removeOtherDoc(i)} className="text-gray-400 hover:text-[#283852] transition-colors"><Trash2 size={14} /></button>
+                                            <button onClick={() => removeOtherDoc(i)} className="text-gray-400 hover:text-[#283852] transition-colors"><Delete02Icon size={14} /></button>
                                         </div>
                                     ))}
                                 </div>
                             )}
                             <label className="flex items-center justify-center gap-2 border-2 border-dashed border-gray-200 rounded-xl px-4 py-4 cursor-pointer hover:border-[#283852]/40 hover:bg-[#283852]/5 transition-all text-sm text-gray-400">
-                                <Upload size={16} />{t('projects.formUpload')}
+                                <Upload01Icon size={16} />{t('projects.formUpload')}
                                 <input type="file" className="hidden" multiple onChange={handleOtherDocs} />
                             </label>
                         </div>
@@ -549,7 +725,7 @@ const AddProjectModal = ({
                         disabled={!isValid || createProject.isPending}
                         className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors shadow-lg shadow-[#283852]/20 ${isValid && !createProject.isPending ? 'bg-[#283852] hover:bg-[#1e2d42]' : 'bg-gray-300 cursor-not-allowed shadow-none'}`}
                     >
-                        {createProject.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createProject.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('projects.formCreate')}
                     </button>
                 </div>
@@ -563,10 +739,16 @@ const AddProjectModal = ({
 const OverviewView = ({ department }: { department: Department }) => {
     const { t } = useTranslation();
     const deptId = String(department.id);
+    const isCarwash = deptId === LIS_CARWASH_DEPT_ID;
 
     const { data: projects } = useProjects(deptId);
     const { data: tasks } = useTasks(deptId);
     const { data: invoiceStats } = useInvoiceStats(deptId);
+
+    // For LIS CARWASH: year-to-date carwash revenue replaces invoice stats
+    const ytdStart = `${new Date().getFullYear()}-01-01`;
+    const ytdEnd   = new Date().toISOString().split('T')[0];
+    const { data: carwashYTD } = useCarwashOverview({ startDate: ytdStart, endDate: ytdEnd });
 
     // Compute project progress from tasks
     const projectProgress = useMemo(() => {
@@ -590,13 +772,15 @@ const OverviewView = ({ department }: { department: Department }) => {
         return Math.round(progresses.reduce((s, v) => s + v, 0) / progresses.length);
     }, [projects, projectProgress]);
 
-    const revenue = invoiceStats?.totalRevenue ?? 0;
+    const revenue = isCarwash
+        ? (carwashYTD?.totalRevenue ?? 0)
+        : (invoiceStats?.totalRevenue ?? 0);
 
     const stats = [
-        { label: t('departmentDetail.overview.totalMembers'), value: department.employees.length, icon: Users, color: '#283852' },
-        { label: t('departmentDetail.overview.activeProjects'), value: projectCount, icon: FolderKanban, color: '#3b82f6' },
-        { label: t('departmentDetail.overview.budget'), value: revenue >= 1000000 ? `${(revenue / 1000000).toFixed(1)}M` : `${(revenue / 1000).toFixed(0)}K`, icon: Wallet, color: '#8b5cf6' },
-        { label: t('departmentDetail.overview.avgProgress'), value: projectCount > 0 ? `${avgProgress}%` : 'N/A', icon: TrendingUp, color: '#f59e0b' },
+        { label: t('departmentDetail.overview.totalMembers'), value: department.employees.length, icon: UserGroupIcon, color: '#283852' },
+        { label: t('departmentDetail.overview.activeProjects'), value: projectCount, icon: Folder01Icon, color: '#3b82f6' },
+        { label: t('departmentDetail.overview.budget'), value: revenue >= 1000000 ? `${(revenue / 1000000).toFixed(1)}M` : `${(revenue / 1000).toFixed(0)}K`, icon: Wallet01Icon, color: '#8b5cf6' },
+        { label: t('departmentDetail.overview.avgProgress'), value: projectCount > 0 ? `${avgProgress}%` : 'N/A', icon: ArrowUpRight01Icon, color: '#f59e0b' },
     ];
 
     // Monthly activity from real tasks
@@ -642,14 +826,16 @@ const OverviewView = ({ department }: { department: Department }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out" style={{ color: stat.color }}>
-                            <stat.icon size={100} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -736,10 +922,10 @@ const OverviewView = ({ department }: { department: Department }) => {
             {/* Info Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
-                    { icon: Crown, label: t('departmentDetail.overview.head'), value: department.head.name, avatar: department.head.avatar },
-                    { icon: Wallet, label: t('departmentDetail.overview.budgetLabel'), value: revenue >= 1000000 ? `${(revenue / 1000000).toFixed(1)}M FCFA` : `${(revenue / 1000).toFixed(0)}K FCFA` },
-                    { icon: Briefcase, label: t('departmentDetail.overview.projectsLabel'), value: String(projectCount) },
-                    { icon: Users, label: t('departmentDetail.overview.teamSize'), value: `${department.employees.length} members` },
+                    { icon: CrownIcon, label: t('departmentDetail.overview.head'), value: department.head.name, avatar: department.head.avatar },
+                    { icon: Wallet01Icon, label: t('departmentDetail.overview.budgetLabel'), value: revenue >= 1000000 ? `${(revenue / 1000000).toFixed(1)}M FCFA` : `${(revenue / 1000).toFixed(0)}K FCFA` },
+                    { icon: Briefcase01Icon, label: t('departmentDetail.overview.projectsLabel'), value: String(projectCount) },
+                    { icon: UserGroupIcon, label: t('departmentDetail.overview.teamSize'), value: `${department.employees.length} members` },
                 ].map((item, i) => (
                     <motion.div
                         key={i}
@@ -759,6 +945,15 @@ const OverviewView = ({ department }: { department: Department }) => {
                     </motion.div>
                 ))}
             </div>
+
+            {/* Carwash block — only for LIS CARWASH dept */}
+            {String(department.id) === LIS_CARWASH_DEPT_ID && (
+                <div className="pt-2">
+                    <div className="border-t border-gray-100 pt-6">
+                        <CarwashDeptBlock />
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -790,7 +985,7 @@ const MembersView = ({ department }: { department: Department }) => {
                     onClick={() => setShowAddModal(true)}
                     className="flex items-center gap-2 bg-[#283852] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20"
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     {t('departmentDetail.members.addMember')}
                 </button>
             </div>
@@ -844,7 +1039,7 @@ const MembersView = ({ department }: { department: Department }) => {
                 </div>
             ) : (
                 <div className="text-center py-16 text-gray-400">
-                    <Users size={48} className="mx-auto mb-4 opacity-30" />
+                    <UserGroupIcon size={48} className="mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">{t('departmentDetail.members.empty')}</p>
                 </div>
             )}
@@ -913,7 +1108,7 @@ const ProjectsView = ({ department }: { department: Department }) => {
                     onClick={() => setShowAddModal(true)}
                     className="flex items-center gap-2 bg-[#283852] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20"
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     {t('departmentDetail.projects.addProject')}
                 </button>
             </div>
@@ -949,7 +1144,7 @@ const ProjectsView = ({ department }: { department: Department }) => {
                             >
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-3">
-                                        <Briefcase size={18} className="text-gray-400" />
+                                        <Briefcase01Icon size={18} className="text-gray-400" />
                                         <h4 className="font-semibold text-gray-800">{proj.name}</h4>
                                     </div>
                                     <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${pStyle.bg} ${pStyle.text}`}>
@@ -974,7 +1169,7 @@ const ProjectsView = ({ department }: { department: Department }) => {
                 </div>
             ) : (
                 <div className="text-center py-16 text-gray-400">
-                    <Briefcase size={48} className="mx-auto mb-4 opacity-30" />
+                    <Briefcase01Icon size={48} className="mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">{t('departmentDetail.projects.empty')}</p>
                     <p className="text-sm mt-1">{t('departmentDetail.projects.emptyHint')}</p>
                 </div>
@@ -998,23 +1193,29 @@ const ProjectsView = ({ department }: { department: Department }) => {
 const BudgetView = ({ department }: { department: Department }) => {
     const { t } = useTranslation();
     const deptId = String(department.id);
+    const isCarwash = deptId === LIS_CARWASH_DEPT_ID;
 
     const { data: invoices } = useInvoices(deptId);
     const { data: invoiceStats } = useInvoiceStats(deptId);
     const { data: projects } = useProjects(deptId);
 
-    const totalRevenue = invoiceStats?.totalRevenue ?? 0;
-    const totalPending = invoiceStats?.totalPending ?? 0;
+    // For LIS CARWASH: year-to-date carwash figures replace invoice stats
+    const ytdStart = `${new Date().getFullYear()}-01-01`;
+    const ytdEnd   = new Date().toISOString().split('T')[0];
+    const { data: carwashYTD } = useCarwashOverview({ startDate: ytdStart, endDate: ytdEnd });
+
+    const totalRevenue = isCarwash ? (carwashYTD?.totalRevenue ?? 0) : (invoiceStats?.totalRevenue ?? 0);
+    const totalPending = isCarwash ? (carwashYTD?.totalExpenses ?? 0) : (invoiceStats?.totalPending ?? 0);
     const totalBudget = useMemo(() => (projects || []).reduce((s, p) => s + (p.budget || 0), 0), [projects]);
     const perEmployee = department.employees.length > 0 ? Math.round(totalRevenue / department.employees.length) : 0;
 
     const formatVal = (v: number) => v >= 1000000 ? `${(v / 1000000).toFixed(1)}M` : `${(v / 1000).toFixed(0)}K`;
 
     const budgetStats = [
-        { label: t('departmentDetail.budget.totalBudget'), value: formatVal(totalBudget), icon: Wallet, color: '#283852' },
-        { label: t('departmentDetail.budget.totalExpenses'), value: formatVal(totalPending), icon: TrendingUp, color: '#f43f5e' },
-        { label: t('departmentDetail.budget.remaining'), value: formatVal(totalRevenue), icon: Wallet, color: '#22c55e' },
-        { label: t('departmentDetail.budget.perEmployee'), value: formatVal(perEmployee), icon: Users, color: '#3b82f6' },
+        { label: t('departmentDetail.budget.totalBudget'), value: formatVal(totalBudget), icon: Wallet01Icon, color: '#283852' },
+        { label: t('departmentDetail.budget.totalExpenses'), value: formatVal(totalPending), icon: ArrowUpRight01Icon, color: '#f43f5e' },
+        { label: t('departmentDetail.budget.remaining'), value: formatVal(totalRevenue), icon: Wallet01Icon, color: '#22c55e' },
+        { label: t('departmentDetail.budget.perEmployee'), value: formatVal(perEmployee), icon: UserGroupIcon, color: '#3b82f6' },
     ];
 
     // Expense breakdown by invoice status
@@ -1057,15 +1258,17 @@ const BudgetView = ({ department }: { department: Department }) => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
-                            <p className="text-xs text-gray-400 mt-1">FCFA</p>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out" style={{ color: stat.color }}>
-                            <stat.icon size={100} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <p className="text-xs text-gray-400 mt-1">FCFA</p>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -1134,6 +1337,13 @@ const BudgetView = ({ department }: { department: Department }) => {
 
             {/* ─── Monthly CA Objectives ─────────────────── */}
             <MonthlyObjectivesSection departmentId={deptId} />
+
+            {/* ─── Carwash performance (LIS CARWASH only) ── */}
+            {deptId === LIS_CARWASH_DEPT_ID && (
+                <div className="border-t border-gray-100 pt-6">
+                    <CarwashDeptBlock />
+                </div>
+            )}
         </div>
     );
 };
@@ -1182,7 +1392,7 @@ const MonthlyObjectivesSection = ({ departmentId }: { departmentId: string }) =>
             <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                        <Target size={18} className="text-[#33cbcc]" />
+                        <Target01Icon size={18} className="text-[#33cbcc]" />
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-gray-800">{t('departmentDetail.budget.monthlyCA', 'Objectifs Chiffre d\'Affaires')}</h3>
@@ -1196,14 +1406,14 @@ const MonthlyObjectivesSection = ({ departmentId }: { departmentId: string }) =>
                         onClick={() => setYear(y => y - 1)}
                         className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
                     >
-                        <ChevronLeft size={16} className="text-gray-500" />
+                        <ArrowLeft01Icon size={16} className="text-gray-500" />
                     </button>
                     <span className="text-sm font-semibold text-gray-700 w-12 text-center">{year}</span>
                     <button
                         onClick={() => setYear(y => y + 1)}
                         className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
                     >
-                        <ChevronRight size={16} className="text-gray-500" />
+                        <ArrowRight01Icon size={16} className="text-gray-500" />
                     </button>
                 </div>
             </div>
@@ -1229,7 +1439,7 @@ const MonthlyObjectivesSection = ({ departmentId }: { departmentId: string }) =>
             {/* Loading */}
             {isLoading ? (
                 <div className="flex items-center justify-center h-32">
-                    <Loader2 size={24} className="animate-spin text-[#33cbcc]" />
+                    <Loading02Icon size={24} className="animate-spin text-[#33cbcc]" />
                 </div>
             ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -1266,7 +1476,7 @@ const MonthlyObjectivesSection = ({ departmentId }: { departmentId: string }) =>
                                     )}
                                 </div>
 
-                                {/* Target edit */}
+                                {/* Target01Icon edit */}
                                 {isEditing ? (
                                     <div className="flex items-center gap-1 mb-2">
                                         <input
@@ -1279,10 +1489,10 @@ const MonthlyObjectivesSection = ({ departmentId }: { departmentId: string }) =>
                                             placeholder="0"
                                         />
                                         <button onClick={() => handleSave(row.month)} className="p-1 rounded-lg bg-[#33cbcc] text-white hover:bg-[#2bb5b6]">
-                                            <Check size={12} />
+                                            <Tick01Icon size={12} />
                                         </button>
                                         <button onClick={() => setEditingMonth(null)} className="p-1 rounded-lg bg-gray-200 text-gray-500 hover:bg-gray-300">
-                                            <X size={12} />
+                                            <Cancel01Icon size={12} />
                                         </button>
                                     </div>
                                 ) : (
@@ -1293,7 +1503,7 @@ const MonthlyObjectivesSection = ({ departmentId }: { departmentId: string }) =>
                                         <p className="text-[10px] text-gray-400">{t('departmentDetail.budget.target', 'Objectif')}</p>
                                         <p className="text-sm font-semibold text-gray-700 group-hover:text-[#33cbcc] transition-colors flex items-center gap-1">
                                             {row.targetRevenue > 0 ? `${formatAmount(row.targetRevenue)} FCFA` : <span className="text-gray-300 italic text-xs">{t('departmentDetail.budget.setTarget', 'Définir...')}</span>}
-                                            <Pencil size={10} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#33cbcc]" />
+                                            <PencilIcon size={10} className="opacity-0 group-hover:opacity-100 transition-opacity text-[#33cbcc]" />
                                         </p>
                                     </button>
                                 )}
@@ -1396,14 +1606,14 @@ const ServiceFormModal = ({
                 <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${color}15` }}>
-                            <Briefcase size={18} style={{ color }} />
+                            <Briefcase01Icon size={18} style={{ color }} />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">
                             {service ? t('departmentDetail.services.editService') : t('departmentDetail.services.addService')}
                         </h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -1436,8 +1646,8 @@ const ServiceFormModal = ({
                         </div>
                         <button onClick={() => setIsActive(v => !v)} className="transition-colors">
                             {isActive
-                                ? <ToggleRight size={28} style={{ color }} />
-                                : <ToggleLeft size={28} className="text-gray-300" />
+                                ? <ToggleOnIcon size={28} style={{ color }} />
+                                : <ToggleOffIcon size={28} className="text-gray-300" />
                             }
                         </button>
                     </div>
@@ -1456,7 +1666,7 @@ const ServiceFormModal = ({
                         className="flex items-center gap-2 px-4 py-2 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ backgroundColor: color }}
                     >
-                        {isPending ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+                        {isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Tick01Icon size={14} />}
                         {service ? t('common.save') : t('departmentDetail.services.create')}
                     </button>
                 </div>
@@ -1497,28 +1707,28 @@ const ServicesView = ({ department }: { department: Department }) => {
                     className="flex items-center gap-2 px-4 py-2.5 text-white text-sm font-medium rounded-xl shadow-sm hover:opacity-90 transition-opacity"
                     style={{ backgroundColor: '#283852' }}
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     {t('departmentDetail.services.addService')}
                 </button>
             </div>
 
-            {/* Search */}
+            {/* Search01Icon */}
             <div className="relative max-w-sm">
-                <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                 <input
                     type="text"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder={t('departmentDetail.services.search')}
-                    className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#283852]/20 focus:border-[#283852] transition-all bg-white"
+                    className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                 />
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 gap-4">
                 {[
-                    { label: t('departmentDetail.services.stats.total'), value: services.length, icon: Briefcase },
-                    { label: t('departmentDetail.services.stats.active'), value: services.filter(s => s.isActive).length, icon: ToggleRight },
+                    { label: t('departmentDetail.services.stats.total'), value: services.length, icon: Briefcase01Icon },
+                    { label: t('departmentDetail.services.stats.active'), value: services.filter(s => s.isActive).length, icon: ToggleOnIcon },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -1541,7 +1751,7 @@ const ServicesView = ({ department }: { department: Department }) => {
             {/* List */}
             {isLoading ? (
                 <div className="flex justify-center py-12">
-                    <Loader2 className="w-6 h-6 animate-spin text-[#283852]" />
+                    <Loading02Icon className="w-6 h-6 animate-spin text-[#283852]" />
                 </div>
             ) : filtered.length === 0 ? (
                 <motion.div
@@ -1550,7 +1760,7 @@ const ServicesView = ({ department }: { department: Department }) => {
                     className="bg-white rounded-2xl border border-gray-100 p-12 text-center"
                 >
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#28385215' }}>
-                        <Briefcase size={24} style={{ color: '#283852' }} />
+                        <Briefcase01Icon size={24} style={{ color: '#283852' }} />
                     </div>
                     <p className="font-semibold text-gray-700">{t('departmentDetail.services.empty')}</p>
                     <p className="text-sm text-gray-400 mt-1">{t('departmentDetail.services.emptyDesc')}</p>
@@ -1568,7 +1778,7 @@ const ServicesView = ({ department }: { department: Department }) => {
                             <div className="flex items-start justify-between gap-3">
                                 <div className="flex items-start gap-3 min-w-0">
                                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5" style={{ backgroundColor: '#28385215' }}>
-                                        <Briefcase size={17} style={{ color: '#283852' }} />
+                                        <Briefcase01Icon size={17} style={{ color: '#283852' }} />
                                     </div>
                                     <div className="min-w-0">
                                         <div className="flex items-center gap-2">
@@ -1587,13 +1797,13 @@ const ServicesView = ({ department }: { department: Department }) => {
                                         onClick={() => { setEditingService(service); setShowModal(true); }}
                                         className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
                                     >
-                                        <Pencil size={14} />
+                                        <PencilIcon size={14} />
                                     </button>
                                     <button
                                         onClick={() => deleteService.mutate(service.id)}
                                         className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
                                     >
-                                        <Trash2 size={14} />
+                                        <Delete02Icon size={14} />
                                     </button>
                                 </div>
                             </div>
@@ -1604,8 +1814,8 @@ const ServicesView = ({ department }: { department: Department }) => {
                                     className="ml-auto transition-colors"
                                 >
                                     {service.isActive
-                                        ? <ToggleRight size={22} style={{ color: '#283852' }} />
-                                        : <ToggleLeft size={22} className="text-gray-300" />
+                                        ? <ToggleOnIcon size={22} style={{ color: '#283852' }} />
+                                        : <ToggleOffIcon size={22} className="text-gray-300" />
                                     }
                                 </button>
                             </div>
@@ -1693,7 +1903,7 @@ const SettingsView = ({ department }: { department: Department }) => {
             >
                 <div className="flex items-center gap-3 mb-4">
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#28385215' }}>
-                        <Building size={18} style={{ color: '#283852' }} />
+                        <Building01Icon size={18} style={{ color: '#283852' }} />
                     </div>
                     <div>
                         <p className="font-semibold text-gray-800 text-sm">{t('departmentDetail.settings.general')}</p>
@@ -1729,8 +1939,8 @@ const SettingsView = ({ department }: { department: Department }) => {
                         className="flex items-center gap-2 px-4 py-2 bg-[#283852] text-white rounded-xl text-sm font-medium hover:bg-[#1e2d42] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {updateDept.isPending && !pendingHodId
-                            ? <Loader2 size={14} className="animate-spin" />
-                            : <Check size={14} />
+                            ? <Loading02Icon size={14} className="animate-spin" />
+                            : <Tick01Icon size={14} />
                         }
                         {t('common.save')}
                     </button>
@@ -1746,7 +1956,7 @@ const SettingsView = ({ department }: { department: Department }) => {
             >
                 <div className="flex items-center gap-3 mb-4">
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#28385215' }}>
-                        <UserCog size={18} style={{ color: '#283852' }} />
+                        <AccountSetting01Icon size={18} style={{ color: '#283852' }} />
                     </div>
                     <div>
                         <p className="font-semibold text-gray-800 text-sm">{t('departmentDetail.settings.hod')}</p>
@@ -1757,7 +1967,7 @@ const SettingsView = ({ department }: { department: Department }) => {
                 {/* HOD dropdown picker */}
                 <div className="relative">
                     <label className="text-xs font-medium text-gray-500 mb-1.5 flex items-center gap-1">
-                        <Crown size={11} className="text-[#33cbcc]" />
+                        <CrownIcon size={11} className="text-[#33cbcc]" />
                         {t('departmentDetail.settings.hod')}
                     </label>
                     <button
@@ -1779,13 +1989,13 @@ const SettingsView = ({ department }: { department: Department }) => {
                                     disabled={updateDept.isPending}
                                     className="p-0.5 rounded text-gray-400 hover:text-[#283852] transition-colors disabled:opacity-40"
                                 >
-                                    <X size={14} />
+                                    <Cancel01Icon size={14} />
                                 </button>
                             </>
                         ) : (
                             <span className="flex-1 text-gray-400">{t('departmentDetail.settings.noHod')}</span>
                         )}
-                        <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform ${headDropdownOpen ? 'rotate-180' : ''}`} />
+                        <ArrowDown01Icon size={16} className={`text-gray-400 shrink-0 transition-transform ${headDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     <AnimatePresence>
@@ -1799,13 +2009,13 @@ const SettingsView = ({ department }: { department: Department }) => {
                             >
                                 <div className="p-2 border-b border-gray-100">
                                     <div className="relative">
-                                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                        <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                                         <input
                                             type="text"
                                             value={headSearch}
                                             onChange={e => setHeadSearch(e.target.value)}
                                             placeholder={t('departments.create.searchEmployee')}
-                                            className="w-full bg-gray-50 rounded-lg border-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#283852]/30"
+                                            className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                                             autoFocus
                                         />
                                     </div>
@@ -1830,8 +2040,8 @@ const SettingsView = ({ department }: { department: Department }) => {
                                                 <p className="text-[11px] text-gray-400 truncate">{emp.role}</p>
                                             </div>
                                             {updateDept.isPending
-                                                ? <Loader2 size={14} className="animate-spin text-gray-400 shrink-0" />
-                                                : String(department.head?.id) === String(emp.id) && <Check size={16} className="text-[#283852] shrink-0" />
+                                                ? <Loading02Icon size={14} className="animate-spin text-gray-400 shrink-0" />
+                                                : String(department.head?.id) === String(emp.id) && <Tick01Icon size={16} className="text-[#283852] shrink-0" />
                                             }
                                         </button>
                                     ))}

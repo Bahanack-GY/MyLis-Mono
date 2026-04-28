@@ -2,33 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Hash,
-    Users,
-    MessageSquare,
-    Send,
-    Search,
-    Plus,
-    X,
-    Loader2,
-    ChevronDown,
-    ArrowUp,
-    ArrowLeft,
-    Reply,
-    CheckCircle,
-    XCircle,
-    Package,
-    Paperclip,
-    Download,
-    FileText,
-    FileSpreadsheet,
-    File as FileIcon,
-    Image as ImageIcon,
-    Eye,
-    Clock,
-    AlertCircle,
-    RotateCcw,
-} from 'lucide-react';
+import { HashtagIcon, UserGroupIcon, Message02Icon, SentIcon, Search01Icon, Add01Icon, Cancel01Icon, Loading02Icon, ArrowDown01Icon, ArrowUp01Icon, ArrowLeft01Icon, MailReply01Icon, Tick01Icon, CancelCircleIcon, PackageIcon, Attachment01Icon, Download01Icon, File01Icon, Csv01Icon, File01Icon as FileIcon, Image01Icon as ImageIcon, ViewIcon, Clock01Icon, Alert01Icon, RefreshIcon } from 'hugeicons-react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { MessagesSkeleton } from '../../components/Skeleton';
@@ -118,9 +92,9 @@ function isPdfType(fileType: string) {
 
 function getFileIcon(fileType: string) {
     if (isImageType(fileType)) return ImageIcon;
-    if (isPdfType(fileType)) return FileText;
-    if (fileType.includes('spreadsheet') || fileType.includes('excel') || fileType.includes('csv')) return FileSpreadsheet;
-    if (fileType.includes('word') || fileType.includes('document')) return FileText;
+    if (isPdfType(fileType)) return File01Icon;
+    if (fileType.includes('spreadsheet') || fileType.includes('excel') || fileType.includes('csv')) return Csv01Icon;
+    if (fileType.includes('word') || fileType.includes('document')) return File01Icon;
     return FileIcon;
 }
 
@@ -201,7 +175,7 @@ const DemandCardBubble = ({
                 <div className="bg-gradient-to-br from-[#283852] to-[#1e2d42] rounded-2xl rounded-tr-sm overflow-hidden shadow-lg">
                     {/* Header */}
                     <div className="px-4 pt-3 pb-2 flex items-center gap-2">
-                        <Package size={16} className="text-[#33cbcc]" />
+                        <PackageIcon size={16} className="text-[#33cbcc]" />
                         <span className="text-sm font-semibold text-white">{t('demands.chatIntroMessage', { items: '' }).replace(': ', '')}</span>
                         <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full ${imp.color}`}>{imp.label}</span>
                     </div>
@@ -234,7 +208,7 @@ const DemandCardBubble = ({
                                         onClick={() => setShowRejectInput(true)}
                                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-white/70 bg-white/10 hover:bg-white/20 transition-colors"
                                     >
-                                        <XCircle size={14} />
+                                        <CancelCircleIcon size={14} />
                                         {t('demands.reject')}
                                     </button>
                                     <button
@@ -242,7 +216,7 @@ const DemandCardBubble = ({
                                         onClick={handleValidate}
                                         className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/20 hover:bg-[#33cbcc]/30 transition-colors"
                                     >
-                                        {validateDemand.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                                        {validateDemand.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Tick01Icon size={14} />}
                                         {t('demands.validate')}
                                     </button>
                                 </div>
@@ -268,7 +242,7 @@ const DemandCardBubble = ({
                                             onClick={handleReject}
                                             className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-xs font-semibold text-white/70 bg-white/10 hover:bg-white/20 transition-colors"
                                         >
-                                            {rejectDemand.isPending ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={14} />}
+                                            {rejectDemand.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <CancelCircleIcon size={14} />}
                                             {t('demands.confirmReject')}
                                         </button>
                                     </div>
@@ -334,13 +308,13 @@ const NewDMModal = ({
                 <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
                     <h3 className="font-bold text-gray-800">{t('chat.newMessage')}</h3>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100">
-                        <X size={18} className="text-gray-400" />
+                        <Cancel01Icon size={18} className="text-gray-400" />
                     </button>
                 </div>
 
                 <div className="px-5 py-3">
                     <div className="relative">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search01Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
                             value={search}
@@ -355,7 +329,7 @@ const NewDMModal = ({
                 <div className="flex-1 overflow-y-auto px-3 pb-3">
                     {isLoading ? (
                         <div className="flex justify-center py-8">
-                            <Loader2 className="w-6 h-6 animate-spin text-[#33cbcc]" />
+                            <Loading02Icon className="w-6 h-6 animate-spin text-[#33cbcc]" />
                         </div>
                     ) : filtered.length === 0 ? (
                         <p className="text-center text-gray-400 text-sm py-8">Aucun utilisateur</p>
@@ -442,7 +416,7 @@ const ChannelSidebar = ({
                         )}
                     </div>
                 ) : (
-                    <Hash size={16} className={isActive ? 'text-[#33cbcc]' : 'text-gray-500'} />
+                    <HashtagIcon size={16} className={isActive ? 'text-[#33cbcc]' : 'text-gray-500'} />
                 )}
 
                 <span className="flex-1 truncate">{ch.name}</span>
@@ -473,7 +447,7 @@ const ChannelSidebar = ({
                         onClick={() => navigate('/dashboard')}
                         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
                     >
-                        <ArrowLeft size={16} />
+                        <ArrowLeft01Icon size={16} />
                         <span className="font-medium">Retour</span>
                     </button>
                 </div>
@@ -487,7 +461,7 @@ const ChannelSidebar = ({
                     className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                     title={t('chat.newMessage')}
                 >
-                    <Plus size={18} className="text-gray-400" />
+                    <Add01Icon size={18} className="text-gray-400" />
                 </button>
             </div>
 
@@ -598,10 +572,10 @@ const ImageLightbox = ({
                     className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white"
                     onClick={e => e.stopPropagation()}
                 >
-                    <Download size={18} />
+                    <Download01Icon size={18} />
                 </a>
                 <button onClick={onClose} className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white">
-                    <X size={18} />
+                    <Cancel01Icon size={18} />
                 </button>
             </div>
             <img src={src} alt={fileName} className="max-w-full max-h-[85vh] rounded-lg object-contain" />
@@ -643,7 +617,7 @@ const AttachmentRenderer = ({
                                         onClick={() => setLightboxSrc({ src: fileUrl, name: att.fileName })}
                                         className="p-1 rounded bg-black/50 text-white hover:bg-black/70"
                                     >
-                                        <Eye size={14} />
+                                        <ViewIcon size={14} />
                                     </button>
                                     <a
                                         href={fileUrl}
@@ -653,7 +627,7 @@ const AttachmentRenderer = ({
                                         className="p-1 rounded bg-black/50 text-white hover:bg-black/70"
                                         onClick={e => e.stopPropagation()}
                                     >
-                                        <Download size={14} />
+                                        <Download01Icon size={14} />
                                     </a>
                                 </div>
                                 <p className="text-[10px] mt-0.5 opacity-60 truncate max-w-[280px]">{att.fileName}</p>
@@ -664,7 +638,7 @@ const AttachmentRenderer = ({
                     if (isPdfType(att.fileType)) {
                         return (
                             <div key={i} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg ${isOwn ? 'bg-white/10' : 'bg-gray-200/60'} max-w-[300px]`}>
-                                <FileText size={20} className="text-[#283852] shrink-0" />
+                                <File01Icon size={20} className="text-[#283852] shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <p className={`text-xs font-medium truncate ${isOwn ? 'text-white' : 'text-gray-700'}`}>{att.fileName}</p>
                                     <p className={`text-[10px] ${isOwn ? 'text-white/50' : 'text-gray-400'}`}>{formatFileSize(att.size)}</p>
@@ -674,7 +648,7 @@ const AttachmentRenderer = ({
                                     className={`p-1 rounded hover:bg-black/10 ${isOwn ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}
                                     title="Aperçu"
                                 >
-                                    <Eye size={14} />
+                                    <ViewIcon size={14} />
                                 </button>
                                 <a
                                     href={fileUrl}
@@ -684,7 +658,7 @@ const AttachmentRenderer = ({
                                     className={`p-1 rounded hover:bg-black/10 ${isOwn ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}
                                     title="Télécharger"
                                 >
-                                    <Download size={14} />
+                                    <Download01Icon size={14} />
                                 </a>
                             </div>
                         );
@@ -706,7 +680,7 @@ const AttachmentRenderer = ({
                                 className={`p-1 rounded hover:bg-black/10 ${isOwn ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}
                                 title="Télécharger"
                             >
-                                <Download size={14} />
+                                <Download01Icon size={14} />
                             </a>
                         </div>
                     );
@@ -745,10 +719,10 @@ const AttachmentRenderer = ({
                                         rel="noopener noreferrer"
                                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
                                     >
-                                        <Download size={16} />
+                                        <Download01Icon size={16} />
                                     </a>
                                     <button onClick={() => setPdfPreview(null)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500">
-                                        <X size={16} />
+                                        <Cancel01Icon size={16} />
                                     </button>
                                 </div>
                             </div>
@@ -836,7 +810,7 @@ const MessageBubble = ({
                             onClick={onReply}
                             className="absolute -left-8 top-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100"
                         >
-                            <Reply size={14} />
+                            <MailReply01Icon size={14} />
                         </button>
                     )}
                     {replyContext}
@@ -854,17 +828,17 @@ const MessageBubble = ({
                     <div className="flex items-center justify-end gap-1 mt-0.5">
                         {message.optimistic && (
                             <span className="flex items-center gap-1 text-[10px] text-gray-400">
-                                <Clock size={10} className="animate-pulse" />
+                                <Clock01Icon size={10} className="animate-pulse" />
                                 Envoi…
                             </span>
                         )}
                         {message.failed && (
                             <span className="flex items-center gap-1 text-[10px] text-[#283852]">
-                                <AlertCircle size={10} />
+                                <Alert01Icon size={10} />
                                 Échec
                                 {onRetry && (
                                     <button onClick={onRetry} className="ml-1 hover:text-[#283852]/70 transition-colors">
-                                        <RotateCcw size={10} />
+                                        <RefreshIcon size={10} />
                                     </button>
                                 )}
                             </span>
@@ -925,7 +899,7 @@ const MessageBubble = ({
                     onClick={onReply}
                     className="absolute -right-8 top-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600 hover:bg-gray-100"
                 >
-                    <Reply size={14} />
+                    <MailReply01Icon size={14} />
                 </button>
             </div>
         </div>
@@ -983,7 +957,7 @@ const MembersPanel = ({
     return (
         <div className="w-56 bg-gray-50 border-l border-gray-200 flex flex-col h-full shrink-0">
             <div className="h-14 flex items-center px-4 border-b border-gray-200 shrink-0">
-                <Users size={16} className="text-gray-400 mr-2" />
+                <UserGroupIcon size={16} className="text-gray-400 mr-2" />
                 <span className="text-sm font-semibold text-gray-600">
                     {t('chat.members')} — {(members || []).length}
                 </span>
@@ -1032,7 +1006,7 @@ const Messages = () => {
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const [isAtBottom, setIsAtBottom] = useState(true);
 
-    // Reply & mention state
+    // MailReply01Icon & mention state
     const [replyingTo, setReplyingTo] = useState<ChatMessage | null>(null);
     const [mentionQuery, setMentionQuery] = useState<string | null>(null);
     const [mentionStartIndex, setMentionStartIndex] = useState(0);
@@ -1286,12 +1260,12 @@ const Messages = () => {
                                             onClick={() => setMobileShowChat(false)}
                                             className="md:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors shrink-0"
                                         >
-                                            <ArrowLeft size={18} />
+                                            <ArrowLeft01Icon size={18} />
                                         </button>
                                         {activeChannel.type === 'DIRECT' ? (
-                                            <MessageSquare size={18} className="text-[#33cbcc] shrink-0" />
+                                            <Message02Icon size={18} className="text-[#33cbcc] shrink-0" />
                                         ) : (
-                                            <Hash size={18} className="text-[#33cbcc] shrink-0" />
+                                            <HashtagIcon size={18} className="text-[#33cbcc] shrink-0" />
                                         )}
                                         <h2 className="font-semibold text-gray-800 truncate">{activeChannel.name}</h2>
                                         {activeChannel.description && (
@@ -1306,7 +1280,7 @@ const Messages = () => {
                                             showMembers ? 'bg-gray-100 text-[#283852]' : 'text-gray-400 hover:bg-gray-50'
                                         }`}
                                     >
-                                        <Users size={18} />
+                                        <UserGroupIcon size={18} />
                                     </button>
                                 </div>
 
@@ -1324,9 +1298,9 @@ const Messages = () => {
                                                 className="flex items-center gap-1.5 text-xs text-[#33cbcc] hover:text-[#2bb5b6] font-medium"
                                             >
                                                 {loadMore.isPending ? (
-                                                    <Loader2 size={14} className="animate-spin" />
+                                                    <Loading02Icon size={14} className="animate-spin" />
                                                 ) : (
-                                                    <ArrowUp size={14} />
+                                                    <ArrowUp01Icon size={14} />
                                                 )}
                                                 {t('chat.loadMore')}
                                             </button>
@@ -1335,11 +1309,11 @@ const Messages = () => {
 
                                     {messagesLoading ? (
                                         <div className="flex items-center justify-center h-full">
-                                            <Loader2 className="w-6 h-6 animate-spin text-[#33cbcc]" />
+                                            <Loading02Icon className="w-6 h-6 animate-spin text-[#33cbcc]" />
                                         </div>
                                     ) : !messages || messages.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                            <MessageSquare size={48} className="mb-3 text-gray-200" />
+                                            <Message02Icon size={48} className="mb-3 text-gray-200" />
                                             <p className="text-sm">{t('chat.noMessages')}</p>
                                         </div>
                                     ) : (
@@ -1408,7 +1382,7 @@ const Messages = () => {
                                     )}
                                 </AnimatePresence>
 
-                                {/* Reply preview */}
+                                {/* MailReply01Icon preview */}
                                 {replyingTo && (
                                     <div className="px-5 pt-2 shrink-0">
                                         <div className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 border-l-2 border-[#33cbcc]">
@@ -1419,7 +1393,7 @@ const Messages = () => {
                                                 <p className="text-xs text-gray-500 truncate">{replyingTo.content}</p>
                                             </div>
                                             <button onClick={() => setReplyingTo(null)} className="p-1 rounded hover:bg-gray-200 shrink-0">
-                                                <X size={14} className="text-gray-400" />
+                                                <Cancel01Icon size={14} className="text-gray-400" />
                                             </button>
                                         </div>
                                     </div>
@@ -1448,7 +1422,7 @@ const Messages = () => {
                                                             onClick={() => removePendingFile(i)}
                                                             className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#283852] text-white flex items-center justify-center opacity-0 group-hover/file:opacity-100 transition-opacity"
                                                         >
-                                                            <X size={12} />
+                                                            <Cancel01Icon size={12} />
                                                         </button>
                                                     </div>
                                                 );
@@ -1480,7 +1454,7 @@ const Messages = () => {
                                             className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-gray-100 transition-colors shrink-0"
                                             title="Joindre un fichier"
                                         >
-                                            <Paperclip size={18} />
+                                            <Attachment01Icon size={18} />
                                         </button>
                                         <textarea
                                             ref={textareaRef}
@@ -1501,14 +1475,14 @@ const Messages = () => {
                                                     : 'text-gray-300'
                                             }`}
                                         >
-                                            {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                                            {isUploading ? <Loading02Icon size={16} className="animate-spin" /> : <SentIcon size={16} />}
                                         </button>
                                     </div>
                                 </div>
                             </>
                         ) : (
                             <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
-                                <MessageSquare size={64} className="mb-4 text-gray-200" />
+                                <Message02Icon size={64} className="mb-4 text-gray-200" />
                                 <p className="text-lg font-medium text-gray-300">{t('chat.title')}</p>
                                 <p className="text-sm mt-1">{t('chat.noMessages')}</p>
                             </div>
@@ -1548,7 +1522,7 @@ const Messages = () => {
                         }}
                         className="fixed bottom-20 md:bottom-8 right-6 w-10 h-10 rounded-full bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/30 flex items-center justify-center hover:bg-[#2bb5b6] transition-colors z-10"
                     >
-                        <ChevronDown size={20} />
+                        <ArrowDown01Icon size={20} />
                     </motion.button>
                 )}
             </AnimatePresence>

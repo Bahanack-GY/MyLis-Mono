@@ -2,23 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Search,
-    Plus,
-    X,
-    Building,
-    LayoutGrid,
-    List,
-    UserCircle,
-    Briefcase,
-    DollarSign,
-    RefreshCw,
-    Repeat,
-    Loader2,
-    Trash2,
-    Edit3,
-    TrendingUp
-} from 'lucide-react';
+import { Search01Icon, Add01Icon, Cancel01Icon, Building01Icon, DashboardSquare01Icon, ListViewIcon, UserCircleIcon, Briefcase01Icon, DollarCircleIcon, RefreshIcon, RepeatIcon, Loading02Icon, Delete02Icon, PencilIcon, ArrowUpRight01Icon } from 'hugeicons-react';
 import { useInfiniteClients, useCreateClient, useUpdateClient, useDeleteClient } from '../api/clients/hooks';
 import { ClientsSkeleton } from '../components/Skeleton';
 import { useInvoices } from '../api/invoices/hooks';
@@ -112,14 +96,14 @@ const ClientModal = ({
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <UserCircle size={20} className="text-[#33cbcc]" />
+                            <UserCircleIcon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">
                             {client ? t('clients.editTitle') : t('clients.createTitle')}
                         </h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -127,7 +111,7 @@ const ClientModal = ({
                 <div className="p-6 space-y-5 overflow-y-auto flex-1">
                     <div>
                         <label className={labelCls}>
-                            <UserCircle size={12} />
+                            <UserCircleIcon size={12} />
                             {t('clients.name')}
                         </label>
                         <input
@@ -142,7 +126,7 @@ const ClientModal = ({
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Repeat size={12} />
+                                <RepeatIcon size={12} />
                                 {t('clients.type')}
                             </label>
                             <select
@@ -156,7 +140,7 @@ const ClientModal = ({
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Building size={12} />
+                                <Building01Icon size={12} />
                                 {t('clients.department')}
                             </label>
                             <select
@@ -175,7 +159,7 @@ const ClientModal = ({
 
                     <div>
                         <label className={labelCls}>
-                            <DollarSign size={12} />
+                            <DollarCircleIcon size={12} />
                             {t('clients.price')}
                         </label>
                         <input
@@ -189,7 +173,7 @@ const ClientModal = ({
 
                     <div>
                         <label className={labelCls}>
-                            <Briefcase size={12} />
+                            <Briefcase01Icon size={12} />
                             {t('clients.projectDescription')}
                         </label>
                         <textarea
@@ -219,7 +203,7 @@ const ClientModal = ({
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {(createClient.isPending || updateClient.isPending) ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {(createClient.isPending || updateClient.isPending) ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {client ? t('clients.save') : t('clients.create')}
                     </button>
                 </div>
@@ -331,10 +315,10 @@ const Clients = () => {
     };
 
     const stats = [
-        { label: t('clients.stats.total'), value: clients.length, icon: UserCircle, color: '#33cbcc' },
-        { label: t('clients.stats.subscription'), value: subscriptionCount, icon: RefreshCw, color: '#33cbcc' },
-        { label: t('clients.stats.oneTime'), value: oneTimeCount, icon: Briefcase, color: '#283852' },
-        { label: t('clients.stats.revenue'), value: fmtCurrency(totalRevenue), icon: DollarSign, color: '#33cbcc' },
+        { label: t('clients.stats.total'), value: clients.length, icon: UserCircleIcon, color: '#33cbcc' },
+        { label: t('clients.stats.subscription'), value: subscriptionCount, icon: RefreshIcon, color: '#33cbcc' },
+        { label: t('clients.stats.oneTime'), value: oneTimeCount, icon: Briefcase01Icon, color: '#283852' },
+        { label: t('clients.stats.revenue'), value: fmtCurrency(totalRevenue), icon: DollarCircleIcon, color: '#33cbcc' },
     ];
 
     /* Chart data */
@@ -374,7 +358,7 @@ const Clients = () => {
                     onClick={() => setShowCreateModal(true)}
                     className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     {t('clients.newClient')}
                 </button>
             </div>
@@ -387,17 +371,16 @@ const Clients = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
-                            style={{ color: stat.color }}
-                        >
-                            <stat.icon size={100} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -478,23 +461,23 @@ const Clients = () => {
                 </motion.div>
             </div>
 
-            {/* ── Search + Filters ── */}
+            {/* ── Search01Icon + Filters ── */}
             <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
+                <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                    <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                     <input
                         type="text"
                         placeholder={t('clients.searchPlaceholder')}
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                        className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                     />
                 </div>
 
                 <div className="flex items-center gap-3">
                     {!deptScope && (
                         <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm min-w-0">
-                            <Building className="text-gray-400 ml-2 shrink-0" size={18} />
+                            <Building01Icon className="text-gray-400 ml-2 shrink-0" size={18} />
                             <select
                                 value={filterDepartment}
                                 onChange={e => setFilterDepartment(e.target.value)}
@@ -513,13 +496,13 @@ const Clients = () => {
                             onClick={() => setViewMode('grid')}
                             className={`p-2.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                         >
-                            <LayoutGrid size={18} />
+                            <DashboardSquare01Icon size={18} />
                         </button>
                         <button
                             onClick={() => setViewMode('list')}
                             className={`p-2.5 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                         >
-                            <List size={18} />
+                            <ListViewIcon size={18} />
                         </button>
                     </div>
                 </div>
@@ -564,14 +547,14 @@ const Clients = () => {
                             >
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="w-12 h-12 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                                        <UserCircle size={24} className="text-[#33cbcc]" />
+                                        <UserCircleIcon size={24} className="text-[#33cbcc]" />
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <button
                                             onClick={e => handleEdit(e, client)}
                                             className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors opacity-0 group-hover:opacity-100"
                                         >
-                                            <Edit3 size={14} />
+                                            <PencilIcon size={14} />
                                         </button>
                                         {isManager && (
                                             <button
@@ -579,7 +562,7 @@ const Clients = () => {
                                                 disabled={deleteClient.isPending}
                                                 className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#283852] transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                                {deleteClient.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                                                {deleteClient.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Delete02Icon size={14} />}
                                             </button>
                                         )}
                                     </div>
@@ -604,13 +587,13 @@ const Clients = () => {
 
                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <div className="flex items-center gap-1.5 text-xs text-gray-400 min-w-0">
-                                        <Building size={12} className="shrink-0" />
+                                        <Building01Icon size={12} className="shrink-0" />
                                         <span className="truncate">{client.department?.name || '—'}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {rev.paid > 0 && (
                                             <span className="text-xs text-[#33cbcc] font-medium flex items-center gap-1">
-                                                <TrendingUp size={10} />
+                                                <ArrowUpRight01Icon size={10} />
                                                 {fmtCurrency(rev.paid)}
                                             </span>
                                         )}
@@ -627,7 +610,7 @@ const Clients = () => {
                 </div>
             )}
 
-            {/* ── List View ── */}
+            {/* ── ListViewIcon View ── */}
             {viewMode === 'list' && filteredClients.length > 0 && (
                 <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden">
                     <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
@@ -651,7 +634,7 @@ const Clients = () => {
                             >
                                 <div className="col-span-3 flex items-center gap-3 min-w-0">
                                     <div className="w-9 h-9 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                                        <UserCircle size={18} className="text-[#33cbcc]" />
+                                        <UserCircleIcon size={18} className="text-[#33cbcc]" />
                                     </div>
                                     <span className="text-sm font-medium text-gray-800 truncate">{client.name}</span>
                                 </div>
@@ -667,7 +650,7 @@ const Clients = () => {
                                     </span>
                                 </div>
                                 <div className="col-span-2 flex items-center gap-1.5 text-xs text-gray-500 min-w-0">
-                                    <Building size={12} className="shrink-0" />
+                                    <Building01Icon size={12} className="shrink-0" />
                                     <span className="truncate">{client.department?.name || '—'}</span>
                                 </div>
                                 <div className="col-span-1 text-sm text-gray-600 font-medium">{client.price || '—'}</div>
@@ -685,7 +668,7 @@ const Clients = () => {
                                         onClick={e => handleEdit(e, client)}
                                         className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                     >
-                                        <Edit3 size={14} />
+                                        <PencilIcon size={14} />
                                     </button>
                                     {isManager && (
                                         <button
@@ -693,7 +676,7 @@ const Clients = () => {
                                             disabled={deleteClient.isPending}
                                             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#283852] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            {deleteClient.isPending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                                            {deleteClient.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Delete02Icon size={14} />}
                                         </button>
                                     )}
                                 </div>
@@ -707,14 +690,14 @@ const Clients = () => {
             <div ref={sentinelRef} className="h-1" />
             {clientsQuery.isFetchingNextPage && (
                 <div className="flex justify-center py-4">
-                    <Loader2 size={20} className="animate-spin text-[#33cbcc]" />
+                    <Loading02Icon size={20} className="animate-spin text-[#33cbcc]" />
                 </div>
             )}
 
             {/* ── Empty State ── */}
             {filteredClients.length === 0 && !isLoading && (
                 <div className="bg-white rounded-3xl border border-gray-100 p-12 text-center">
-                    <UserCircle size={48} className="mx-auto text-gray-300 mb-4" />
+                    <UserCircleIcon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-400 font-medium">{t('clients.noResults')}</p>
                     <button
                         onClick={() => setShowCreateModal(true)}

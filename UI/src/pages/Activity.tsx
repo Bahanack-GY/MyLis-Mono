@@ -1,23 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import {
-    Activity as ActivityIcon,
-    Search,
-    LogIn,
-    Plus,
-    RefreshCw,
-    Trash2,
-    Eye,
-    Download,
-    Upload,
-    MessageSquare,
-    Users,
-    Zap,
-    CalendarDays,
-    ChevronLeft,
-    ChevronRight,
-} from 'lucide-react';
+import { Activity01Icon as ActivityIcon, Search01Icon, Login01Icon, Add01Icon, RefreshIcon, Delete02Icon, ViewIcon, Download01Icon, Upload01Icon, Message02Icon, UserGroupIcon, ZapIcon, Calendar01Icon, ArrowLeft01Icon, ArrowRight01Icon } from 'hugeicons-react';
 import { useLogs, useLogsStats } from '../api/logs/hooks';
 import { ActivitySkeleton } from '../components/Skeleton';
 import type { Log } from '../api/logs/types';
@@ -58,14 +42,14 @@ const ACTION_COLORS: Record<ActionType, string> = {
 };
 
 const ACTION_ICONS: Record<ActionType, React.ComponentType<{ size?: number; className?: string }>> = {
-    login: LogIn,
-    create: Plus,
-    update: RefreshCw,
-    delete: Trash2,
-    view: Eye,
-    export: Download,
-    upload: Upload,
-    comment: MessageSquare,
+    login: Login01Icon,
+    create: Add01Icon,
+    update: RefreshIcon,
+    delete: Delete02Icon,
+    view: ViewIcon,
+    export: Download01Icon,
+    upload: Upload01Icon,
+    comment: Message02Icon,
 };
 
 const ROLE_COLORS: Record<UserRole, string> = {
@@ -149,9 +133,9 @@ const ActivityPage = () => {
 
     const stats = [
         { label: t('activity.stats.total'), value: statsData?.total ?? '—', icon: ActivityIcon, color: '#33cbcc' },
-        { label: t('activity.stats.today'), value: statsData?.todayCount ?? '—', icon: CalendarDays, color: '#3b82f6' },
-        { label: t('activity.stats.activeUsers'), value: statsData?.activeUsers ?? '—', icon: Users, color: '#8b5cf6' },
-        { label: t('activity.stats.topAction'), value: statsData?.topAction ? t(`activity.actions.${topActionKey}`) : '—', icon: Zap, color: '#f59e0b' },
+        { label: t('activity.stats.today'), value: statsData?.todayCount ?? '—', icon: Calendar01Icon, color: '#3b82f6' },
+        { label: t('activity.stats.activeUsers'), value: statsData?.activeUsers ?? '—', icon: UserGroupIcon, color: '#8b5cf6' },
+        { label: t('activity.stats.topAction'), value: statsData?.topAction ? t(`activity.actions.${topActionKey}`) : '—', icon: ZapIcon, color: '#f59e0b' },
     ];
 
     // Chart data from dedicated endpoint
@@ -178,17 +162,16 @@ const ActivityPage = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
-                            style={{ color: stat.color }}
-                        >
-                            <stat.icon size={100} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
@@ -223,15 +206,15 @@ const ActivityPage = () => {
 
             {/* ── Filters ── */}
             <div className="flex flex-col md:flex-row gap-4">
-                {/* Search */}
-                <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                    <Search className="text-gray-400 ml-3" size={20} />
+                {/* Search01Icon */}
+                <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                    <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                     <input
                         type="text"
                         placeholder={t('activity.searchPlaceholder')}
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
-                        className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                        className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                     />
                 </div>
 
@@ -287,7 +270,7 @@ const ActivityPage = () => {
                                     />
                                 ) : (
                                     <div className="w-10 h-10 rounded-xl border border-gray-200 bg-gray-100 flex items-center justify-center shrink-0">
-                                        <Users size={16} className="text-gray-400" />
+                                        <UserGroupIcon size={16} className="text-gray-400" />
                                     </div>
                                 )}
 
@@ -342,7 +325,7 @@ const ActivityPage = () => {
                         disabled={page === 1}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
-                        <ChevronLeft size={16} />
+                        <ArrowLeft01Icon size={16} />
                         {t('common.previous')}
                     </button>
 
@@ -356,7 +339,7 @@ const ActivityPage = () => {
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                         {t('common.next')}
-                        <ChevronRight size={16} />
+                        <ArrowRight01Icon size={16} />
                     </button>
                 </div>
             )}

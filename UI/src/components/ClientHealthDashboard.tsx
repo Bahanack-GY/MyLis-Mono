@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { AlertTriangle, TrendingDown, Clock, CheckCircle2, TrendingUp, Filter, ChevronRight } from 'lucide-react';
+import { Alert02Icon, ArrowDownRight01Icon, Clock01Icon, Tick01Icon, ArrowUpRight01Icon, FilterIcon, ArrowRight01Icon } from 'hugeicons-react';
 import { useClients } from '../api/clients/hooks';
 import { useClientHealthMetrics } from '../api/commercial/hooks';
 import type { HealthStatus } from '../api/commercial/types';
@@ -10,12 +10,12 @@ import type { HealthStatus } from '../api/commercial/types';
 
 const getHealthBadgeConfig = (status: HealthStatus) => {
     const configs = {
-        AT_RISK: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: AlertTriangle, priority: 1 },
-        ATTENTION_NEEDED: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: TrendingDown, priority: 2 },
-        NEEDS_FOLLOWUP: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: Clock, priority: 3 },
-        GOOD: { color: 'bg-[#33cbcc]', textColor: 'text-[#33cbcc]', bgColor: 'bg-[#33cbcc]/10', icon: CheckCircle2, priority: 4 },
-        HEALTHY: { color: 'bg-[#33cbcc]', textColor: 'text-[#33cbcc]', bgColor: 'bg-[#33cbcc]/10', icon: CheckCircle2, priority: 5 },
-        NEW: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: TrendingUp, priority: 6 },
+        AT_RISK: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: Alert02Icon, priority: 1 },
+        ATTENTION_NEEDED: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: ArrowDownRight01Icon, priority: 2 },
+        NEEDS_FOLLOWUP: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: Clock01Icon, priority: 3 },
+        GOOD: { color: 'bg-[#33cbcc]', textColor: 'text-[#33cbcc]', bgColor: 'bg-[#33cbcc]/10', icon: Tick01Icon, priority: 4 },
+        HEALTHY: { color: 'bg-[#33cbcc]', textColor: 'text-[#33cbcc]', bgColor: 'bg-[#33cbcc]/10', icon: Tick01Icon, priority: 5 },
+        NEW: { color: 'bg-[#283852]', textColor: 'text-[#283852]', bgColor: 'bg-[#283852]/10', icon: ArrowUpRight01Icon, priority: 6 },
     };
     return configs[status] || configs.NEW;
 };
@@ -59,7 +59,7 @@ function ClientHealthItem({ clientId, clientName, onSelect }: { clientId: string
                         </span>
                     </div>
                 </div>
-                <ChevronRight size={16} className="text-gray-400 flex-shrink-0 mt-1" />
+                <ArrowRight01Icon size={16} className="text-gray-400 flex-shrink-0 mt-1" />
             </div>
 
             <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
@@ -110,7 +110,7 @@ export default function ClientHealthDashboard({ onClientSelect }: ClientHealthDa
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                            <AlertTriangle size={20} />
+                            <Alert02Icon size={20} />
                             {t('commercial.clientHealth.title', 'Santé Clients')}
                         </h2>
                         <p className="text-xs text-white/70 mt-1">
@@ -120,7 +120,7 @@ export default function ClientHealthDashboard({ onClientSelect }: ClientHealthDa
                 </div>
             </div>
 
-            {/* Filter Tabs */}
+            {/* FilterIcon Tabs */}
             <div className="px-5 pt-4 border-b border-gray-100">
                 <div className="flex gap-2">
                     <button
@@ -132,7 +132,7 @@ export default function ClientHealthDashboard({ onClientSelect }: ClientHealthDa
                         }`}
                     >
                         <div className="flex items-center gap-2">
-                            <AlertTriangle size={14} />
+                            <Alert02Icon size={14} />
                             {t('commercial.clientHealth.atRisk', 'À risque')}
                         </div>
                     </button>
@@ -145,7 +145,7 @@ export default function ClientHealthDashboard({ onClientSelect }: ClientHealthDa
                         }`}
                     >
                         <div className="flex items-center gap-2">
-                            <Clock size={14} />
+                            <Clock01Icon size={14} />
                             {t('commercial.clientHealth.needsAttention', 'Attention requise')}
                         </div>
                     </button>
@@ -158,7 +158,7 @@ export default function ClientHealthDashboard({ onClientSelect }: ClientHealthDa
                         }`}
                     >
                         <div className="flex items-center gap-2">
-                            <Filter size={14} />
+                            <FilterIcon size={14} />
                             {t('commercial.clientHealth.all', 'Tous')}
                         </div>
                     </button>
@@ -173,7 +173,7 @@ export default function ClientHealthDashboard({ onClientSelect }: ClientHealthDa
                     </div>
                 ) : filteredClients.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                        <CheckCircle2 size={40} strokeWidth={1.2} className="mb-3" />
+                        <Tick01Icon size={40} strokeWidth={1.2} className="mb-3" />
                         <p className="text-sm">{t('commercial.clientHealth.noClients', 'Aucun client à afficher')}</p>
                     </div>
                 ) : (

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Clock, ArrowRight, Building2, User as UserIcon, FileText } from 'lucide-react';
+import { Cancel01Icon, Clock01Icon, ArrowRight01Icon, Building02Icon, UserIcon, File01Icon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useEmployeeTransferHistory } from '../../api/employees/hooks';
 import { format } from 'date-fns';
@@ -38,7 +38,7 @@ const TransferHistoryModal = ({ employeeId, onClose }: TransferHistoryModalProps
                             onClick={onClose}
                             className="text-gray-400 hover:text-gray-600 transition-colors"
                         >
-                            <X className="w-6 h-6" />
+                            <Cancel01Icon className="w-6 h-6" />
                         </button>
                     </div>
 
@@ -50,7 +50,7 @@ const TransferHistoryModal = ({ employeeId, onClose }: TransferHistoryModalProps
                             </div>
                         ) : history.length === 0 ? (
                             <div className="text-center py-12">
-                                <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                <Building02Icon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                                 <p className="text-gray-500">{t('employees.transfer.noHistory')}</p>
                             </div>
                         ) : (
@@ -64,7 +64,7 @@ const TransferHistoryModal = ({ employeeId, onClose }: TransferHistoryModalProps
 
                                         <div className="flex gap-4">
                                             <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                                                <ArrowRight className="w-5 h-5 text-[#33cbcc]" />
+                                                <ArrowRight01Icon className="w-5 h-5 text-[#33cbcc]" />
                                             </div>
 
                                             <div className="flex-1 bg-gray-50 rounded-lg p-4">
@@ -73,7 +73,7 @@ const TransferHistoryModal = ({ employeeId, onClose }: TransferHistoryModalProps
                                                     <span className="text-sm text-gray-600">
                                                         {entry.fromDepartment?.name || t('employees.transfer.noDepartment')}
                                                     </span>
-                                                    <ArrowRight className="w-4 h-4 text-gray-400" />
+                                                    <ArrowRight01Icon className="w-4 h-4 text-gray-400" />
                                                     <span className="text-sm font-semibold text-gray-900">
                                                         {entry.toDepartment.name}
                                                     </span>
@@ -86,12 +86,12 @@ const TransferHistoryModal = ({ employeeId, onClose }: TransferHistoryModalProps
                                                         <span>{t('employees.transfer.transferredBy')} {entry.transferredByName}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <Clock className="w-4 h-4" />
+                                                        <Clock01Icon className="w-4 h-4" />
                                                         <span>{format(new Date(entry.createdAt), 'PPp')}</span>
                                                     </div>
                                                     {entry.reason && (
                                                         <div className="flex items-start gap-2 mt-2">
-                                                            <FileText className="w-4 h-4 mt-0.5" />
+                                                            <File01Icon className="w-4 h-4 mt-0.5" />
                                                             <span className="text-gray-700">{entry.reason}</span>
                                                         </div>
                                                     )}

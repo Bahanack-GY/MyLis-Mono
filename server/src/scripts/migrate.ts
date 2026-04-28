@@ -83,6 +83,9 @@ import { BusinessExpense } from '../models/business-expense.model';
 // Reports
 import { Report } from '../models/report.model';
 
+// Reminders
+import { Reminder } from '../models/reminder.model';
+
 dotenv.config();
 
 async function migrate() {
@@ -162,6 +165,9 @@ async function migrate() {
 
             // Reports (depends on User, Employee, Department)
             Report,
+
+            // Reminders (depends on User)
+            Reminder,
         ],
         logging: (sql) => console.log(sql),
     });

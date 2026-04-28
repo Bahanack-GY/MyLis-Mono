@@ -1,42 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Player } from '@lottiefiles/react-lottie-player';
+import trophyData from '../assets/lottie/trophy';
+import emptyTeamData from '../assets/lottie/emptyTeam';
 import { Tree, TreeNode } from 'react-organizational-chart';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import i18n from '../i18n/config';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Search,
-    Filter,
-    Plus,
-    X,
-    User,
-    Mail,
-    Phone,
-    Briefcase,
-    Building,
-    Calendar,
-    UserPlus,
-    Zap,
-    GraduationCap,
-    FileText,
-    Trash2,
-    Target,
-    Loader2,
-    Eye,
-    EyeOff,
-    MapPin,
-    Upload,
-    CheckCircle,
-    Camera,
-    Shield,
-    Calculator,
-    LayoutGrid,
-    List,
-    ArrowUpRight,
-    Crown,
-    Network,
-} from 'lucide-react';
+import { Search01Icon, FilterIcon, Add01Icon, Cancel01Icon, UserIcon, Mail01Icon, CallIcon, Briefcase01Icon, Building01Icon, Calendar01Icon, UserAdd01Icon, ZapIcon, GraduationScrollIcon, File01Icon, Delete02Icon, Target01Icon, Loading02Icon, ViewIcon, ViewOffIcon, Location01Icon, Upload01Icon, Tick01Icon, Camera01Icon, Shield01Icon, CalculatorIcon, DashboardSquare01Icon, ListViewIcon, ArrowUpRight01Icon, CrownIcon, Share01Icon } from 'hugeicons-react';
 import { useInfiniteEmployees, useCreateEmployee, useLeaderboard, useEmployees } from '../api/employees/hooks';
 import { EmployeesSkeleton } from '../components/Skeleton';
 import { useDepartmentScope, useAuth } from '../contexts/AuthContext';
@@ -47,7 +19,7 @@ import { documentsApi } from '../api/documents/api';
 /* ─── UI Suggestion Chips ──────────────────────────────── */
 
 const SKILLS = [
-    'Figma', 'Adobe XD', 'Sketch', 'Prototyping', 'User Research', 'Wireframing',
+    'Figma', 'Adobe XD', 'Sketch', 'Prototyping', 'UserIcon Research', 'Wireframing',
     'Design Systems', 'UI Design', 'Illustrator', 'Photoshop', 'Branding',
     'Typography', 'Motion Design', 'CSS', 'React', 'TypeScript', 'Tailwind CSS',
     'Node.js', 'Leadership', 'Project Mgmt', 'Agile', 'After Effects', '3D Design',
@@ -195,12 +167,12 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                                {ceoMode ? <Crown size={20} className="text-[#33cbcc]" /> : managerMode ? <Shield size={20} className="text-[#33cbcc]" /> : accountantMode ? <Calculator size={20} className="text-[#33cbcc]" /> : commercialMode ? <Target size={20} className="text-[#33cbcc]" /> : stagiaireMode ? <GraduationCap size={20} className="text-[#33cbcc]" /> : <UserPlus size={20} className="text-[#33cbcc]" />}
+                                {ceoMode ? <CrownIcon size={20} className="text-[#33cbcc]" /> : managerMode ? <Shield01Icon size={20} className="text-[#33cbcc]" /> : accountantMode ? <CalculatorIcon size={20} className="text-[#33cbcc]" /> : commercialMode ? <Target01Icon size={20} className="text-[#33cbcc]" /> : stagiaireMode ? <GraduationScrollIcon size={20} className="text-[#33cbcc]" /> : <UserAdd01Icon size={20} className="text-[#33cbcc]" />}
                             </div>
                             <h2 className="text-lg font-bold text-gray-800">{t('employees.create.title')}</h2>
                         </div>
                         <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                            <X size={18} />
+                            <Cancel01Icon size={18} />
                         </button>
                     </div>
                     {/* Role type selector */}
@@ -216,12 +188,12 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                         : 'text-gray-500 hover:text-gray-700'
                                 }`}
                             >
-                                {type === 'employee' && <UserPlus size={13} />}
-                                {type === 'manager' && <Shield size={13} />}
-                                {type === 'accountant' && <Calculator size={13} />}
-                                {type === 'commercial' && <Target size={13} />}
-                                {type === 'stagiaire' && <GraduationCap size={13} />}
-                                {type === 'ceo' && <Crown size={13} />}
+                                {type === 'employee' && <UserAdd01Icon size={13} />}
+                                {type === 'manager' && <Shield01Icon size={13} />}
+                                {type === 'accountant' && <CalculatorIcon size={13} />}
+                                {type === 'commercial' && <Target01Icon size={13} />}
+                                {type === 'stagiaire' && <GraduationScrollIcon size={13} />}
+                                {type === 'ceo' && <CrownIcon size={13} />}
                                 {type === 'employee' ? t('employees.addEmployee') : type === 'manager' ? t('employees.addManager') : type === 'accountant' ? t('employees.addAccountant') : type === 'commercial' ? t('employees.addCommercial') : type === 'stagiaire' ? 'Stagiaire' : 'CEO'}
                             </button>
                         ))}
@@ -233,7 +205,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     {/* Profile Picture */}
                     <div>
                         <label className={labelCls}>
-                            <Camera size={12} />
+                            <Camera01Icon size={12} />
                             {t('employees.edit.profilePicture')}
                         </label>
                         <div className="flex items-center gap-5">
@@ -243,7 +215,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                         <img src={avatarPreview} alt="" className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                            <User size={28} className="text-gray-400" />
+                                            <UserIcon size={28} className="text-gray-400" />
                                         </div>
                                     )}
                                 </div>
@@ -252,7 +224,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                     onClick={() => avatarInputRef.current?.click()}
                                     className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
-                                    <Camera size={18} className="text-white" />
+                                    <Camera01Icon size={18} className="text-white" />
                                 </button>
                             </div>
                             <div
@@ -261,7 +233,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                 onClick={() => avatarInputRef.current?.click()}
                                 className="flex-1 border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-[#33cbcc]/40 transition-colors"
                             >
-                                <Upload size={20} className="mx-auto text-gray-400 mb-1" />
+                                <Upload01Icon size={20} className="mx-auto text-gray-400 mb-1" />
                                 <p className="text-xs text-gray-500">{t('employees.edit.dragOrClick')}</p>
                                 <p className="text-[10px] text-gray-400 mt-0.5">{t('employees.edit.maxSize')}</p>
                             </div>
@@ -288,7 +260,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('employees.create.firstName')}
                             </label>
                             <input
@@ -302,7 +274,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('employees.create.lastName')}
                             </label>
                             <input
@@ -315,11 +287,11 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         </div>
                     </div>
 
-                    {/* Email + Phone */}
+                    {/* Email + CallIcon */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Mail size={12} />
+                                <Mail01Icon size={12} />
                                 {t('employees.create.email')}
                             </label>
                             <input
@@ -332,7 +304,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Phone size={12} />
+                                <CallIcon size={12} />
                                 {t('employees.create.phone')}
                             </label>
                             <input
@@ -349,7 +321,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <MapPin size={12} />
+                                <Location01Icon size={12} />
                                 {t('employees.create.address')}
                             </label>
                             <input
@@ -362,7 +334,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Briefcase size={12} />
+                                <Briefcase01Icon size={12} />
                                 {t('employees.create.salary')} (XAF)
                             </label>
                             <input
@@ -378,7 +350,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     {/* Password */}
                     <div>
                          <label className={labelCls}>
-                            <User size={12} />
+                            <UserIcon size={12} />
                             {t('employees.create.password')}
                         </label>
                         <div className="relative">
@@ -394,7 +366,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
                             >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                {showPassword ? <ViewOffIcon size={16} /> : <ViewIcon size={16} />}
                             </button>
                         </div>
                     </div>
@@ -403,7 +375,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('employees.create.dateOfBirth')}
                             </label>
                             <input
@@ -415,7 +387,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <User size={12} />
+                                <UserIcon size={12} />
                                 {t('employees.create.gender')}
                             </label>
                             <select
@@ -435,7 +407,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         <div className="space-y-4">
                             <div>
                                 <label className={labelCls}>
-                                    <Building size={12} />
+                                    <Building01Icon size={12} />
                                     {t('employees.create.department')}
                                 </label>
                                 <select
@@ -452,7 +424,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                             </div>
                             <div>
                                 <label className={labelCls}>
-                                    <User size={12} />
+                                    <UserIcon size={12} />
                                     Encadreur
                                 </label>
                                 <select
@@ -481,7 +453,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className={labelCls}>
-                                    <Briefcase size={12} />
+                                    <Briefcase01Icon size={12} />
                                     {t('employees.create.role')}
                                 </label>
                                 <select
@@ -497,7 +469,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                             </div>
                             <div>
                                 <label className={labelCls}>
-                                    <Building size={12} />
+                                    <Building01Icon size={12} />
                                     {t('employees.create.department')}
                                 </label>
                                 <select
@@ -519,7 +491,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('employees.create.startDate')}
                             </label>
                             <input
@@ -531,7 +503,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         </div>
                         <div>
                             <label className={labelCls}>
-                                <Calendar size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('employees.create.workDays')}
                             </label>
                             <input
@@ -550,7 +522,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     {form.role === 'Commercial' && (
                         <div>
                             <label className={labelCls}>
-                                <Target size={12} />
+                                <Target01Icon size={12} />
                                 {t('employees.create.customersGoal')}
                             </label>
                             <input
@@ -568,7 +540,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="border-t border-gray-100 pt-5">
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-2 text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                <Zap size={14} className="text-[#33cbcc]" />
+                                <ZapIcon size={14} className="text-[#33cbcc]" />
                                 {t('employees.create.skills')}
                             </div>
                             {form.skills.length > 0 && (
@@ -597,7 +569,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             >
-                                <Plus size={14} />
+                                <Add01Icon size={14} />
                             </button>
                         </div>
                         <div className="flex flex-wrap gap-2">
@@ -635,7 +607,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="border-t border-gray-100 pt-5">
                         <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2 text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                <GraduationCap size={14} className="text-[#33cbcc]" />
+                                <GraduationScrollIcon size={14} className="text-[#33cbcc]" />
                                 {t('employees.create.educationDocs')}
                             </div>
                             <button
@@ -643,7 +615,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                 onClick={() => addDoc('educationDocs', 'diploma')}
                                 className="flex items-center gap-1 text-xs font-semibold text-[#33cbcc] hover:text-[#2bb5b6] transition-colors"
                             >
-                                <Plus size={14} />
+                                <Add01Icon size={14} />
                                 {t('employees.create.addDocument')}
                             </button>
                         </div>
@@ -675,7 +647,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                                 onClick={() => removeDoc('educationDocs', i)}
                                                 className="p-1.5 rounded-lg text-gray-400 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
                                             >
-                                                <Trash2 size={14} />
+                                                <Delete02Icon size={14} />
                                             </button>
                                         </div>
                                         <label className="flex items-center gap-2 cursor-pointer group/file">
@@ -684,7 +656,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                                     ? 'bg-[#33cbcc]/10 text-[#33cbcc] border border-[#33cbcc]/20'
                                                     : 'bg-white text-gray-500 border border-gray-200 hover:border-[#33cbcc]/30'
                                             }`}>
-                                                {doc.file ? <CheckCircle size={12} className="shrink-0" /> : <Upload size={12} className="shrink-0" />}
+                                                {doc.file ? <Tick01Icon size={12} className="shrink-0" /> : <Upload01Icon size={12} className="shrink-0" />}
                                                 <span className="truncate max-w-[160px] inline-block">{doc.file ? doc.file.name : t('employees.create.chooseFile')}</span>
                                             </div>
                                             <input
@@ -704,7 +676,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                     <div className="border-t border-gray-100 pt-5">
                         <div className="flex items-center justify-between mb-1">
                             <div className="flex items-center gap-2 text-xs font-bold text-gray-600 uppercase tracking-wider">
-                                <FileText size={14} className="text-[#33cbcc]" />
+                                <File01Icon size={14} className="text-[#33cbcc]" />
                                 {t('employees.create.recruitmentDocs')}
                             </div>
                             <button
@@ -712,7 +684,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                 onClick={() => addDoc('recruitmentDocs', 'cv')}
                                 className="flex items-center gap-1 text-xs font-semibold text-[#33cbcc] hover:text-[#2bb5b6] transition-colors"
                             >
-                                <Plus size={14} />
+                                <Add01Icon size={14} />
                                 {t('employees.create.addDocument')}
                             </button>
                         </div>
@@ -745,7 +717,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                                 onClick={() => removeDoc('recruitmentDocs', i)}
                                                 className="p-1.5 rounded-lg text-gray-400 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
                                             >
-                                                <Trash2 size={14} />
+                                                <Delete02Icon size={14} />
                                             </button>
                                         </div>
                                         <label className="flex items-center gap-2 cursor-pointer group/file">
@@ -754,7 +726,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                                     ? 'bg-[#33cbcc]/10 text-[#33cbcc] border border-[#33cbcc]/20'
                                                     : 'bg-white text-gray-500 border border-gray-200 hover:border-[#33cbcc]/30'
                                             }`}>
-                                                {doc.file ? <CheckCircle size={12} className="shrink-0" /> : <Upload size={12} className="shrink-0" />}
+                                                {doc.file ? <Tick01Icon size={12} className="shrink-0" /> : <Upload01Icon size={12} className="shrink-0" />}
                                                 <span className="truncate max-w-[160px] inline-block">{doc.file ? doc.file.name : t('employees.create.chooseFile')}</span>
                                             </div>
                                             <input
@@ -781,7 +753,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                         onClick={async () => {
                             setIsUploading(true);
                             try {
-                                // Upload education docs to formation folder
+                                // Upload01Icon education docs to formation folder
                                 const uploadedEducationDocs = await Promise.all(
                                     form.educationDocs.map(async (doc) => {
                                         if (doc.file) {
@@ -792,7 +764,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                     })
                                 );
 
-                                // Upload recruitment docs to recruitment folder
+                                // Upload01Icon recruitment docs to recruitment folder
                                 const uploadedRecruitmentDocs = await Promise.all(
                                     form.recruitmentDocs.map(async (doc) => {
                                         if (doc.file) {
@@ -836,7 +808,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {(createEmployee.isPending || isUploading) ? <Loader2 size={16} className="animate-spin" /> : ceoMode ? <Crown size={16} /> : managerMode ? <Shield size={16} /> : accountantMode ? <Calculator size={16} /> : commercialMode ? <Target size={16} /> : stagiaireMode ? <GraduationCap size={16} /> : <Plus size={16} />}
+                        {(createEmployee.isPending || isUploading) ? <Loading02Icon size={16} className="animate-spin" /> : ceoMode ? <CrownIcon size={16} /> : managerMode ? <Shield01Icon size={16} /> : accountantMode ? <CalculatorIcon size={16} /> : commercialMode ? <Target01Icon size={16} /> : stagiaireMode ? <GraduationScrollIcon size={16} /> : <Add01Icon size={16} />}
                         {isUploading ? t('employees.create.uploading') : ceoMode ? 'Créer le CEO' : managerMode ? t('employees.createManager.submit') : accountantMode ? t('employees.createAccountant.submit') : commercialMode ? t('employees.createCommercial.submit') : stagiaireMode ? 'Créer le stagiaire' : t('employees.create.submit')}
                     </button>
                 </div>
@@ -886,7 +858,7 @@ const PersonNode = ({ emp, badge, onClick }: { emp: any; badge: string; onClick:
 const CompanyNode = () => (
     <div className="inline-flex items-center gap-2.5 bg-gradient-to-r from-[#283852] to-[#1e2a3d] text-white px-5 py-3 rounded-2xl shadow-lg cursor-default">
         <div className="w-7 h-7 rounded-lg bg-[#33cbcc]/20 flex items-center justify-center shrink-0">
-            <Building size={14} className="text-[#33cbcc]" />
+            <Building01Icon size={14} className="text-[#33cbcc]" />
         </div>
         <span className="text-sm font-bold tracking-tight">Organisation</span>
     </div>
@@ -999,7 +971,7 @@ const OrganigramView = ({ deptScope }: { deptScope?: string | null }) => {
     if (isLoading) {
         return (
             <div className="flex justify-center py-20">
-                <Loader2 className="animate-spin text-[#33cbcc]" size={32} />
+                <Loading02Icon className="animate-spin text-[#33cbcc]" size={32} />
             </div>
         );
     }
@@ -1017,7 +989,7 @@ const OrganigramView = ({ deptScope }: { deptScope?: string | null }) => {
     if (activeDepts.length === 0 && !hasCeo && !hasManagers) {
         return (
             <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                <Network size={40} className="mb-3 opacity-30" />
+                <Share01Icon size={40} className="mb-3 opacity-30" />
                 <p className="text-sm">Aucun département configuré</p>
             </div>
         );
@@ -1187,352 +1159,376 @@ const Employees = () => {
     const employees = (activeQuery.data?.pages.flatMap(p => p.rows) || []).map((emp, i) => mapEmp(emp, i, false));
     const dismissedEmployees = (dismissedQuery.data?.pages.flatMap(p => p.rows) || []).map((emp, i) => mapEmp(emp, i, true));
 
+    const DEPT_COLORS = ['#33cbcc','#283852','#e05e5e','#f59e0b','#6366f1','#10b981','#ec4899'];
+    const deptColorMap: Record<string, string> = {};
+    (apiDepartments || []).forEach((d, i) => { deptColorMap[d.id] = DEPT_COLORS[i % DEPT_COLORS.length]; });
+
     return (
-        <div className="space-y-8 ">
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h1 className="text-3xl font-bold text-gray-800">{t('employees.title')}</h1>
+        <div>
+            <div className="space-y-7">
 
-                <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-2xl flex items-center shadow-sm border border-gray-100">
-                         <div className="flex -space-x-3">
-                            {employees.slice(0, 4).map((emp) => (
-                                <div key={emp.id} className="w-10 h-10 rounded-full border-2 border-white overflow-hidden">
-                                    <img
-                                        src={emp.avatar}
-                                        alt={emp.name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                            ))}
-                         </div>
-                         <span className="ml-4 text-gray-500 font-medium pr-2">{employees.length}</span>
+                {/* ── PAGE HEADER ─────────────────────────────────── */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#33cbcc] mb-1">
+                            {i18n.language === 'fr' ? 'Ressources Humaines' : 'Human Resources'}
+                        </p>
+                        <h1 className="text-4xl font-bold text-[#1c2b3a] leading-none tracking-tight">
+                            {t('employees.title')}
+                        </h1>
                     </div>
-                    {role !== 'ACCOUNTANT' && (
-                        <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
-                        >
-                            <UserPlus size={16} />
-                            {t('employees.addEmployee')}
-                        </button>
-                    )}
-                </div>
-            </div>
 
-            {/* Filters */}
-            <div className="flex flex-col md:flex-row gap-4">
-                 {viewMode !== 'org' && (
-                     <div className="flex-1 bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                         <Search className="text-gray-400 ml-3" size={20} />
-                         <input
-                             type="text"
-                             placeholder={t('employees.searchPlaceholder')}
-                             value={searchQuery}
-                             onChange={(e) => setSearchQuery(e.target.value)}
-                             className="w-full bg-transparent border-none focus:ring-0 text-gray-700 placeholder-gray-400 px-3"
-                         />
-                     </div>
-                 )}
-
-                 <div className="flex flex-wrap gap-3">
-                     {/* View toggle */}
-                     <div className="flex items-center bg-white rounded-2xl border border-gray-100 shadow-sm p-1 self-start">
-                         <button
-                             onClick={() => setViewMode('org')}
-                             title="Organigramme"
-                             className={`p-2 rounded-xl transition-colors ${viewMode === 'org' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                         >
-                             <Network size={16} />
-                         </button>
-                         <button
-                             onClick={() => setViewMode('grid')}
-                             title="Grille"
-                             className={`p-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                         >
-                             <LayoutGrid size={16} />
-                         </button>
-                         <button
-                             onClick={() => setViewMode('list')}
-                             title="Liste"
-                             className={`p-2 rounded-xl transition-colors ${viewMode === 'list' ? 'bg-[#33cbcc] text-white' : 'text-gray-400 hover:text-gray-600'}`}
-                         >
-                             <List size={16} />
-                         </button>
-                     </div>
-                     {viewMode !== 'org' && (
-                         <>
-                             <div className="relative flex-1 min-w-40">
-                                 <Building className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
-                                 <select
-                                     value={selectedDepartment}
-                                     onChange={e => setSelectedDepartment(e.target.value)}
-                                     className="w-full bg-white rounded-2xl p-3 pl-10 pr-8 border border-gray-100 shadow-sm text-sm text-gray-600 appearance-none cursor-pointer hover:border-[#33cbcc]/30 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 transition-all"
-                                 >
-                                     <option value="">{t('employees.allDepartments')}</option>
-                                     {(apiDepartments || []).map(d => (
-                                         <option key={d.id} value={d.id}>{d.name}</option>
-                                     ))}
-                                 </select>
-                                 <Filter size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                             </div>
-                             {selectedDepartment && (
-                                 <button
-                                     onClick={() => setSelectedDepartment('')}
-                                     className="bg-white p-3 rounded-2xl border border-gray-100 shadow-sm hover:bg-[#283852]/10 hover:border-gray-200 text-gray-400 hover:text-[#283852] transition-colors self-start"
-                                     title={t('employees.clearFilter')}
-                                 >
-                                     <X size={20} />
-                                 </button>
-                             )}
-                         </>
-                     )}
-                 </div>
-            </div>
-
-            {/* Top Employees Section */}
-            {leaderboard && leaderboard.length > 0 && !searchQuery && !selectedDepartment && viewMode !== 'org' && (
-                <div className="bg-linear-to-r from-[#283852] to-[#1e2a3d] rounded-3xl p-6 lg:p-8 text-white shadow-xl relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#33cbcc]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                    
-                    <div className="flex flex-col lg:flex-row gap-8 relative z-10">
-                        {/* Best Employee */}
-                        <div className="flex-1 max-w-sm flex flex-col items-center justify-center text-center p-6 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm">
-                            
-                            <h2 className="text-sm font-semibold uppercase tracking-widest text-[#33cbcc] mb-3">{t('employees.bestEmployee', 'Employee of the Month')}</h2>
-                            <div className="relative mb-4">
-                                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-[#33cbcc] shadow-lg shadow-[#33cbcc]/30">
-                                    <img 
-                                        src={leaderboard[0].avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(leaderboard[0].firstName + '+' + leaderboard[0].lastName)}&background=33cbcc&color=fff`} 
-                                        alt={`${leaderboard[0].firstName} ${leaderboard[0].lastName}`} 
-                                        className="w-full h-full object-cover" 
-                                    />
+                    <div className="flex items-center gap-3 flex-wrap">
+                        {/* Avatar stack + count */}
+                        {employees.length > 0 && (
+                            <div className="flex items-center gap-2 border border-[#e5e8ef] bg-white rounded-2xl px-3 py-2">
+                                <div className="flex -space-x-2.5">
+                                    {employees.slice(0, 4).map(emp => (
+                                        <div key={emp.id} className="w-8 h-8 rounded-full border-2 border-white overflow-hidden">
+                                            <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-[#33cbcc] rounded-full flex items-center justify-center text-white border-2 border-[#283852] font-bold shadow-sm">
-                                    #1
-                                </div>
+                                <span className="text-sm font-semibold text-[#1c2b3a] pl-1">{employees.length}</span>
                             </div>
-                            <h3 className="text-xl font-bold">{leaderboard[0].firstName} {leaderboard[0].lastName}</h3>
-                            <p className="text-white/60 text-sm mb-3">{leaderboard[0].positionTitle} • {leaderboard[0].department}</p>
-                            <div className="px-4 py-1.5 bg-[#33cbcc]/20 text-[#33cbcc] font-bold rounded-full text-sm">
-                                {leaderboard[0].points} pts
-                            </div>
+                        )}
+
+                        {/* View toggle */}
+                        <div className="flex items-center border border-[#e5e8ef] bg-white rounded-2xl p-1">
+                            {(['org','grid','list'] as const).map(mode => (
+                                <button key={mode} onClick={() => setViewMode(mode)}
+                                    className={`p-2 rounded-xl transition-all duration-150 ${viewMode === mode ? 'bg-[#283852] text-white' : 'text-[#8892a4] hover:text-[#1c2b3a]'}`}
+                                    title={mode === 'org' ? 'Organigramme' : mode === 'grid' ? 'Grille' : 'Liste'}>
+                                    {mode === 'org' ? <Share01Icon size={15} /> : mode === 'grid' ? <DashboardSquare01Icon size={15} /> : <ListViewIcon size={15} />}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Top 5 List */}
-                        <div className="flex-1 flex flex-col">
-                            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                                <Target size={20} className="text-[#33cbcc]" />
-                                {t('employees.leaderboard', 'Top Employees')}
-                            </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                {leaderboard.slice(1, 5).map((emp) => (
-                                    <div key={emp.id} className="flex items-center gap-4 bg-white/5 rounded-xl p-3 border border-white/5 hover:bg-white/10 transition-colors">
-                                        <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm shrink-0">
-                                            #{emp.rank}
-                                        </div>
-                                        <div className="w-10 h-10 rounded-full overflow-hidden border border-white/20 shrink-0">
-                                            <img 
-                                                src={emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=33cbcc&color=fff`} 
-                                                alt={`${emp.firstName} ${emp.lastName}`} 
-                                                className="w-full h-full object-cover" 
-                                            />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className="font-semibold text-sm truncate">{emp.firstName} {emp.lastName}</h4>
-                                            <p className="text-[10px] text-white/50 truncate">{emp.positionTitle}</p>
-                                        </div>
-                                        <div className="text-[#33cbcc] font-bold text-sm shrink-0">
-                                            {emp.points} pts
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        {role !== 'ACCOUNTANT' && (
+                            <motion.button
+                                onClick={() => setShowCreateModal(true)}
+                                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                                className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-2xl text-sm font-semibold"
+                            >
+                                <UserAdd01Icon size={15} />
+                                {t('employees.addEmployee')}
+                            </motion.button>
+                        )}
                     </div>
                 </div>
-            )}
 
-            {/* Organigram View */}
-            {viewMode === 'org' && <OrganigramView deptScope={deptScope} />}
-
-            {/* Employee Grid / List */}
-            {viewMode !== 'org' && (
-                <>
-                    {isLoading && <EmployeesSkeleton />}
-                    {viewMode === 'grid' ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {employees.map((employee, index) => (
-                                <motion.div
-                                    key={employee.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
-                                    onClick={() => navigate(`/employees/${employee.id}`)}
-                                    className="bg-white rounded-3xl p-8 transition-all duration-300 border border-gray-100 group relative overflow-hidden cursor-pointer hover:border-[#33cbcc]/30"
-                                >
-                                    <div className="flex flex-col items-center text-center">
-                                        <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-100 mb-4">
-                                            <img src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
-                                        </div>
-                                        <h3 className="text-xl font-bold text-gray-800">{employee.name}</h3>
-                                        <p className="text-gray-400 text-sm mt-1">{employee.role}</p>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden divide-y divide-gray-100">
-                            {employees.map((employee, index) => (
-                                <motion.div
-                                    key={employee.id}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.04 }}
-                                    onClick={() => navigate(`/employees/${employee.id}`)}
-                                    className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/60 cursor-pointer transition-colors group"
-                                >
-                                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-100 shrink-0">
-                                        <img src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-semibold text-gray-800">{employee.name}</p>
-                                        <p className="text-xs text-gray-400">{employee.role}</p>
-                                    </div>
-                                    {employee.departmentName && (
-                                        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 shrink-0">
-                                            {employee.departmentName}
-                                        </span>
-                                    )}
-                                    <ArrowUpRight size={16} className="text-gray-300 group-hover:text-[#33cbcc] transition-colors shrink-0" />
-                                </motion.div>
-                            ))}
-                            {employees.length === 0 && !isLoading && (
-                                <div className="py-12 text-center text-gray-400 text-sm">
-                                    <p>{t('employees.searchPlaceholder')}</p>
-                                    {role !== 'ACCOUNTANT' && (
-                                        <button
-                                            onClick={() => setShowCreateModal(true)}
-                                            className="mt-4 px-4 py-2 bg-[#33cbcc] text-white text-sm font-semibold rounded-xl hover:bg-[#2bb5b6] transition-colors"
-                                        >
-                                            {t('employees.addEmployee')}
-                                        </button>
-                                    )}
-                                </div>
+                {/* ── SEARCH + FILTERS ────────────────────────────── */}
+                {viewMode !== 'org' && (
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3 focus-within:border-[#33cbcc] transition-colors">
+                            <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
+                            <input
+                                type="text"
+                                placeholder={t('employees.searchPlaceholder')}
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                                className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
+                            />
+                            {searchQuery && (
+                                <button onClick={() => setSearchQuery('')} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+                                    <Cancel01Icon size={16} />
+                                </button>
                             )}
                         </div>
-                    )}
-                </>
-            )}
-
-            {/* Active employees scroll sentinel (grid/list only) */}
-            {viewMode !== 'org' && <div ref={activeSentinelRef} className="h-1" />}
-            {activeQuery.isFetchingNextPage && (
-                <div className="flex justify-center py-4">
-                    <Loader2 size={20} className="animate-spin text-[#33cbcc]" />
-                </div>
-            )}
-
-            {/* Dismissed Employees Section (grid/list only) */}
-            {viewMode !== 'org' && (dismissedEmployees.length > 0 || (dismissedQuery.data?.pages[0]?.count ?? 0) > 0) && (
-                <div>
-                    <button
-                        onClick={() => setShowDismissed(v => !v)}
-                        className="flex items-center gap-3 w-full text-left mb-4 group"
-                    >
-                        <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 text-sm font-semibold hover:bg-gray-200 transition-colors">
-                            <UserPlus size={15} className="rotate-45" />
-                            {t('employees.dismissed', 'Dismissed / Suspended')}
-                            <span className="bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full text-xs font-bold">
-                                {dismissedQuery.data?.pages[0]?.count ?? dismissedEmployees.length}
-                            </span>
-                            <motion.span
-                                animate={{ rotate: showDismissed ? 180 : 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="ml-1"
+                        <div className="relative min-w-44">
+                            <Building01Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
+                            <select
+                                value={selectedDepartment}
+                                onChange={e => setSelectedDepartment(e.target.value)}
+                                className="w-full bg-white border border-[#e5e8ef] rounded-2xl py-3 pl-10 pr-8 text-sm text-[#1c2b3a] appearance-none cursor-pointer focus:outline-none focus:border-[#33cbcc] transition-colors"
                             >
-                                ▾
-                            </motion.span>
+                                <option value="">{t('employees.allDepartments')}</option>
+                                {(apiDepartments || []).map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+                            </select>
+                            <FilterIcon size={13} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                         </div>
-                    </button>
+                    </div>
+                )}
 
-                    <AnimatePresence>
-                        {showDismissed && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.25 }}
-                                className="overflow-hidden"
-                            >
-                                {viewMode === 'grid' ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        {dismissedEmployees.map((employee, index) => (
-                                            <motion.div
-                                                key={employee.id}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: index * 0.05 }}
-                                                onClick={() => navigate(`/employees/${employee.id}`)}
-                                                className="bg-white rounded-3xl p-8 border border-gray-200 group relative overflow-hidden cursor-pointer hover:border-gray-300 transition-all opacity-70 grayscale-[40%]"
-                                            >
-                                                <div className="absolute top-3 right-3 px-2 py-1 bg-gray-100 text-gray-400 text-[10px] font-bold rounded-lg uppercase tracking-wide">
-                                                    {t('employees.dismissedBadge', 'Dismissed')}
-                                                </div>
-                                                <div className="flex flex-col items-center text-center">
-                                                    <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200 mb-4">
-                                                        <img src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
-                                                    </div>
-                                                    <h3 className="text-xl font-bold text-gray-500">{employee.name}</h3>
-                                                    <p className="text-gray-400 text-sm mt-1">{employee.role}</p>
-                                                </div>
-                                            </motion.div>
-                                        ))}
+                {/* ── LEADERBOARD ─────────────────────────────────── */}
+                {leaderboard && leaderboard.length > 0 && !searchQuery && !selectedDepartment && viewMode !== 'org' && (
+                    <div className="bg-[#283852] rounded-3xl overflow-hidden">
+                        <div className="flex flex-col lg:flex-row">
+
+                            {/* Left: Lottie + #1 */}
+                            <div className="lg:w-72 flex flex-col items-center justify-center p-8 border-b border-white/10 lg:border-b-0 lg:border-r border-white/10">
+                                <div className="relative">
+                                    <Player
+                                        autoplay loop
+                                        src={trophyData as any}
+                                        style={{ width: 100, height: 100 }}
+                                    />
+                                </div>
+                                <p className="text-[#33cbcc] text-[11px] font-bold uppercase tracking-[0.18em] mb-4">
+                                    {t('employees.bestEmployee', 'Employee of the month')}
+                                </p>
+                                <div className="relative mb-3">
+                                    <div className="w-20 h-20 rounded-full overflow-hidden border-[3px] border-[#33cbcc]">
+                                        <img
+                                            src={leaderboard[0].avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(leaderboard[0].firstName + '+' + leaderboard[0].lastName)}&background=33cbcc&color=fff`}
+                                            alt={`${leaderboard[0].firstName} ${leaderboard[0].lastName}`}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
-                                ) : (
-                                    <div className="bg-white rounded-3xl border border-gray-200 overflow-hidden divide-y divide-gray-100">
-                                        {dismissedEmployees.map((employee, index) => (
-                                            <motion.div
-                                                key={employee.id}
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: index * 0.04 }}
-                                                onClick={() => navigate(`/employees/${employee.id}`)}
-                                                className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 cursor-pointer transition-colors group opacity-70"
-                                            >
-                                                <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200 shrink-0 grayscale">
+                                    <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full bg-[#33cbcc] flex items-center justify-center text-white text-xs font-black border-2 border-[#283852]">
+                                        1
+                                    </div>
+                                </div>
+                                <h3 className="text-white font-bold text-base text-center leading-tight">
+                                    {leaderboard[0].firstName} {leaderboard[0].lastName}
+                                </h3>
+                                <p className="text-white/40 text-xs mt-0.5 text-center">{leaderboard[0].positionTitle}</p>
+                                <div className="mt-3 px-3 py-1 bg-[#33cbcc]/15 text-[#33cbcc] text-xs font-bold rounded-xl border border-[#33cbcc]/20">
+                                    {leaderboard[0].points} pts
+                                </div>
+                            </div>
+
+                            {/* Right: ranked list */}
+                            <div className="flex-1 p-6 lg:p-8">
+                                <div className="flex items-center gap-3 mb-5">
+                                    <Target01Icon size={18} className="text-[#33cbcc]" />
+                                    <h2 className="text-white font-bold text-base">{t('employees.leaderboard', 'Top Employees')}</h2>
+                                </div>
+                                <div className="space-y-2">
+                                    {leaderboard.slice(1, 6).map((emp, idx) => (
+                                        <motion.div
+                                            key={emp.id}
+                                            initial={{ opacity: 0, x: 16 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: idx * 0.06, ease: [0.22, 1, 0.36, 1] }}
+                                            className="flex items-center gap-3 rounded-2xl px-4 py-3 border border-white/6 hover:bg-white/6 transition-colors"
+                                        >
+                                            <span className="w-6 text-center text-xs font-bold text-white/30">#{emp.rank}</span>
+                                            <div className="w-9 h-9 rounded-full overflow-hidden border border-white/15 shrink-0">
+                                                <img src={emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}&background=33cbcc&color=fff`} alt={`${emp.firstName} ${emp.lastName}`} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-white text-sm font-semibold truncate">{emp.firstName} {emp.lastName}</p>
+                                                <p className="text-white/35 text-[11px] truncate">{emp.positionTitle}</p>
+                                            </div>
+                                            <span className="text-[#33cbcc] text-sm font-bold tabular-nums shrink-0">{emp.points}<span className="text-[#33cbcc]/40 text-xs font-normal ml-0.5">pts</span></span>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ── ORG VIEW ────────────────────────────────────── */}
+                {viewMode === 'org' && <OrganigramView deptScope={deptScope} />}
+
+                {/* ── GRID / LIST ─────────────────────────────────── */}
+                {viewMode !== 'org' && (
+                    <>
+                        {isLoading && <EmployeesSkeleton />}
+
+                        {/* Empty state */}
+                        {!isLoading && employees.length === 0 && (
+                            <div className="flex flex-col items-center justify-center py-20">
+                                <Player autoplay loop src={emptyTeamData as any} style={{ width: 160, height: 140 }} />
+                                <p className="mt-4 text-[#1c2b3a] font-semibold text-base">
+                                    {searchQuery
+                                        ? (i18n.language === 'fr' ? 'Aucun résultat' : 'No results found')
+                                        : (i18n.language === 'fr' ? 'Aucun employé pour l\'instant' : 'No employees yet')}
+                                </p>
+                                <p className="text-[#8892a4] text-sm mt-1 mb-5">
+                                    {searchQuery
+                                        ? (i18n.language === 'fr' ? 'Essayez un autre terme' : 'Try a different search term')
+                                        : (i18n.language === 'fr' ? 'Commencez par ajouter un employé' : 'Start by adding your first employee')}
+                                </p>
+                                {!searchQuery && role !== 'ACCOUNTANT' && (
+                                    <button
+                                        onClick={() => setShowCreateModal(true)}
+                                        className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-2xl text-sm font-semibold"
+                                    >
+                                        <UserAdd01Icon size={15} /> {t('employees.addEmployee')}
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Grid */}
+                        {viewMode === 'grid' && employees.length > 0 && (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {employees.map((employee, index) => {
+                                    const accentColor = deptColorMap[employee.departmentId] || '#33cbcc';
+                                    return (
+                                        <motion.div
+                                            key={employee.id}
+                                            initial={{ opacity: 0, y: 16 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: Math.min(index * 0.05, 0.4), ease: [0.22, 1, 0.36, 1] }}
+                                            onClick={() => navigate(`/employees/${employee.id}`)}
+                                            className="group bg-white border border-[#e5e8ef] rounded-3xl overflow-hidden cursor-pointer hover:border-[#33cbcc] transition-colors duration-200"
+                                        >
+                                            {/* Color accent bar */}
+                                            <div className="h-1.5" style={{ backgroundColor: accentColor }} />
+                                            <div className="p-6 flex flex-col items-center text-center">
+                                                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#f0f2f5] mb-3">
                                                     <img src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
                                                 </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-semibold text-gray-500">{employee.name}</p>
-                                                    <p className="text-xs text-gray-400">{employee.role}</p>
-                                                </div>
+                                                <h3 className="font-bold text-[#1c2b3a] text-sm leading-snug">{employee.name}</h3>
+                                                <p className="text-[#8892a4] text-xs mt-0.5 line-clamp-1">{employee.role}</p>
                                                 {employee.departmentName && (
-                                                    <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gray-100 text-gray-400 shrink-0">
+                                                    <span className="mt-3 text-[10px] font-semibold px-2.5 py-1 rounded-xl" style={{ backgroundColor: accentColor + '18', color: accentColor }}>
                                                         {employee.departmentName}
                                                     </span>
                                                 )}
-                                                <span className="text-[10px] font-bold px-2 py-1 rounded-lg bg-gray-100 text-gray-400 uppercase tracking-wide shrink-0">
-                                                    {t('employees.dismissedBadge', 'Dismissed')}
-                                                </span>
-                                                <ArrowUpRight size={16} className="text-gray-300 group-hover:text-gray-500 transition-colors shrink-0" />
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                )}
-                                <div ref={dismissedSentinelRef} className="h-1" />
-                                {dismissedQuery.isFetchingNextPage && (
-                                    <div className="flex justify-center py-4">
-                                        <Loader2 size={20} className="animate-spin text-gray-400" />
-                                    </div>
-                                )}
-                            </motion.div>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
                         )}
-                    </AnimatePresence>
-                </div>
-            )}
 
-            {/* Modals */}
+                        {/* List */}
+                        {viewMode === 'list' && employees.length > 0 && (
+                            <div className="bg-white border border-[#e5e8ef] rounded-3xl overflow-hidden">
+                                {/* Table header */}
+                                <div className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 px-6 py-3 border-b border-[#f0f2f5]">
+                                    <div className="w-10" />
+                                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#b0bac9]">{i18n.language === 'fr' ? 'Employé' : 'Employee'}</p>
+                                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#b0bac9] hidden md:block">{i18n.language === 'fr' ? 'Département' : 'Department'}</p>
+                                    <div className="w-5" />
+                                </div>
+                                {employees.map((employee, index) => {
+                                    const accentColor = deptColorMap[employee.departmentId] || '#33cbcc';
+                                    return (
+                                        <motion.div
+                                            key={employee.id}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: Math.min(index * 0.03, 0.3) }}
+                                            onClick={() => navigate(`/employees/${employee.id}`)}
+                                            className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 px-6 py-3.5 border-b border-[#f0f2f5] last:border-b-0 hover:bg-[#f8f9fc] cursor-pointer transition-colors group"
+                                        >
+                                            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#f0f2f5] shrink-0">
+                                                <img src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-semibold text-[#1c2b3a] truncate">{employee.name}</p>
+                                                <p className="text-xs text-[#8892a4] truncate">{employee.role}</p>
+                                            </div>
+                                            {employee.departmentName && (
+                                                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-xl hidden md:inline-flex items-center gap-1.5 shrink-0"
+                                                    style={{ backgroundColor: accentColor + '18', color: accentColor }}>
+                                                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: accentColor }} />
+                                                    {employee.departmentName}
+                                                </span>
+                                            )}
+                                            <ArrowUpRight01Icon size={15} className="text-[#d8dde6] group-hover:text-[#33cbcc] transition-colors shrink-0" />
+                                        </motion.div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* scroll sentinel */}
+                {viewMode !== 'org' && <div ref={activeSentinelRef} className="h-1" />}
+                {activeQuery.isFetchingNextPage && (
+                    <div className="flex justify-center py-4">
+                        <Loading02Icon size={20} className="animate-spin text-[#33cbcc]" />
+                    </div>
+                )}
+
+                {/* ── DISMISSED ───────────────────────────────────── */}
+                {viewMode !== 'org' && (dismissedEmployees.length > 0 || (dismissedQuery.data?.pages[0]?.count ?? 0) > 0) && (
+                    <div>
+                        <button
+                            onClick={() => setShowDismissed(v => !v)}
+                            className="flex items-center gap-2.5 px-4 py-2.5 bg-white border border-[#e5e8ef] rounded-2xl text-sm font-semibold text-[#8892a4] hover:border-[#283852]/30 hover:text-[#283852] transition-colors mb-4"
+                        >
+                            <UserAdd01Icon size={14} className="rotate-45 shrink-0" />
+                            {t('employees.dismissed', 'Dismissed / Suspended')}
+                            <span className="px-2 py-0.5 bg-[#f0f2f5] text-[#8892a4] rounded-lg text-xs font-bold">
+                                {dismissedQuery.data?.pages[0]?.count ?? dismissedEmployees.length}
+                            </span>
+                            <motion.span animate={{ rotate: showDismissed ? 180 : 0 }} transition={{ duration: 0.2 }} className="ml-auto text-xs">▾</motion.span>
+                        </button>
+
+                        <AnimatePresence>
+                            {showDismissed && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.25 }}
+                                    className="overflow-hidden"
+                                >
+                                    {viewMode === 'grid' ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                            {dismissedEmployees.map((employee, index) => (
+                                                <motion.div
+                                                    key={employee.id}
+                                                    initial={{ opacity: 0, y: 16 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: index * 0.04 }}
+                                                    onClick={() => navigate(`/employees/${employee.id}`)}
+                                                    className="group bg-white border border-[#e5e8ef] rounded-3xl overflow-hidden cursor-pointer opacity-55 grayscale hover:opacity-70 transition-all"
+                                                >
+                                                    <div className="h-1.5 bg-[#d1d5db]" />
+                                                    <div className="p-6 flex flex-col items-center text-center">
+                                                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[#f0f2f5] mb-3">
+                                                            <img src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
+                                                        </div>
+                                                        <h3 className="font-bold text-[#6b7280] text-sm">{employee.name}</h3>
+                                                        <p className="text-[#9ca3af] text-xs mt-0.5">{employee.role}</p>
+                                                        <span className="mt-3 text-[10px] font-bold px-2.5 py-1 rounded-xl bg-[#f3f4f6] text-[#9ca3af] uppercase tracking-wide">
+                                                            {t('employees.dismissedBadge', 'Dismissed')}
+                                                        </span>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="bg-white border border-[#e5e8ef] rounded-3xl overflow-hidden">
+                                            {dismissedEmployees.map((employee, index) => (
+                                                <motion.div
+                                                    key={employee.id}
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ delay: index * 0.03 }}
+                                                    onClick={() => navigate(`/employees/${employee.id}`)}
+                                                    className="flex items-center gap-4 px-6 py-3.5 border-b border-[#f0f2f5] last:border-b-0 hover:bg-[#f8f9fc] cursor-pointer transition-colors group opacity-55"
+                                                >
+                                                    <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#f0f2f5] shrink-0 grayscale">
+                                                        <img src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-semibold text-[#6b7280] truncate">{employee.name}</p>
+                                                        <p className="text-xs text-[#9ca3af] truncate">{employee.role}</p>
+                                                    </div>
+                                                    <span className="text-[10px] font-bold px-2.5 py-1 rounded-xl bg-[#f3f4f6] text-[#9ca3af] uppercase tracking-wide shrink-0">
+                                                        {t('employees.dismissedBadge', 'Dismissed')}
+                                                    </span>
+                                                    <ArrowUpRight01Icon size={15} className="text-[#d8dde6] group-hover:text-[#9ca3af] transition-colors shrink-0" />
+                                                </motion.div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div ref={dismissedSentinelRef} className="h-1" />
+                                    {dismissedQuery.isFetchingNextPage && (
+                                        <div className="flex justify-center py-4">
+                                            <Loading02Icon size={20} className="animate-spin text-[#b0bac9]" />
+                                        </div>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                )}
+
+            </div>
+
+            {/* ── Modals ──────────────────────────────────────────── */}
             <AnimatePresence>
                 {showCreateModal && (
                     <CreateEmployeeModal onClose={() => setShowCreateModal(false)} hodDepartmentId={role === 'HEAD_OF_DEPARTMENT' ? (departmentId ?? undefined) : undefined} />

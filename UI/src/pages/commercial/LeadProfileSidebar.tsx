@@ -1,14 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Plus, Pencil, X, Check, Trophy, Frown,
-    CheckCircle2, Phone, Mail, MapPin, Building2, Clock,
-    MessageSquare, User, ListTodo, FileText,
-    PhoneCall, ScanSearch, MailOpen, Users, Monitor, RefreshCw, MoreHorizontal,
-    ChevronRight,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Add01Icon, PencilIcon, Cancel01Icon, Tick01Icon, Award01Icon, Sad01Icon, CallIcon, Mail01Icon, Location01Icon, Building02Icon, Clock01Icon, Message02Icon, UserIcon, Task01Icon, File01Icon, ScanIcon, UserGroupIcon, ComputerIcon, RefreshIcon, MoreHorizontalIcon, ArrowRight01Icon } from 'hugeicons-react';
+import type { FC, SVGProps } from 'react';
+type LucideIcon = FC<Omit<SVGProps<SVGSVGElement>, 'ref'> & { size?: number | string }>;
 import { useUpdateLead, useLead, useLeadActivities, useCreateLeadActivity } from '../../api/commercial/hooks';
 import { useTasksByLead } from '../../api/tasks/hooks';
 import type { Lead, CreateLeadActivityDto, SaleStage, ActivityType } from '../../api/commercial/types';
@@ -41,12 +36,12 @@ const ACTIVITY_TYPES: ActivityType[] = [
 ];
 
 const ACTIVITY_TYPE_ICONS: Record<string, LucideIcon> = {
-    VISITE_CLIENT: Building2, VISITE_PROSPECT: ScanSearch, APPEL: PhoneCall,
-    EMAIL: MailOpen, REUNION: Users, DEMO: Monitor, RELANCE: RefreshCw, AUTRE: FileText,
+    VISITE_CLIENT: Building02Icon, VISITE_PROSPECT: ScanIcon, APPEL: CallIcon,
+    EMAIL: Mail01Icon, REUNION: UserGroupIcon, DEMO: ComputerIcon, RELANCE: RefreshIcon, AUTRE: File01Icon,
 };
 
 const ActivityTypeIcon = ({ type, size = 16 }: { type: string; size?: number }) => {
-    const Icon = ACTIVITY_TYPE_ICONS[type] ?? MoreHorizontal;
+    const Icon = ACTIVITY_TYPE_ICONS[type] ?? MoreHorizontalIcon;
     return <Icon size={size} />;
 };
 
@@ -107,7 +102,7 @@ const StageRoadmap = ({
                                         : 'bg-white border-gray-200 text-gray-300 cursor-not-allowed'
                                 }`}
                             >
-                                {isDone ? <Check size={13} strokeWidth={3} /> : (
+                                {isDone ? <Tick01Icon size={13} strokeWidth={3} /> : (
                                     <span className="text-[11px] font-bold">{i + 1}</span>
                                 )}
                             </button>
@@ -133,8 +128,8 @@ const StageRoadmap = ({
                         : 'bg-gray-100 text-gray-500 border border-gray-200'
                 }`}>
                     {currentStage === 'GAGNE'
-                        ? <><Trophy size={15} /> {t('commercial.pipeline.stages.GAGNE')} — {t('commercial.convert.stageLocked', 'Verrouillé')}</>
-                        : <><Frown size={15} /> {t('commercial.pipeline.stages.PERDU')} — {t('commercial.convert.stageLocked', 'Verrouillé')}</>
+                        ? <><Award01Icon size={15} /> {t('commercial.pipeline.stages.GAGNE')} — {t('commercial.convert.stageLocked', 'Verrouillé')}</>
+                        : <><Sad01Icon size={15} /> {t('commercial.pipeline.stages.PERDU')} — {t('commercial.convert.stageLocked', 'Verrouillé')}</>
                     }
                 </div>
             ) : (
@@ -146,7 +141,7 @@ const StageRoadmap = ({
                             disabled={isPending}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold hover:bg-[#33cbcc]/20 transition-colors border border-[#33cbcc]/20"
                         >
-                            <ChevronRight size={13} />
+                            <ArrowRight01Icon size={13} />
                             {t('commercial.stageModal.advanceTo', 'Avancer →')} {t(`commercial.pipeline.stages.${PIPELINE_STAGES[currentIdx + 1]}`)}
                         </button>
                     )}
@@ -156,7 +151,7 @@ const StageRoadmap = ({
                             disabled={isPending}
                             className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold hover:bg-[#33cbcc]/20 transition-colors border border-[#33cbcc]/20"
                         >
-                            <Trophy size={13} />
+                            <Award01Icon size={13} />
                             {t('commercial.pipeline.stages.GAGNE')}
                         </button>
                     )}
@@ -166,7 +161,7 @@ const StageRoadmap = ({
                         disabled={isPending}
                         className="flex items-center justify-center gap-1 py-2 px-3 rounded-xl text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors border border-gray-200"
                     >
-                        <Frown size={13} />
+                        <Sad01Icon size={13} />
                         <span className="hidden sm:inline">{t('commercial.pipeline.stages.PERDU')}</span>
                     </button>
                 </div>
@@ -257,9 +252,9 @@ export default function LeadProfileSidebar({
     const labelCls = 'block text-xs font-medium text-gray-500 mb-1';
 
     const tabs = [
-        { key: 'details',    icon: FileText,     label: t('common.details', 'Détails'),                        count: null },
-        { key: 'activities', icon: MessageSquare, label: t('commercial.detail.activities', 'Activités'),        count: activities.length },
-        { key: 'tasks',      icon: ListTodo,      label: t('commercial.leads.linkedTasks', 'Tâches'),           count: linkedTasks?.length || 0 },
+        { key: 'details',    icon: File01Icon,     label: t('common.details', 'Détails'),                        count: null },
+        { key: 'activities', icon: Message02Icon, label: t('commercial.detail.activities', 'Activités'),        count: activities.length },
+        { key: 'tasks',      icon: Task01Icon,      label: t('commercial.leads.linkedTasks', 'Tâches'),           count: linkedTasks?.length || 0 },
     ] as const;
 
     return (
@@ -298,14 +293,14 @@ export default function LeadProfileSidebar({
                                         </span>
                                         {lead.clientId && (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#33cbcc]/10 text-[#33cbcc]">
-                                                <CheckCircle2 size={10} /> {t('commercial.leads.converted', 'Converti')}
+                                                <Tick01Icon size={10} /> {t('commercial.leads.converted', 'Converti')}
                                             </span>
                                         )}
                                     </div>
                                     <h2 className="text-lg font-bold text-gray-900 truncate">{lead.company}</h2>
                                     {(lead.city || lead.country) && (
                                         <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                                            <MapPin size={11} />
+                                            <Location01Icon size={11} />
                                             {[lead.city, lead.country].filter(Boolean).join(', ')}
                                         </p>
                                     )}
@@ -316,14 +311,14 @@ export default function LeadProfileSidebar({
                                         <a href={`tel:${lead.contacts[0].phone}`}
                                             className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                             title={lead.contacts[0].phone}>
-                                            <Phone size={16} />
+                                            <CallIcon size={16} />
                                         </a>
                                     )}
                                     {lead.contacts?.[0]?.email && (
                                         <a href={`mailto:${lead.contacts[0].email}`}
                                             className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                             title={lead.contacts[0].email}>
-                                            <Mail size={16} />
+                                            <Mail01Icon size={16} />
                                         </a>
                                     )}
                                     <button
@@ -331,10 +326,10 @@ export default function LeadProfileSidebar({
                                         className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors"
                                         title={t('commercial.leads.editLead')}
                                     >
-                                        <Pencil size={16} />
+                                        <PencilIcon size={16} />
                                     </button>
                                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 transition-colors">
-                                        <X size={18} />
+                                        <Cancel01Icon size={18} />
                                     </button>
                                 </div>
                             </div>
@@ -422,7 +417,7 @@ export default function LeadProfileSidebar({
                                             {lead.contacts.map(c => (
                                                 <div key={c.id} className={`border rounded-xl p-3 space-y-2 ${c.isPrimary ? 'border-[#33cbcc]/30 bg-[#33cbcc]/5' : 'border-gray-100 bg-white'}`}>
                                                     <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-                                                        <User size={13} className="text-[#33cbcc] shrink-0" />
+                                                        <UserIcon size={13} className="text-[#33cbcc] shrink-0" />
                                                         <span>{c.name}</span>
                                                         {c.role && <span className="text-gray-400 font-normal text-xs">({c.role})</span>}
                                                         {c.isPrimary && (
@@ -434,12 +429,12 @@ export default function LeadProfileSidebar({
                                                     <div className="flex flex-wrap gap-3">
                                                         {c.phone && (
                                                             <a href={`tel:${c.phone}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#33cbcc] transition-colors">
-                                                                <Phone size={12} className="text-gray-400" />{c.phone}
+                                                                <CallIcon size={12} className="text-gray-400" />{c.phone}
                                                             </a>
                                                         )}
                                                         {c.email && (
                                                             <a href={`mailto:${c.email}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#33cbcc] transition-colors">
-                                                                <Mail size={12} className="text-gray-400" />{c.email}
+                                                                <Mail01Icon size={12} className="text-gray-400" />{c.email}
                                                             </a>
                                                         )}
                                                     </div>
@@ -451,17 +446,17 @@ export default function LeadProfileSidebar({
                                             <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{t('commercial.leads.sectionContact1')}</h3>
                                             <div className="bg-white border border-gray-100 rounded-xl p-3 space-y-2">
                                                 <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
-                                                    <User size={13} className="text-[#33cbcc]" />
+                                                    <UserIcon size={13} className="text-[#33cbcc]" />
                                                     {lead.contact1Name} {lead.contact1Role && <span className="text-gray-400 font-normal text-xs">({lead.contact1Role})</span>}
                                                 </div>
                                                 {lead.contact1Phone && (
                                                     <a href={`tel:${lead.contact1Phone}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#33cbcc]">
-                                                        <Phone size={12} />{lead.contact1Phone}
+                                                        <CallIcon size={12} />{lead.contact1Phone}
                                                     </a>
                                                 )}
                                                 {lead.contact1Email && (
                                                     <a href={`mailto:${lead.contact1Email}`} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-[#33cbcc]">
-                                                        <Mail size={12} />{lead.contact1Email}
+                                                        <Mail01Icon size={12} />{lead.contact1Email}
                                                     </a>
                                                 )}
                                             </div>
@@ -474,19 +469,19 @@ export default function LeadProfileSidebar({
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             {lead.activitySector && (
                                                 <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2 border border-gray-100">
-                                                    <Building2 size={13} className="text-gray-400 shrink-0" />
+                                                    <Building02Icon size={13} className="text-gray-400 shrink-0" />
                                                     <span className="truncate">{lead.activitySector}</span>
                                                 </div>
                                             )}
                                             {lead.leadType && (
                                                 <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2 border border-gray-100">
-                                                    <User size={13} className="text-gray-400 shrink-0" />
+                                                    <UserIcon size={13} className="text-gray-400 shrink-0" />
                                                     <span className="truncate">{t(`commercial.leads.types.${lead.leadType}`, lead.leadType)}</span>
                                                 </div>
                                             )}
                                             {(lead.city || lead.country) && (
                                                 <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-xl px-3 py-2 border border-gray-100 sm:col-span-2">
-                                                    <MapPin size={13} className="text-gray-400 shrink-0" />
+                                                    <Location01Icon size={13} className="text-gray-400 shrink-0" />
                                                     <span className="truncate">{[lead.address, lead.city, lead.region, lead.country].filter(Boolean).join(', ')}</span>
                                                 </div>
                                             )}
@@ -519,7 +514,7 @@ export default function LeadProfileSidebar({
                                         onClick={() => setShowActivityForm(!showActivityForm)}
                                         className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-dashed border-[#33cbcc] text-[#33cbcc] font-medium text-sm hover:bg-[#33cbcc]/5 transition-colors"
                                     >
-                                        <Plus size={15} />
+                                        <Add01Icon size={15} />
                                         {t('commercial.detail.logActivity', 'Enregistrer une activité')}
                                     </button>
 
@@ -558,7 +553,7 @@ export default function LeadProfileSidebar({
                                                     >
                                                         {createActivity.isPending
                                                             ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                            : <MessageSquare size={12} />}
+                                                            : <Message02Icon size={12} />}
                                                         {t('commercial.detail.save', 'Enregistrer')}
                                                     </button>
                                                 </div>
@@ -569,7 +564,7 @@ export default function LeadProfileSidebar({
                                     <div className="space-y-2 pt-1">
                                         {activities.length === 0 ? (
                                             <div className="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                                <MessageSquare size={24} className="mx-auto text-gray-300 mb-2" />
+                                                <Message02Icon size={24} className="mx-auto text-gray-300 mb-2" />
                                                 <p className="text-sm text-gray-400">{t('commercial.detail.noActivities', 'Aucune activité')}</p>
                                             </div>
                                         ) : activities.map(act => (
@@ -612,7 +607,7 @@ export default function LeadProfileSidebar({
                                                 </div>
                                                 {task.dueDate && (
                                                     <div className="flex items-center gap-1 text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-md border border-gray-100 shrink-0 ml-2">
-                                                        <Clock size={11} />
+                                                        <Clock01Icon size={11} />
                                                         {new Date(task.dueDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
                                                     </div>
                                                 )}
@@ -620,7 +615,7 @@ export default function LeadProfileSidebar({
                                         );
                                     }) : (
                                         <div className="text-center py-10 bg-gray-50 rounded-xl border border-dashed border-gray-200">
-                                            <ListTodo size={24} className="mx-auto text-gray-300 mb-2" />
+                                            <Task01Icon size={24} className="mx-auto text-gray-300 mb-2" />
                                             <p className="text-sm text-gray-400">{t('commercial.leads.noLinkedTasks', 'Aucune tâche liée')}</p>
                                         </div>
                                     )}
@@ -635,7 +630,7 @@ export default function LeadProfileSidebar({
                                     onClick={() => setShowConvertModal(true)}
                                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20"
                                 >
-                                    <CheckCircle2 size={16} />
+                                    <Tick01Icon size={16} />
                                     {t('commercial.leads.convert')}
                                 </button>
                             </div>

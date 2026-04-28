@@ -7,7 +7,7 @@ export const ADMIN_ROLES: Role[] = ['CEO', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'ACC
 // Roles that have BOTH a management view AND an employee view and can toggle between them.
 // MANAGER always stays in admin view (no toggle needed).
 // COMMERCIAL and EMPLOYEE have a single fixed view (no toggle).
-export const TOGGLEABLE_ROLES: Role[] = ['HEAD_OF_DEPARTMENT', 'ACCOUNTANT'];
+export const TOGGLEABLE_ROLES: Role[] = ['HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'CEO'];
 
 export function useIsAdmin(): boolean {
     const { role, viewMode } = useAuth();

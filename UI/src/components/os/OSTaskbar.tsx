@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Monitor, Minimize2, Maximize2, X, LayoutDashboard } from 'lucide-react';
+import { ComputerIcon, Minimize01Icon, Maximize01Icon, Cancel01Icon, DashboardSquare01Icon } from 'hugeicons-react';
 import { useNavigate } from 'react-router-dom';
 import { appRegistry } from './osAppRegistry';
 import OSMacIcon from './OSMacIcon';
@@ -39,20 +39,20 @@ export default function OSTaskbar({
         {
           type: 'item',
           label: w.isMinimized ? 'Restore' : 'Minimize',
-          icon: Minimize2,
+          icon: Minimize01Icon,
           onClick: () => (w.isMinimized ? onWindowClick(w.id) : onMinimizeWindow(w.id)),
         },
         {
           type: 'item',
           label: w.isMaximized ? 'Restore size' : 'Maximize',
-          icon: Maximize2,
+          icon: Maximize01Icon,
           onClick: () => onMaximizeWindow(w.id),
         },
         { type: 'divider' },
         {
           type: 'item',
           label: 'Close',
-          icon: X,
+          icon: Cancel01Icon,
           danger: true,
           onClick: () => onCloseWindow(w.id),
         },
@@ -74,7 +74,7 @@ export default function OSTaskbar({
           startOpen ? 'bg-[#33cbcc]/20 text-[#33cbcc]' : 'hover:bg-white/10 text-gray-300'
         }`}
       >
-        <Monitor size={18} />
+        <ComputerIcon size={18} />
         <span className="text-sm font-medium">Start</span>
       </button>
 
@@ -110,7 +110,7 @@ export default function OSTaskbar({
         title="Switch to Dashboard view"
         className="flex items-center gap-1.5 px-3 h-9 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-[#33cbcc] transition-colors border border-white/10 ml-2"
       >
-        <LayoutDashboard size={16} />
+        <DashboardSquare01Icon size={16} />
         <span>Dashboard</span>
       </button>
 

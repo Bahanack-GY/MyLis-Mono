@@ -1,4 +1,4 @@
-import { Search, Bell, Mail, ChevronDown, Menu } from 'lucide-react';
+import { Search01Icon, Notification01Icon, Mail01Icon, ArrowDown01Icon, Menu01Icon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,7 +33,7 @@ const Header = ({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) => {
                 aria-label="Open menu"
                 className="md:hidden p-1.5 rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
             >
-                <Menu size={22} aria-hidden="true" />
+                <Menu01Icon size={22} aria-hidden="true" />
             </button>
 
             {/* Mobile: logo centered absolutely */}
@@ -44,16 +44,16 @@ const Header = ({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) => {
             {/* Empty spacer on desktop left */}
             <div className="hidden md:flex items-center gap-2" />
 
-            {/* Center: Search (desktop only) */}
+            {/* Center: Search01Icon (desktop only) */}
             <div className="hidden md:block flex-1 max-w-xl mx-8">
                 <div className="relative">
+                    <Search01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                     <input
                         type="text"
                         placeholder={t('header.searchPlaceholder')}
                         aria-label={t('header.searchPlaceholder')}
-                        className="w-full bg-gray-50 border-none rounded-xl py-3 px-4 pl-4 pr-12 text-sm focus:ring-2 focus:ring-[#33cbcc]/20 outline-none"
+                        className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-2xl py-3.5 pl-11 pr-4 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors"
                     />
-                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 </div>
             </div>
 
@@ -77,7 +77,7 @@ const Header = ({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) => {
                             : t('header.notifications', 'Notifications')}
                         className="relative p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-500"
                     >
-                        <Bell size={20} aria-hidden="true" />
+                        <Notification01Icon size={20} aria-hidden="true" />
                         {unreadCount > 0 && (
                             <span
                                 aria-hidden="true"
@@ -94,7 +94,7 @@ const Header = ({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) => {
                             : t('header.messages', 'Messages')}
                         className="hidden md:flex relative p-2 hover:bg-gray-50 rounded-full transition-colors text-gray-500"
                     >
-                        <Mail size={20} aria-hidden="true" />
+                        <Mail01Icon size={20} aria-hidden="true" />
                         {unreadMessages > 0 && (
                             <span
                                 aria-hidden="true"
@@ -125,7 +125,7 @@ const Header = ({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) => {
                             {profile?.email || ''}
                         </p>
                     </div>
-                    <ChevronDown size={16} className="hidden md:block text-gray-400" aria-hidden="true" />
+                    <ArrowDown01Icon size={16} className="hidden md:block text-gray-400" aria-hidden="true" />
                 </button>
             </div>
         </div>

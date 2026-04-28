@@ -1,24 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    FileText,
-    Upload,
-    Download,
-    Eye,
-    Trash2,
-    Search,
-    Plus,
-    X,
-    HardDrive,
-    Clock,
-    FolderOpen,
-    LayoutGrid,
-    List,
-    Building,
-    Loader2,
-    ChartBar
-} from 'lucide-react';
+import { File01Icon, Upload01Icon, Download01Icon, ViewIcon, Delete02Icon, Search01Icon, Add01Icon, Cancel01Icon, HardDriveIcon, Clock01Icon, FolderOpenIcon, DashboardSquare01Icon, ListViewIcon, Building01Icon, Loading02Icon, BarChartIcon } from 'hugeicons-react';
 import { useDocuments, useCreateDocument, useStorageInfo, useDeleteDocument } from '../../api/documents/hooks';
 import { DocumentsAdminSkeleton } from '../../components/Skeleton';
 import { documentsApi } from '../../api/documents/api';
@@ -77,7 +60,7 @@ const CATEGORIES: DocCategory[] = ['Contract', 'SRS', 'Design', 'Technical', 'No
 
 const DEPT_NAMES = ['Engineering', 'Design', 'Marketing', 'Sales', 'HR', 'Finance'];
 
-/* ─── Upload Document Modal ─────────────────────────────── */
+/* ─── Upload01Icon Document Modal ─────────────────────────────── */
 
 const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
     const { t } = useTranslation();
@@ -150,12 +133,12 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                 <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Upload size={20} className="text-[#33cbcc]" />
+                            <Upload01Icon size={20} className="text-[#33cbcc]" />
                         </div>
                         <h2 className="text-lg font-bold text-gray-800">{t('documents.upload.title')}</h2>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -178,7 +161,7 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                     >
                         {form.file ? (
                             <div className="flex items-center justify-center gap-3">
-                                <FileText size={24} className="text-[#33cbcc]" />
+                                <File01Icon size={24} className="text-[#33cbcc]" />
                                 <div className="text-left">
                                     <p className="text-sm font-medium text-gray-800">{form.file.name}</p>
                                     <p className="text-xs text-gray-400">{t('documents.upload.fileSelected')} — {(form.file.size / 1024 / 1024).toFixed(1)} MB</p>
@@ -192,7 +175,7 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                             </div>
                         ) : (
                             <>
-                                <Upload size={32} className="mx-auto text-gray-300 mb-3" />
+                                <Upload01Icon size={32} className="mx-auto text-gray-300 mb-3" />
                                 <p className="text-sm font-medium text-gray-600">{t('documents.upload.dropzone')}</p>
                                 <p className="text-xs text-gray-400 mt-1">{t('documents.upload.dropzoneSub')}</p>
                                 <p className="text-[10px] text-gray-300 mt-3">{t('documents.upload.formats')}</p>
@@ -204,7 +187,7 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                     {/* File Name */}
                     <div>
                         <label className={labelCls}>
-                            <FileText size={12} />
+                            <File01Icon size={12} />
                             {t('documents.upload.fileName')}
                         </label>
                         <input
@@ -219,7 +202,7 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Category */}
                     <div>
                         <label className={labelCls}>
-                            <FolderOpen size={12} />
+                            <FolderOpenIcon size={12} />
                             {t('documents.upload.category')}
                         </label>
                         <select
@@ -369,7 +352,7 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {(createDocument.isPending || isUploading) ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {(createDocument.isPending || isUploading) ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('documents.upload.submit')}
                     </button>
                 </div>
@@ -455,7 +438,7 @@ const Documents = () => {
 
     const isLoading = isLoadingDocs || isLoadingEmployees;
 
-    /* Upload activity data — group documents by month */
+    /* Upload01Icon activity data — group documents by month */
     const uploadActivityData = useMemo(() => {
         const counts: Record<string, number> = {};
         documents.forEach(doc => {
@@ -497,10 +480,10 @@ const Documents = () => {
     const categoriesCount = new Set(documents.map(d => d.type)).size;
 
     const stats = [
-        { label: t('documents.stats.total'), value: documents.length, icon: FileText, color: '#33cbcc' },
-        { label: t('documents.stats.storage'), value: storageUsed, icon: HardDrive, color: '#283852' },
-        { label: t('documents.stats.recent'), value: recentDocs, icon: Clock, color: '#283852' },
-        { label: t('documents.stats.categories'), value: categoriesCount, icon: FolderOpen, color: '#283852' },
+        { label: t('documents.stats.total'), value: documents.length, icon: File01Icon, color: '#33cbcc' },
+        { label: t('documents.stats.storage'), value: storageUsed, icon: HardDriveIcon, color: '#283852' },
+        { label: t('documents.stats.recent'), value: recentDocs, icon: Clock01Icon, color: '#283852' },
+        { label: t('documents.stats.categories'), value: categoriesCount, icon: FolderOpenIcon, color: '#283852' },
     ];
 
     /* Chart data */
@@ -534,7 +517,7 @@ const Documents = () => {
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
                         >
-                            <ChartBar size={16} />
+                            <BarChartIcon size={16} />
                             {showStats ? 'Hide Stats' : 'Show Stats'}
                         </button>
                     )}
@@ -542,7 +525,7 @@ const Documents = () => {
                         onClick={() => setShowUploadModal(true)}
                         className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                     >
-                        <Upload size={16} />
+                        <Upload01Icon size={16} />
                         {t('documents.uploadDocument')}
                     </button>
                 </div>
@@ -557,17 +540,16 @@ const Documents = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-white p-6 rounded-3xl border border-gray-100 relative overflow-hidden group"
+                            className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                         >
-                            <div className="relative z-10">
-                                <h3 className="text-gray-500 text-sm font-medium">{stat.label}</h3>
-                                <h2 className="text-3xl font-bold text-gray-800 mt-2">{stat.value}</h2>
+                            <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                                <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                             </div>
-                            <div
-                                className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
-                                style={{ color: stat.color }}
-                            >
-                                <stat.icon size={100} strokeWidth={1.5} />
+                            <div className="p-5 bg-white relative overflow-hidden">
+                                <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                                <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                    <stat.icon size={110} strokeWidth={1.2} />
+                                </div>
                             </div>
                         </motion.div>
                     ))}
@@ -602,7 +584,7 @@ const Documents = () => {
                     </div>
                 </motion.div>
 
-                {/* Upload Activity — AreaChart */}
+                {/* Upload01Icon Activity — AreaChart */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -693,7 +675,7 @@ const Documents = () => {
                             <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
                                 <div className="flex items-center gap-3">
                                     <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                                        <FolderOpen size={20} className="text-[#33cbcc]" />
+                                        <FolderOpenIcon size={20} className="text-[#33cbcc]" />
                                     </div>
                                     <div>
                                         <h2 className="text-lg font-bold text-gray-800">
@@ -711,25 +693,25 @@ const Documents = () => {
                                     }}
                                     className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
                                 >
-                                    <X size={18} />
+                                    <Cancel01Icon size={18} />
                                 </button>
                             </div>
 
-                            {/* Search Bar */}
+                            {/* Search01Icon Bar */}
                             <div className="px-6 py-4 border-b border-gray-100 shrink-0">
                                 <div className="relative">
-                                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                                     <input
                                         type="text"
                                         placeholder={t('documents.searchPlaceholder')}
                                         value={categorySearchQuery}
                                         onChange={e => setCategorySearchQuery(e.target.value)}
-                                        className="w-full bg-gray-50 rounded-xl border border-gray-200 pl-10 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+                                        className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                                     />
                                 </div>
                             </div>
 
-                            {/* Documents List */}
+                            {/* Documents ListViewIcon */}
                             <div className="flex-1 overflow-y-auto px-6 py-4">
                                 {(() => {
                                     const categoryDocs = documents.filter(d =>
@@ -740,7 +722,7 @@ const Documents = () => {
                                     if (categoryDocs.length === 0) {
                                         return (
                                             <div className="flex flex-col items-center justify-center py-12 text-center">
-                                                <FileText size={48} className="text-gray-300 mb-4" />
+                                                <File01Icon size={48} className="text-gray-300 mb-4" />
                                                 <p className="text-gray-400 font-medium">
                                                     {categorySearchQuery ? t('documents.noResults') : t('documents.noDocuments')}
                                                 </p>
@@ -761,7 +743,7 @@ const Documents = () => {
                                                     <div className="flex items-center gap-4">
                                                         {/* File Icon */}
                                                         <div className="w-10 h-10 rounded-lg bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                                                            <FileText size={18} className="text-[#33cbcc]" />
+                                                            <File01Icon size={18} className="text-[#33cbcc]" />
                                                         </div>
 
                                                         {/* Document Info */}
@@ -794,7 +776,7 @@ const Documents = () => {
                                                                         className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                                                         title={t('documents.actions.preview')}
                                                                     >
-                                                                        <Eye size={16} />
+                                                                        <ViewIcon size={16} />
                                                                     </a>
                                                                     <a
                                                                         href={getFileUrl(doc.filePath)}
@@ -802,7 +784,7 @@ const Documents = () => {
                                                                         className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                                                         title={t('documents.actions.download')}
                                                                     >
-                                                                        <Download size={16} />
+                                                                        <Download01Icon size={16} />
                                                                     </a>
                                                                     {doc.dbId && (
                                                                         <button
@@ -814,17 +796,17 @@ const Documents = () => {
                                                                             className="p-2 rounded-lg hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors"
                                                                             title="Delete"
                                                                         >
-                                                                            <Trash2 size={16} />
+                                                                            <Delete02Icon size={16} />
                                                                         </button>
                                                                     )}
                                                                 </>
                                                             ) : (
                                                                 <>
                                                                     <button className="p-2 rounded-lg text-gray-300 cursor-not-allowed" disabled>
-                                                                        <Eye size={16} />
+                                                                        <ViewIcon size={16} />
                                                                     </button>
                                                                     <button className="p-2 rounded-lg text-gray-300 cursor-not-allowed" disabled>
-                                                                        <Download size={16} />
+                                                                        <Download01Icon size={16} />
                                                                     </button>
                                                                 </>
                                                             )}
@@ -841,7 +823,7 @@ const Documents = () => {
                 )}
             </AnimatePresence>
 
-            {/* ── Upload Modal ── */}
+            {/* ── Upload01Icon Modal ── */}
             <AnimatePresence>
                 {showUploadModal && (
                     <UploadDocumentModal onClose={() => setShowUploadModal(false)} />

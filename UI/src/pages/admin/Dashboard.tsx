@@ -14,18 +14,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import {
-  Users,
-  Briefcase,
-  CheckCircle,
-  TrendingUp,
-  DollarSign,
-  CreditCard,
-  Coins,
-  Clock,
-  Calendar,
-  ChevronDown,
-} from 'lucide-react';
+import { UserGroupIcon, Briefcase01Icon, Tick01Icon, ArrowUpRight01Icon, DollarCircleIcon, CreditCardIcon, Coins01Icon, Clock01Icon, Calendar01Icon, ArrowDown01Icon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useEmployees } from '../../api/employees/hooks';
@@ -119,14 +108,14 @@ const Dashboard = () => {
   const pending = invoiceStats?.totalPending ?? 0;
 
   const stats = [
-    { title: t('dashboard.stats.totalEmployees'), value: String(totalEmployees), icon: Users, color: '#283852', link: '/employees' },
-    { title: t('dashboard.stats.activeProjects'), value: String(activeProjects), icon: Briefcase, color: '#314463', link: '/projects' },
-    { title: t('dashboard.stats.tasksCompleted'), value: String(tasksCompleted), icon: CheckCircle, color: '#3a5175', link: '/tasks' },
-    { title: t('dashboard.stats.efficiency'), value: `${efficiency}%`, icon: TrendingUp, color: '#445d86' },
-    { title: t('dashboard.stats.revenue'), value: formatFCFA(revenue), icon: DollarSign, color: '#4d6a98' },
-    { title: t('dashboard.stats.expenses'), value: formatFCFA(totalExpenses), icon: CreditCard, color: '#5676a9', link: '/expenses' },
-    { title: t('dashboard.stats.profit'), value: formatFCFA(profit), icon: Coins, color: profit >= 0 ? '#22c55e' : '#f43f5e' },
-    { title: t('dashboard.stats.pending'), value: formatFCFA(pending), icon: Clock, color: '#698fcc' },
+    { title: t('dashboard.stats.totalEmployees'), value: String(totalEmployees), icon: UserGroupIcon, color: '#283852', link: '/employees' },
+    { title: t('dashboard.stats.activeProjects'), value: String(activeProjects), icon: Briefcase01Icon, color: '#283852', link: '/projects' },
+    { title: t('dashboard.stats.tasksCompleted'), value: String(tasksCompleted), icon: Tick01Icon, color: '#283852', link: '/tasks' },
+    { title: t('dashboard.stats.efficiency'), value: `${efficiency}%`, icon: ArrowUpRight01Icon, color: '#283852' },
+    { title: t('dashboard.stats.revenue'), value: formatFCFA(revenue), icon: DollarCircleIcon, color: '#283852' },
+    { title: t('dashboard.stats.expenses'), value: formatFCFA(totalExpenses), icon: CreditCardIcon, color: '#283852', link: '/expenses' },
+    { title: t('dashboard.stats.profit'), value: formatFCFA(profit), icon: Coins01Icon, color: '#283852' },
+    { title: t('dashboard.stats.pending'), value: formatFCFA(pending), icon: Clock01Icon, color: '#283852' },
   ];
 
   // Derive chart data from real tasks grouped by day of week
@@ -191,9 +180,9 @@ const Dashboard = () => {
               onClick={() => setShowDateMenu(!showDateMenu)}
               className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-gray-700 font-medium hover:bg-gray-50 hover:border-[#33cbcc]/40 transition-colors"
            >
-              <Calendar size={16} className="text-[#33cbcc]" />
+              <Calendar01Icon size={16} className="text-[#33cbcc]" />
               <span className="text-sm">{currentLabel}</span>
-              <ChevronDown size={14} className={`text-gray-400 transition-transform ${showDateMenu ? 'rotate-180' : ''}`} />
+              <ArrowDown01Icon size={14} className={`text-gray-400 transition-transform ${showDateMenu ? 'rotate-180' : ''}`} />
            </button>
 
            <AnimatePresence>
@@ -268,20 +257,18 @@ const Dashboard = () => {
             onKeyDown={stat.link ? (e) => { if (e.key === 'Enter' || e.key === ' ') navigate(stat.link); } : undefined}
             tabIndex={stat.link ? 0 : undefined}
             role={stat.link ? 'button' : undefined}
-            className={`bg-white p-6 rounded-2xl border border-gray-100 transition-all duration-200 relative overflow-hidden group hover:border-[#33cbcc]/50  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#33cbcc]/40${stat.link ? ' cursor-pointer' : ''}`}
+            className={`border border-gray-100 rounded-2xl overflow-hidden transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#33cbcc]/40 hover:border-[#33cbcc]/50${stat.link ? ' cursor-pointer' : ''}`}
           >
-            <div className="relative z-10">
-                <h3 className="text-gray-500 text-sm font-medium mb-2 truncate">{stat.title}</h3>
-                <h2 className={`font-bold text-gray-800 truncate leading-tight ${stat.value.length > 10 ? 'text-xl' : 'text-3xl'}`}>
+            <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.title}</h3>
+            </div>
+            <div className="p-5 bg-white relative overflow-hidden">
+                <h2 className={`font-bold text-[#1c2b3a] truncate leading-tight ${stat.value.length > 10 ? 'text-xl' : 'text-4xl'}`}>
                   {stat.value}
                 </h2>
-            </div>
-
-            <div
-                className="absolute -right-6 -bottom-6 opacity-5 transition-transform  duration-500 ease-out"
-                style={{ color: stat.color }}
-            >
-                <stat.icon size={120} strokeWidth={1.5} />
+                <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                    <stat.icon size={110} strokeWidth={1.2} />
+                </div>
             </div>
           </motion.div>
         ))}
@@ -303,7 +290,7 @@ const Dashboard = () => {
           <div className="h-[280px] w-full">
             {chartData.every(d => d.tasks === 0) ? (
               <div className="flex flex-col items-center justify-center h-full gap-2">
-                <CheckCircle size={32} className="text-gray-200" />
+                <Tick01Icon size={32} className="text-gray-200" />
                 <p className="text-sm text-gray-400">{t('dashboard.charts.noTasks', 'No tasks in this period')}</p>
               </div>
             ) : (
@@ -342,7 +329,7 @@ const Dashboard = () => {
           </div>
           {pieTotal === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-2">
-              <Users size={32} className="text-gray-200" />
+              <UserGroupIcon size={32} className="text-gray-200" />
               <p className="text-sm text-gray-400">{t('dashboard.charts.noDepartments', 'No departments yet')}</p>
             </div>
           ) : (

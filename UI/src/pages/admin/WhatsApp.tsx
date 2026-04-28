@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle, Clock, MessageSquare, RefreshCw, Smartphone, WifiOff, XCircle } from 'lucide-react';
+import { Tick01Icon, Clock01Icon, Message02Icon, RefreshIcon, SmartPhone01Icon, WifiDisconnected01Icon, CancelCircleIcon } from 'hugeicons-react';
 import api from '../../api/config';
 
 interface PollResponse {
@@ -28,7 +28,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 function StatusBadge({ status }: { status: string }) {
-    const Icon = status === 'connected' ? CheckCircle : status === 'connecting' ? Clock : WifiOff;
+    const Icon = status === 'connected' ? Tick01Icon : status === 'connecting' ? Clock01Icon : WifiDisconnected01Icon;
     return (
         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLOR[status] ?? 'bg-gray-100 text-gray-600'}`}>
             <Icon size={12} />
@@ -85,7 +85,7 @@ export default function WhatsAppPage() {
                 {poll.status === 'connected' ? (
                     <div className="flex flex-col items-center gap-3 py-6 text-center">
                         <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-                            <Smartphone size={32} className="text-emerald-600" />
+                            <SmartPhone01Icon size={32} className="text-emerald-600" />
                         </div>
                         <p className="font-semibold text-gray-800">WhatsApp connecté</p>
                         <p className="text-sm text-gray-500">Les notifications sont envoyées automatiquement.</p>
@@ -102,14 +102,14 @@ export default function WhatsAppPage() {
                             className="w-56 h-56 rounded-xl border border-gray-200 shadow-sm"
                         />
                         <p className="text-xs text-gray-400 flex items-center gap-1.5">
-                            <RefreshCw size={11} className="animate-spin" />
+                            <RefreshIcon size={11} className="animate-spin" />
                             Actualisation automatique toutes les 3 s
                         </p>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center gap-3 py-6 text-center">
                         <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                            <RefreshCw size={28} className="text-gray-400 animate-spin" />
+                            <RefreshIcon size={28} className="text-gray-400 animate-spin" />
                         </div>
                         <p className="font-semibold text-gray-700">Connexion en cours…</p>
                         <p className="text-sm text-gray-400">Le QR code apparaîtra ici dans quelques secondes.</p>
@@ -120,7 +120,7 @@ export default function WhatsAppPage() {
             {/* Sent messages */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
                 <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-                    <MessageSquare size={16} className="text-[#283852]" />
+                    <Message02Icon size={16} className="text-[#283852]" />
                     <h2 className="font-semibold text-sm text-gray-800">Messages envoyés</h2>
                     <span className="ml-auto text-xs text-gray-400">{messages.length} message{messages.length !== 1 ? 's' : ''}</span>
                 </div>
@@ -135,8 +135,8 @@ export default function WhatsAppPage() {
                             <div key={i} className="px-5 py-3 flex items-start gap-3">
                                 <div className="mt-0.5 shrink-0">
                                     {msg.status === 'sent'
-                                        ? <CheckCircle size={15} className="text-emerald-500" />
-                                        : <XCircle size={15} className="text-red-400" />}
+                                        ? <Tick01Icon size={15} className="text-emerald-500" />
+                                        : <CancelCircleIcon size={15} className="text-red-400" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-0.5">

@@ -1,6 +1,6 @@
 import { useRef, useCallback, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Minimize2, Maximize2, X } from 'lucide-react';
+import { Minimize01Icon, Maximize01Icon, Cancel01Icon } from 'hugeicons-react';
 import OSTitleBar from './OSTitleBar';
 import type { WindowState, AppDefinition, ContextMenuEntry } from './types';
 
@@ -141,20 +141,20 @@ export default function OSWindow({
         {
           type: 'item',
           label: 'Minimize',
-          icon: Minimize2,
+          icon: Minimize01Icon,
           onClick: onMinimize,
         },
         {
           type: 'item',
           label: win.isMaximized ? 'Restore size' : 'Maximize',
-          icon: Maximize2,
+          icon: Maximize01Icon,
           onClick: onMaximize,
         },
         { type: 'divider' },
         {
           type: 'item',
           label: 'Close',
-          icon: X,
+          icon: Cancel01Icon,
           danger: true,
           onClick: handleClose,
         },

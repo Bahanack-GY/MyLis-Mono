@@ -1,45 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    LayoutDashboard,
-    Users,
-    LogOut,
-    ChevronLeft,
-    ChevronRight,
-    Briefcase,
-    FileText,
-    Building,
-    ListChecks,
-    Ticket,
-    Receipt,
-    UserCircle,
-    Activity,
-    Calendar,
-    CalendarRange,
-    MessageSquare,
-    HandCoins,
-    Wallet,
-    GraduationCap,
-    AlertTriangle,
-    X,
-    BookOpen,
-    FileSpreadsheet,
-    Calculator,
-    CalendarCheck,
-    PieChart,
-    Scale,
-    FileCheck,
-    Target,
-    Database,
-    TrendingUp,
-    Banknote,
-    ArrowLeftRight,
-    FileBarChart,
-    Truck,
-    Waves,
-    Trophy,
-    Landmark,
-} from 'lucide-react';
+import { DashboardSquare01Icon, UserGroupIcon, Logout01Icon, ArrowLeft01Icon, ArrowRight01Icon, Briefcase01Icon, File01Icon, Building01Icon, Task01Icon, Ticket01Icon, Invoice01Icon, UserCircleIcon, Activity01Icon, Calendar01Icon, Message02Icon, Money01Icon, Wallet01Icon, GraduationScrollIcon, Alert02Icon, Cancel01Icon, BookOpen01Icon, Csv01Icon, CalculatorIcon, PieChartIcon, JusticeScale01Icon, Target01Icon, DatabaseIcon, ArrowUpRight01Icon, ArrowLeftRightIcon, DeliveryTruck01Icon, WaveIcon, Award01Icon, BankIcon, Car01Icon, Clock01Icon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLogout } from '../api/auth/hooks';
@@ -68,93 +29,139 @@ type Section = {
     roles?: Role[];
 };
 
+// CEO sees a focused set of items matching the CEO dashboard scope
+const CEO_SECTIONS: Section[] = [
+    {
+        key: 'work',
+        items: [
+            { icon: DashboardSquare01Icon, label: 'dashboard', path: '/dashboard' },
+            { icon: File01Icon, label: 'reports', path: '/reports' },
+        ],
+    },
+    {
+        key: 'people',
+        items: [
+            { icon: UserGroupIcon, label: 'employees', path: '/employees' },
+            { icon: Building01Icon, label: 'departments', path: '/departments' },
+            { icon: Award01Icon, label: 'monthlyRankings', path: '/employees/rankings' },
+            { icon: UserCircleIcon, label: 'clients', path: '/clients' },
+        ],
+    },
+    {
+        key: 'finance',
+        items: [
+            { icon: Invoice01Icon, label: 'invoices', path: '/invoices' },
+            { icon: Wallet01Icon, label: 'expenses', path: '/expenses' },
+            { icon: Money01Icon, label: 'demands', path: '/demands' },
+            { icon: BankIcon, label: 'fundMovements', path: '/accounting/fund-movements' },
+        ],
+    },
+    {
+        key: 'accounting',
+        items: [
+            { icon: PieChartIcon, label: 'accountingDashboard', path: '/accounting' },
+            { icon: JusticeScale01Icon, label: 'reports', path: '/accounting/reports' },
+            { icon: WaveIcon, label: 'cashFlow', path: '/accounting/cash-flow' },
+        ],
+    },
+    {
+        key: 'comms',
+        items: [
+            { icon: Message02Icon, label: 'messages', path: '/messages' },
+            { icon: Calendar01Icon, label: 'meetings', path: '/meetings' },
+            { icon: Clock01Icon, label: 'reminders', path: '/reminders' },
+        ],
+    },
+];
+
 const ALL_SECTIONS: Section[] = [
     {
         key: 'work',
         items: [
-            { icon: LayoutDashboard, label: 'dashboard', path: '/dashboard' },
-            { icon: ListChecks, label: 'tasks', path: '/tasks', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
-            { icon: CalendarRange, label: 'planning', path: '/planning', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
-            { icon: Briefcase, label: 'projects', path: '/projects', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL'] },
-            { icon: FileText, label: 'documents', path: '/documents', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
-            { icon: FileCheck, label: 'myPayslips', path: '/my-payslips' },
-            { icon: FileBarChart, label: 'reports', path: '/reports' },
+            { icon: DashboardSquare01Icon, label: 'dashboard', path: '/dashboard' },
+            { icon: Task01Icon, label: 'tasks', path: '/tasks', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
+            { icon: Calendar01Icon, label: 'planning', path: '/planning', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
+            { icon: Briefcase01Icon, label: 'projects', path: '/projects', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL'] },
+            { icon: File01Icon, label: 'documents', path: '/documents', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
+            { icon: File01Icon, label: 'myPayslips', path: '/my-payslips' },
+            { icon: File01Icon, label: 'reports', path: '/reports' },
         ],
     },
     {
         key: 'people',
         roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'],
         items: [
-            { icon: Users, label: 'employees', path: '/employees', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
-            { icon: Building, label: 'departments', path: '/departments', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
-            { icon: Trophy, label: 'monthlyRankings', path: '/employees/rankings', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
-            { icon: UserCircle, label: 'clients', path: '/clients', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
+            { icon: UserGroupIcon, label: 'employees', path: '/employees', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
+            { icon: Building01Icon, label: 'departments', path: '/departments', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
+            { icon: Award01Icon, label: 'monthlyRankings', path: '/employees/rankings', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
+            { icon: UserCircleIcon, label: 'clients', path: '/clients', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
         ],
     },
     {
         key: 'requests',
         roles: ['EMPLOYEE', 'COMMERCIAL'],
         items: [
-            { icon: Ticket, label: 'tickets', path: '/tickets' },
-            { icon: HandCoins, label: 'demands', path: '/demands' },
-            { icon: Banknote, label: 'businessExpenses', path: '/business-expenses' },
-            { icon: GraduationCap, label: 'formations', path: '/formations' },
+            { icon: Ticket01Icon, label: 'tickets', path: '/tickets' },
+            { icon: Money01Icon, label: 'demands', path: '/demands' },
+            { icon: Money01Icon, label: 'businessExpenses', path: '/business-expenses' },
+            { icon: GraduationScrollIcon, label: 'formations', path: '/formations' },
         ],
     },
     {
         key: 'finance',
         roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'],
         items: [
-            { icon: Receipt, label: 'invoices', path: '/invoices' },
-            { icon: Wallet, label: 'expenses', path: '/expenses', roles: ['MANAGER', 'ACCOUNTANT'] },
-            { icon: HandCoins, label: 'demands', path: '/demands' },
-            { icon: Banknote, label: 'businessExpenses', path: '/business-expenses' },
+            { icon: Invoice01Icon, label: 'invoices', path: '/invoices' },
+            { icon: Wallet01Icon, label: 'expenses', path: '/expenses', roles: ['MANAGER', 'ACCOUNTANT', 'HEAD_OF_DEPARTMENT'] },
+            { icon: Money01Icon, label: 'demands', path: '/demands' },
+            { icon: Money01Icon, label: 'businessExpenses', path: '/business-expenses' },
         ],
     },
     {
         key: 'commercial',
         roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL'],
         items: [
-            { icon: Target, label: 'commercialDashboard', path: '/commercial' },
-            { icon: Database, label: 'leadsDatabase', path: '/commercial/leads' },
-            { icon: TrendingUp, label: 'salesPipeline', path: '/commercial/pipeline' },
-            { icon: ListChecks, label: 'leadFollowUp', path: '/commercial/suivi' },
-            { icon: BookOpen, label: 'clientFollowUp', path: '/commercial/follow-up', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
+            { icon: Target01Icon, label: 'commercialDashboard', path: '/commercial' },
+            { icon: DatabaseIcon, label: 'leadsDatabase', path: '/commercial/leads' },
+            { icon: ArrowUpRight01Icon, label: 'salesPipeline', path: '/commercial/pipeline' },
+            { icon: Task01Icon, label: 'leadFollowUp', path: '/commercial/suivi' },
+            { icon: BookOpen01Icon, label: 'clientFollowUp', path: '/commercial/follow-up', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
         ],
     },
     {
         key: 'accounting',
         roles: ['MANAGER', 'ACCOUNTANT'],
         items: [
-            { icon: PieChart, label: 'accountingDashboard', path: '/accounting' },
-            { icon: BookOpen, label: 'chartOfAccounts', path: '/accounting/accounts' },
-            { icon: FileSpreadsheet, label: 'journalEntries', path: '/accounting/entries' },
-            { icon: Scale, label: 'reports', path: '/accounting/reports' },
-            { icon: FileBarChart, label: 'aiReports', path: '/accounting/ai-reports' },
-            { icon: CalendarCheck, label: 'fiscalYears', path: '/accounting/fiscal-years' },
-            { icon: Calculator, label: 'payroll', path: '/accounting/payroll' },
-            { icon: Receipt, label: 'taxDeclarations', path: '/accounting/tax' },
-            { icon: Truck, label: 'suppliers', path: '/accounting/suppliers' },
-            { icon: Waves, label: 'cashFlow', path: '/accounting/cash-flow' },
-            { icon: Landmark, label: 'fundMovements', path: '/accounting/fund-movements' },
+            { icon: PieChartIcon, label: 'accountingDashboard', path: '/accounting' },
+            { icon: BookOpen01Icon, label: 'chartOfAccounts', path: '/accounting/accounts' },
+            { icon: Csv01Icon, label: 'journalEntries', path: '/accounting/entries' },
+            { icon: JusticeScale01Icon, label: 'reports', path: '/accounting/reports' },
+            { icon: File01Icon, label: 'aiReports', path: '/accounting/ai-reports' },
+            { icon: Calendar01Icon, label: 'fiscalYears', path: '/accounting/fiscal-years' },
+            { icon: CalculatorIcon, label: 'payroll', path: '/accounting/payroll' },
+            { icon: Invoice01Icon, label: 'taxDeclarations', path: '/accounting/tax' },
+            { icon: DeliveryTruck01Icon, label: 'suppliers', path: '/accounting/suppliers' },
+            { icon: WaveIcon, label: 'cashFlow', path: '/accounting/cash-flow' },
+            { icon: BankIcon, label: 'fundMovements', path: '/accounting/fund-movements' },
         ],
     },
     {
         key: 'comms',
         items: [
-            { icon: MessageSquare, label: 'messages', path: '/messages' },
-            { icon: Calendar, label: 'meetings', path: '/meetings', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL'] },
-            { icon: Ticket, label: 'tickets', path: '/tickets', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
-            { icon: FileText, label: 'documents', path: '/documents', roles: ['EMPLOYEE', 'COMMERCIAL'] },
-            { icon: AlertTriangle, label: 'sanctions', path: '/sanctions', roles: ['EMPLOYEE', 'COMMERCIAL'] },
-            { icon: Activity, label: 'activity', path: '/activity', roles: ['MANAGER'] },
+            { icon: Message02Icon, label: 'messages', path: '/messages' },
+            { icon: Calendar01Icon, label: 'meetings', path: '/meetings', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL'] },
+            { icon: Clock01Icon, label: 'reminders', path: '/reminders' },
+            { icon: Ticket01Icon, label: 'tickets', path: '/tickets', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
+            { icon: File01Icon, label: 'documents', path: '/documents', roles: ['EMPLOYEE', 'COMMERCIAL'] },
+            { icon: Alert02Icon, label: 'sanctions', path: '/sanctions', roles: ['EMPLOYEE', 'COMMERCIAL'] },
+            { icon: Activity01Icon, label: 'activity', path: '/activity', roles: ['MANAGER'] },
         ],
     },
 ];
 
 function filterSections(sections: Section[], role: Role | null): Section[] {
     if (!role) return [];
-    if (role === 'CEO') return sections.map(s => ({ ...s }));
+    if (role === 'CEO') return CEO_SECTIONS;
 
     return sections
         .filter(section => !section.roles || section.roles.includes(role))
@@ -177,10 +184,16 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
     const canToggleView = role !== null && TOGGLEABLE_ROLES.includes(role);
     const effectiveRole: Role | null = canToggleView && viewMode === 'employee' ? 'EMPLOYEE' : role;
 
-    // Label for the "management" side of the toggle, specific to each toggleable role
+    // Label for the active view (shown in the toggle button)
     const mgmtViewLabel = role === 'ACCOUNTANT'
         ? t('sidebar.accountingView', 'Comptabilité')
+        : role === 'CEO'
+        ? t('sidebar.ceoView', 'Vue Directeur')
         : t('sidebar.hodView', 'Chef de département');
+    // Label shown when in the "other" (non-admin) toggled view
+    const altViewLabel = role === 'CEO'
+        ? t('sidebar.managerView', 'Vue Manager')
+        : t('sidebar.employeeView', 'Employé');
 
     const sections = useMemo(() => filterSections(ALL_SECTIONS, effectiveRole), [effectiveRole]);
 
@@ -205,7 +218,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                 className={`
                     w-full text-left flex items-center p-3 rounded-xl cursor-pointer transition-all duration-200 group relative
                     ${active
-                        ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
+                        ? 'bg-white text-[#283852]'
                         : 'text-gray-400 hover:bg-white/5 hover:text-white'
                     }
                 `}
@@ -270,7 +283,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                 aria-expanded={isSidebarOpen}
                 className="absolute -right-3 top-[52px] bg-[#33cbcc] p-1 rounded-full shadow-lg hover:bg-[#2bb5b6] transition-colors z-50"
             >
-                {isSidebarOpen ? <ChevronLeft size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
+                {isSidebarOpen ? <ArrowLeft01Icon size={14} aria-hidden="true" /> : <ArrowRight01Icon size={14} aria-hidden="true" />}
             </button>
 
             {/* Navigation */}
@@ -311,7 +324,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                         aria-label={!isSidebarOpen ? (viewMode === 'admin' ? t('sidebar.switchToEmployeeView', 'Vue employé') : t('sidebar.switchToMgmtView', 'Vue gestion')) : undefined}
                         className="w-full text-left flex items-center p-3 rounded-xl cursor-pointer transition-colors group relative text-gray-400 hover:bg-white/5 hover:text-[#33cbcc]"
                     >
-                        <ArrowLeftRight size={20} aria-hidden="true" className="min-w-[20px]" />
+                        <ArrowLeftRightIcon size={20} aria-hidden="true" className="min-w-[20px]" />
                         <AnimatePresence>
                             {isSidebarOpen && (
                                 <motion.div
@@ -325,18 +338,14 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                                         {t('sidebar.viewMode', 'Vue active')}
                                     </p>
                                     <p className="text-sm font-medium whitespace-nowrap text-white">
-                                        {viewMode === 'admin'
-                                            ? mgmtViewLabel
-                                            : t('sidebar.employeeView', 'Employé')}
+                                        {viewMode === 'admin' ? mgmtViewLabel : altViewLabel}
                                     </p>
                                 </motion.div>
                             )}
                         </AnimatePresence>
                         {!isSidebarOpen && (
                             <div aria-hidden="true" className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
-                                {viewMode === 'admin'
-                                    ? t('sidebar.switchToEmployeeView', 'Passer en vue employé')
-                                    : t('sidebar.switchToMgmtView', 'Passer en vue gestion')}
+                                {viewMode === 'admin' ? altViewLabel : mgmtViewLabel}
                             </div>
                         )}
                     </button>
@@ -347,7 +356,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                     aria-label={!isSidebarOpen ? t('sidebar.logout') : undefined}
                     className="w-full text-left flex items-center p-3 rounded-xl cursor-pointer text-gray-500 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors group relative"
                 >
-                    <LogOut size={20} aria-hidden="true" className="min-w-[20px]" />
+                    <Logout01Icon size={20} aria-hidden="true" className="min-w-[20px]" />
                     <AnimatePresence>
                         {isSidebarOpen && (
                             <motion.span
@@ -397,7 +406,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                                     aria-label={t('common.close', 'Close')}
                                     className="p-1.5 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
                                 >
-                                    <X size={18} aria-hidden="true" />
+                                    <Cancel01Icon size={18} aria-hidden="true" />
                                 </button>
                             </div>
 
@@ -429,7 +438,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                                                         aria-current={active ? 'page' : undefined}
                                                         className={`w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
                                                             active
-                                                                ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
+                                                                ? 'bg-white text-[#283852]'
                                                                 : 'text-gray-400 hover:bg-white/5 hover:text-white'
                                                         }`}
                                                     >
@@ -450,7 +459,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                                         onClick={() => { setViewMode(viewMode === 'admin' ? 'employee' : 'admin'); setMoreOpen(false); }}
                                         className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-400 hover:bg-white/5 hover:text-[#33cbcc] transition-colors"
                                     >
-                                        <ArrowLeftRight size={19} aria-hidden="true" className="shrink-0" />
+                                        <ArrowLeftRightIcon size={19} aria-hidden="true" className="shrink-0" />
                                         <div>
                                             <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
                                                 {t('sidebar.viewMode', 'Vue active')}
@@ -467,7 +476,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
                                     onClick={() => { setMoreOpen(false); logout(); }}
                                     className="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-500 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
                                 >
-                                    <LogOut size={19} aria-hidden="true" className="shrink-0" />
+                                    <Logout01Icon size={19} aria-hidden="true" className="shrink-0" />
                                     <span className="text-sm font-medium">{t('sidebar.logout')}</span>
                                 </button>
                             </div>

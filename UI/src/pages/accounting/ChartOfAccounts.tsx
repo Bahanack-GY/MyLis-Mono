@@ -1,21 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
- Search,
- Plus,
- X,
- ChevronRight,
- ChevronDown,
- Edit3,
- Trash2,
- Loader2,
- BookOpen,
- Database,
- Layers,
- AlertTriangle,
- Building2,
-} from 'lucide-react';
+import { Search01Icon, Add01Icon, Cancel01Icon, ArrowRight01Icon, ArrowDown01Icon, PencilIcon, Delete02Icon, Loading02Icon, BookOpen01Icon, DatabaseIcon, Layers01Icon, Alert02Icon, Building02Icon } from 'hugeicons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -212,7 +198,7 @@ const AccountFormModal = ({ onClose, account, categories, accounts, defaultDepar
  <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
  <div className="flex items-center gap-3">
  <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
- <BookOpen size={20} className="text-[#33cbcc]"/>
+ <BookOpen01Icon size={20} className="text-[#33cbcc]"/>
  </div>
  <h2 className="text-lg font-bold text-gray-800">
  {isEdit ? 'Modifier le compte' : 'Nouveau compte'}
@@ -222,7 +208,7 @@ const AccountFormModal = ({ onClose, account, categories, accounts, defaultDepar
  onClick={onClose}
  className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
- <X size={18} />
+ <Cancel01Icon size={18} />
  </button>
  </div>
 
@@ -344,11 +330,11 @@ const AccountFormModal = ({ onClose, account, categories, accounts, defaultDepar
  }`}
  >
  {isPending ? (
- <Loader2 size={16} className="animate-spin"/>
+ <Loading02Icon size={16} className="animate-spin"/>
  ) : isEdit ? (
- <Edit3 size={16} />
+ <PencilIcon size={16} />
  ) : (
- <Plus size={16} />
+ <Add01Icon size={16} />
  )}
  {isEdit ? 'Modifier' : 'Creer'}
  </button>
@@ -398,7 +384,7 @@ const DeleteConfirmModal = ({
  >
  <div className="flex items-center gap-3 mb-4">
  <div className="p-2.5 rounded-xl bg-[#283852]/10">
- <AlertTriangle size={20} className="text-[#283852]"/>
+ <Alert02Icon size={20} className="text-[#283852]"/>
  </div>
  <h3 className="text-base font-semibold text-gray-800">Supprimer le compte</h3>
  </div>
@@ -422,7 +408,7 @@ const DeleteConfirmModal = ({
  disabled={isPending}
  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852]/90 transition-colors disabled:opacity-50"
  >
- {isPending ? <Loader2 size={14} className="animate-spin"/> : <Trash2 size={14} />}
+ {isPending ? <Loading02Icon size={14} className="animate-spin"/> : <Delete02Icon size={14} />}
  Supprimer
  </button>
  </div>
@@ -475,7 +461,7 @@ const AccountRow = ({
  <td className="px-6 py-3">
  {account.department ? (
  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] text-[10px] font-semibold">
- <Building2 size={9} />
+ <Building02Icon size={9} />
  {account.department.name}
  </span>
  ) : (
@@ -489,7 +475,7 @@ const AccountRow = ({
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors"
  title="Modifier"
  >
- <Edit3 size={14} />
+ <PencilIcon size={14} />
  </button>
  {!account.isSystem && (
  <button
@@ -497,7 +483,7 @@ const AccountRow = ({
  className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
  title="Supprimer"
  >
- <Trash2 size={14} />
+ <Delete02Icon size={14} />
  </button>
  )}
  </div>
@@ -549,9 +535,9 @@ const CategorySection = ({ category, search, selectedDeptId, onEdit, onDelete }:
  className="w-full flex items-center gap-3 px-6 py-3 bg-gray-50 hover:bg-gray-100 transition-colors rounded-xl"
  >
  {expanded ? (
- <ChevronDown size={16} className="text-gray-400"/>
+ <ArrowDown01Icon size={16} className="text-gray-400"/>
  ) : (
- <ChevronRight size={16} className="text-gray-400"/>
+ <ArrowRight01Icon size={16} className="text-gray-400"/>
  )}
  <span className="text-xs font-bold text-[#33cbcc] uppercase tracking-wider">
  Classe {category.code}
@@ -669,9 +655,9 @@ export default function ChartOfAccounts() {
  className="flex items-center gap-2 px-4 py-2.5 bg-[#283852] text-white rounded-xl text-sm font-semibold hover:bg-[#283852]/90 transition-colors disabled:opacity-50"
  >
  {seed.isPending ? (
- <Loader2 size={16} className="animate-spin"/>
+ <Loading02Icon size={16} className="animate-spin"/>
  ) : (
- <Database size={16} />
+ <DatabaseIcon size={16} />
  )}
  Initialiser SYSCOHADA
  </button>
@@ -683,21 +669,21 @@ export default function ChartOfAccounts() {
  }}
  className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
  >
- <Plus size={16} />
+ <Add01Icon size={16} />
  Nouveau Compte
  </button>
  </div>
  </div>
 
- {/* Search */}
- <div className="bg-white rounded-2xl p-2 flex items-center border border-gray-100 focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
- <Search className="text-gray-400 ml-3" size={20} />
+ {/* Search01Icon */}
+ <div className="flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+ <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
  <input
  type="text"
  placeholder="Rechercher par code ou nom de compte..."
  value={search}
  onChange={(e) => setSearch(e.target.value)}
- className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+ className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
  />
  </div>
 
@@ -724,7 +710,7 @@ export default function ChartOfAccounts() {
  : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
  }`}
  >
- <Building2 size={13} />
+ <Building02Icon size={13} />
  {dept.name}
  {deptAccountCounts[dept.id] ? (
  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -741,7 +727,7 @@ export default function ChartOfAccounts() {
  {/* Empty state */}
  {isEmpty && (
  <div className="bg-white rounded-2xl p-12 text-center">
- <Layers size={48} className="mx-auto text-gray-300 mb-4"/>
+ <Layers01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-500 font-medium mb-2">Aucun compte comptable</p>
  <p className="text-sm text-gray-400">
  Cliquez sur"Initialiser SYSCOHADA"pour creer le plan comptable standard.

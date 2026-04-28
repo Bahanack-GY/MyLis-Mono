@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Tick01Icon } from 'hugeicons-react';
 import type { ContextMenuState } from './types';
 
 interface OSContextMenuProps {
@@ -79,7 +79,7 @@ export default function OSContextMenu({ menu, onClose }: OSContextMenuProps) {
               >
                 {entry.checked !== undefined ? (
                   <span className="w-3.5 shrink-0 flex items-center justify-center">
-                    {entry.checked && <Check size={12} className="text-[#33cbcc]" />}
+                    {entry.checked && <Tick01Icon size={12} className="text-[#33cbcc]" />}
                   </span>
                 ) : (
                   Icon && <Icon size={14} className="shrink-0 opacity-70" />

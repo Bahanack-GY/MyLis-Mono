@@ -2,13 +2,7 @@ import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Flag, Search, X, AlertCircle,
-    ArrowLeft, Clock, Plus, CalendarDays,
-    AlignLeft, Briefcase, BarChart3, RefreshCw, Loader2, Zap,
-    Pencil, Trash2, History, Save, CalendarRange, Columns3, Tag, Settings,
-    ListTodo, Target, Paperclip, Download, FileText, AlertTriangle, Star,
-} from 'lucide-react';
+import { ArrowLeft01Icon, ArrowRight01Icon, ArrowDown01Icon, ArrowUp01Icon, Flag01Icon, Search01Icon, Cancel01Icon, Alert01Icon, Clock01Icon, Add01Icon, Calendar01Icon, AlignLeftIcon, Briefcase01Icon, BarChartHorizontalIcon, RefreshIcon, Loading02Icon, ZapIcon, PencilIcon, Delete02Icon, Time01Icon, FloppyDiskIcon, ListViewIcon, Tag01Icon, Settings01Icon, Task01Icon, Target01Icon, Attachment01Icon, Download01Icon, File01Icon, Alert02Icon, StarIcon, Activity01Icon } from 'hugeicons-react';
 import { useTasks, useInfiniteTasksByStates, useCreateTask, useUpdateTask, useDeleteTask, useTaskHistory, useWeeklyCheckForEmployee, useCreateSubtask, useToggleSubtask, useDeleteSubtask, useUploadTaskAttachment, useDeleteTaskAttachment, useGlobalDistribution } from '../../api/tasks/hooks';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { Task } from '../../api/tasks/types';
@@ -195,7 +189,7 @@ const SubtasksSection = ({ task }: { task: GanttTask }) => {
                         disabled={!newSubtaskTitle.trim() || createSubtask.isPending}
                         className="p-2 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
-                        {createSubtask.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createSubtask.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                     </button>
                 </div>
             </div>
@@ -240,7 +234,7 @@ const SubtasksSection = ({ task }: { task: GanttTask }) => {
                             onClick={() => deleteSubtask.mutate(subtask.id)}
                             className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-all"
                         >
-                            <Trash2 size={14} />
+                            <Delete02Icon size={14} />
                         </button>
                     </div>
                 ))}
@@ -261,7 +255,7 @@ const SubtasksSection = ({ task }: { task: GanttTask }) => {
                     disabled={!newSubtaskTitle.trim() || createSubtask.isPending}
                     className="p-2 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                    {createSubtask.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                    {createSubtask.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                 </button>
             </div>
         </div>
@@ -324,22 +318,22 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: c.border }} />
                                 <h3 className="text-lg font-bold text-gray-800">{task.title}</h3>
-                                {task.hasFlag && <Flag size={14} className="text-[#283852] shrink-0" />}
+                                {task.hasFlag && <Flag01Icon size={14} className="text-[#283852] shrink-0" />}
                                 {task.selfAssigned && (
                                     <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] shrink-0">
-                                        <Zap size={10} />
+                                        <ZapIcon size={10} />
                                         Self-assigned
                                     </span>
                                 )}
                                 {task.urgent && (
                                     <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
-                                        <AlertTriangle size={10} />
+                                        <Alert02Icon size={10} />
                                         {t('tasksPage.urgent')}
                                     </span>
                                 )}
                                 {task.important && (
                                     <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
-                                        <Star size={10} />
+                                        <StarIcon size={10} />
                                         {t('tasksPage.important')}
                                     </span>
                                 )}
@@ -347,7 +341,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                             <p className="text-sm text-gray-500 pl-5">{task.subtitle}</p>
                         </div>
                         <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0">
-                            <X size={18} />
+                            <Cancel01Icon size={18} />
                         </button>
                     </div>
 
@@ -372,7 +366,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                         </div>
                         <div className="bg-gray-50 rounded-xl p-3">
                             <div className="flex items-center gap-1.5 mb-1">
-                                <Clock size={11} className="text-gray-400" />
+                                <Clock01Icon size={11} className="text-gray-400" />
                                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.duration')}</p>
                             </div>
                             <p className="text-sm font-semibold text-gray-800">{duration} {duration === 1 ? t('tasksPage.day') : t('tasksPage.days')}</p>
@@ -388,7 +382,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                     {/* Nature */}
                     {task.natureName && (
                         <div className="flex items-center gap-2">
-                            <Tag size={12} className="text-gray-400" />
+                            <Tag01Icon size={12} className="text-gray-400" />
                             <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.nature')}</span>
                             <span className="text-sm font-medium text-gray-700">{task.natureName}</span>
                         </div>
@@ -401,14 +395,14 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                     {task.attachments && task.attachments.length > 0 && (
                         <div>
                             <div className="flex items-center gap-2 mb-2">
-                                <Paperclip size={12} className="text-gray-400" />
+                                <Attachment01Icon size={12} className="text-gray-400" />
                                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.attachments', 'Attachments')}</p>
                                 <span className="text-xs font-medium text-gray-500">{task.attachments.length}</span>
                             </div>
                             <div className="space-y-2 max-h-40 overflow-y-auto">
                                 {task.attachments.map(att => (
                                     <div key={att.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                                        <FileText size={14} className="text-gray-400 shrink-0" />
+                                        <File01Icon size={14} className="text-gray-400 shrink-0" />
                                         <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
                                         <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
                                         <a
@@ -418,7 +412,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                                             rel="noopener noreferrer"
                                             className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"
                                         >
-                                            <Download size={14} />
+                                            <Download01Icon size={14} />
                                         </a>
                                     </div>
                                 ))}
@@ -445,7 +439,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                     )}
                     {totalTimeMs !== null && totalTimeMs > 0 && (
                         <div className="bg-[#33cbcc]/5 border border-[#33cbcc]/15 rounded-xl p-3 flex items-center gap-2">
-                            <Clock size={14} className="text-[#33cbcc]" />
+                            <Clock01Icon size={14} className="text-[#33cbcc]" />
                             <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider">{t('tasksPage.totalTime')}</p>
                             <p className="text-sm font-bold text-gray-800 ml-auto">{fmtDuration(totalTimeMs, t)}</p>
                         </div>
@@ -467,7 +461,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                                     onClick={() => { onClose(); onEdit(); }}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors"
                                 >
-                                    <Pencil size={12} /> {t('tasksPage.editTask')}
+                                    <PencilIcon size={12} /> {t('tasksPage.editTask')}
                                 </button>
                             )}
                             {!task.selfAssigned && onDelete && (
@@ -475,7 +469,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                                     onClick={() => { if (window.confirm(t('tasksPage.confirmDelete'))) { onClose(); onDelete(); } }}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors"
                                 >
-                                    <Trash2 size={12} /> {t('tasksPage.deleteTask')}
+                                    <Delete02Icon size={12} /> {t('tasksPage.deleteTask')}
                                 </button>
                             )}
                             {onHistory && (
@@ -483,7 +477,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                                     onClick={() => { onClose(); onHistory(); }}
                                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors"
                                 >
-                                    <History size={12} /> {t('tasksPage.viewHistory')}
+                                    <Time01Icon size={12} /> {t('tasksPage.viewHistory')}
                                 </button>
                             )}
                         </div>
@@ -544,11 +538,11 @@ const EditGanttTaskModal = ({
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Pencil size={18} className="text-[#33cbcc]" />
+                            <PencilIcon size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('tasksPage.editTask')}</h3>
                     </div>
-                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
+                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><Cancel01Icon size={18} /></button>
                 </div>
                 <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
                     <div>
@@ -579,12 +573,12 @@ const EditGanttTaskModal = ({
                     <div className="flex items-center gap-6 mb-4">
                         <label className="flex items-center gap-2 cursor-pointer select-none">
                             <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                            <AlertTriangle size={14} className="text-[#283852]" />
+                            <Alert02Icon size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer select-none">
                             <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                            <Star size={14} className="text-[#283852]" />
+                            <StarIcon size={14} className="text-[#283852]" />
                             <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
                         </label>
                     </div>
@@ -603,26 +597,26 @@ const EditGanttTaskModal = ({
                     {task.apiId && (
                         <div>
                             <label className={labelCls}>
-                                <span className="flex items-center gap-1.5"><Paperclip size={11} /> {t('tasksPage.attachments', 'Attachments')}</span>
+                                <span className="flex items-center gap-1.5"><Attachment01Icon size={11} /> {t('tasksPage.attachments', 'Attachments')}</span>
                             </label>
                             {(task.attachments || []).length > 0 && (
                                 <div className="space-y-1.5 mb-2">
                                     {task.attachments!.map(att => (
                                         <div key={att.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 group">
-                                            <FileText size={14} className="text-gray-400 shrink-0" />
+                                            <File01Icon size={14} className="text-gray-400 shrink-0" />
                                             <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
                                             <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
-                                            <a href={att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"><Download size={14} /></a>
+                                            <a href={att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"><Download01Icon size={14} /></a>
                                             <button
                                                 onClick={() => { if (window.confirm(t('tasksPage.deleteAttachmentConfirm', 'Delete this attachment?'))) deleteAttachment.mutate({ taskId: task.apiId!, attachmentId: att.id }); }}
                                                 className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
-                                            ><Trash2 size={14} /></button>
+                                            ><Delete02Icon size={14} /></button>
                                         </div>
                                     ))}
                                 </div>
                             )}
                             <label className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
-                                <Plus size={14} />
+                                <Add01Icon size={14} />
                                 {t('tasksPage.addFiles', 'Add files')}
                                 <input
                                     type="file"
@@ -645,7 +639,7 @@ const EditGanttTaskModal = ({
                         disabled={!form.title.trim() || isSaving}
                         className="px-5 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb5b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                     >
-                        {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                        {isSaving ? <Loading02Icon size={14} className="animate-spin" /> : <FloppyDiskIcon size={14} />}
                         {t('tasksPage.save')}
                     </button>
                 </div>
@@ -654,7 +648,7 @@ const EditGanttTaskModal = ({
     );
 };
 
-/* ─── Gantt History Modal ─────────────────────────────────── */
+/* ─── Gantt Time01Icon Modal ─────────────────────────────────── */
 
 const GanttHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () => void }) => {
     const { t } = useTranslation();
@@ -674,15 +668,15 @@ const GanttHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () =>
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                            <History size={18} className="text-[#283852]" />
+                            <Time01Icon size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('tasksPage.historyTitle')}</h3>
                     </div>
-                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><X size={18} /></button>
+                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><Cancel01Icon size={18} /></button>
                 </div>
                 <div className="flex-1 overflow-y-auto px-6 py-5">
                     {isLoading ? (
-                        <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-[#33cbcc]" /></div>
+                        <div className="flex justify-center py-8"><Loading02Icon size={24} className="animate-spin text-[#33cbcc]" /></div>
                     ) : (history as any[]).length === 0 ? (
                         <p className="text-center text-sm text-gray-400 py-8">{t('tasksPage.historyEmpty')}</p>
                     ) : (
@@ -721,10 +715,37 @@ const PRIORITY_COLOR: Record<string, ColorKey> = { low: 'teal', medium: 'blue', 
 
 /* projects are fetched from API inside the modal */
 
+/* ─── Commercial Activity Types ───────────────────────────── */
+
+const COMMERCIAL_ACTIVITY_GROUPS: { natureKey: string; types: string[] }[] = [
+    { natureKey: 'VENTE_ACTIVE',           types: ['VISITE_CLIENT', 'TEL_CLIENT', 'CLOSING', 'REUNION_CLIENT', 'PRESTATION', 'LIVRAISON'] },
+    { natureKey: 'VENTE_PROSPECTION',      types: ['VISITE_PROSPECT', 'TEL_PROSPECT', 'SALON_EXPOSITION', 'REUNION_PROSPECT'] },
+    { natureKey: 'RESOLUTION_PROBLEMES',   types: ['SAV', 'RAPPROCHEMENT_COMPTES'] },
+    { natureKey: 'TACHES_ADMINISTRATIVES', types: ['PAPERASSE', 'EMAIL', 'TEL_INTERNE', 'REUNION_INTERNE'] },
+    { natureKey: 'TEMPS_IMPRODUCTIF',      types: ['PAUSE', 'MALADIE', 'CONGES'] },
+    { natureKey: 'MARKETING_DIGITAL',      types: ['CREATION_CONTENU', 'POST_RESEAUX_SOCIAUX'] },
+    { natureKey: 'AUTRE',                  types: ['AUTRE'] },
+];
+
+const COMMERCIAL_NATURE_NAMES: Record<string, string> = {
+    VENTE_ACTIVE:           'Vente Active',
+    VENTE_PROSPECTION:      'Vente Prospection',
+    RESOLUTION_PROBLEMES:   'Résolution de problèmes',
+    TACHES_ADMINISTRATIVES: 'Tâches administratives',
+    TEMPS_IMPRODUCTIF:      'Temps improductif',
+    MARKETING_DIGITAL:      'Marketing digital',
+    AUTRE:                  'Autre',
+};
+
+const ACTIVITY_TO_NATURE_KEY: Record<string, string> = Object.fromEntries(
+    COMMERCIAL_ACTIVITY_GROUPS.flatMap(g => g.types.map(t => [t, g.natureKey]))
+);
+
 interface TaskForm {
     title: string;
     description: string;
     project: string;
+    activityType: string;
     nature: string;
     lead: string;
     startDate: string;
@@ -779,6 +800,7 @@ const AddTaskModal = ({
         title: '',
         description: '',
         project: '',
+        activityType: '',
         nature: '',
         lead: '',
         startDate: fmtDate(initialDate),
@@ -795,7 +817,19 @@ const AddTaskModal = ({
     const [taskFiles, setTaskFiles] = useState<File[][]>([[]]);
 
     const update = (idx: number, field: keyof TaskForm, value: string | boolean) => {
-        setTasks(prev => prev.map((tf, i) => i === idx ? { ...tf, [field]: value } : tf));
+        setTasks(prev => prev.map((tf, i) => {
+            if (i !== idx) return tf;
+            const updated = { ...tf, [field]: value };
+            if (field === 'activityType' && isSelectedCommercial && typeof value === 'string' && value) {
+                const natureKey = ACTIVITY_TO_NATURE_KEY[value];
+                const natureName = natureKey ? COMMERCIAL_NATURE_NAMES[natureKey] : undefined;
+                const match = natureName
+                    ? (taskNatures || []).find(n => n.name.toLowerCase() === natureName.toLowerCase())
+                    : undefined;
+                if (match) updated.nature = match.id;
+            }
+            return updated;
+        }));
     };
 
     const validCount = tasks.filter(tf => tf.title.trim().length > 0).length;
@@ -852,7 +886,7 @@ const AddTaskModal = ({
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                            <Plus size={18} className="text-[#33cbcc]" />
+                            <Add01Icon size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('tasksPage.addTask')}</h3>
                     </div>
@@ -863,7 +897,7 @@ const AddTaskModal = ({
                             </span>
                         )}
                         <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                            <X size={18} />
+                            <Cancel01Icon size={18} />
                         </button>
                     </div>
                 </div>
@@ -898,14 +932,14 @@ const AddTaskModal = ({
                     {/* Weekly compliance warning */}
                     {complianceLoading && selectedEmp?.apiId && (
                         <div className="flex items-center gap-2 text-xs text-gray-400 px-1">
-                            <Loader2 size={12} className="animate-spin" />
+                            <Loading02Icon size={12} className="animate-spin" />
                             {t('tasks.weeklyCompliance.checking')}
                         </div>
                     )}
                     {isNonCompliant && (
                         <div className="bg-[#283852]/10 border border-gray-200 rounded-xl p-4 space-y-3">
                             <div className="flex items-center gap-2">
-                                <AlertCircle size={14} className="text-[#283852] shrink-0" />
+                                <Alert01Icon size={14} className="text-[#283852] shrink-0" />
                                 <p className="text-sm font-semibold text-[#283852]">{t('tasks.weeklyCompliance.adminWarningTitle')}</p>
                             </div>
                             <p className="text-xs text-[#283852]">
@@ -942,7 +976,7 @@ const AddTaskModal = ({
 
                             {/* Description */}
                             <div className="relative">
-                                <AlignLeft size={14} className="absolute left-4 top-3 text-gray-400 pointer-events-none" />
+                                <AlignLeftIcon size={14} className="absolute left-4 top-3 text-gray-400 pointer-events-none" />
                                 <input
                                     value={task.description}
                                     onChange={e => update(idx, 'description', e.target.value)}
@@ -954,7 +988,7 @@ const AddTaskModal = ({
                             {/* Project */}
                             <div>
                                 <label className={labelCls}>
-                                    <Briefcase size={11} />
+                                    <Briefcase01Icon size={11} />
                                     {t('tasksPage.project')}
                                 </label>
                                 <select
@@ -969,10 +1003,36 @@ const AddTaskModal = ({
                                 </select>
                             </div>
 
+                            {/* Activity Type (commercial employees only) */}
+                            {isSelectedCommercial && (
+                                <div>
+                                    <label className={labelCls}>
+                                        <Activity01Icon size={11} />
+                                        {t('tasksPage.activityType')}
+                                    </label>
+                                    <select
+                                        value={task.activityType}
+                                        onChange={e => update(idx, 'activityType', e.target.value)}
+                                        className={selectCls}
+                                    >
+                                        <option value="">{t('tasksPage.activityTypeNone')}</option>
+                                        {COMMERCIAL_ACTIVITY_GROUPS.map(group => (
+                                            <optgroup key={group.natureKey} label={t(`tasksPage.commercialNatures.${group.natureKey}`)}>
+                                                {group.types.map(type => (
+                                                    <option key={type} value={type}>
+                                                        {t(`tasksPage.commercialActivityTypes.${type}`)}
+                                                    </option>
+                                                ))}
+                                            </optgroup>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
                             {/* Nature */}
                             <div>
                                 <label className={labelCls}>
-                                    <Tag size={11} />
+                                    <Tag01Icon size={11} />
                                     {t('tasksPage.nature')}
                                 </label>
                                 <select
@@ -991,7 +1051,7 @@ const AddTaskModal = ({
                             {isSelectedCommercial && leads.length > 0 && (
                                 <div>
                                     <label className={labelCls}>
-                                        <Target size={11} />
+                                        <Target01Icon size={11} />
                                         {t('tasksPage.lead', 'Lead')}
                                     </label>
                                     <select
@@ -1011,7 +1071,7 @@ const AddTaskModal = ({
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className={labelCls}>
-                                        <CalendarDays size={11} />
+                                        <Calendar01Icon size={11} />
                                         {t('tasksPage.startDate')}
                                     </label>
                                     <input
@@ -1023,7 +1083,7 @@ const AddTaskModal = ({
                                 </div>
                                 <div>
                                     <label className={labelCls}>
-                                        <CalendarDays size={11} />
+                                        <Calendar01Icon size={11} />
                                         {t('tasksPage.endDate')}
                                     </label>
                                     <input
@@ -1035,7 +1095,7 @@ const AddTaskModal = ({
                                 </div>
                                 <div>
                                     <label className={labelCls}>
-                                        <Clock size={11} />
+                                        <Clock01Icon size={11} />
                                         {t('tasksPage.time')}
                                     </label>
                                     <input
@@ -1051,7 +1111,7 @@ const AddTaskModal = ({
                             <div className="grid grid-cols-3 gap-3">
                                 <div>
                                     <label className={labelCls}>
-                                        <BarChart3 size={11} />
+                                        <BarChartHorizontalIcon size={11} />
                                         {t('tasksPage.difficulty')}
                                     </label>
                                     <select
@@ -1066,7 +1126,7 @@ const AddTaskModal = ({
                                 </div>
                                 <div>
                                     <label className={labelCls}>
-                                        <Flag size={11} />
+                                        <Flag01Icon size={11} />
                                         {t('tasksPage.priority')}
                                     </label>
                                     <select
@@ -1082,7 +1142,7 @@ const AddTaskModal = ({
                                 </div>
                                 <div>
                                     <label className={labelCls}>
-                                        <RefreshCw size={11} />
+                                        <RefreshIcon size={11} />
                                         {t('tasksPage.repeat')}
                                     </label>
                                     <select
@@ -1102,12 +1162,12 @@ const AddTaskModal = ({
                             <div className="flex items-center gap-6">
                                 <label className="flex items-center gap-2 cursor-pointer select-none">
                                     <input type="checkbox" checked={task.urgent} onChange={e => update(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                                    <AlertTriangle size={14} className="text-[#283852]" />
+                                    <Alert02Icon size={14} className="text-[#283852]" />
                                     <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
                                 </label>
                                 <label className="flex items-center gap-2 cursor-pointer select-none">
                                     <input type="checkbox" checked={task.important} onChange={e => update(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                                    <Star size={14} className="text-[#283852]" />
+                                    <StarIcon size={14} className="text-[#283852]" />
                                     <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
                                 </label>
                             </div>
@@ -1115,11 +1175,11 @@ const AddTaskModal = ({
                             {/* File attachments */}
                             <div>
                                 <label className={labelCls}>
-                                    <Paperclip size={11} />
+                                    <Attachment01Icon size={11} />
                                     {t('tasksPage.attachments', 'Attachments')}
                                 </label>
                                 <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
-                                    <Plus size={14} />
+                                    <Add01Icon size={14} />
                                     {t('tasksPage.addFiles', 'Add files')}
                                     <input
                                         type="file"
@@ -1142,7 +1202,7 @@ const AddTaskModal = ({
                                     <div className="mt-2 space-y-1.5">
                                         {taskFiles[idx].map((file, fi) => (
                                             <div key={fi} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                                                <FileText size={14} className="text-gray-400 shrink-0" />
+                                                <File01Icon size={14} className="text-gray-400 shrink-0" />
                                                 <span className="flex-1 text-sm text-gray-700 truncate">{file.name}</span>
                                                 <span className="text-[10px] text-gray-400 shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
                                                 <button
@@ -1156,7 +1216,7 @@ const AddTaskModal = ({
                                                     }}
                                                     className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
                                                 >
-                                                    <X size={14} />
+                                                    <Cancel01Icon size={14} />
                                                 </button>
                                             </div>
                                         ))}
@@ -1171,7 +1231,7 @@ const AddTaskModal = ({
                         onClick={() => { setTasks(prev => [...prev, makeEmpty()]); setTaskFiles(prev => [...prev, []]); }}
                         className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm font-medium text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors flex items-center justify-center gap-2"
                     >
-                        <Plus size={16} />
+                        <Add01Icon size={16} />
                         {t('tasksPage.addAnother')}
                     </button>
                 </div>
@@ -1238,7 +1298,7 @@ const BoardColumn = ({ dot, label, count, tasks, hasMore, isLoadingMore, onLoadM
                 {tasks.map(task => renderCard(task))}
                 {(hasMore || isLoadingMore) && (
                     <div ref={sentinelRef} className="flex items-center justify-center py-3">
-                        <Loader2 size={16} className="animate-spin text-gray-300" />
+                        <Loading02Icon size={16} className="animate-spin text-gray-300" />
                     </div>
                 )}
                 {!isLoadingMore && tasks.length === 0 && (
@@ -1762,14 +1822,14 @@ const Tasks = () => {
                             onClick={() => setPageView('calendar')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${pageView === 'calendar' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            <CalendarRange size={14} />
+                            <Calendar01Icon size={14} />
                             {t('tasksPage.calendarView')}
                         </button>
                         <button
                             onClick={() => setPageView('board')}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${pageView === 'board' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                         >
-                            <Columns3 size={14} />
+                            <ListViewIcon size={14} />
                             {t('tasksPage.boardView')}
                         </button>
                     </div>
@@ -1778,27 +1838,27 @@ const Tasks = () => {
                         className="p-2.5 rounded-xl border border-gray-200 text-gray-500 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors"
                         title={t('taskNatures.manageTitle')}
                     >
-                        <Settings size={16} />
+                        <Settings01Icon size={16} />
                     </button>
                     <button
                         onClick={() => setAddTaskData({ date: new Date() })}
                         className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20 flex-1 sm:flex-none justify-center"
                     >
-                        <Plus size={16} />
+                        <Add01Icon size={16} />
                         {t('tasksPage.addTask')}
                     </button>
                     <div className="relative w-full sm:w-auto">
-                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <Search01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                         <input
                             type="text"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             placeholder={t('tasksPage.searchPlaceholder')}
-                            className="bg-white rounded-xl border border-gray-200 pl-9 pr-9 py-2.5 text-sm text-gray-700 placeholder-gray-400 w-full sm:w-60 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+                            className="w-full sm:w-60 bg-white border border-[#e5e8ef] rounded-2xl py-3.5 pl-11 pr-4 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors"
                         />
                         {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                                <X size={14} />
+                            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b0bac9] hover:text-[#1c2b3a]">
+                                <Cancel01Icon size={14} />
                             </button>
                         )}
                     </div>
@@ -1825,12 +1885,12 @@ const Tasks = () => {
                             {/* Navigation */}
                             <div className="flex items-center gap-1">
                                 <button onClick={() => setDistOffset(o => o - 1)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
-                                    <ChevronLeft size={15} />
+                                    <ArrowLeft01Icon size={15} />
                                 </button>
                                 <span className="text-xs font-semibold text-gray-700 min-w-[120px] text-center capitalize">{distRange.label}</span>
                                 <button onClick={() => setDistOffset(o => o + 1)} disabled={distOffset >= 0}
                                     className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors disabled:opacity-30">
-                                    <ChevronRight size={15} />
+                                    <ArrowRight01Icon size={15} />
                                 </button>
                             </div>
                             {/* View toggle */}
@@ -1982,11 +2042,11 @@ const Tasks = () => {
                                 {/* Prev / label / Next */}
                                 <div className="flex items-center gap-1">
                                     <button onClick={() => boardNav(-1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-                                        <ChevronLeft size={18} />
+                                        <ArrowLeft01Icon size={18} />
                                     </button>
                                     <span className="text-sm font-bold text-gray-800 min-w-42 text-center select-none capitalize">{boardNavLabel}</span>
                                     <button onClick={() => boardNav(1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-                                        <ChevronRight size={18} />
+                                        <ArrowRight01Icon size={18} />
                                     </button>
                                 </div>
 
@@ -2035,7 +2095,7 @@ const Tasks = () => {
                                     onClick={() => { setBoardFilterDepartment(''); setBoardFilterEmployee(''); }}
                                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-[#283852]/10 hover:border-gray-300 hover:text-[#283852] transition-colors"
                                 >
-                                    <X size={14} />
+                                    <Cancel01Icon size={14} />
                                     {t('tasksPage.showAll')}
                                 </button>
                             )}
@@ -2066,23 +2126,23 @@ const Tasks = () => {
                                             >
                                                 <div className="flex items-start justify-between gap-2 mb-3">
                                                     <p className="text-sm font-semibold text-gray-800 leading-snug">{task.title}</p>
-                                                    {task.urgent && <AlertTriangle size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
-                                                    {task.important && <Star size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
+                                                    {task.urgent && <Alert02Icon size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
+                                                    {task.important && <StarIcon size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
                                                 </div>
                                                 {task.subtitle && (
                                                     <div className="flex items-center gap-1.5 mb-2">
-                                                        <Briefcase size={11} className="text-gray-400 shrink-0" />
+                                                        <Briefcase01Icon size={11} className="text-gray-400 shrink-0" />
                                                         <span className="text-[11px] text-gray-400">{task.subtitle}</span>
                                                     </div>
                                                 )}
                                                 {task.natureName && (
                                                     <div className="flex items-center gap-1.5 mb-2">
-                                                        <Tag size={11} className="text-gray-400 shrink-0" />
+                                                        <Tag01Icon size={11} className="text-gray-400 shrink-0" />
                                                         <span className="text-[11px] text-gray-400">{task.natureName}</span>
                                                     </div>
                                                 )}
                                                 <div className="flex items-center gap-1.5 mb-3">
-                                                    <CalendarDays size={11} className="text-gray-400 shrink-0" />
+                                                    <Calendar01Icon size={11} className="text-gray-400 shrink-0" />
                                                     <span className="text-[11px] text-gray-400">
                                                         {(task.startDate as Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                                                         {' – '}
@@ -2144,11 +2204,11 @@ const Tasks = () => {
                     {/* Prev / label / Next */}
                     <div className="flex items-center gap-1">
                         <button onClick={() => nav(-1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-                            <ChevronLeft size={20} />
+                            <ArrowLeft01Icon size={20} />
                         </button>
                         <span className="text-sm font-bold text-gray-800 min-w-42.5 text-center capitalize select-none">{navLabel}</span>
                         <button onClick={() => nav(1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-                            <ChevronRight size={20} />
+                            <ArrowRight01Icon size={20} />
                         </button>
                     </div>
 
@@ -2199,7 +2259,7 @@ const Tasks = () => {
                                 onClick={() => setSelectedEmployeeId(null)}
                                 className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] hover:text-[#2aa8a9] px-3 py-1.5 rounded-lg hover:bg-[#33cbcc]/10 transition-colors shrink-0"
                             >
-                                <ArrowLeft size={14} />
+                                <ArrowLeft01Icon size={14} />
                                 <span className="hidden sm:inline">{t('tasksPage.showAll')}</span>
                             </button>
                         </div>
@@ -2223,7 +2283,7 @@ const Tasks = () => {
                                 title={allExpanded ? 'Collapse all' : 'Expand all'}
                                 className="hidden sm:flex items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-[#33cbcc] transition-colors px-2 py-1 rounded-lg hover:bg-[#33cbcc]/8"
                             >
-                                {allExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                                {allExpanded ? <ArrowUp01Icon size={13} /> : <ArrowDown01Icon size={13} />}
                                 {allExpanded ? 'Collapse' : 'Expand'}
                             </button>
                         </div>
@@ -2319,7 +2379,7 @@ const Tasks = () => {
                                             onClick={() => toggleRow(emp.id)}
                                             className="hidden sm:flex shrink-0 items-center gap-1 text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 rounded-full px-2 py-0.5 transition-colors"
                                         >
-                                            <ChevronDown size={10} />
+                                            <ArrowDown01Icon size={10} />
                                             +{hiddenCount}
                                         </button>
                                     )}
@@ -2328,7 +2388,7 @@ const Tasks = () => {
                                             onClick={() => toggleRow(emp.id)}
                                             className="hidden sm:flex shrink-0 items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-gray-600 rounded-full px-2 py-0.5 transition-colors"
                                         >
-                                            <ChevronUp size={10} />
+                                            <ArrowUp01Icon size={10} />
                                         </button>
                                     )}
                                 </div>
@@ -2436,16 +2496,16 @@ const Tasks = () => {
                                                         </div>
                                                     )}
                                                     {!narrow && task.hasFlag && (
-                                                        <Flag size={12} className="shrink-0 opacity-50" style={{ color: c.text }} />
+                                                        <Flag01Icon size={12} className="shrink-0 opacity-50" style={{ color: c.text }} />
                                                     )}
                                                     {!narrow && task.selfAssigned && (
-                                                        <Zap size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
+                                                        <ZapIcon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
                                                     )}
                                                     {!narrow && task.urgent && (
-                                                        <AlertTriangle size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
+                                                        <Alert02Icon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
                                                     )}
                                                     {!narrow && task.important && (
-                                                        <Star size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
+                                                        <StarIcon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
                                                     )}
                                                     {/* Full title tooltip on hover */}
                                                     {!isDrag && (
@@ -2482,7 +2542,7 @@ const Tasks = () => {
                                             onClick={e => { e.stopPropagation(); toggleRow(emp.id); }}
                                             className="absolute bottom-1.5 right-2 flex items-center gap-1 text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 rounded-full px-2 py-0.5 transition-colors z-10"
                                         >
-                                            <ChevronDown size={10} />
+                                            <ArrowDown01Icon size={10} />
                                             +{hiddenTasks.length} more
                                         </button>
                                     )}
@@ -2546,7 +2606,7 @@ const Tasks = () => {
                 )}
             </AnimatePresence>
 
-            {/* ═══ History modal ═══ */}
+            {/* ═══ Time01Icon modal ═══ */}
             <AnimatePresence>
                 {historyTaskId && (
                     <GanttHistoryModal

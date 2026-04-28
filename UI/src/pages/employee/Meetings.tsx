@@ -1,26 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Calendar,
-    CalendarPlus,
-    Search,
-    X,
-    Eye,
-    Users,
-    ClipboardCheck,
-    RotateCcw,
-    Briefcase,
-    UserPlus,
-    MapPin,
-    Clock,
-    FileText,
-    CheckCircle,
-    ArrowRight,
-    CalendarDays,
-    User,
-    Mic,
-} from 'lucide-react';
+import { Calendar01Icon, Search01Icon, Cancel01Icon, ViewIcon, UserGroupIcon, ClipboardIcon, RefreshIcon, Briefcase01Icon, UserAdd01Icon, Location01Icon, Clock01Icon, File01Icon, Tick01Icon, ArrowRight01Icon, UserIcon, Mic01Icon } from 'hugeicons-react';
 import { useMeetings, useAttendMeeting } from '../../api/meetings/hooks';
 import type { Meeting } from '../../api/meetings/types';
 import { UserMeetingsSkeleton } from '../../components/Skeleton';
@@ -69,12 +50,12 @@ const STATUS_STYLES: Record<MeetingStatus, string> = {
 };
 
 const TYPE_ICONS: Record<MeetingType, React.ComponentType<{ size?: number; className?: string }>> = {
-    standup: Users,
-    review: ClipboardCheck,
-    planning: CalendarPlus,
-    retrospective: RotateCcw,
-    client: Briefcase,
-    onboarding: UserPlus,
+    standup: UserGroupIcon,
+    review: ClipboardIcon,
+    planning: Calendar01Icon,
+    retrospective: RefreshIcon,
+    client: Briefcase01Icon,
+    onboarding: UserAdd01Icon,
 };
 
 const STATUSES: MeetingStatus[] = ['scheduled', 'in_progress', 'completed', 'cancelled'];
@@ -145,7 +126,7 @@ const MeetingDetailModal = ({
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -155,7 +136,7 @@ const MeetingDetailModal = ({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-gray-50 rounded-xl p-4">
                             <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                <CalendarDays size={12} />
+                                <Calendar01Icon size={12} />
                                 {t('meetings.detail.dateTime')}
                             </div>
                             <p className="text-sm font-medium text-gray-800">{meeting.date}</p>
@@ -163,7 +144,7 @@ const MeetingDetailModal = ({
                         </div>
                         <div className="bg-gray-50 rounded-xl p-4">
                             <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                <MapPin size={12} />
+                                <Location01Icon size={12} />
                                 {t('meetings.detail.location')}
                             </div>
                             <p className="text-sm font-medium text-gray-800">{meeting.location || '--'}</p>
@@ -187,7 +168,7 @@ const MeetingDetailModal = ({
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                <User size={14} className="text-gray-400" />
+                                <UserIcon size={14} className="text-gray-400" />
                             </div>
                             <span className="text-sm font-medium text-gray-800">{meeting.organizer.name}</span>
                         </div>
@@ -212,11 +193,11 @@ const MeetingDetailModal = ({
                                         <img src={p.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
                                     ) : (
                                         <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                            <User size={10} className="text-gray-400" />
+                                            <UserIcon size={10} className="text-gray-400" />
                                         </div>
                                     )}
                                     <span className="text-xs text-gray-600">{p.name}</span>
-                                    {p.attended && <CheckCircle size={11} className="text-[#33cbcc] shrink-0" />}
+                                    {p.attended && <Tick01Icon size={11} className="text-[#33cbcc] shrink-0" />}
                                 </div>
                             ))}
                             {meeting.participants.length === 0 && (
@@ -246,7 +227,7 @@ const MeetingDetailModal = ({
                     {/* Report */}
                     <div className="border-t border-gray-100 pt-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <FileText size={18} className="text-[#33cbcc]" />
+                            <File01Icon size={18} className="text-[#33cbcc]" />
                             <h3 className="text-base font-bold text-gray-800">{t('meetings.detail.report')}</h3>
                             {meeting.report && (
                                 <span className="w-2 h-2 rounded-full bg-[#33cbcc]" />
@@ -266,7 +247,7 @@ const MeetingDetailModal = ({
                                     <div className="space-y-2">
                                         {meeting.report.decisions.map((d, i) => (
                                             <div key={i} className="flex items-start gap-2.5">
-                                                <CheckCircle size={16} className="text-[#33cbcc] shrink-0 mt-0.5" />
+                                                <Tick01Icon size={16} className="text-[#33cbcc] shrink-0 mt-0.5" />
                                                 <span className="text-sm text-gray-700">{d}</span>
                                             </div>
                                         ))}
@@ -277,7 +258,7 @@ const MeetingDetailModal = ({
                                     <div className="space-y-2">
                                         {meeting.report.actionItems.map((ai, i) => (
                                             <div key={i} className="flex items-start gap-2.5 bg-[#33cbcc]/5 rounded-xl px-4 py-3">
-                                                <ArrowRight size={14} className="text-[#33cbcc] shrink-0 mt-0.5" />
+                                                <ArrowRight01Icon size={14} className="text-[#33cbcc] shrink-0 mt-0.5" />
                                                 <div className="flex-1 min-w-0">
                                                     <p className="text-sm text-gray-700">{ai.task}</p>
                                                     <p className="text-xs text-gray-400 mt-0.5">{ai.assignee}</p>
@@ -289,7 +270,7 @@ const MeetingDetailModal = ({
                             </div>
                         ) : (
                             <div className="bg-gray-50 rounded-xl p-8 text-center">
-                                <FileText size={32} className="mx-auto text-gray-300 mb-3" />
+                                <File01Icon size={32} className="mx-auto text-gray-300 mb-3" />
                                 <p className="text-sm text-gray-400">{t('meetings.detail.reportPending')}</p>
                             </div>
                         )}
@@ -308,7 +289,7 @@ const MeetingDetailModal = ({
                             }}
                             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#283852] text-white hover:bg-[#283852]/80 transition-colors shadow-lg shadow-[#283852]/20"
                         >
-                            <Mic size={15} />
+                            <Mic01Icon size={15} />
                             {t('meetings.start.record', 'Record Meeting')}
                         </button>
                     )}
@@ -324,7 +305,7 @@ const MeetingDetailModal = ({
                                         : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'
                             }`}
                         >
-                            <CheckCircle size={15} className={isAttending ? 'animate-pulse' : ''} />
+                            <Tick01Icon size={15} className={isAttending ? 'animate-pulse' : ''} />
                             {alreadyAttended
                                 ? t('meetings.attend.attended')
                                 : isAttending
@@ -407,10 +388,10 @@ const Meetings = () => {
     const reportsCount = meetings.filter(m => m.report !== null).length;
 
     const stats = [
-        { label: t('meetings.stats.total'), value: meetings.length, icon: Calendar, color: '#33cbcc' },
-        { label: t('meetings.stats.scheduled'), value: scheduledCount, icon: CalendarPlus, color: '#283852' },
-        { label: t('meetings.stats.completed'), value: completedCount, icon: CheckCircle, color: '#33cbcc' },
-        { label: t('meetings.stats.reports'), value: reportsCount, icon: FileText, color: '#283852' },
+        { label: t('meetings.stats.total'), value: meetings.length, icon: Calendar01Icon, color: '#33cbcc' },
+        { label: t('meetings.stats.scheduled'), value: scheduledCount, icon: Calendar01Icon, color: '#283852' },
+        { label: t('meetings.stats.completed'), value: completedCount, icon: Tick01Icon, color: '#33cbcc' },
+        { label: t('meetings.stats.reports'), value: reportsCount, icon: File01Icon, color: '#283852' },
     ];
 
     /* Status filters */
@@ -435,31 +416,30 @@ const Meetings = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.1 }}
-                        className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100 relative overflow-hidden group"
+                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
                     >
-                        <div className="relative z-10">
-                            <h3 className="text-gray-500 text-xs md:text-sm font-medium">{stat.label}</h3>
-                            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-1 md:mt-2">{stat.value}</h2>
+                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
                         </div>
-                        <div
-                            className="absolute -right-4 -bottom-4 opacity-5 transition-transform  duration-500 ease-out"
-                            style={{ color: stat.color }}
-                        >
-                            <stat.icon size={80} strokeWidth={1.5} />
+                        <div className="p-5 bg-white relative overflow-hidden">
+                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                <stat.icon size={110} strokeWidth={1.2} />
+                            </div>
                         </div>
                     </motion.div>
                 ))}
             </div>
 
-            {/* Search bar */}
-            <div className="bg-white rounded-2xl p-2 flex items-center border border-gray-100 shadow-sm focus-within:ring-2 focus-within:ring-[#33cbcc]/20 transition-shadow">
-                <Search className="text-gray-400 ml-3" size={20} />
+            {/* Search01Icon bar */}
+            <div className="flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+                <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
                 <input
                     type="text"
                     placeholder={t('meetings.searchPlaceholder')}
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none text-gray-700 placeholder-gray-400 px-3 text-sm"
+                    className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
                 />
             </div>
 
@@ -504,7 +484,7 @@ const Meetings = () => {
                                             onClick={e => { e.stopPropagation(); setSelectedMeetingId(meeting.id); }}
                                             className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
                                         >
-                                            <Eye size={16} />
+                                            <ViewIcon size={16} />
                                         </button>
                                     </div>
                                 </div>
@@ -522,7 +502,7 @@ const Meetings = () => {
                                     </span>
                                     {meeting.report && (
                                         <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc]">
-                                            <FileText size={10} />
+                                            <File01Icon size={10} />
                                             {t('meetings.detail.report')}
                                         </span>
                                     )}
@@ -531,12 +511,12 @@ const Meetings = () => {
                                 {/* Date + Time */}
                                 <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
                                     <span className="flex items-center gap-1">
-                                        <CalendarDays size={12} />
+                                        <Calendar01Icon size={12} />
                                         {meeting.date}
                                     </span>
                                     {meeting.startTime && (
                                         <span className="flex items-center gap-1">
-                                            <Clock size={12} />
+                                            <Clock01Icon size={12} />
                                             {meeting.startTime}
                                         </span>
                                     )}
@@ -546,7 +526,7 @@ const Meetings = () => {
                                 <div className="flex items-center justify-between pt-3 border-t border-gray-100">
                                     <div className="flex items-center gap-2 min-w-0">
                                         <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center shrink-0">
-                                            <User size={10} className="text-gray-400" />
+                                            <UserIcon size={10} className="text-gray-400" />
                                         </div>
                                         <span className="text-xs text-gray-500 truncate">{meeting.organizer.name.split('@')[0]}</span>
                                     </div>
@@ -557,7 +537,7 @@ const Meetings = () => {
                                                     <img key={p.id} src={p.avatar} alt="" className="w-5 h-5 rounded-full border-2 border-white" />
                                                 ) : (
                                                     <div key={p.id} className="w-5 h-5 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center">
-                                                        <User size={8} className="text-gray-400" />
+                                                        <UserIcon size={8} className="text-gray-400" />
                                                     </div>
                                                 )
                                             ))}
@@ -580,7 +560,7 @@ const Meetings = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="bg-white rounded-2xl border border-gray-100 p-12 text-center"
                 >
-                    <Calendar size={48} className="mx-auto text-gray-300 mb-4" />
+                    <Calendar01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-400 font-medium">{t('meetings.noResults')}</p>
                 </motion.div>
             )}

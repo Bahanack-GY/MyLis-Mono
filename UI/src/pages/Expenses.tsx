@@ -4,7 +4,7 @@ import ExpenseModal from './ExpenseModal';
 import {
     LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell
 } from 'recharts';
-import { Plus, FileText, Search, Trash2, Pencil, ChevronLeft, ChevronRight, Briefcase, Users, Tag, TrendingUp, Building2, Layers } from 'lucide-react';
+import { Add01Icon, File01Icon, Search01Icon, Delete02Icon, PencilIcon, ArrowLeft01Icon, ArrowRight01Icon, Briefcase01Icon, UserGroupIcon, Tag01Icon, ArrowUpRight01Icon, Building02Icon, Layers01Icon } from 'hugeicons-react';
 import { useExpenses, useExpenseStats, useDeleteExpense } from '../api/expenses/hooks';
 import { useDepartments } from '../api/departments/hooks';
 import { useChargeFamilies } from '../api/charge-natures/hooks';
@@ -129,7 +129,7 @@ export default function Expenses() {
                     onClick={() => { setEditingExpense(null); setIsModalOpen(true); }}
                     className="flex items-center gap-2 px-4 py-2.5 bg-[#33cbcc] text-white rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20"
                 >
-                    <Plus size={16} />
+                    <Add01Icon size={16} />
                     Nouvelle Charge
                 </button>
             </div>
@@ -144,7 +144,7 @@ export default function Expenses() {
                             : 'bg-white text-gray-600 border-gray-200 hover:border-[#33cbcc]/40 hover:text-[#33cbcc]'
                     }`}
                 >
-                    <Building2 size={14} />
+                    <Building02Icon size={14} />
                     Toutes les départements
                 </button>
                 {departments.map(dept => (
@@ -168,7 +168,7 @@ export default function Expenses() {
                     onClick={() => setSelectedYear(y => y - 1)}
                     className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
                 >
-                    <ChevronLeft size={18} />
+                    <ArrowLeft01Icon size={18} />
                 </button>
                 <span className="text-lg font-bold text-gray-800 tabular-nums min-w-[60px] text-center">{selectedYear}</span>
                 <button
@@ -176,7 +176,7 @@ export default function Expenses() {
                     disabled={selectedYear >= new Date().getFullYear()}
                     className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                    <ChevronRight size={18} />
+                    <ArrowRight01Icon size={18} />
                 </button>
                 {selectedDeptName && (
                     <span className="text-sm font-medium text-[#33cbcc] bg-[#33cbcc]/10 px-3 py-1 rounded-lg">
@@ -186,81 +186,74 @@ export default function Expenses() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#33cbcc]/5 rounded-bl-[100px]" />
-                    <div className="flex justify-between items-start">
-                        <div className="min-w-0 flex-1 pr-2">
-                            <p className="text-sm font-medium text-gray-500 mb-1">Total des Charges</p>
-                            <h3 className="text-xl font-bold text-gray-800 truncate">
-                                {formatFCFA((stats?.totalYear || 0) + (stats?.totalProjects || 0))}
-                            </h3>
-                            <p className="text-xs text-gray-400 mt-1">Charges + salaires + projets</p>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-[#33cbcc]/10 flex items-center justify-center text-[#33cbcc] shrink-0">
-                            <TrendingUp size={20} />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer">
+                    <div className="px-5 py-3" style={{ backgroundColor: '#33cbcc' }}>
+                        <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">Total des Charges</h3>
+                    </div>
+                    <div className="p-5 bg-white relative overflow-hidden">
+                        <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none truncate">{formatFCFA((stats?.totalYear || 0) + (stats?.totalProjects || 0))}</h2>
+                        <p className="text-xs text-gray-400 mt-1">Charges + salaires + projets</p>
+                        <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: '#33cbcc' }}>
+                            <ArrowUpRight01Icon size={110} strokeWidth={1.2} />
                         </div>
                     </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px]" />
-                    <div className="flex justify-between items-start">
-                        <div className="min-w-0 flex-1 pr-2">
-                            <p className="text-sm font-medium text-gray-500 mb-1">Charges Directes</p>
-                            <h3 className="text-xl font-bold text-gray-800 truncate">{formatFCFA(stats?.totalYear || 0)}</h3>
-                            <p className="text-xs text-gray-400 mt-1">
-                                {stats?.totalCount || 0} transaction{(stats?.totalCount || 0) > 1 ? 's' : ''}
-                                {(stats?.recurrentCount || 0) > 0 && ` · ${stats?.recurrentCount} récurrente${(stats?.recurrentCount || 0) > 1 ? 's' : ''}`}
-                            </p>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center text-[#283852] shrink-0">
-                            <FileText size={20} />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer">
+                    <div className="px-5 py-3" style={{ backgroundColor: '#283852' }}>
+                        <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">Charges Directes</h3>
+                    </div>
+                    <div className="p-5 bg-white relative overflow-hidden">
+                        <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none truncate">{formatFCFA(stats?.totalYear || 0)}</h2>
+                        <p className="text-xs text-gray-400 mt-1">
+                            {stats?.totalCount || 0} transaction{(stats?.totalCount || 0) > 1 ? 's' : ''}
+                            {(stats?.recurrentCount || 0) > 0 && ` · ${stats?.recurrentCount} récurrente${(stats?.recurrentCount || 0) > 1 ? 's' : ''}`}
+                        </p>
+                        <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: '#283852' }}>
+                            <File01Icon size={110} strokeWidth={1.2} />
                         </div>
                     </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px]" />
-                    <div className="flex justify-between items-start">
-                        <div className="min-w-0 flex-1 pr-2">
-                            <p className="text-sm font-medium text-gray-500 mb-1">Masse Salariale</p>
-                            <h3 className="text-xl font-bold text-gray-800 truncate">{formatFCFA(stats?.totalSalaries || 0)}</h3>
-                            <p className="text-xs text-gray-400 mt-1">Total versé en {selectedYear}</p>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center text-[#283852] shrink-0">
-                            <Users size={20} />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer">
+                    <div className="px-5 py-3" style={{ backgroundColor: '#283852' }}>
+                        <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">Masse Salariale</h3>
+                    </div>
+                    <div className="p-5 bg-white relative overflow-hidden">
+                        <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none truncate">{formatFCFA(stats?.totalSalaries || 0)}</h2>
+                        <p className="text-xs text-gray-400 mt-1">Total versé en {selectedYear}</p>
+                        <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: '#283852' }}>
+                            <UserGroupIcon size={110} strokeWidth={1.2} />
                         </div>
                     </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#33cbcc]/5 rounded-bl-[100px]" />
-                    <div className="flex justify-between items-start">
-                        <div className="min-w-0 flex-1 pr-2">
-                            <p className="text-sm font-medium text-gray-500 mb-1">Budget Projets</p>
-                            <h3 className="text-xl font-bold text-gray-800 truncate">{formatFCFA(stats?.totalProjects || 0)}</h3>
-                            <p className="text-xs text-gray-400 mt-1">Alloué sur {selectedYear}</p>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-[#33cbcc]/10 flex items-center justify-center text-[#33cbcc] shrink-0">
-                            <Briefcase size={20} />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer">
+                    <div className="px-5 py-3" style={{ backgroundColor: '#33cbcc' }}>
+                        <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">Budget Projets</h3>
+                    </div>
+                    <div className="p-5 bg-white relative overflow-hidden">
+                        <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none truncate">{formatFCFA(stats?.totalProjects || 0)}</h2>
+                        <p className="text-xs text-gray-400 mt-1">Alloué sur {selectedYear}</p>
+                        <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: '#33cbcc' }}>
+                            <Briefcase01Icon size={110} strokeWidth={1.2} />
                         </div>
                     </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
-                    <div className="absolute right-0 top-0 w-24 h-24 bg-[#283852]/5 rounded-bl-[100px]" />
-                    <div className="flex justify-between items-start">
-                        <div className="min-w-0 flex-1 pr-2">
-                            <p className="text-sm font-medium text-gray-500 mb-1">Top Nature</p>
-                            <h3 className="text-xl font-bold text-gray-800 truncate">
-                                {stats?.byCategory?.[0] ? formatFCFA(stats.byCategory[0].value) : '—'}
-                            </h3>
-                            <p className="text-xs text-gray-400 mt-1 truncate">
-                                {stats?.byCategory?.[0]?.name || 'Aucune charge'}
-                            </p>
-                        </div>
-                        <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center text-[#283852] shrink-0">
-                            <Tag size={20} />
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer">
+                    <div className="px-5 py-3" style={{ backgroundColor: '#283852' }}>
+                        <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">Top Nature</h3>
+                    </div>
+                    <div className="p-5 bg-white relative overflow-hidden">
+                        <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none truncate">
+                            {stats?.byCategory?.[0] ? formatFCFA(stats.byCategory[0].value) : '—'}
+                        </h2>
+                        <p className="text-xs text-gray-400 mt-1 truncate">
+                            {stats?.byCategory?.[0]?.name || 'Aucune charge'}
+                        </p>
+                        <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: '#283852' }}>
+                            <Tag01Icon size={110} strokeWidth={1.2} />
                         </div>
                     </div>
                 </motion.div>
@@ -270,7 +263,7 @@ export default function Expenses() {
             {familyBreakdown.length > 0 && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                     <div className="flex items-center gap-2 mb-4">
-                        <Layers size={16} className="text-gray-400" />
+                        <Layers01Icon size={16} className="text-gray-400" />
                         <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wider">Répartition par Famille</h3>
                     </div>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -378,14 +371,14 @@ export default function Expenses() {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col min-h-[400px]">
                 <div className="px-6 py-5 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center bg-gray-50/50 gap-4">
                     <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                        <FileText size={20} className="text-gray-400" />
+                        <File01Icon size={20} className="text-gray-400" />
                         Historique des Charges
                         {selectedDeptName && (
                             <span className="text-sm font-medium text-[#33cbcc] bg-[#33cbcc]/10 px-2 py-0.5 rounded-lg">{selectedDeptName}</span>
                         )}
                     </h2>
                     <div className="relative w-full sm:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Search01Icon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <input
                             type="text"
                             placeholder="Rechercher..."
@@ -425,7 +418,7 @@ export default function Expenses() {
                                         <td className="px-6 py-4">
                                             {expense.department ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold">
-                                                    <Building2 size={11} />
+                                                    <Building02Icon size={11} />
                                                     {expense.department.name}
                                                 </span>
                                             ) : (
@@ -435,7 +428,7 @@ export default function Expenses() {
                                         <td className="px-6 py-4">
                                             {expense.project ? (
                                                 <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-[#33cbcc]/10 text-[#33cbcc] text-xs font-semibold">
-                                                    <Briefcase size={11} />
+                                                    <Briefcase01Icon size={11} />
                                                     {expense.project.name}
                                                 </span>
                                             ) : (
@@ -487,14 +480,14 @@ export default function Expenses() {
                                                             className="p-2 text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 rounded-lg transition-colors"
                                                             title="Modifier"
                                                         >
-                                                            <Pencil size={15} />
+                                                            <PencilIcon size={15} />
                                                         </button>
                                                         <button
                                                             onClick={() => setConfirmDeleteId(expense.id)}
                                                             className="p-2 text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg transition-colors"
                                                             title="Supprimer"
                                                         >
-                                                            <Trash2 size={15} />
+                                                            <Delete02Icon size={15} />
                                                         </button>
                                                     </>
                                                 )}
@@ -508,7 +501,7 @@ export default function Expenses() {
                                     <td colSpan={7} className="px-6 py-16 text-center bg-gray-50/30">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                                <FileText size={18} className="text-gray-400" />
+                                                <File01Icon size={18} className="text-gray-400" />
                                             </div>
                                             <p className="text-sm font-medium text-gray-500">
                                                 {search ? 'Aucun résultat pour « ' + search + ' »' : 'Aucune charge enregistrée'}
@@ -541,7 +534,7 @@ export default function Expenses() {
                                 disabled={page === 1}
                                 className="p-1.5 rounded-lg border border-gray-200 hover:bg-white text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronLeft size={15} />
+                                <ArrowLeft01Icon size={15} />
                             </button>
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
                                 <button
@@ -559,7 +552,7 @@ export default function Expenses() {
                                 disabled={page === totalPages}
                                 className="p-1.5 rounded-lg border border-gray-200 hover:bg-white text-gray-600 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                             >
-                                <ChevronRight size={15} />
+                                <ArrowRight01Icon size={15} />
                             </button>
                         </div>
                     </div>

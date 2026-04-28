@@ -2,33 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Building,
-    Users,
-    Briefcase,
-    TrendingUp,
-    Plus,
-    X,
-    Code,
-    Palette,
-    Megaphone,
-    DollarSign,
-    Heart,
-    PieChart as PieChartIcon,
-    ArrowUpRight,
-    AlignLeft,
-    Wallet,
-    Search,
-    Check,
-    ChevronDown,
-    Loader2,
-    Pencil,
-    LayoutGrid,
-    List,
-    Trash2,
-    ToggleLeft,
-    ToggleRight,
-} from 'lucide-react';
+import { Building01Icon, UserGroupIcon, Briefcase01Icon, ArrowUpRight01Icon, Add01Icon, Cancel01Icon, CodeIcon, PaintBoardIcon, Megaphone01Icon, DollarCircleIcon, FavouriteIcon, PieChartIcon, AlignLeftIcon, Wallet01Icon, Search01Icon, Tick01Icon, ArrowDown01Icon, Loading02Icon, PencilIcon, DashboardSquare01Icon, ListViewIcon, Delete02Icon, ToggleOffIcon, ToggleOnIcon } from 'hugeicons-react';
 import { useInfiniteDepartments, useCreateDepartment, useUpdateDepartment, useDepartmentServices, useCreateDepartmentService, useUpdateDepartmentService, useDeleteDepartmentService } from '../api/departments/hooks';
 import { DepartmentsSkeleton } from '../components/Skeleton';
 import { useEmployees } from '../api/employees/hooks';
@@ -74,7 +48,7 @@ interface Department {
     projects: DeptProject[];
     budget: number;
     color: string;
-    icon: typeof Code;
+    icon: typeof CodeIcon;
 }
 
 /* ─── (no mock data — uses API only) ───────────────────── */
@@ -92,15 +66,15 @@ const COLOR_OPTIONS = [
     { value: '#6366f1', label: 'Indigo' },
 ];
 
-const ICON_OPTIONS: { value: string; icon: typeof Code }[] = [
-    { value: 'code', icon: Code },
-    { value: 'palette', icon: Palette },
-    { value: 'megaphone', icon: Megaphone },
-    { value: 'dollar', icon: DollarSign },
-    { value: 'heart', icon: Heart },
+const ICON_OPTIONS: { value: string; icon: typeof CodeIcon }[] = [
+    { value: 'code', icon: CodeIcon },
+    { value: 'palette', icon: PaintBoardIcon },
+    { value: 'megaphone', icon: Megaphone01Icon },
+    { value: 'dollar', icon: DollarCircleIcon },
+    { value: 'heart', icon: FavouriteIcon },
     { value: 'chart', icon: PieChartIcon },
-    { value: 'briefcase', icon: Briefcase },
-    { value: 'building', icon: Building },
+    { value: 'briefcase', icon: Briefcase01Icon },
+    { value: 'building', icon: Building01Icon },
 ];
 
 /* ─── Employee pool is now fetched from API inside modal ─ */
@@ -214,12 +188,12 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center shrink-0">
-                            <Plus size={18} className="text-[#283852]" />
+                            <Add01Icon size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('departments.create.title')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -228,7 +202,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Department name */}
                     <div>
                         <label className={labelCls}>
-                            <Building size={12} />
+                            <Building01Icon size={12} />
                             {t('departments.create.name')}
                         </label>
                         <input
@@ -243,7 +217,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Description */}
                     <div>
                         <label className={labelCls}>
-                            <AlignLeft size={12} />
+                            <AlignLeftIcon size={12} />
                             {t('departments.create.description')}
                         </label>
                         <textarea
@@ -258,7 +232,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Head of department — dropdown selector */}
                     <div className="relative">
                         <label className={labelCls}>
-                            <Users size={12} />
+                            <UserGroupIcon size={12} />
                             {t('departments.create.head')}
                         </label>
                         <button
@@ -275,7 +249,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                             ) : (
                                 <span className="flex-1 text-gray-400">{t('departments.create.headPlaceholder')}</span>
                             )}
-                            <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform ${headDropdownOpen ? 'rotate-180' : ''}`} />
+                            <ArrowDown01Icon size={16} className={`text-gray-400 shrink-0 transition-transform ${headDropdownOpen ? 'rotate-180' : ''}`} />
                         </button>
 
                         <AnimatePresence>
@@ -289,13 +263,13 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                 >
                                     <div className="p-2 border-b border-gray-100">
                                         <div className="relative">
-                                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                                             <input
                                                 type="text"
                                                 value={headSearch}
                                                 onChange={e => setHeadSearch(e.target.value)}
                                                 placeholder={t('departments.create.searchEmployee')}
-                                                className="w-full bg-gray-50 rounded-lg border-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#283852]/30"
+                                                className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                                                 autoFocus
                                             />
                                         </div>
@@ -319,7 +293,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                                     <p className="text-sm font-medium text-gray-800 truncate">{emp.name}</p>
                                                     <p className="text-[11px] text-gray-400 truncate">{emp.role}</p>
                                                 </div>
-                                                {form.headId === emp.id && <Check size={16} className="text-[#283852] shrink-0" />}
+                                                {form.headId === emp.id && <Tick01Icon size={16} className="text-[#283852] shrink-0" />}
                                             </button>
                                         ))}
                                         {filteredHeadEmployees.length === 0 && (
@@ -334,7 +308,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Budget */}
                     <div>
                         <label className={labelCls}>
-                            <Wallet size={12} />
+                            <Wallet01Icon size={12} />
                             {t('departments.create.budget')}
                         </label>
                         <input
@@ -349,7 +323,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Default CA target */}
                     <div>
                         <label className={labelCls}>
-                            <TrendingUp size={12} />
+                            <ArrowUpRight01Icon size={12} />
                             {t('departments.create.defaultCA', 'Objectif CA par défaut')}
                         </label>
                         <div className="relative">
@@ -369,7 +343,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                     {/* Members — multi-select */}
                     <div>
                         <label className={labelCls}>
-                            <Users size={12} />
+                            <UserGroupIcon size={12} />
                             {t('departments.create.members')}
                             {selectedMembers.length > 0 && (
                                 <span className="ml-1 text-[#283852]">({selectedMembers.length})</span>
@@ -394,23 +368,23 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                             onClick={() => removeMember(emp.id)}
                                             className="text-gray-300 hover:text-[#283852] transition-colors"
                                         >
-                                            <X size={12} />
+                                            <Cancel01Icon size={12} />
                                         </button>
                                     </motion.div>
                                 ))}
                             </div>
                         )}
 
-                        {/* Search + selectable list */}
+                        {/* Search01Icon + selectable list */}
                         <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
                             <div className="relative p-2">
-                                <Search size={14} className="absolute left-4.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Search01Icon size={15} className="absolute left-5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                                 <input
                                     type="text"
                                     value={memberSearch}
                                     onChange={e => setMemberSearch(e.target.value)}
                                     placeholder={t('departments.create.searchEmployee')}
-                                    className="w-full bg-white rounded-lg border border-gray-100 pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#283852]/30"
+                                    className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                                 />
                             </div>
                             <div className="max-h-40 overflow-y-auto">
@@ -430,7 +404,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                                     ? 'bg-[#283852] border-[#283852]'
                                                     : 'border-gray-300'
                                             }`}>
-                                                {isSelected && <Check size={12} className="text-white" />}
+                                                {isSelected && <Tick01Icon size={12} className="text-white" />}
                                             </div>
                                             <img src={emp.avatar} alt="" className="w-7 h-7 rounded-full border border-gray-200 shrink-0" />
                                             <div className="flex-1 min-w-0">
@@ -550,7 +524,7 @@ const CreateDepartmentModal = ({ onClose }: { onClose: () => void }) => {
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {createDepartment.isPending ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+                        {createDepartment.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('departments.create.submit')}
                     </button>
                 </div>
@@ -665,12 +639,12 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#283852]/10 flex items-center justify-center shrink-0">
-                            <Pencil size={18} className="text-[#283852]" />
+                            <PencilIcon size={18} className="text-[#283852]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('departments.edit.title')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -679,7 +653,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                     {/* Department name */}
                     <div>
                         <label className={labelCls}>
-                            <Building size={12} />
+                            <Building01Icon size={12} />
                             {t('departments.create.name')}
                         </label>
                         <input
@@ -694,7 +668,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                     {/* Description */}
                     <div>
                         <label className={labelCls}>
-                            <AlignLeft size={12} />
+                            <AlignLeftIcon size={12} />
                             {t('departments.create.description')}
                         </label>
                         <textarea
@@ -709,7 +683,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                     {/* Head of department — dropdown selector */}
                     <div className="relative">
                         <label className={labelCls}>
-                            <Users size={12} />
+                            <UserGroupIcon size={12} />
                             {t('departments.create.head')}
                         </label>
                         <button
@@ -726,7 +700,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                             ) : (
                                 <span className="flex-1 text-gray-400">{t('departments.create.headPlaceholder')}</span>
                             )}
-                            <ChevronDown size={16} className={`text-gray-400 shrink-0 transition-transform ${headDropdownOpen ? 'rotate-180' : ''}`} />
+                            <ArrowDown01Icon size={16} className={`text-gray-400 shrink-0 transition-transform ${headDropdownOpen ? 'rotate-180' : ''}`} />
                         </button>
 
                         <AnimatePresence>
@@ -740,13 +714,13 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                 >
                                     <div className="p-2 border-b border-gray-100">
                                         <div className="relative">
-                                            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                            <Search01Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
                                             <input
                                                 type="text"
                                                 value={headSearch}
                                                 onChange={e => setHeadSearch(e.target.value)}
                                                 placeholder={t('departments.create.searchEmployee')}
-                                                className="w-full bg-gray-50 rounded-lg border-none pl-8 pr-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#283852]/30"
+                                                className="w-full bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
                                                 autoFocus
                                             />
                                         </div>
@@ -770,7 +744,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                     <p className="text-sm font-medium text-gray-800 truncate">{emp.name}</p>
                                                     <p className="text-[11px] text-gray-400 truncate">{emp.role}</p>
                                                 </div>
-                                                {form.headId === emp.id && <Check size={16} className="text-[#283852] shrink-0" />}
+                                                {form.headId === emp.id && <Tick01Icon size={16} className="text-[#283852] shrink-0" />}
                                             </button>
                                         ))}
                                         {filteredHeadEmployees.length === 0 && (
@@ -785,7 +759,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                     {/* Default CA target */}
                     <div>
                         <label className={labelCls}>
-                            <TrendingUp size={12} />
+                            <ArrowUpRight01Icon size={12} />
                             {t('departments.create.defaultCA', 'Objectif CA par défaut')}
                         </label>
                         <div className="relative">
@@ -805,7 +779,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                     {/* Services */}
                     <div>
                         <label className={labelCls}>
-                            <Briefcase size={12} />
+                            <Briefcase01Icon size={12} />
                             {t('departments.services.title')}
                         </label>
 
@@ -831,8 +805,8 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                 <div className="flex items-center justify-between">
                                                     <button onClick={() => setEditServiceForm(prev => ({ ...prev, isActive: !prev.isActive }))}>
                                                         {editServiceForm.isActive
-                                                            ? <ToggleRight size={22} className="text-[#283852]" />
-                                                            : <ToggleLeft size={22} className="text-gray-300" />
+                                                            ? <ToggleOnIcon size={22} className="text-[#283852]" />
+                                                            : <ToggleOffIcon size={22} className="text-gray-300" />
                                                         }
                                                     </button>
                                                     <div className="flex gap-2">
@@ -844,7 +818,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                             disabled={!editServiceForm.name.trim() || updateService.isPending}
                                                             className="flex items-center gap-1 px-3 py-1 text-xs text-white bg-[#283852] hover:bg-[#1e2d42] rounded-lg transition-colors disabled:opacity-40"
                                                         >
-                                                            {updateService.isPending ? <Loader2 size={11} className="animate-spin" /> : <Check size={11} />}
+                                                            {updateService.isPending ? <Loading02Icon size={11} className="animate-spin" /> : <Tick01Icon size={11} />}
                                                             {t('common.save')}
                                                         </button>
                                                     </div>
@@ -861,10 +835,10 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                                     </div>
                                                 </div>
                                                 <button onClick={() => handleEditService(svc)} className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors">
-                                                    <Pencil size={13} />
+                                                    <PencilIcon size={13} />
                                                 </button>
                                                 <button onClick={() => deleteService.mutate(svc.id)} className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors">
-                                                    <Trash2 size={13} />
+                                                    <Delete02Icon size={13} />
                                                 </button>
                                             </div>
                                         )}
@@ -890,8 +864,8 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                             <div className="flex items-center justify-between">
                                 <button onClick={() => setNewService(prev => ({ ...prev, isActive: !prev.isActive }))}>
                                     {newService.isActive
-                                        ? <ToggleRight size={22} className="text-[#283852]" />
-                                        : <ToggleLeft size={22} className="text-gray-300" />
+                                        ? <ToggleOnIcon size={22} className="text-[#283852]" />
+                                        : <ToggleOffIcon size={22} className="text-gray-300" />
                                     }
                                 </button>
                                 <button
@@ -899,7 +873,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                     disabled={!newService.name.trim() || createService.isPending}
                                     className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#283852] hover:bg-[#1e2d42] rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
-                                    {createService.isPending ? <Loader2 size={12} className="animate-spin" /> : <Plus size={12} />}
+                                    {createService.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <Add01Icon size={12} />}
                                     {t('departments.services.addService')}
                                 </button>
                             </div>
@@ -936,7 +910,7 @@ const EditDepartmentModal = ({ department, onClose }: { department: Department; 
                                 : 'bg-gray-300 cursor-not-allowed shadow-none'
                         }`}
                     >
-                        {updateDepartment.isPending ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                        {updateDepartment.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Tick01Icon size={16} />}
                         {t('departments.edit.submit')}
                     </button>
                 </div>
@@ -982,7 +956,7 @@ const Departments = () => {
 
     // UI config for cycling colors and icons
     const DEPT_COLORS = ['#283852'];
-    const DEPT_ICONS = [Code, Palette, Megaphone, DollarSign, Heart, PieChartIcon];
+    const DEPT_ICONS = [CodeIcon, PaintBoardIcon, Megaphone01Icon, DollarCircleIcon, FavouriteIcon, PieChartIcon];
 
     // Map API departments to display shape — no mock fallback
     const DEPARTMENTS: Department[] = (apiDepartments || []).map((d, i) => ({
@@ -1019,10 +993,10 @@ const Departments = () => {
     const avgSize = Math.round(totalEmployees / Math.max(DEPARTMENTS.length, 1));
 
     const stats = [
-        { label: t('departments.stats.total'), value: DEPARTMENTS.length, icon: Building, color: '#283852' },
-        { label: t('departments.stats.employees'), value: totalEmployees, icon: Users, color: '#3b82f6' },
-        { label: t('departments.stats.projects'), value: totalProjects, icon: Briefcase, color: '#8b5cf6' },
-        { label: t('departments.stats.avgSize'), value: avgSize, icon: TrendingUp, color: '#f59e0b' },
+        { label: t('departments.stats.total'), value: DEPARTMENTS.length, icon: Building01Icon, color: '#283852' },
+        { label: t('departments.stats.employees'), value: totalEmployees, icon: UserGroupIcon, color: '#3b82f6' },
+        { label: t('departments.stats.projects'), value: totalProjects, icon: Briefcase01Icon, color: '#8b5cf6' },
+        { label: t('departments.stats.avgSize'), value: avgSize, icon: ArrowUpRight01Icon, color: '#f59e0b' },
     ];
 
     const barData = DEPARTMENTS.map(d => ({
@@ -1057,7 +1031,7 @@ const Departments = () => {
                         onClick={() => setShowRoleModal(true)}
                         className="flex items-center gap-2 bg-white text-gray-700 border border-gray-200 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
                     >
-                        <Briefcase size={16} />
+                        <Briefcase01Icon size={16} />
                         {t('departments.manageRoles', 'Manage Roles')}
                     </button>
                     {!isHOD && (
@@ -1065,7 +1039,7 @@ const Departments = () => {
                         onClick={() => setShowCreateModal(true)}
                         className="flex items-center gap-2 bg-[#283852] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#1e2d42] transition-colors shadow-lg shadow-[#283852]/20"
                     >
-                        <Plus size={16} />
+                        <Add01Icon size={16} />
                         {t('departments.addDepartment')}
                     </button>
                     )}
@@ -1175,7 +1149,7 @@ const Departments = () => {
                 </motion.div>
             </div>
 
-            {/* Department Cards / List */}
+            {/* Department Cards / ListViewIcon */}
             <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-500">{DEPARTMENTS.length} {t('departments.stats.total', 'departments')}</p>
                 <div className="flex items-center bg-white rounded-2xl border border-gray-100 shadow-sm p-1">
@@ -1183,13 +1157,13 @@ const Departments = () => {
                         onClick={() => setViewMode('grid')}
                         className={`p-2 rounded-xl transition-colors ${viewMode === 'grid' ? 'bg-[#283852] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                        <LayoutGrid size={16} />
+                        <DashboardSquare01Icon size={16} />
                     </button>
                     <button
                         onClick={() => setViewMode('list')}
                         className={`p-2 rounded-xl transition-colors ${viewMode === 'list' ? 'bg-[#283852] text-white' : 'text-gray-400 hover:text-gray-600'}`}
                     >
-                        <List size={16} />
+                        <ListViewIcon size={16} />
                     </button>
                 </div>
             </div>
@@ -1225,7 +1199,7 @@ const Departments = () => {
                                         onClick={e => { e.stopPropagation(); setEditingDepartment(dept); }}
                                         className="p-2 rounded-xl text-gray-300 hover:text-[#283852] hover:bg-[#283852]/5 transition-colors opacity-0 group-hover:opacity-100"
                                     >
-                                        <Pencil size={16} />
+                                        <PencilIcon size={16} />
                                     </button>
                                 )}
                             </div>
@@ -1263,7 +1237,7 @@ const Departments = () => {
                                         </div>
                                     )}
                                 </div>
-                                <ArrowUpRight size={18} className="text-gray-300 group-hover:text-[#283852] transition-colors" />
+                                <ArrowUpRight01Icon size={18} className="text-gray-300 group-hover:text-[#283852] transition-colors" />
                             </div>
                         </motion.div>
                     ))}
@@ -1291,11 +1265,11 @@ const Departments = () => {
                             </div>
                             <div className="flex items-center gap-6 text-xs text-gray-500 shrink-0">
                                 <span className="flex items-center gap-1.5">
-                                    <Users size={12} className="text-gray-400" />
+                                    <UserGroupIcon size={12} className="text-gray-400" />
                                     {dept.employees.length}
                                 </span>
                                 <span className="flex items-center gap-1.5">
-                                    <Briefcase size={12} className="text-gray-400" />
+                                    <Briefcase01Icon size={12} className="text-gray-400" />
                                     {dept.projects.length}
                                 </span>
                             </div>
@@ -1305,10 +1279,10 @@ const Departments = () => {
                                         onClick={e => { e.stopPropagation(); setEditingDepartment(dept); }}
                                         className="p-1.5 rounded-lg text-gray-300 hover:text-[#283852] hover:bg-[#283852]/5 transition-colors opacity-0 group-hover:opacity-100"
                                     >
-                                        <Pencil size={14} />
+                                        <PencilIcon size={14} />
                                     </button>
                                 )}
-                                <ArrowUpRight size={16} className="text-gray-300 group-hover:text-[#283852] transition-colors" />
+                                <ArrowUpRight01Icon size={16} className="text-gray-300 group-hover:text-[#283852] transition-colors" />
                             </div>
                         </motion.div>
                     ))}
@@ -1319,7 +1293,7 @@ const Departments = () => {
             <div ref={sentinelRef} className="h-1" />
             {departmentsQuery.isFetchingNextPage && (
                 <div className="flex justify-center py-4">
-                    <Loader2 size={20} className="animate-spin text-[#283852]" />
+                    <Loading02Icon size={20} className="animate-spin text-[#283852]" />
                 </div>
             )}
 

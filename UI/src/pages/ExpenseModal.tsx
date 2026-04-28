@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2, Paperclip, FileText, Image, Trash2, Upload } from 'lucide-react';
+import { Cancel01Icon, Loading02Icon, Attachment01Icon, File01Icon, Image01Icon, Delete02Icon, Upload01Icon } from 'hugeicons-react';
 import { useCreateExpense, useUpdateExpense } from '../api/expenses/hooks';
 import { expensesApi } from '../api/expenses/api';
 import { useDepartments } from '../api/departments/hooks';
@@ -35,7 +35,7 @@ function FilePreview({ file, onRemove }: { file: JustificationFile; onRemove: ()
                 />
             ) : (
                 <div className="w-8 h-8 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
-                    <FileText size={14} className="text-red-400" />
+                    <File01Icon size={14} className="text-red-400" />
                 </div>
             )}
             <a
@@ -51,7 +51,7 @@ function FilePreview({ file, onRemove }: { file: JustificationFile; onRemove: ()
                 onClick={onRemove}
                 className="p-1 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
             >
-                <Trash2 size={12} />
+                <Delete02Icon size={12} />
             </button>
         </div>
     );
@@ -75,7 +75,7 @@ function PendingFilePreview({ file, onRemove }: { file: File; onRemove: () => vo
                 <img src={preview} alt={file.name} className="w-8 h-8 rounded-lg object-cover border border-blue-100 shrink-0" />
             ) : (
                 <div className="w-8 h-8 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
-                    <FileText size={14} className="text-red-400" />
+                    <File01Icon size={14} className="text-red-400" />
                 </div>
             )}
             <span className="flex-1 min-w-0 text-xs text-gray-700 truncate">{file.name}</span>
@@ -85,7 +85,7 @@ function PendingFilePreview({ file, onRemove }: { file: File; onRemove: () => vo
                 onClick={onRemove}
                 className="p-1 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors shrink-0"
             >
-                <Trash2 size={12} />
+                <Delete02Icon size={12} />
             </button>
         </div>
     );
@@ -240,7 +240,7 @@ export default function ExpenseModal({ isOpen, onClose, expense, defaultDepartme
                                 onClick={onClose}
                                 className="p-2 text-gray-400 hover:text-gray-600 hover:bg-white rounded-xl transition-colors"
                             >
-                                <X size={20} />
+                                <Cancel01Icon size={20} />
                             </button>
                         </div>
 
@@ -395,7 +395,7 @@ export default function ExpenseModal({ isOpen, onClose, expense, defaultDepartme
                                 {/* Justificatifs */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
-                                        <Paperclip size={14} className="text-gray-400" />
+                                        <Attachment01Icon size={14} className="text-gray-400" />
                                         Justificatifs
                                         {totalFiles > 0 && (
                                             <span className="text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-1.5 py-0.5 rounded-full">
@@ -411,7 +411,7 @@ export default function ExpenseModal({ isOpen, onClose, expense, defaultDepartme
                                         onClick={() => fileInputRef.current?.click()}
                                         className="flex flex-col items-center justify-center gap-2 px-4 py-5 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:border-[#33cbcc]/50 hover:bg-[#33cbcc]/5 transition-colors cursor-pointer"
                                     >
-                                        <Upload size={20} className="text-gray-300" />
+                                        <Upload01Icon size={20} className="text-gray-300" />
                                         <p className="text-xs text-gray-400 text-center">
                                             Glissez un fichier ici ou <span className="text-[#33cbcc] font-medium">cliquez pour parcourir</span>
                                         </p>
@@ -466,7 +466,7 @@ export default function ExpenseModal({ isOpen, onClose, expense, defaultDepartme
                             >
                                 {isPending ? (
                                     <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <Loading02Icon className="w-4 h-4 animate-spin" />
                                         {isUploading ? 'Envoi des fichiers...' : 'Enregistrement...'}
                                     </>
                                 ) : (

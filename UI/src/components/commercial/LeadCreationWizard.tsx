@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    X, Building2, MapPin, Users, ListChecks, BarChart2,
-    Plus, Trash2, Star, ChevronLeft, ChevronRight, Loader2,
-    Phone, Mail, Briefcase,
-} from 'lucide-react';
+import { Cancel01Icon, Building02Icon, Location01Icon, UserGroupIcon, Task01Icon, BarChartIcon, Add01Icon, Delete02Icon, StarIcon, ArrowLeft01Icon, ArrowRight01Icon, Loading02Icon, CallIcon, Mail01Icon, Briefcase01Icon } from 'hugeicons-react';
 import { useCreateLead } from '../../api/commercial/hooks';
 import { useDepartmentServices } from '../../api/departments/hooks';
 import type { CreateLeadContactDto, CreateLeadNeedDto, LeadType, SaleStage } from '../../api/commercial/types';
@@ -56,11 +52,11 @@ const SALE_STAGES: SaleStage[] = [
 /* ── Step definitions ────────────────────────────────────── */
 
 const STEPS = [
-    { key: 'company',    labelKey: 'wizard.steps.company',    Icon: Building2   },
-    { key: 'location',   labelKey: 'wizard.steps.location',   Icon: MapPin      },
-    { key: 'contacts',   labelKey: 'wizard.steps.contacts',   Icon: Users       },
-    { key: 'needs',      labelKey: 'wizard.steps.needs',      Icon: ListChecks  },
-    { key: 'commercial', labelKey: 'wizard.steps.commercial', Icon: BarChart2   },
+    { key: 'company',    labelKey: 'wizard.steps.company',    Icon: Building02Icon   },
+    { key: 'location',   labelKey: 'wizard.steps.location',   Icon: Location01Icon      },
+    { key: 'contacts',   labelKey: 'wizard.steps.contacts',   Icon: UserGroupIcon       },
+    { key: 'needs',      labelKey: 'wizard.steps.needs',      Icon: Task01Icon  },
+    { key: 'commercial', labelKey: 'wizard.steps.commercial', Icon: BarChartIcon   },
 ] as const;
 
 /* ── Styles ──────────────────────────────────────────────── */
@@ -187,7 +183,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                         </p>
                     </div>
                     <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -349,7 +345,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                             onClick={addContact}
                                             className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] hover:bg-[#33cbcc]/10 px-3 py-1.5 rounded-lg transition-colors"
                                         >
-                                            <Plus size={13} />
+                                            <Add01Icon size={13} />
                                             {t('commercial.leads.wizard.addContact', 'Ajouter un contact')}
                                         </button>
                                     </div>
@@ -378,14 +374,14 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                         title={t('commercial.leads.wizard.setPrimary', 'Définir comme principal')}
                                                         className={`p-1.5 rounded-lg transition-colors ${c.isPrimary ? 'text-[#33cbcc]' : 'text-gray-300 hover:text-[#33cbcc]'}`}
                                                     >
-                                                        <Star size={13} fill={c.isPrimary ? 'currentColor' : 'none'} />
+                                                        <StarIcon size={13} fill={c.isPrimary ? 'currentColor' : 'none'} />
                                                     </button>
                                                     {form.contacts.length > 1 && (
                                                         <button
                                                             onClick={() => removeContact(i)}
                                                             className="p-1.5 text-gray-300 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg transition-colors"
                                                         >
-                                                            <Trash2 size={13} />
+                                                            <Delete02Icon size={13} />
                                                         </button>
                                                     )}
                                                 </div>
@@ -393,7 +389,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                 <div>
                                                     <label className={labelCls}>
-                                                        <span className="flex items-center gap-1"><Users size={10} />{t('commercial.leads.contactName', 'Nom')}</span>
+                                                        <span className="flex items-center gap-1"><UserGroupIcon size={10} />{t('commercial.leads.contactName', 'Nom')}</span>
                                                     </label>
                                                     <input
                                                         value={c.name}
@@ -404,7 +400,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                 </div>
                                                 <div>
                                                     <label className={labelCls}>
-                                                        <span className="flex items-center gap-1"><Briefcase size={10} />{t('commercial.leads.contactRole', 'Poste')}</span>
+                                                        <span className="flex items-center gap-1"><Briefcase01Icon size={10} />{t('commercial.leads.contactRole', 'Poste')}</span>
                                                     </label>
                                                     <input
                                                         value={c.role ?? ''}
@@ -415,7 +411,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                 </div>
                                                 <div>
                                                     <label className={labelCls}>
-                                                        <span className="flex items-center gap-1"><Phone size={10} />{t('commercial.leads.contactPhone', 'Téléphone')}</span>
+                                                        <span className="flex items-center gap-1"><CallIcon size={10} />{t('commercial.leads.contactPhone', 'Téléphone')}</span>
                                                     </label>
                                                     <input
                                                         value={c.phone ?? ''}
@@ -426,7 +422,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                 </div>
                                                 <div>
                                                     <label className={labelCls}>
-                                                        <span className="flex items-center gap-1"><Mail size={10} />{t('commercial.leads.contactEmail', 'Email')}</span>
+                                                        <span className="flex items-center gap-1"><Mail01Icon size={10} />{t('commercial.leads.contactEmail', 'Email')}</span>
                                                     </label>
                                                     <input
                                                         type="email"
@@ -451,7 +447,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                             onClick={addNeed}
                                             className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] hover:bg-[#33cbcc]/10 px-3 py-1.5 rounded-lg transition-colors"
                                         >
-                                            <Plus size={13} />
+                                            <Add01Icon size={13} />
                                             {t('commercial.leads.wizard.addNeed', 'Ajouter un besoin')}
                                         </button>
                                     </div>
@@ -472,7 +468,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                         onClick={() => removeNeed(i)}
                                                         className="p-1.5 text-gray-300 hover:text-[#283852] hover:bg-[#283852]/10 rounded-lg transition-colors"
                                                     >
-                                                        <Trash2 size={13} />
+                                                        <Delete02Icon size={13} />
                                                     </button>
                                                 )}
                                             </div>
@@ -497,7 +493,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                             onClick={() => updateNeed(i, 'serviceId', null)}
                                                             className="p-2 text-gray-400 hover:text-[#283852] rounded-lg transition-colors"
                                                         >
-                                                            <X size={14} />
+                                                            <Cancel01Icon size={14} />
                                                         </button>
                                                     </div>
                                                 ) : (
@@ -605,7 +601,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                         disabled={step === 0}
                         className="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     >
-                        <ChevronLeft size={15} />
+                        <ArrowLeft01Icon size={15} />
                         <span className="hidden sm:inline">{t('commercial.leads.wizard.previous', 'Précédent')}</span>
                     </button>
 
@@ -627,7 +623,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                             className="flex items-center gap-1.5 px-3 sm:px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
                         >
                             <span className="hidden sm:inline">{t('commercial.leads.wizard.next', 'Suivant')}</span>
-                            <ChevronRight size={15} />
+                            <ArrowRight01Icon size={15} />
                         </button>
                     ) : (
                         <button
@@ -640,8 +636,8 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                             }`}
                         >
                             {createLead.isPending
-                                ? <Loader2 size={15} className="animate-spin" />
-                                : <Plus size={15} />
+                                ? <Loading02Icon size={15} className="animate-spin" />
+                                : <Add01Icon size={15} />
                             }
                             <span className="hidden sm:inline">{t('commercial.leads.wizard.createLead', 'Créer le lead')}</span>
                             <span className="sm:hidden">{t('commercial.leads.wizard.create', 'Créer')}</span>

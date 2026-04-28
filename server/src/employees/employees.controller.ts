@@ -174,10 +174,10 @@ export class EmployeesController {
 
     @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
     @Post('rankings/snapshot')
-    triggerSnapshot(@Body() body: { year?: number; month?: number }) {
+    triggerSnapshot(@Body() body: { year?: number; month?: number; resetPoints?: boolean }) {
         const now = new Date();
         const y = body.year || now.getFullYear();
         const m = body.month || now.getMonth() + 1;
-        return this.monthlyRankingsService.snapshotMonthlyRankings(y, m);
+        return this.monthlyRankingsService.snapshotMonthlyRankings(y, m, body.resetPoints ?? false);
     }
 }

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Calendar, User, MapPin, Phone, Mail, AlertCircle, CheckCircle2, Clock, TrendingUp } from 'lucide-react';
+import { Add01Icon, Calendar01Icon, UserIcon, Location01Icon, CallIcon, Mail01Icon, Alert01Icon, Tick01Icon, Clock01Icon, ArrowUpRight01Icon } from 'hugeicons-react';
 import { useClientActivitiesReport, useClientHealthMetrics } from '../api/commercial/hooks';
 import type { HealthStatus, ActivityType } from '../api/commercial/types';
 
@@ -9,28 +9,28 @@ import type { HealthStatus, ActivityType } from '../api/commercial/types';
 
 const getHealthBadgeStyles = (status: HealthStatus) => {
     const styles = {
-        HEALTHY: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: CheckCircle2, border: 'border-gray-200' },
-        GOOD: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: CheckCircle2, border: 'border-gray-200' },
-        NEEDS_FOLLOWUP: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Clock, border: 'border-gray-200' },
-        ATTENTION_NEEDED: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: AlertCircle, border: 'border-gray-200' },
-        AT_RISK: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: AlertCircle, border: 'border-gray-200' },
-        NEW: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: TrendingUp, border: 'border-gray-200' },
+        HEALTHY: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: Tick01Icon, border: 'border-gray-200' },
+        GOOD: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', icon: Tick01Icon, border: 'border-gray-200' },
+        NEEDS_FOLLOWUP: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Clock01Icon, border: 'border-gray-200' },
+        ATTENTION_NEEDED: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Alert01Icon, border: 'border-gray-200' },
+        AT_RISK: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: Alert01Icon, border: 'border-gray-200' },
+        NEW: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', icon: ArrowUpRight01Icon, border: 'border-gray-200' },
     };
     return styles[status] || styles.NEW;
 };
 
 const getActivityIcon = (type: ActivityType) => {
     const icons = {
-        VISITE_CLIENT: MapPin,
-        VISITE_PROSPECT: MapPin,
-        APPEL: Phone,
-        EMAIL: Mail,
-        REUNION: User,
-        DEMO: User,
-        RELANCE: Phone,
-        AUTRE: Calendar,
+        VISITE_CLIENT: Location01Icon,
+        VISITE_PROSPECT: Location01Icon,
+        APPEL: CallIcon,
+        EMAIL: Mail01Icon,
+        REUNION: UserIcon,
+        DEMO: UserIcon,
+        RELANCE: CallIcon,
+        AUTRE: Calendar01Icon,
     };
-    return icons[type] || Calendar;
+    return icons[type] || Calendar01Icon;
 };
 
 const formatDate = (dateStr: string) => {
@@ -55,7 +55,7 @@ export default function ClientActivitiesPanel({ clientId }: { clientId: string }
     const { data: health, isLoading: healthLoading } = useClientHealthMetrics(clientId);
 
     const healthStyles = health ? getHealthBadgeStyles(health.healthStatus) : null;
-    const HealthIcon = healthStyles?.icon || TrendingUp;
+    const HealthIcon = healthStyles?.icon || ArrowUpRight01Icon;
 
     // Activity type breakdown for chart
     const activityBreakdown = useMemo(() => {
@@ -71,7 +71,7 @@ export default function ClientActivitiesPanel({ clientId }: { clientId: string }
     if (!clientId) {
         return (
             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                <Calendar size={48} strokeWidth={1.2} className="mb-4" />
+                <Calendar01Icon size={48} strokeWidth={1.2} className="mb-4" />
                 <p className="text-sm">{t('commercial.clientActivities.selectClient', 'Sélectionnez un client')}</p>
             </div>
         );
@@ -109,7 +109,7 @@ export default function ClientActivitiesPanel({ clientId }: { clientId: string }
                             console.log('Log activity for client:', clientId);
                         }}
                     >
-                        <Plus size={16} />
+                        <Add01Icon size={16} />
                         {t('commercial.clientActivities.logActivity')}
                     </button>
                 </div>
@@ -214,7 +214,7 @@ export default function ClientActivitiesPanel({ clientId }: { clientId: string }
                     </div>
                 ) : !report?.activities || report.activities.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-                        <Calendar size={40} strokeWidth={1.2} className="mb-3" />
+                        <Calendar01Icon size={40} strokeWidth={1.2} className="mb-3" />
                         <p className="text-sm">{t('commercial.clientActivities.noActivities', 'Aucune activité enregistrée')}</p>
                     </div>
                 ) : (
@@ -257,19 +257,19 @@ export default function ClientActivitiesPanel({ clientId }: { clientId: string }
                                             <div className="flex flex-wrap gap-2 text-xs text-gray-500">
                                                 {activity.employee && (
                                                     <span className="flex items-center gap-1">
-                                                        <User size={12} />
+                                                        <UserIcon size={12} />
                                                         {activity.employee.firstName} {activity.employee.lastName}
                                                     </span>
                                                 )}
                                                 {activity.location && (
                                                     <span className="flex items-center gap-1">
-                                                        <MapPin size={12} />
+                                                        <Location01Icon size={12} />
                                                         {activity.location}
                                                     </span>
                                                 )}
                                                 {activity.startTime && activity.endTime && (
                                                     <span className="flex items-center gap-1">
-                                                        <Clock size={12} />
+                                                        <Clock01Icon size={12} />
                                                         {activity.startTime} - {activity.endTime}
                                                     </span>
                                                 )}

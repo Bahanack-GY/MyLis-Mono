@@ -672,4 +672,92 @@ export class JournalEngineService {
             this.logger.error(`Failed to create journal entry for supplier invoice paid: ${error.message}`);
         }
     }
+
+    // ===== CARWASH INTEGRATION =====
+
+    /** Upsert daily revenue journal entry for a carwash station. */
+    async onCarwashRevenueSynced(params: {
+        stationId: number;
+        stationName: string;
+        date: string;
+        amount: number;
+        departmentId: string;
+        userId: string;
+    }): Promise<void> {
+        if (params.amount <= 0) return;
+        const sourceId = `carwash-rev-${params.stationId}-${params.date}`;
+        await this.deleteEntriesForSource('CARWASH_REVENUE', sourceId);
+        try {
+            await this.createAutoEntry({
+                journalCode: 'VTE',
+                date: params.date,
+                description: `Recettes carwash ${params.stationName} — ${params.date}`,
+                reference: `CW-REV-${params.stationId}-${params.date}`,
+                sourceType: 'CARWASH_REVENUE',
+                sourceId,
+                lines: [
+                    {
+                        accountCode: '521000',
+                        debit: params.amount,
+                        credit: 0,
+                        label: `Recettes ${params.stationName}`,
+                        departmentId: params.departmentId,
+                    },
+                    {
+                        accountCode: '706000',
+                        debit: 0,
+                        credit: params.amount,
+                        label: `Prestations carwash ${params.stationName}`,
+                        departmentId: params.departmentId,
+                    },
+                ],
+                userId: params.userId,
+            });
+        } catch (error) {
+            this.logger.error(`Failed to create carwash revenue entry: ${error.message}`);
+        }
+    }
+
+    /** Upsert daily expense journal entry for a carwash station. */
+    async onCarwashExpenseSynced(params: {
+        stationId: number;
+        stationName: string;
+        date: string;
+        amount: number;
+        departmentId: string;
+        userId: string;
+    }): Promise<void> {
+        if (params.amount <= 0) return;
+        const sourceId = `carwash-exp-${params.stationId}-${params.date}`;
+        await this.deleteEntriesForSource('CARWASH_EXPENSE', sourceId);
+        try {
+            await this.createAutoEntry({
+                journalCode: 'OD',
+                date: params.date,
+                description: `Charges carwash ${params.stationName} — ${params.date}`,
+                reference: `CW-EXP-${params.stationId}-${params.date}`,
+                sourceType: 'CARWASH_EXPENSE',
+                sourceId,
+                lines: [
+                    {
+                        accountCode: '605000',
+                        debit: params.amount,
+                        credit: 0,
+                        label: `Charges ${params.stationName}`,
+                        departmentId: params.departmentId,
+                    },
+                    {
+                        accountCode: '521000',
+                        debit: 0,
+                        credit: params.amount,
+                        label: `Sortie trésorerie ${params.stationName}`,
+                        departmentId: params.departmentId,
+                    },
+                ],
+                userId: params.userId,
+            });
+        } catch (error) {
+            this.logger.error(`Failed to create carwash expense entry: ${error.message}`);
+        }
+    }
 }

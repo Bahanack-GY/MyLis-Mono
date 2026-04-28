@@ -1,17 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-    Download,
-    Loader2,
-    FileText,
-    Calendar,
-    Wallet,
-    TrendingDown,
-    Eye,
-    X,
-    ChevronDown,
-} from 'lucide-react';
+import { Download01Icon, Loading02Icon, File01Icon, Calendar01Icon, Wallet01Icon, ArrowDownRight01Icon, ViewIcon, Cancel01Icon, ArrowDown01Icon } from 'hugeicons-react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../api/config';
 import { exportPayslipPdf } from '../utils/exportPayslipPdf';
@@ -160,11 +150,11 @@ const PayslipDetailModal = ({
                             disabled={downloading}
                             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-60"
                         >
-                            {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                            {downloading ? <Loading02Icon size={14} className="animate-spin" /> : <Download01Icon size={14} />}
                             PDF
                         </button>
                         <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                            <X size={18} />
+                            <Cancel01Icon size={18} />
                         </button>
                     </div>
                 </div>
@@ -237,7 +227,7 @@ const PayslipDetailModal = ({
                             <p className="text-xs font-semibold text-white/70 uppercase tracking-wider">Net a payer</p>
                             <p className="text-2xl font-bold text-white mt-1">{formatXAF(Number(payslip.netSalary) || 0)}</p>
                         </div>
-                        <Wallet size={32} className="text-white/30" />
+                        <Wallet01Icon size={32} className="text-white/30" />
                     </div>
                 </div>
             </motion.div>
@@ -273,7 +263,7 @@ const PayslipCard = ({
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Calendar size={18} className="text-[#33cbcc]" />
+                            <Calendar01Icon size={18} className="text-[#33cbcc]" />
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-800">{MONTHS[run.month - 1]} {run.year}</h3>
@@ -311,7 +301,7 @@ const PayslipCard = ({
                         onClick={onView}
                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors"
                     >
-                        <Eye size={14} />
+                        <ViewIcon size={14} />
                         Details
                     </button>
                     <button
@@ -319,7 +309,7 @@ const PayslipCard = ({
                         disabled={downloading}
                         className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-60 shadow-sm shadow-[#33cbcc]/20"
                     >
-                        {downloading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                        {downloading ? <Loading02Icon size={14} className="animate-spin" /> : <Download01Icon size={14} />}
                         Telecharger
                     </button>
                 </div>
@@ -419,36 +409,40 @@ export default function MyPayslips() {
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Wallet size={16} className="text-[#33cbcc]" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Net percu {currentYear}</p>
+            {(() => {
+                const summaryStats = [
+                    { label: `Net percu ${currentYear}`,   value: formatXAF(totalNetThisYear),        icon: Wallet01Icon,        color: '#33cbcc' },
+                    { label: `Brut cumule ${currentYear}`, value: formatXAF(totalGrossThisYear),       icon: File01Icon,          color: '#283852' },
+                    { label: `Retenues ${currentYear}`,    value: formatXAF(totalDeductionsThisYear),  icon: ArrowDownRight01Icon, color: '#283852' },
+                ];
+                return (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {summaryStats.map((stat, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="border border-gray-100 rounded-2xl overflow-hidden transition-colors duration-200 hover:border-[#33cbcc]/50"
+                            >
+                                <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+                                    <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">
+                                        {stat.label}
+                                    </h3>
+                                </div>
+                                <div className="p-5 bg-white relative overflow-hidden">
+                                    <h2 className={`font-bold text-[#1c2b3a] truncate leading-tight ${stat.value.length > 10 ? 'text-xl' : 'text-4xl'}`}>
+                                        {stat.value}
+                                    </h2>
+                                    <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+                                        <stat.icon size={110} strokeWidth={1.2} />
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
                     </div>
-                    <p className="text-2xl font-bold text-gray-800">{formatXAF(totalNetThisYear)}</p>
-                    <p className="text-xs text-gray-400 mt-1">{currentYearPayslips.length} fiche(s) de paie</p>
-                </div>
-                <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                            <FileText size={16} className="text-[#283852]" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Brut cumule {currentYear}</p>
-                    </div>
-                    <p className="text-2xl font-bold text-gray-800">{formatXAF(totalGrossThisYear)}</p>
-                </div>
-                <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                            <TrendingDown size={16} className="text-[#283852]" />
-                        </div>
-                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Retenues {currentYear}</p>
-                    </div>
-                    <p className="text-2xl font-bold text-gray-800">{formatXAF(totalDeductionsThisYear)}</p>
-                </div>
-            </div>
+                );
+            })()}
 
             {/* Year filter */}
             {years.length > 1 && (
@@ -502,7 +496,7 @@ export default function MyPayslips() {
             {/* Empty state */}
             {!isLoading && filtered.length === 0 && (
                 <div className="text-center py-20">
-                    <FileText size={48} className="mx-auto text-gray-300 mb-4" />
+                    <File01Icon size={48} className="mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-500 font-medium mb-2">Aucune fiche de paie</p>
                     <p className="text-sm text-gray-400">
                         {payslips.length > 0

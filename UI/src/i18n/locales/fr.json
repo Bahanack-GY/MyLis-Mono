@@ -495,6 +495,7 @@
     "suppliers": "Fournisseurs",
     "cashFlow": "Flux de Trésorerie",
     "fundMovements": "Compte Courant d'Associé",
+    "carwashDashboard": "LIS Carwash",
     "monthlyRankings": "Palmarès",
     "aiReports": "Rapports IA",
     "commercialDashboard": "Commercial",
@@ -503,6 +504,7 @@
     "leadFollowUp": "Suivi Leads",
     "clientFollowUp": "Suivi Client",
     "businessExpenses": "Frais de vie",
+    "reminders": "Rappels",
     "sections": {
       "work": "Travail",
       "people": "Équipe",
@@ -510,7 +512,8 @@
       "requests": "Demandes",
       "comms": "Comms",
       "commercial": "Commercial",
-      "accounting": "Comptabilité"
+      "accounting": "Comptabilité",
+      "carwash": "Carwash"
     }
   },
   "planning": {
@@ -520,8 +523,13 @@
     "noTasks": "Aucune tâche pour ce jour",
     "today": "Aujourd'hui",
     "allEmployees": "Tous les employés",
+    "allStatuses": "Tous les statuts",
     "weekProgress": "Progression de la semaine",
-    "tasksCompleted": "tâches complétées"
+    "tasksCompleted": "tâches complétées",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "transferred": "Transférée",
+    "legend": "Légende"
   },
   "salaries": {
     "pageSubtitle": "{{count}} employés · {{withSalary}} avec salaire défini",
@@ -601,7 +609,7 @@
   },
   "dashboard": {
     "title": "Tableau de bord",
-    "subtitle": "Aperçu des performances de votre organisation",
+    "subtitle": "Aperçu de vos performances",
     "sortBy": "Trier par : Récent",
     "stats": {
       "totalEmployees": "Total Employés",
@@ -813,7 +821,42 @@
     "minShort": "m",
     "attachments": "Pièces jointes",
     "addFiles": "Ajouter des fichiers",
-    "deleteAttachmentConfirm": "Supprimer cette pièce jointe ?"
+    "deleteAttachmentConfirm": "Supprimer cette pièce jointe ?",
+    "activityType": "Type d'activité",
+    "activityTypeNone": "Sélectionner un type",
+    "commercialNatures": {
+      "VENTE_ACTIVE":           "Vente Active",
+      "VENTE_PROSPECTION":      "Vente Prospection",
+      "RESOLUTION_PROBLEMES":   "Résolution de problèmes",
+      "TACHES_ADMINISTRATIVES": "Tâches administratives",
+      "TEMPS_IMPRODUCTIF":      "Temps improductif",
+      "MARKETING_DIGITAL":      "Marketing digital",
+      "AUTRE":                  "Autre"
+    },
+    "commercialActivityTypes": {
+      "VISITE_CLIENT":          "Visite client",
+      "TEL_CLIENT":             "Tel. client",
+      "CLOSING":                "Closing",
+      "REUNION_CLIENT":         "Réunion client",
+      "PRESTATION":             "Prestation",
+      "LIVRAISON":              "Livraison",
+      "VISITE_PROSPECT":        "Visite prospect",
+      "TEL_PROSPECT":           "Tel. prospect",
+      "SALON_EXPOSITION":       "Salon d'exposition",
+      "REUNION_PROSPECT":       "Réunion prospect",
+      "SAV":                    "SAV",
+      "RAPPROCHEMENT_COMPTES":  "Rapprochement comptes",
+      "PAPERASSE":              "Paperasse",
+      "EMAIL":                  "Email",
+      "TEL_INTERNE":            "Tel. interne",
+      "REUNION_INTERNE":        "Réunion interne",
+      "PAUSE":                  "Pause",
+      "MALADIE":                "Maladie",
+      "CONGES":                 "Congés",
+      "CREATION_CONTENU":       "Création de contenu",
+      "POST_RESEAUX_SOCIAUX":   "Post réseaux sociaux",
+      "AUTRE":                  "Autre"
+    }
   },
   "tasks": {
     "title": "Tâches",
@@ -936,11 +979,20 @@
       "adminWarningTitle": "Problème de conformité hebdomadaire",
       "adminWarningMessage": "{{name}} a des tâches en attente de la semaine dernière qui nécessitent une mise à jour de statut. La création de tâches est bloquée jusqu'à résolution."
     },
+    "states": {
+      "created": "Créée",
+      "assigned": "Assignée",
+      "in_progress": "En cours",
+      "blocked": "Bloquée",
+      "completed": "Terminée",
+      "reviewed": "Évaluée"
+    },
     "subtasks": {
       "title": "Sous-tâches",
       "complete": "terminé",
       "addPlaceholder": "Ajouter une sous-tâche..."
-    }
+    },
+    "file": "fichier(s)"
   },
   "projectSidebar": {
     "back": "Retour aux projets",
@@ -2937,9 +2989,27 @@
     },
     "paymentReminders": {
       "title": "Rappels de Paiement",
+      "subtitle": "Factures impayées à surveiller",
+      "overdueLabel": "En retard",
+      "dueSoonLabel": "Échéance proche",
+      "upcomingLabel": "À venir",
+      "overdue1Day": "1 jour de retard",
+      "overdueNDays": "{{days}} jours de retard",
+      "dueToday": "Dû aujourd'hui",
+      "dueTomorrow": "Dû demain",
+      "dueInNDays": "Dû dans {{days}} jours",
+      "dueDate": "Échéance",
+      "statusPaid": "Payé",
+      "statusPending": "En attente",
       "overdue": "En retard",
       "dueSoon": "Échéance proche",
-      "upcoming": "À venir"
+      "7days": "7 jours",
+      "upcoming": "À venir",
+      "gt7days": "> 7 jours",
+      "all": "Tous",
+      "noInvoices": "Aucune facture impayée",
+      "noInvoicesInCategory": "Aucune facture dans cette catégorie",
+      "totalOutstanding": "Total impayé"
     },
     "toast": {
       "leadCreated": "Lead créé avec succès",
@@ -3012,5 +3082,49 @@
     "namePlaceholder": "ex. Repas, Transport, Hébergement...",
     "add": "Ajouter",
     "noTypes": "Aucun type de frais pour le moment."
+  },
+  "remindersPage": {
+    "urgency": {
+      "done": "Terminé",
+      "overdue": "{{days}}j en retard",
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain",
+      "inDays": "Dans {{days}} jours"
+    },
+    "newReminder": "Nouveau rappel",
+    "title": "Titre",
+    "titlePlaceholder": "De quoi voulez-vous être rappelé ?",
+    "description": "Description",
+    "descriptionPlaceholder": "Détails supplémentaires (optionnel)...",
+    "dueDate": "Date d'échéance",
+    "create": "Créer",
+    "completedOn": "Fait le",
+    "markDone": "Marquer comme terminé",
+    "pageTitle": "Rappels",
+    "pending": "en attente",
+    "urgent": "urgent",
+    "new": "Nouveau",
+    "urgentBanner1": "1 rappel est dû aujourd'hui ou en retard",
+    "urgentBannerN": "{{count}} rappels sont dus aujourd'hui ou en retard",
+    "filterPending": "En attente",
+    "filterDone": "Terminés",
+    "filterAll": "Tous",
+    "noDone": "Aucun rappel terminé",
+    "noPending": "Aucun rappel — vous êtes à jour !",
+    "createFirst": "Créez votre premier rappel",
+    "legendTitle": "Légende :",
+    "legend": {
+      "overdue": "En retard",
+      "today": "Aujourd'hui",
+      "tomorrow": "Demain",
+      "leq5Days": "≤ 5 jours",
+      "leq10Days": "≤ 10 jours",
+      "later": "Plus tard"
+    },
+    "popup": {
+      "single": "1 rappel à venir",
+      "multiple": "{{count}} rappels à venir",
+      "viewAll": "Voir tous les rappels →"
+    }
   }
 }

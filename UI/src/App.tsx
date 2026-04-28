@@ -4,12 +4,17 @@ import DashboardLayout from "./layouts/DashboardLayout"
 import ProtectedRoute from "./components/ProtectedRoute"
 import PublicRoute from "./components/PublicRoute"
 import { RolePageSwitch } from "./components/RolePageSwitch"
+import { useAuth } from "./contexts/AuthContext"
 
 // Shared pages
 const Login = lazy(() => import("./pages/Login"))
 const Formations = lazy(() => import("./pages/Formations"))
 const Sanctions = lazy(() => import("./pages/Sanctions"))
 const MyPayslips = lazy(() => import("./pages/MyPayslips"))
+const Reminders = lazy(() => import("./pages/Reminders"))
+
+// CEO dashboard
+const CeoDashboard = lazy(() => import("./pages/admin/CeoDashboard"))
 
 // Admin pages (dual-view)
 const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"))
@@ -79,6 +84,15 @@ const CashFlow = lazy(() => import("./pages/accounting/CashFlow"))
 const FundMovements = lazy(() => import("./pages/accounting/FundMovements"))
 const MonthlyRankings = lazy(() => import("./pages/admin/MonthlyRankings"))
 
+// CEO sees CeoDashboard in admin mode; toggling to "manager view" shows AdminDashboard.
+const DashboardRouter = () => {
+  const { role, viewMode } = useAuth();
+  if (role === 'CEO') {
+    return viewMode === 'admin' ? <CeoDashboard /> : <AdminDashboard />;
+  }
+  return <RolePageSwitch adminComponent={AdminDashboard} employeeComponent={EmployeeDashboard} />;
+};
+
 function App() {
   return (
     <Suspense fallback={null}>
@@ -93,9 +107,7 @@ function App() {
         {/* Routes for all authenticated users — dual-view pages */}
         <Route element={<ProtectedRoute />}>
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={
-              <RolePageSwitch adminComponent={AdminDashboard} employeeComponent={EmployeeDashboard} />
-            } />
+            <Route path="/dashboard" element={<DashboardRouter />} />
             <Route path="/tasks" element={
               <RolePageSwitch adminComponent={AdminTasks} employeeComponent={EmployeeTasks} />
             } />
@@ -132,6 +144,7 @@ function App() {
             <Route path="/reports" element={
               <RolePageSwitch adminComponent={AdminReports} employeeComponent={EmployeeReports} />
             } />
+            <Route path="/reminders" element={<Reminders />} />
           </Route>
 
           {/* Messages — outside DashboardLayout (full screen) */}

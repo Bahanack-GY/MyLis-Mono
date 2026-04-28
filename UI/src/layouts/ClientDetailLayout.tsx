@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loading02Icon } from 'hugeicons-react';
 import ClientDetailSidebar, { type ClientTab } from '../components/ClientDetailSidebar';
 import Header from '../components/Header';
 import ClientDetail from '../pages/ClientDetail';
@@ -66,7 +66,7 @@ const ClientDetailLayout = () => {
     if (isLoading) {
         return (
             <div className="flex h-screen bg-gray-100 items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-[#33cbcc]" />
+                <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
             </div>
         );
     }

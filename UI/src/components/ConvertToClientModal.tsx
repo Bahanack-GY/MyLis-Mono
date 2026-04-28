@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { X, CheckCircle2 } from 'lucide-react';
+import { Cancel01Icon, Tick01Icon } from 'hugeicons-react';
 import { useConvertLead } from '../api/commercial/hooks';
 import { useDepartments } from '../api/departments/hooks';
 import type { Lead } from '../api/commercial/types';
@@ -80,7 +80,7 @@ const ConvertToClientModal = ({
                         </p>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -151,7 +151,7 @@ const ConvertToClientModal = ({
                         disabled={!form.name.trim() || convertLead.isPending}
                         className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors"
                     >
-                        <CheckCircle2 size={14} />
+                        <Tick01Icon size={14} />
                         {convertLead.isPending
                             ? t('commercial.convert.converting', 'Converting...')
                             : t('commercial.convert.confirm', 'Convert & Save')

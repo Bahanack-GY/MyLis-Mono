@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, AlertTriangle, X, CheckCircle2 } from 'lucide-react';
+import { ArrowRight01Icon, Alert02Icon, Cancel01Icon, Tick01Icon } from 'hugeicons-react';
 import type { SaleStage } from '../../api/commercial/types';
 
 /* ── Stage metadata ────────────────────────────────────────── */
@@ -88,7 +88,7 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
                             <p className="text-xs text-gray-400 mt-0.5">{companyName}</p>
                         </div>
                         <button onClick={onCancel} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
-                            <X size={16} />
+                            <Cancel01Icon size={16} />
                         </button>
                     </div>
 
@@ -97,7 +97,7 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
                         <div className={`flex-1 text-center px-3 py-2.5 rounded-xl border text-xs font-semibold ${fromColors.bg} ${fromColors.text} ${fromColors.border}`}>
                             {t(`commercial.pipeline.stages.${from}`)}
                         </div>
-                        <ArrowRight size={18} className={allowed ? 'text-gray-400 shrink-0' : 'text-gray-300 shrink-0'} />
+                        <ArrowRight01Icon size={18} className={allowed ? 'text-gray-400 shrink-0' : 'text-gray-300 shrink-0'} />
                         <div className={`flex-1 text-center px-3 py-2.5 rounded-xl border text-xs font-semibold ${toColors.bg} ${toColors.text} ${toColors.border} ${!allowed ? 'opacity-40' : ''}`}>
                             {t(`commercial.pipeline.stages.${to}`)}
                         </div>
@@ -106,7 +106,7 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
                     {/* Message */}
                     {!allowed ? (
                         <div className="flex items-start gap-2.5 bg-[#283852]/10 border border-gray-200 rounded-xl p-3 mb-5">
-                            <AlertTriangle size={16} className="text-[#283852] shrink-0 mt-0.5" />
+                            <Alert02Icon size={16} className="text-[#283852] shrink-0 mt-0.5" />
                             <p className="text-xs text-[#283852]">
                                 {from === 'GAGNE' || from === 'PERDU'
                                     ? t('commercial.stageModal.lockedMsg', 'Ce lead est verrouillé et ne peut plus être modifié.')
@@ -115,14 +115,14 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
                         </div>
                     ) : isLost ? (
                         <div className="flex items-start gap-2.5 bg-[#283852]/10 border border-gray-200 rounded-xl p-3 mb-5">
-                            <AlertTriangle size={16} className="text-[#283852] shrink-0 mt-0.5" />
+                            <Alert02Icon size={16} className="text-[#283852] shrink-0 mt-0.5" />
                             <p className="text-xs text-[#283852]">
                                 {t('commercial.stageModal.lostWarning', 'Vous êtes sur le point de marquer ce lead comme perdu. Cette action peut être irréversible.')}
                             </p>
                         </div>
                     ) : isWon ? (
                         <div className="flex items-start gap-2.5 bg-[#33cbcc]/10 border border-gray-200 rounded-xl p-3 mb-5">
-                            <CheckCircle2 size={16} className="text-[#33cbcc] shrink-0 mt-0.5" />
+                            <Tick01Icon size={16} className="text-[#33cbcc] shrink-0 mt-0.5" />
                             <p className="text-xs text-[#33cbcc]">
                                 {t('commercial.stageModal.wonInfo', 'Le lead sera converti en client. Une fois gagné, le stade sera verrouillé.')}
                             </p>

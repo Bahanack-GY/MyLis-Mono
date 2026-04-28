@@ -1,3 +1,5 @@
+import type { FC, SVGProps } from 'react';
+type LucideIcon = FC<Omit<SVGProps<SVGSVGElement>, 'ref'> & { size?: number | string }>;
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -14,22 +16,7 @@ import {
  Cell,
  Legend,
 } from 'recharts';
-import {
- TrendingUp,
- TrendingDown,
- BarChart3,
- Wallet,
- Users,
- FileText,
- Calculator,
- PenLine,
- Banknote,
- Receipt,
- FileBarChart,
- AlertCircle,
- CalendarPlus,
- type LucideIcon,
-} from 'lucide-react';
+import { ArrowUpRight01Icon, ArrowDownRight01Icon, BarChartHorizontalIcon, Wallet01Icon, UserGroupIcon, File01Icon, CalculatorIcon, PencilIcon, Money01Icon, Invoice01Icon, Alert01Icon, Calendar01Icon } from 'hugeicons-react';
 
 import {
  useDashboardKpis,
@@ -43,7 +30,6 @@ import type { DashboardKpis, FiscalYear, IncomeStatement } from '../../api/accou
 import { useUpcomingDeclarations } from '../../api/tax/hooks';
 import type { TaxDeclaration } from '../../api/tax/types';
 import { useDepartments } from '../../api/departments/hooks';
-import { useExpenseStats } from '../../api/expenses/hooks';
 
 /* ─── Currency formatter (XAF / fr-CM) ─────────────────────────────────── */
 
@@ -80,22 +66,25 @@ interface KpiCardProps {
  value: number;
  icon: LucideIcon;
  index: number;
+ color?: string;
 }
 
-const KpiCard = ({ label, value, icon: Icon, index }: KpiCardProps) => (
+const KpiCard = ({ label, value, icon: Icon, index, color = '#33cbcc' }: KpiCardProps) => (
  <motion.div
  custom={index}
  variants={cardVariants}
  initial="hidden"
  animate="visible"
- className="bg-white rounded-2xl p-6 relative overflow-hidden"
+ className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
  >
- <div className="relative z-10 space-y-1">
- <p className="text-sm font-medium text-gray-500 truncate">{label}</p>
- <p className="text-2xl font-bold leading-tight text-gray-800">{fmt(value)}</p>
+ <div className="px-5 py-3" style={{ backgroundColor: color }}>
+ <p className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{label}</p>
  </div>
- <div className="absolute -right-4 -bottom-4 text-[#33cbcc]/10 pointer-events-none">
- <Icon size={100} strokeWidth={1} />
+ <div className="p-5 bg-white relative overflow-hidden">
+ <p className="text-3xl font-bold text-[#1c2b3a] leading-none">{fmt(value)}</p>
+ <div className="absolute -right-4 -bottom-4 opacity-[0.14] pointer-events-none" style={{ color }}>
+ <Icon size={110} strokeWidth={1.2} />
+ </div>
  </div>
  </motion.div>
 );
@@ -163,7 +152,7 @@ const NoFiscalYearPrompt = () => {
  className="flex flex-col items-center justify-center min-h-[60vh] gap-6"
  >
  <div className="w-20 h-20 rounded-2xl bg-[#33cbcc]/10 flex items-center justify-center">
- <AlertCircle size={40} className="text-[#33cbcc]"/>
+ <Alert01Icon size={40} className="text-[#33cbcc]"/>
  </div>
  <div className="text-center max-w-md">
  <h2 className="text-2xl font-bold text-gray-800 mb-2">Aucun exercice fiscal ouvert</h2>
@@ -177,7 +166,7 @@ const NoFiscalYearPrompt = () => {
  disabled={createFY.isPending}
  className="flex items-center gap-2 px-6 py-3 bg-[#33cbcc] hover:bg-[#2bb5b6] text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
  >
- <CalendarPlus size={18} />
+ <Calendar01Icon size={18} />
  {createFY.isPending ? 'Creation en cours...' : `Ouvrir l'exercice ${year}`}
  </button>
  </motion.div>
@@ -207,9 +196,6 @@ const AccountantDashboard = () => {
  // Monthly summary (real data for chart)
  const { data: monthlySummaryData } = useMonthlySummary(fiscalYearId);
 
- // Department-filtered expense stats (for charges KPI and chart when a dept is selected)
- const { data: deptExpenseStats } = useExpenseStats(fiscalYear, selectedDeptId || undefined);
-
  // Tax declarations
  const { data: declarations = [] } = useUpcomingDeclarations();
 
@@ -228,32 +214,25 @@ const AccountantDashboard = () => {
  ];
 
  const summary = monthlySummaryData as { month: number; revenue: number; expenses: number }[] | undefined;
- const deptMonths = (deptExpenseStats as any)?.byMonth as any[] | undefined;
 
  return monthLabels.map((label, idx) => {
  const entry = summary?.find((s) => s.month === idx + 1);
- const deptMonth = deptMonths?.[idx];
  return {
  month: label,
  revenue: entry?.revenue ?? 0,
- expenses: selectedDeptId && deptMonth !== undefined
- ? Math.round(Number(deptMonth.total) || 0)
- : (entry?.expenses ?? 0),
+ expenses: entry?.expenses ?? 0,
  };
  });
- }, [monthlySummaryData, deptExpenseStats, selectedDeptId]);
+ }, [monthlySummaryData]);
 
  // Pie data for income statement summary
  const pieData = useMemo(() => {
  if (!dashboardKpis) return [];
- const expensesValue = selectedDeptId
- ? ((deptExpenseStats as any)?.totalYear ?? dashboardKpis.totalExpenses)
- : dashboardKpis.totalExpenses;
  return [
  { name: 'Revenus', value: dashboardKpis.totalRevenue },
- { name: 'Charges', value: expensesValue },
+ { name: 'Charges', value: dashboardKpis.totalExpenses },
  ].filter((d) => d.value > 0);
- }, [dashboardKpis, deptExpenseStats, selectedDeptId]);
+ }, [dashboardKpis]);
 
  // Sorted declarations
  const sortedDeclarations = useMemo(
@@ -267,10 +246,10 @@ const AccountantDashboard = () => {
  /* ── Quick actions ──────────────────────────────────────────── */
 
  const quickActions = [
- { label: 'Nouvelle ecriture', icon: PenLine, path: '/accounting/entries' },
- { label: 'Lancer la paie', icon: Banknote, path: '/accounting/payroll' },
- { label: 'Declarer TVA', icon: Receipt, path: '/accounting/tax' },
- { label: 'Voir les rapports', icon: FileBarChart, path: '/accounting/reports' },
+ { label: 'Nouvelle ecriture', icon: PencilIcon, path: '/accounting/entries' },
+ { label: 'Lancer la paie', icon: Money01Icon, path: '/accounting/payroll' },
+ { label: 'Declarer TVA', icon: Invoice01Icon, path: '/accounting/tax' },
+ { label: 'Voir les rapports', icon: File01Icon, path: '/accounting/reports' },
  ];
 
  /* ── Loading skeleton ───────────────────────────────────────── */
@@ -305,21 +284,21 @@ const AccountantDashboard = () => {
 
  /* ── KPI definitions ────────────────────────────────────────── */
 
- const deptTotalExpenses = selectedDeptId
- ? ((deptExpenseStats as any)?.totalYear ?? dashboardKpis?.totalExpenses ?? 0)
- : (dashboardKpis?.totalExpenses ?? 0);
+ // Always use journal-entries-based expenses (dashboardKpis is already dept-filtered).
+ // deptExpenseStats only covers the expenses table, missing carwash journal entries.
+ const deptTotalExpenses = dashboardKpis?.totalExpenses ?? 0;
 
  const kpiRow1 = [
- { label: 'Chiffre d\'affaires', value: dashboardKpis?.totalRevenue ?? 0, icon: TrendingUp },
- { label: 'Charges', value: deptTotalExpenses, icon: TrendingDown },
- { label: 'Resultat net', value: (dashboardKpis?.totalRevenue ?? 0) - deptTotalExpenses, icon: BarChart3 },
- { label: 'Tresorerie', value: dashboardKpis?.cashBalance ?? 0, icon: Wallet },
+ { label: 'Chiffre d\'affaires', value: dashboardKpis?.totalRevenue ?? 0, icon: ArrowUpRight01Icon, color: '#33cbcc' },
+ { label: 'Charges', value: deptTotalExpenses, icon: ArrowDownRight01Icon, color: '#ef4444' },
+ { label: 'Resultat net', value: (dashboardKpis?.totalRevenue ?? 0) - deptTotalExpenses, icon: BarChartHorizontalIcon, color: '#22c55e' },
+ { label: 'Tresorerie', value: dashboardKpis?.cashBalance ?? 0, icon: Wallet01Icon, color: '#283852' },
  ];
 
  const kpiRow2 = [
- { label: 'Creances clients', value: dashboardKpis?.receivables ?? 0, icon: Users },
- { label: 'Dettes fournisseurs', value: dashboardKpis?.payables ?? 0, icon: FileText },
- { label: 'TVA due', value: dashboardKpis?.tvaDue ?? 0, icon: Calculator },
+ { label: 'Creances clients', value: dashboardKpis?.receivables ?? 0, icon: UserGroupIcon, color: '#f59e0b' },
+ { label: 'Dettes fournisseurs', value: dashboardKpis?.payables ?? 0, icon: File01Icon, color: '#8b5cf6' },
+ { label: 'TVA due', value: dashboardKpis?.tvaDue ?? 0, icon: CalculatorIcon, color: '#283852' },
  ];
 
  /* ── Render ─────────────────────────────────────────────────── */
@@ -447,7 +426,7 @@ const AccountantDashboard = () => {
 
  {pieData.length === 0 ? (
  <div className="flex-1 flex flex-col items-center justify-center gap-3">
- <BarChart3 size={36} className="text-gray-200"/>
+ <BarChartHorizontalIcon size={36} className="text-gray-200"/>
  <p className="text-sm text-gray-400">Aucune donnee disponible</p>
  </div>
  ) : (
@@ -519,7 +498,7 @@ const AccountantDashboard = () => {
 
  {sortedDeclarations.length === 0 ? (
  <div className="flex flex-col items-center justify-center py-10 gap-3">
- <Calculator size={36} className="text-gray-200"/>
+ <CalculatorIcon size={36} className="text-gray-200"/>
  <p className="text-sm text-gray-400">Aucune obligation fiscale a venir</p>
  </div>
  ) : (

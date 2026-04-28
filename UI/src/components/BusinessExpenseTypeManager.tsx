@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { X, Plus, Pencil, Trash2, Check, Loader2, Wallet } from 'lucide-react';
+import { Cancel01Icon, Add01Icon, PencilIcon, Delete02Icon, Tick01Icon, Loading02Icon, Wallet01Icon } from 'hugeicons-react';
 import { useBusinessExpenseTypes, useCreateBusinessExpenseType, useUpdateBusinessExpenseType, useDeleteBusinessExpenseType } from '../api/business-expenses/hooks';
 
 const PRESET_COLORS = ['#33cbcc', '#283852', '#33cbcc99', '#28385280', '#33cbcc50', '#283852', '#33cbcc', '#283852'];
@@ -56,12 +56,12 @@ const BusinessExpenseTypeManager = ({ onClose }: { onClose: () => void }) => {
                 <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Wallet size={18} className="text-[#33cbcc]" />
+                            <Wallet01Icon size={18} className="text-[#33cbcc]" />
                         </div>
                         <h3 className="text-base font-bold text-gray-800">{t('businessExpenseTypes.manageTitle')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                        <X size={18} />
+                        <Cancel01Icon size={18} />
                     </button>
                 </div>
 
@@ -80,7 +80,7 @@ const BusinessExpenseTypeManager = ({ onClose }: { onClose: () => void }) => {
                             disabled={!name.trim() || createType.isPending}
                             className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors flex items-center gap-1.5"
                         >
-                            {createType.isPending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                            {createType.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Add01Icon size={14} />}
                             {t('businessExpenseTypes.add')}
                         </button>
                     </div>
@@ -98,7 +98,7 @@ const BusinessExpenseTypeManager = ({ onClose }: { onClose: () => void }) => {
 
                 <div className="px-6 py-4 max-h-[40vh] overflow-y-auto space-y-2">
                     {isLoading ? (
-                        <div className="flex justify-center py-8"><Loader2 size={24} className="animate-spin text-[#33cbcc]" /></div>
+                        <div className="flex justify-center py-8"><Loading02Icon size={24} className="animate-spin text-[#33cbcc]" /></div>
                     ) : types.length === 0 ? (
                         <p className="text-center text-sm text-gray-400 py-8">{t('businessExpenseTypes.noTypes')}</p>
                     ) : (
@@ -130,13 +130,13 @@ const BusinessExpenseTypeManager = ({ onClose }: { onClose: () => void }) => {
                                             disabled={!editName.trim() || updateType.isPending}
                                             className="p-1.5 rounded-lg bg-[#33cbcc] text-white hover:bg-[#2bb5b6] disabled:opacity-50 transition-colors"
                                         >
-                                            {updateType.isPending ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                                            {updateType.isPending ? <Loading02Icon size={13} className="animate-spin" /> : <Tick01Icon size={13} />}
                                         </button>
                                         <button
                                             onClick={() => setEditingId(null)}
                                             className="p-1.5 rounded-lg bg-gray-200 text-gray-600 hover:bg-gray-300 transition-colors"
                                         >
-                                            <X size={13} />
+                                            <Cancel01Icon size={13} />
                                         </button>
                                     </>
                                 ) : (
@@ -148,14 +148,14 @@ const BusinessExpenseTypeManager = ({ onClose }: { onClose: () => void }) => {
                                                 onClick={() => startEdit(type)}
                                                 className="p-1.5 rounded-lg hover:bg-white text-gray-400 hover:text-[#33cbcc] transition-colors"
                                             >
-                                                <Pencil size={13} />
+                                                <PencilIcon size={13} />
                                             </button>
                                             <button
                                                 onClick={() => deleteType.mutate(type.id)}
                                                 disabled={deleteType.isPending}
                                                 className="p-1.5 rounded-lg hover:bg-white text-gray-400 hover:text-[#283852] transition-colors"
                                             >
-                                                <Trash2 size={13} />
+                                                <Delete02Icon size={13} />
                                             </button>
                                         </div>
                                     </>
