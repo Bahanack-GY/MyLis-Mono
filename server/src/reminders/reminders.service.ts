@@ -13,12 +13,22 @@ export class RemindersService {
         private notificationsService: NotificationsService,
     ) {}
 
-    async create(userId: string, dto: { title: string; description?: string; dueDate: string }) {
+    async create(userId: string, dto: {
+        title: string;
+        description?: string;
+        dueDate: string;
+        dueTime?: string;
+        recurrence?: string;
+        recurrenceInterval?: number;
+    }) {
         return this.reminderModel.create({
             userId,
             title: dto.title,
             description: dto.description,
             dueDate: dto.dueDate,
+            dueTime: dto.dueTime ?? null,
+            recurrence: dto.recurrence || 'none',
+            recurrenceInterval: dto.recurrenceInterval ?? null,
         });
     }
 
@@ -29,6 +39,18 @@ export class RemindersService {
         });
     }
 
+    private getNextDueDate(dueDate: string, recurrence: string, interval: number | null): string {
+        const d = new Date(dueDate);
+        switch (recurrence) {
+            case 'daily':   d.setDate(d.getDate() + 1); break;
+            case 'weekly':  d.setDate(d.getDate() + 7); break;
+            case 'monthly': d.setMonth(d.getMonth() + 1); break;
+            case 'yearly':  d.setFullYear(d.getFullYear() + 1); break;
+            case 'custom':  d.setDate(d.getDate() + (interval || 1)); break;
+        }
+        return d.toISOString().slice(0, 10);
+    }
+
     async markDone(id: string, userId: string) {
         const reminder = await this.reminderModel.findOne({ where: { id, userId } });
         if (!reminder) {
@@ -36,7 +58,22 @@ export class RemindersService {
         }
         reminder.isCompleted = true;
         reminder.completedAt = new Date();
-        return reminder.save();
+        await reminder.save();
+
+        if (reminder.recurrence && reminder.recurrence !== 'none') {
+            const nextDate = this.getNextDueDate(reminder.dueDate, reminder.recurrence, reminder.recurrenceInterval);
+            await this.reminderModel.create({
+                userId,
+                title: reminder.title,
+                description: reminder.description,
+                dueDate: nextDate,
+                dueTime: reminder.dueTime,
+                recurrence: reminder.recurrence,
+                recurrenceInterval: reminder.recurrenceInterval,
+            });
+        }
+
+        return reminder;
     }
 
     async remove(id: string, userId: string) {

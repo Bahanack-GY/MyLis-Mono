@@ -61,7 +61,7 @@ const ReminderPopup = ({ onClose }: { onClose: () => void }) => {
         try {
             const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const playNotes = () => {
-                const playNote = (freq: number, start: number, dur: number) => {
+                const playNote = (freq: number, start: number, dur: number, vol = 0.75) => {
                     const osc = ctx.createOscillator();
                     const gain = ctx.createGain();
                     osc.connect(gain);
@@ -69,15 +69,18 @@ const ReminderPopup = ({ onClose }: { onClose: () => void }) => {
                     osc.type = 'sine';
                     osc.frequency.value = freq;
                     gain.gain.setValueAtTime(0, ctx.currentTime + start);
-                    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + start + 0.02);
+                    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + start + 0.03);
                     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
                     osc.start(ctx.currentTime + start);
                     osc.stop(ctx.currentTime + start + dur);
                 };
-                playNote(523, 0, 0.35);    // C5
-                playNote(659, 0.18, 0.35); // E5
-                playNote(784, 0.36, 0.55); // G5
-                setTimeout(() => ctx.close(), 1500);
+                // Rising arpeggio — louder and longer
+                playNote(440,  0,    0.7);   // A4
+                playNote(523,  0.22, 0.7);   // C5
+                playNote(659,  0.44, 0.8);   // E5
+                playNote(784,  0.68, 0.9);   // G5
+                playNote(1047, 0.95, 1.4);   // C6  — bright high note
+                setTimeout(() => ctx.close(), 3500);
             };
             // resume() unblocks autoplay policy — plays only if browser allows
             ctx.resume().then(playNotes).catch(() => {});

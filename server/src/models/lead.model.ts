@@ -10,8 +10,8 @@ import { LeadNeed } from './lead-need.model';
 import { Task } from './task.model';
 
 export enum SaleStage {
-    PROSPECTION = 'PROSPECTION',
     QUALIFICATION = 'QUALIFICATION',
+    IDENTIFICATION_BESOIN = 'IDENTIFICATION_BESOIN',
     PROPOSITION = 'PROPOSITION',
     NEGOCIATION = 'NEGOCIATION',
     CLOSING = 'CLOSING',
@@ -21,13 +21,17 @@ export enum SaleStage {
 
 export enum LeadType {
     PROSPECT = 'PROSPECT',
-    CLIENT_EXISTANT = 'CLIENT_EXISTANT',
+    CLIENT_ACTIF = 'CLIENT_ACTIF',
+    CLIENT_INACTIF = 'CLIENT_INACTIF',
+}
+
+export enum LeadSource {
     RECOMMANDATION = 'RECOMMANDATION',
-    APPEL_ENTRANT = 'APPEL_ENTRANT',
-    SALON = 'SALON',
-    SITE_WEB = 'SITE_WEB',
-    RESEAU_SOCIAL = 'RESEAU_SOCIAL',
+    APPEL = 'APPEL',
+    RESEAUX_SOCIAUX = 'RESEAUX_SOCIAUX',
     PARTENAIRE = 'PARTENAIRE',
+    SITE_WEB = 'SITE_WEB',
+    AUTRE = 'AUTRE',
 }
 
 export enum LeadStatus {
@@ -95,8 +99,8 @@ export class Lead extends Model {
     })
     declare potentialRevenue: number;
 
-    @Column(DataType.STRING)
-    declare source: string;
+    @Column(DataType.ENUM(...Object.values(LeadSource)))
+    declare source: LeadSource;
 
     // ── Location ──
     @Column(DataType.STRING)
@@ -183,7 +187,7 @@ export class Lead extends Model {
     @Column({
         type: DataType.ENUM(...Object.values(SaleStage)),
         allowNull: false,
-        defaultValue: SaleStage.PROSPECTION,
+        defaultValue: SaleStage.QUALIFICATION,
     })
     declare saleStage: SaleStage;
 

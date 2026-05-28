@@ -14,21 +14,21 @@ import StageChangeModal, { isForwardMove, STAGE_ORDER } from '../../components/c
 /* ── Constants ─────────────────────────────────────────────── */
 
 const STAGE_COLORS: Record<string, { bg: string; text: string; border: string; ring: string }> = {
-    PROSPECTION:  { bg: 'bg-[#283852]',    text: 'text-[#283852]',    border: 'border-gray-300',  ring: 'ring-gray-200'  },
-    QUALIFICATION:{ bg: 'bg-[#283852]',    text: 'text-[#283852]',    border: 'border-gray-300',  ring: 'ring-gray-200'  },
-    PROPOSITION:  { bg: 'bg-[#283852]',    text: 'text-[#283852]',    border: 'border-gray-300',  ring: 'ring-gray-200'  },
-    NEGOCIATION:  { bg: 'bg-[#33cbcc]',    text: 'text-[#33cbcc]',    border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
-    CLOSING:      { bg: 'bg-[#33cbcc]',    text: 'text-[#33cbcc]',    border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
-    GAGNE:        { bg: 'bg-[#33cbcc]',    text: 'text-[#33cbcc]',    border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
-    PERDU:        { bg: 'bg-gray-400',     text: 'text-gray-500',     border: 'border-gray-300',  ring: 'ring-gray-200'  },
+    QUALIFICATION:         { bg: 'bg-[#283852]', text: 'text-[#283852]', border: 'border-gray-300',  ring: 'ring-gray-200'     },
+    IDENTIFICATION_BESOIN: { bg: 'bg-[#283852]', text: 'text-[#283852]', border: 'border-gray-300',  ring: 'ring-gray-200'     },
+    PROPOSITION:           { bg: 'bg-[#283852]', text: 'text-[#283852]', border: 'border-gray-300',  ring: 'ring-gray-200'     },
+    NEGOCIATION:           { bg: 'bg-[#33cbcc]', text: 'text-[#33cbcc]', border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
+    CLOSING:               { bg: 'bg-[#33cbcc]', text: 'text-[#33cbcc]', border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
+    GAGNE:                 { bg: 'bg-[#33cbcc]', text: 'text-[#33cbcc]', border: 'border-[#33cbcc]', ring: 'ring-[#33cbcc]/20' },
+    PERDU:                 { bg: 'bg-gray-400',  text: 'text-gray-500',  border: 'border-gray-300',  ring: 'ring-gray-200'     },
 };
 
-const PIPELINE_STAGES: SaleStage[] = ['PROSPECTION', 'QUALIFICATION', 'PROPOSITION', 'NEGOCIATION', 'CLOSING'];
+const PIPELINE_STAGES: SaleStage[] = ['QUALIFICATION', 'IDENTIFICATION_BESOIN', 'PROPOSITION', 'NEGOCIATION', 'CLOSING'];
 
 const priorityColors: Record<string, string> = {
-    HOT: 'bg-[#283852]/10 text-[#283852]',
-    WARM: 'bg-[#283852]/10 text-[#283852]',
-    COLD: 'bg-[#283852]/10 text-[#283852]',
+    HOT:  'text-red-500 border border-red-300',
+    WARM: 'text-amber-500 border border-amber-300',
+    COLD: 'text-blue-400 border border-blue-200',
 };
 
 const ACTIVITY_TYPES: ActivityType[] = [
@@ -64,7 +64,7 @@ const StageRoadmap = ({
 
     // Short labels for mobile
     const shortLabels: Record<string, string> = {
-        PROSPECTION: 'Prosp.', QUALIFICATION: 'Qualif.', PROPOSITION: 'Prop.',
+        QUALIFICATION: 'Qualif.', IDENTIFICATION_BESOIN: 'Besoin', PROPOSITION: 'Prop.',
         NEGOCIATION: 'Négo.', CLOSING: 'Closing',
     };
 
@@ -288,7 +288,7 @@ export default function LeadProfileSidebar({
                                 <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
                                         <span className="text-xs font-mono text-[#33cbcc] font-bold">{lead.code}</span>
-                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${priorityColors[lead.priority] ?? 'bg-gray-100 text-gray-700'}`}>
+                                        <span className={`px-3 py-1 rounded-full text-sm font-bold ${priorityColors[lead.priority] ?? 'text-gray-500 border border-gray-300'}`}>
                                             {t(`commercial.leads.priorities.${lead.priority}`)}
                                         </span>
                                         {lead.clientId && (

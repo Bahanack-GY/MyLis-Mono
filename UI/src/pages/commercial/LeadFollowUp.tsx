@@ -35,7 +35,7 @@ const HEALTH_ORDER: Record<HealthStatus, number> = {
 };
 
 const STAGE_LABEL: Record<string, string> = {
-    PROSPECTION: 'Prospection', QUALIFICATION: 'Qualification',
+    QUALIFICATION: 'Qualification', IDENTIFICATION_BESOIN: 'Identification du Besoin',
     PROPOSITION: 'Proposition', NEGOCIATION: 'Négociation',
     CLOSING: 'Closing', GAGNE: 'Gagné', PERDU: 'Perdu',
 };
@@ -539,7 +539,7 @@ export default function LeadFollowUp() {
 
     const openLog = (lead: Lead) => setLogFor(lead);
 
-    const stages = ['PROSPECTION', 'QUALIFICATION', 'PROPOSITION', 'NEGOCIATION', 'CLOSING', 'GAGNE', 'PERDU'];
+    const stages = ['QUALIFICATION', 'IDENTIFICATION_BESOIN', 'PROPOSITION', 'NEGOCIATION', 'CLOSING', 'GAGNE', 'PERDU'];
 
     return (
         <div className="h-[calc(100vh-4rem)] md:h-screen flex flex-col bg-gray-50">

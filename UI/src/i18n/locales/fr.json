@@ -505,6 +505,7 @@
     "clientFollowUp": "Suivi Client",
     "businessExpenses": "Frais de vie",
     "reminders": "Rappels",
+    "attendance": "Présences",
     "sections": {
       "work": "Travail",
       "people": "Équipe",
@@ -513,7 +514,8 @@
       "comms": "Comms",
       "commercial": "Commercial",
       "accounting": "Comptabilité",
-      "carwash": "Carwash"
+      "carwash": "Carwash",
+      "discipline": "Discipline"
     }
   },
   "planning": {
@@ -2571,7 +2573,16 @@
       "activitySector": "Secteur d'Activité",
       "clientNeeds": "Besoin Client",
       "potentialRevenue": "CA Potentiel",
+      "department": "Département",
       "source": "Source",
+      "sources": {
+        "RECOMMANDATION": "Recommandation",
+        "APPEL": "Appel",
+        "RESEAUX_SOCIAUX": "Réseaux Sociaux",
+        "PARTENAIRE": "Partenaires",
+        "SITE_WEB": "Site Web",
+        "AUTRE": "Autres Sources"
+      },
       "country": "Pays",
       "region": "Région",
       "city": "Ville",
@@ -2621,6 +2632,7 @@
       "allStatuses": "Tous les Statuts",
       "allPriorities": "Toutes les Priorités",
       "allTypes": "Tous les Types",
+      "allCommercials": "Tous les Commerciaux",
       "noLeads": "Aucun lead trouvé",
       "showing": "Affichage {{from}}-{{to}} sur {{total}}",
       "statuses": {
@@ -2640,13 +2652,8 @@
       },
       "types": {
         "PROSPECT": "Prospect",
-        "CLIENT_EXISTANT": "Client Existant",
-        "RECOMMANDATION": "Recommandation",
-        "APPEL_ENTRANT": "Appel Entrant",
-        "SALON": "Salon",
-        "SITE_WEB": "Site Web",
-        "RESEAU_SOCIAL": "Réseau Social",
-        "PARTENAIRE": "Partenaire"
+        "CLIENT_ACTIF": "Client Actif",
+        "CLIENT_INACTIF": "Client Inactif"
       },
       "linkedTasks": "Tâches Liées",
       "noLinkedTasks": "Aucune tâche liée",
@@ -2675,13 +2682,18 @@
         "needPlaceholder": "Décrivez le besoin...",
         "assignedService": "Service associé",
         "noService": "— Aucun service —",
+        "selectDeptFirst": "Sélectionnez d'abord un département à l'étape 1",
         "defaultCold": "par défaut",
         "summary": "Récapitulatif",
         "contactCount": "Contacts",
         "needCount": "Besoins",
         "createLead": "Créer le lead",
+        "create": "Créer",
         "next": "Suivant",
-        "previous": "Précédent"
+        "previous": "Précédent",
+        "companyPlaceholder": "Nom de l'entreprise",
+        "contactNamePlaceholder": "Nom complet",
+        "contactRolePlaceholder": "Directeur, Manager..."
       }
     },
     "pipeline": {
@@ -2754,8 +2766,8 @@
       "noResults": "Aucun résultat trouvé",
       "showing": "Affichage {{from}}-{{to}} sur {{total}}",
       "stages": {
-        "PROSPECTION": "Prospection",
         "QUALIFICATION": "Qualification",
+        "IDENTIFICATION_BESOIN": "Identification du Besoin",
         "PROPOSITION": "Proposition",
         "NEGOCIATION": "Négociation",
         "CLOSING": "Conclusion",
@@ -2921,13 +2933,8 @@
     },
     "types": {
       "PROSPECT": "Prospect",
-      "CLIENT_EXISTANT": "Client Existant",
-      "RECOMMANDATION": "Recommandation",
-      "APPEL_ENTRANT": "Appel Entrant",
-      "SALON": "Salon",
-      "SITE_WEB": "Site Web",
-      "RESEAU_SOCIAL": "Réseau Social",
-      "PARTENAIRE": "Partenaire"
+      "CLIENT_ACTIF": "Client Actif",
+      "CLIENT_INACTIF": "Client Inactif"
     },
     "activityTypes": {
       "VISITE_CLIENT": "Visite Client",

@@ -22,6 +22,15 @@ export class Reminder extends Model {
     @Column({ type: DataType.DATEONLY, allowNull: false })
     declare dueDate: string;
 
+    @Column({ type: DataType.STRING(5), allowNull: true })
+    declare dueTime: string | null;
+
+    @Column({ type: DataType.STRING, defaultValue: 'none' })
+    declare recurrence: string; // 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom'
+
+    @Column({ type: DataType.INTEGER, allowNull: true })
+    declare recurrenceInterval: number | null; // in days, used when recurrence === 'custom'
+
     @Column({ type: DataType.BOOLEAN, defaultValue: false })
     declare isCompleted: boolean;
 

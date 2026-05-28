@@ -60,24 +60,24 @@ export class LeadsService {
             case SaleStage.CLOSING:
             case SaleStage.GAGNE:
                 return LeadPriority.HOT;
-            case SaleStage.QUALIFICATION:
+            case SaleStage.IDENTIFICATION_BESOIN:
             case SaleStage.PROPOSITION:
                 return LeadPriority.WARM;
-            default: // PROSPECTION, PERDU
+            default: // QUALIFICATION, PERDU
                 return LeadPriority.COLD;
         }
     }
 
     private mapStageToStatus(stage: SaleStage): LeadStatus {
         switch (stage) {
-            case SaleStage.PROSPECTION: return LeadStatus.NOUVEAU;
             case SaleStage.QUALIFICATION: return LeadStatus.QUALIFIE;
+            case SaleStage.IDENTIFICATION_BESOIN: return LeadStatus.CONTACTE;
             case SaleStage.PROPOSITION: return LeadStatus.PROPOSITION_ENVOYEE;
             case SaleStage.NEGOCIATION: return LeadStatus.NEGOCIATION;
-            case SaleStage.CLOSING: return LeadStatus.NEGOCIATION; /* map closing to negociation since no closer equivalent */
+            case SaleStage.CLOSING: return LeadStatus.NEGOCIATION;
             case SaleStage.GAGNE: return LeadStatus.GAGNE;
             case SaleStage.PERDU: return LeadStatus.PERDU;
-            default: return LeadStatus.CONTACTE;
+            default: return LeadStatus.NOUVEAU;
         }
     }
 
@@ -108,7 +108,7 @@ export class LeadsService {
 
         const { contacts, needs, ...leadData } = dto;
 
-        const saleStage = leadData.saleStage || SaleStage.PROSPECTION;
+        const saleStage = leadData.saleStage || SaleStage.QUALIFICATION;
         const leadStatus = this.mapStageToStatus(saleStage);
         // New leads always start COLD regardless of what the client sends
         const priority = LeadPriority.COLD;
@@ -116,8 +116,8 @@ export class LeadsService {
         // Set default success rate if not provided
         if (leadData.successRate === undefined || leadData.successRate === null) {
             switch (saleStage) {
-                case SaleStage.PROSPECTION: leadData.successRate = 10; break;
-                case SaleStage.QUALIFICATION: leadData.successRate = 25; break;
+                case SaleStage.QUALIFICATION: leadData.successRate = 10; break;
+                case SaleStage.IDENTIFICATION_BESOIN: leadData.successRate = 25; break;
                 case SaleStage.PROPOSITION: leadData.successRate = 50; break;
                 case SaleStage.NEGOCIATION: leadData.successRate = 70; break;
                 case SaleStage.CLOSING: leadData.successRate = 90; break;
@@ -271,8 +271,8 @@ export class LeadsService {
                 leadData.successRate = 0;
             } else if (leadData.successRate === undefined || leadData.successRate === null) {
                 switch (leadData.saleStage) {
-                    case SaleStage.PROSPECTION: leadData.successRate = 10; break;
-                    case SaleStage.QUALIFICATION: leadData.successRate = 25; break;
+                    case SaleStage.QUALIFICATION: leadData.successRate = 10; break;
+                    case SaleStage.IDENTIFICATION_BESOIN: leadData.successRate = 25; break;
                     case SaleStage.PROPOSITION: leadData.successRate = 50; break;
                     case SaleStage.NEGOCIATION: leadData.successRate = 70; break;
                     case SaleStage.CLOSING: leadData.successRate = 90; break;
@@ -395,9 +395,11 @@ export class LeadsService {
         const revenueTrendMap: Record<string, number> = {};
 
         leads.forEach(lead => {
+            if (!byStage[lead.saleStage]) byStage[lead.saleStage] = { count: 0, value: 0 };
             byStage[lead.saleStage].count++;
             byStage[lead.saleStage].value += Number(lead.potentialRevenue) || 0;
-            byStatus[lead.leadStatus]++;
+            if (byStatus[lead.leadStatus] !== undefined) byStatus[lead.leadStatus]++;
+            else byStatus[lead.leadStatus] = 1;
 
             // Count by leadType (source)
             const src = lead.leadType || 'AUTRE';

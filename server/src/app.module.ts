@@ -38,6 +38,7 @@ import { FundMovementsModule } from './fund-movements/fund-movements.module';
 import { CarwashModule } from './carwash/carwash.module';
 import { AiChatModule } from './ai-chat/ai-chat.module';
 import { RemindersModule } from './reminders/reminders.module';
+import { AttendanceModule } from './attendance/attendance.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RolesGuard } from './auth/roles.guard';
 import { ActivityInterceptor } from './logs/activity.interceptor';
@@ -97,6 +98,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     CarwashModule,
     AiChatModule,
     RemindersModule,
+    AttendanceModule,
   ],
   controllers: [AppController],
   providers: [

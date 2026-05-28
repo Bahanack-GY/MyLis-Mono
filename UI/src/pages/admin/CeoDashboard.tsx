@@ -131,15 +131,21 @@ const KpiCard = ({ label, value, sub, icon: Icon, accent = TEAL, index, onClick 
 interface DateFilterProps {
     preset: DatePreset;
     setPreset: (p: DatePreset) => void;
-    customFrom: string;
-    setCustomFrom: (v: string) => void;
-    customTo: string;
-    setCustomTo: (v: string) => void;
+    draftFrom: string;
+    setDraftFrom: (v: string) => void;
+    draftTo: string;
+    setDraftTo: (v: string) => void;
+    onApply: () => void;
 }
 
-const DateFilter = ({ preset, setPreset, customFrom, setCustomFrom, customTo, setCustomTo }: DateFilterProps) => {
+const DateFilter = ({ preset, setPreset, draftFrom, setDraftFrom, draftTo, setDraftTo, onApply }: DateFilterProps) => {
     const [open, setOpen] = useState(false);
     const presets: DatePreset[] = ['today', 'this_week', 'this_month', 'this_year', 'custom'];
+
+    const handleApply = () => {
+        onApply();
+        setOpen(false);
+    };
 
     return (
         <div className="relative">
@@ -179,8 +185,8 @@ const DateFilter = ({ preset, setPreset, customFrom, setCustomFrom, customTo, se
                                     <label className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Du</label>
                                     <input
                                         type="date"
-                                        value={customFrom}
-                                        onChange={e => setCustomFrom(e.target.value)}
+                                        value={draftFrom}
+                                        onChange={e => setDraftFrom(e.target.value)}
                                         className="w-full mt-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-[#33cbcc]"
                                     />
                                 </div>
@@ -188,14 +194,15 @@ const DateFilter = ({ preset, setPreset, customFrom, setCustomFrom, customTo, se
                                     <label className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Au</label>
                                     <input
                                         type="date"
-                                        value={customTo}
-                                        onChange={e => setCustomTo(e.target.value)}
+                                        value={draftTo}
+                                        onChange={e => setDraftTo(e.target.value)}
                                         className="w-full mt-1 px-3 py-1.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-[#33cbcc]"
                                     />
                                 </div>
                                 <button
-                                    onClick={() => setOpen(false)}
-                                    className="w-full px-3 py-2 bg-[#33cbcc] text-white text-sm font-semibold rounded-lg hover:bg-[#2bb5b6] transition-colors"
+                                    onClick={handleApply}
+                                    disabled={!draftFrom || !draftTo}
+                                    className="w-full px-3 py-2 bg-[#33cbcc] text-white text-sm font-semibold rounded-lg hover:bg-[#2bb5b6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                                 >
                                     Appliquer
                                 </button>
@@ -210,17 +217,54 @@ const DateFilter = ({ preset, setPreset, customFrom, setCustomFrom, customTo, se
 
 /* ─── Main Component ─────────────────────────────────────── */
 
+const CEO_FILTER_KEY = 'ceo_dashboard_filter';
+
+function loadCeoFilter() {
+    try {
+        const raw = localStorage.getItem(CEO_FILTER_KEY);
+        if (raw) return JSON.parse(raw) as { preset: DatePreset; from: string; to: string };
+    } catch { /* ignore */ }
+    return null;
+}
+
 const CeoDashboard = () => {
     const navigate = useNavigate();
 
+    const saved = loadCeoFilter();
     const [selectedDeptId, setSelectedDeptId] = useState('');
-    const [datePreset, setDatePreset] = useState<DatePreset>('this_month');
-    const [customFrom, setCustomFrom] = useState('');
-    const [customTo, setCustomTo] = useState('');
+
+    // uiPreset: controls which option is highlighted in the dropdown (UI only, does NOT trigger fetch)
+    const [uiPreset, setUiPreset] = useState<DatePreset>(saved?.preset ?? 'this_month');
+    // draft: what the user is typing in the date inputs (does NOT trigger fetch)
+    const [draftFrom, setDraftFrom] = useState(saved?.from ?? '');
+    const [draftTo, setDraftTo] = useState(saved?.to ?? '');
+    // committed: the only thing that drives the actual data fetch
+    const [committed, setCommitted] = useState<{ preset: DatePreset; from: string; to: string }>({
+        preset: saved?.preset ?? 'this_month',
+        from: saved?.from ?? '',
+        to: saved?.to ?? '',
+    });
+
+    const handlePresetChange = (p: DatePreset) => {
+        setUiPreset(p);
+        if (p !== 'custom') {
+            // Non-custom presets apply immediately
+            const next = { preset: p, from: '', to: '' };
+            setCommitted(next);
+            localStorage.setItem(CEO_FILTER_KEY, JSON.stringify(next));
+        }
+        // custom: just shows the inputs — nothing commits until Appliquer is clicked
+    };
+
+    const handleApplyCustom = () => {
+        const next = { preset: 'custom' as DatePreset, from: draftFrom, to: draftTo };
+        setCommitted(next);
+        localStorage.setItem(CEO_FILTER_KEY, JSON.stringify(next));
+    };
 
     const { from, to } = useMemo(
-        () => getDateRange(datePreset, customFrom, customTo),
-        [datePreset, customFrom, customTo],
+        () => getDateRange(committed.preset, committed.from, committed.to),
+        [committed],
     );
 
     /* ── Data ───────────────────────────────────────── */
@@ -239,7 +283,9 @@ const CeoDashboard = () => {
     /* ── KPI derivations ────────────────────────────── */
 
     const revenue = invoiceStats?.totalRevenue ?? 0;
-    const expenses = (expenseStats?.totalYear ?? 0) + (expenseStats?.totalProjects ?? 0);
+    // Use only actually-recorded expenses; project budgets are anticipated allocations,
+    // not money spent, and would inflate the figure when nothing has been recorded yet.
+    const expenses = expenseStats?.totalYear ?? 0;
     const netProfit = revenue - expenses;
     const pendingAmount = invoiceStats?.totalPending ?? 0;
     const pendingCount = invoiceStats?.countByStatus?.SENT ?? 0;
@@ -312,7 +358,7 @@ const CeoDashboard = () => {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold text-gray-800">Vue Directeur</h1>
-                        <p className="text-sm text-gray-400 mt-0.5">Synthèse globale — {PRESET_LABELS[datePreset]}</p>
+                        <p className="text-sm text-gray-400 mt-0.5">Synthèse globale — {PRESET_LABELS[committed.preset]}</p>
                     </div>
                 </div>
 
@@ -331,12 +377,13 @@ const CeoDashboard = () => {
 
                     {/* Date filter */}
                     <DateFilter
-                        preset={datePreset}
-                        setPreset={setDatePreset}
-                        customFrom={customFrom}
-                        setCustomFrom={setCustomFrom}
-                        customTo={customTo}
-                        setCustomTo={setCustomTo}
+                        preset={uiPreset}
+                        setPreset={handlePresetChange}
+                        draftFrom={draftFrom}
+                        setDraftFrom={setDraftFrom}
+                        draftTo={draftTo}
+                        setDraftTo={setDraftTo}
+                        onApply={handleApplyCustom}
                     />
                 </div>
             </motion.div>
@@ -347,7 +394,7 @@ const CeoDashboard = () => {
                     index={0}
                     label="Chiffre d'affaires"
                     value={fmt(revenue)}
-                    sub={PRESET_LABELS[datePreset]}
+                    sub={PRESET_LABELS[committed.preset]}
                     icon={ArrowUpRight01Icon}
                     accent={TEAL}
                     onClick={() => navigate('/invoices')}
@@ -496,7 +543,7 @@ const CeoDashboard = () => {
                     <div className="mb-6">
                         <h3 className="text-base font-bold text-gray-800">Revenus par département</h3>
                         <p className="text-xs text-gray-400 mt-0.5">
-                            Factures encaissées · {PRESET_LABELS[datePreset]}
+                            Factures encaissées · {PRESET_LABELS[committed.preset]}
                         </p>
                     </div>
                     <div className="h-[240px]">
@@ -675,7 +722,7 @@ const CeoDashboard = () => {
                     <div className="flex items-center justify-between mb-5">
                         <div>
                             <h3 className="text-base font-bold text-gray-800">Demandes des employés</h3>
-                            <p className="text-xs text-gray-400 mt-0.5">{PRESET_LABELS[datePreset]}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{PRESET_LABELS[committed.preset]}</p>
                         </div>
                         <button
                             onClick={() => navigate('/demands')}

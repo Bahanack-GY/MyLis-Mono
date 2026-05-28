@@ -2538,13 +2538,13 @@ const FormationsView = ({ employee: _employee }: { employee: Employee }) => {
 // PROSPECTS VIEW (Commercial role)
 // ============================================================
 const stageConfig: Record<string, { color: string; bg: string }> = {
-    PROSPECTION: { color: '#6366f1', bg: '#eef2ff' },
-    QUALIFICATION: { color: '#8b5cf6', bg: '#f5f3ff' },
-    PROPOSITION: { color: '#f59e0b', bg: '#fffbeb' },
-    NEGOCIATION: { color: '#3b82f6', bg: '#eff6ff' },
-    CLOSING: { color: '#10b981', bg: '#ecfdf5' },
-    GAGNE: { color: '#22c55e', bg: '#f0fdf4' },
-    PERDU: { color: '#ef4444', bg: '#fef2f2' },
+    QUALIFICATION:         { color: '#6366f1', bg: '#eef2ff' },
+    IDENTIFICATION_BESOIN: { color: '#8b5cf6', bg: '#f5f3ff' },
+    PROPOSITION:           { color: '#f59e0b', bg: '#fffbeb' },
+    NEGOCIATION:           { color: '#3b82f6', bg: '#eff6ff' },
+    CLOSING:               { color: '#10b981', bg: '#ecfdf5' },
+    GAGNE:                 { color: '#22c55e', bg: '#f0fdf4' },
+    PERDU:                 { color: '#ef4444', bg: '#fef2f2' },
 };
 
 const priorityConfig: Record<string, { color: string; bg: string }> = {

@@ -6,8 +6,8 @@ import type { SaleStage } from '../../api/commercial/types';
 /* ── Stage metadata ────────────────────────────────────────── */
 
 export const STAGE_ORDER: Record<SaleStage, number> = {
-    PROSPECTION: 0,
-    QUALIFICATION: 1,
+    QUALIFICATION: 0,
+    IDENTIFICATION_BESOIN: 1,
     PROPOSITION: 2,
     NEGOCIATION: 3,
     CLOSING: 4,
@@ -16,13 +16,13 @@ export const STAGE_ORDER: Record<SaleStage, number> = {
 };
 
 export const STAGE_COLORS: Record<SaleStage, { bg: string; text: string; border: string }> = {
-    PROSPECTION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
-    QUALIFICATION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
-    PROPOSITION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
-    NEGOCIATION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
-    CLOSING: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-200' },
-    GAGNE: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-200' },
-    PERDU: { bg: 'bg-gray-100', text: 'text-gray-400', border: 'border-gray-200' },
+    QUALIFICATION:        { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    IDENTIFICATION_BESOIN:{ bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    PROPOSITION:          { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-200' },
+    NEGOCIATION:          { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-200' },
+    CLOSING:              { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-200' },
+    GAGNE:                { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-200' },
+    PERDU:                { bg: 'bg-gray-100',     text: 'text-gray-400',  border: 'border-gray-200' },
 };
 
 /**
@@ -31,7 +31,7 @@ export const STAGE_COLORS: Record<SaleStage, { bg: string; text: string; border:
 export function isForwardMove(from: SaleStage, to: SaleStage): boolean {
     if (from === 'GAGNE' || from === 'PERDU') return false; // locked
     if (to === 'PERDU') return true;                        // lost is always reachable
-    return STAGE_ORDER[to] > STAGE_ORDER[from];
+    return STAGE_ORDER[to] === STAGE_ORDER[from] + 1;
 }
 
 /* ── Component ─────────────────────────────────────────────── */
@@ -110,7 +110,9 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
                             <p className="text-xs text-[#283852]">
                                 {from === 'GAGNE' || from === 'PERDU'
                                     ? t('commercial.stageModal.lockedMsg', 'Ce lead est verrouillé et ne peut plus être modifié.')
-                                    : t('commercial.stageModal.backwardMsg', 'Il n\'est pas possible de revenir à un stade précédent.')}
+                                    : STAGE_ORDER[to] < STAGE_ORDER[from]
+                                    ? t('commercial.stageModal.backwardMsg', 'Il n\'est pas possible de revenir à un stade précédent.')
+                                    : t('commercial.stageModal.skipMsg', 'Vous ne pouvez avancer que d\'un stade à la fois.')}
                             </p>
                         </div>
                     ) : isLost ? (

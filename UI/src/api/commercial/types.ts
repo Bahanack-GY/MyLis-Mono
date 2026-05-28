@@ -1,6 +1,7 @@
-export type SaleStage = 'PROSPECTION' | 'QUALIFICATION' | 'PROPOSITION' | 'NEGOCIATION' | 'CLOSING' | 'GAGNE' | 'PERDU';
+export type SaleStage = 'QUALIFICATION' | 'IDENTIFICATION_BESOIN' | 'PROPOSITION' | 'NEGOCIATION' | 'CLOSING' | 'GAGNE' | 'PERDU';
 export type LeadStatus = 'NOUVEAU' | 'CONTACTE' | 'QUALIFIE' | 'PROPOSITION_ENVOYEE' | 'NEGOCIATION' | 'GAGNE' | 'PERDU' | 'EN_ATTENTE';
-export type LeadType = 'PROSPECT' | 'CLIENT_EXISTANT' | 'RECOMMANDATION' | 'APPEL_ENTRANT' | 'SALON' | 'SITE_WEB' | 'RESEAU_SOCIAL' | 'PARTENAIRE';
+export type LeadType = 'PROSPECT' | 'CLIENT_ACTIF' | 'CLIENT_INACTIF';
+export type LeadSource = 'RECOMMANDATION' | 'APPEL' | 'RESEAUX_SOCIAUX' | 'PARTENAIRE' | 'SITE_WEB' | 'AUTRE';
 export type LeadPriority = 'HOT' | 'WARM' | 'COLD';
 export type ActivityType = 'VISITE_CLIENT' | 'VISITE_PROSPECT' | 'APPEL' | 'EMAIL' | 'REUNION' | 'DEMO' | 'RELANCE' | 'AUTRE';
 export type ActivityStatus = 'PLANNED' | 'COMPLETED' | 'CANCELLED';

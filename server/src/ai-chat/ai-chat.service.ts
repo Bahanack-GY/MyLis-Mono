@@ -44,8 +44,11 @@ export class AiChatService {
     async chat(message: string, history: ChatMessage[]): Promise<string> {
         if (!this.geminiApiKey) throw new Error('GEMINI_API_KEY is not set');
 
-        const context = await this.gatherContext();
-        const systemInstruction = this.buildSystemPrompt(context);
+        const [context, attendance] = await Promise.all([
+            this.gatherContext(),
+            this.gatherAttendanceContext(),
+        ]);
+        const systemInstruction = this.buildSystemPrompt({ ...context, attendance });
 
         const genAI = new GoogleGenerativeAI(this.geminiApiKey);
         const model = genAI.getGenerativeModel({
@@ -704,6 +707,146 @@ export class AiChatService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // DISCIPLINE / ATTENDANCE
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Pulls attendance uploads + records for the last 3 imported periods, joins
+     * each row against the HR roster (so punch-machine entries like "Admin" /
+     * "Test" / "BOSS" are dropped), and computes weekday-only metrics:
+     *   - presentWorkdays / workdayCount
+     *   - lateDays  (first SW after 08:15)
+     *   - punctuality + assiduity rates, average arrival time
+     * Saturday & Sunday are excluded from both denominators.
+     */
+    private async gatherAttendanceContext(): Promise<Record<string, any>> {
+        const LATE_THRESHOLD = 8 * 60 + 15; // minutes since midnight
+
+        const [periodsRaw, latestRaw, hrRaw] = await Promise.all([
+            this.sequelize.query(
+                `SELECT id, year, month, "fileName", "employeeCount", "daysCount", "createdAt"
+                 FROM attendance_uploads
+                 ORDER BY year DESC, month DESC`,
+                { raw: true },
+            ),
+            this.sequelize.query(
+                `SELECT au.year, au.month, au."fileName", au."daysCount",
+                        ar."employeeName", ar.department, ar.days,
+                        ar."presentDays", ar."absentDays"
+                 FROM attendance_uploads au
+                 JOIN attendance_records ar ON ar."uploadId" = au.id
+                 WHERE (au.year, au.month) IN (
+                    SELECT year, month FROM attendance_uploads
+                    ORDER BY year DESC, month DESC LIMIT 3
+                 )
+                 ORDER BY au.year DESC, au.month DESC, ar."employeeName" ASC`,
+                { raw: true },
+            ),
+            this.sequelize.query(
+                `SELECT "firstName", "lastName"
+                 FROM "Employees" WHERE "dismissedAt" IS NULL`,
+                { raw: true },
+            ),
+        ]);
+
+        const periods = (periodsRaw as any)[0] as any[];
+        const records = (latestRaw as any)[0] as any[];
+        const roster = (hrRaw as any)[0] as any[];
+
+        if (!periods || periods.length === 0) {
+            return { hasData: false, periods: [], months: [] };
+        }
+
+        // Build HR matcher (same logic the frontend uses)
+        const matchers = roster
+            .map((e: any) => ({
+                first: normaliseChatName(e.firstName ?? '').split(' ').filter(Boolean),
+                last: normaliseChatName(e.lastName ?? '').split(' ').filter(Boolean),
+            }))
+            .filter((m: any) => m.first.length > 0 || m.last.length > 0);
+
+        const isKnown = (name: string) => {
+            const tokens = new Set(normaliseChatName(name).split(' ').filter(Boolean));
+            if (tokens.size === 0) return false;
+            return matchers.some(({ first, last }: any) => {
+                const firstHit = first.length === 0 || first.some((t: string) => tokens.has(t));
+                const lastHit = last.length === 0 || last.some((t: string) => tokens.has(t));
+                return firstHit && lastHit;
+            });
+        };
+
+        // Group rows by year-month
+        type Row = {
+            year: number; month: number; fileName: string; daysCount: number;
+            employeeName: string; department: string | null; days: any[];
+            presentDays: number; absentDays: number;
+        };
+        const grouped = new Map<string, Row[]>();
+        for (const r of records as Row[]) {
+            const key = `${r.year}-${r.month}`;
+            if (!grouped.has(key)) grouped.set(key, []);
+            grouped.get(key)!.push(r);
+        }
+
+        const months: any[] = [];
+        for (const [key, rows] of grouped) {
+            const [yStr, mStr] = key.split('-');
+            const year = parseInt(yStr, 10);
+            const month = parseInt(mStr, 10);
+            const knownRows = rows.filter(r => isKnown(r.employeeName));
+
+            const employeeMetrics = knownRows.map(r => computeChatMetrics(r, year, month, LATE_THRESHOLD));
+
+            // Aggregates
+            const totalPresent = employeeMetrics.reduce((s, m) => s + m.presentWorkdays, 0);
+            const totalAbsent = employeeMetrics.reduce((s, m) => s + (m.workdayCount - m.presentWorkdays), 0);
+            const totalLate = employeeMetrics.reduce((s, m) => s + m.lateDays, 0);
+
+            // Champions (require at least one weekday present)
+            const candidates = employeeMetrics.filter(m => m.presentWorkdays > 0);
+            const mostPunctual = [...candidates].sort((a, b) =>
+                b.punctualityRate - a.punctualityRate
+                || b.presentWorkdays - a.presentWorkdays
+                || (a.avgArrivalMin ?? Infinity) - (b.avgArrivalMin ?? Infinity)
+            )[0] ?? null;
+            const mostDiligent = [...candidates].sort((a, b) =>
+                b.assiduityRate - a.assiduityRate
+                || a.lateDays - b.lateDays
+            )[0] ?? null;
+            const mostLate = [...employeeMetrics]
+                .filter(m => m.lateDays > 0)
+                .sort((a, b) => b.lateDays - a.lateDays)[0] ?? null;
+
+            // Per-employee ranked listing (capped)
+            const ranked = [...employeeMetrics].sort((a, b) =>
+                b.presentWorkdays - a.presentWorkdays || a.lateDays - b.lateDays
+            );
+
+            months.push({
+                year, month,
+                fileName: rows[0]?.fileName ?? null,
+                daysCount: rows[0]?.daysCount ?? 0,
+                knownEmployees: knownRows.length,
+                unknownEmployees: rows.length - knownRows.length,
+                totalPresent, totalAbsent, totalLate,
+                mostPunctual, mostDiligent, mostLate,
+                employees: ranked,
+            });
+        }
+
+        return {
+            hasData: true,
+            lateThreshold: '08:15',
+            periods: periods.map((p: any) => ({
+                year: p.year, month: p.month, fileName: p.fileName,
+                employeeCount: p.employeeCount, daysCount: p.daysCount,
+                createdAt: p.createdAt,
+            })),
+            months,
+        };
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // SYSTEM PROMPT BUILDER
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -1092,8 +1235,146 @@ ${carwashSummaryLine}
 Par station:
 ${carwashStationLines}
 
+╔══════════════════════════════════════════════════════════════╗
+  DISCIPLINE — PRÉSENCES & PONCTUALITÉ
+╚══════════════════════════════════════════════════════════════╝
+${buildDisciplineSection(ctx.attendance, fmtDate)}
+
 ══════════════════════════════════════════════════════════════
 Pour les montants, utilise toujours le format XAF.
 Sois concis mais complet. Si l'utilisateur demande un filtre (ex: "pour le département X", "cette semaine", "cet employé"), utilise les données de la section appropriée.`;
     }
 }
+
+/* ─── Attendance / discipline helpers (module-scope) ─────────────────────── */
+
+interface ChatEmployeeMetrics {
+    name: string;
+    department: string | null;
+    workdayCount: number;
+    presentWorkdays: number;
+    lateDays: number;
+    onTimeWorkdays: number;
+    avgArrivalMin: number | null;
+    punctualityRate: number;
+    assiduityRate: number;
+}
+
+function normaliseChatName(s: string): string {
+    return s
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}+/gu, '')
+        .replace(/[^a-z0-9 ]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function isWeekendDay(year: number, month: number, day: number): boolean {
+    const wd = new Date(year, month - 1, day).getDay();
+    return wd === 0 || wd === 6;
+}
+
+function parseHHMM(s: string | null | undefined): number | null {
+    if (!s) return null;
+    const m = s.match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return null;
+    return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+}
+
+function fmtMin(mins: number | null): string {
+    if (mins == null) return '--:--';
+    const h = Math.floor(mins / 60).toString().padStart(2, '0');
+    const m = Math.floor(mins % 60).toString().padStart(2, '0');
+    return `${h}:${m}`;
+}
+
+function computeChatMetrics(
+    rec: { employeeName: string; department: string | null; days: any[] },
+    year: number,
+    month: number,
+    lateThreshold: number,
+): ChatEmployeeMetrics {
+    let workdayCount = 0;
+    let presentWorkdays = 0;
+    let lateDays = 0;
+    const arrivals: number[] = [];
+
+    for (const d of rec.days ?? []) {
+        if (isWeekendDay(year, month, d.day)) continue;
+        workdayCount++;
+        const pairs = d.pairs ?? [];
+        const firstSw = pairs
+            .map((p: any) => parseHHMM(p.sw))
+            .filter((v: number | null): v is number => v != null)
+            .sort((a: number, b: number) => a - b)[0];
+        const hasActivity = pairs.some((p: any) => p.sw || p.ew);
+        if (!hasActivity) continue;
+        presentWorkdays++;
+        if (firstSw != null) {
+            arrivals.push(firstSw);
+            if (firstSw > lateThreshold) lateDays++;
+        }
+    }
+
+    const onTimeWorkdays = presentWorkdays - lateDays;
+    return {
+        name: rec.employeeName,
+        department: rec.department,
+        workdayCount,
+        presentWorkdays,
+        lateDays,
+        onTimeWorkdays,
+        avgArrivalMin: arrivals.length
+            ? Math.round(arrivals.reduce((s, v) => s + v, 0) / arrivals.length)
+            : null,
+        punctualityRate: presentWorkdays > 0 ? onTimeWorkdays / presentWorkdays : 0,
+        assiduityRate: workdayCount > 0 ? presentWorkdays / workdayCount : 0,
+    };
+}
+
+const MONTH_LABELS_FR = [
+    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+];
+
+function buildDisciplineSection(att: any, _fmtDate: (d: any) => string): string {
+    if (!att?.hasData) {
+        return 'Aucun relevé de présence importé pour le moment.';
+    }
+    const pct = (x: number) => `${Math.round(x * 100)}%`;
+    const periodList = att.periods
+        .map((p: any) => `    ${MONTH_LABELS_FR[p.month - 1]} ${p.year} — ${p.employeeCount} employés / ${p.daysCount} jours (${p.fileName})`)
+        .join('\n');
+
+    const monthSections = att.months.map((m: any) => {
+        const champ = (label: string, emp: ChatEmployeeMetrics | null, extra: string) =>
+            emp ? `    ${label}: ${emp.name}${emp.department ? ` (${emp.department})` : ''} — ${extra}` : `    ${label}: aucun candidat`;
+
+        const empLines = m.employees.length === 0
+            ? '    Aucun employé reconnu pour cette période.'
+            : m.employees.map((e: ChatEmployeeMetrics) => {
+                const dept = e.department ? ` [${e.department}]` : '';
+                return `    • ${e.name}${dept}: présent ${e.presentWorkdays}/${e.workdayCount} (${pct(e.assiduityRate)}) | retards ${e.lateDays} | ponctualité ${pct(e.punctualityRate)} | arrivée moy. ${fmtMin(e.avgArrivalMin)}`;
+            }).join('\n');
+
+        return `── ${MONTH_LABELS_FR[m.month - 1]} ${m.year} ─────────────
+  Source: ${m.fileName ?? 'N/A'} | ${m.daysCount} jours couverts
+  Employés reconnus: ${m.knownEmployees}${m.unknownEmployees ? ` (${m.unknownEmployees} non reconnus ignorés)` : ''}
+  Présences cumulées: ${m.totalPresent} | Absences: ${m.totalAbsent} | Retards (>${att.lateThreshold}): ${m.totalLate}
+${champ('Plus ponctuel', m.mostPunctual, m.mostPunctual ? `${pct(m.mostPunctual.punctualityRate)} (${m.mostPunctual.onTimeWorkdays}/${m.mostPunctual.presentWorkdays} à l'heure, ${m.mostPunctual.lateDays} retard(s))` : '')}
+${champ('Plus assidu', m.mostDiligent, m.mostDiligent ? `${pct(m.mostDiligent.assiduityRate)} (${m.mostDiligent.presentWorkdays}/${m.mostDiligent.workdayCount} jours présents)` : '')}
+${champ('Le plus en retard', m.mostLate, m.mostLate ? `${m.mostLate.lateDays} retard(s)` : '')}
+  Détail par employé:
+${empLines}`;
+    }).join('\n\n');
+
+    return `Règle: arrivée après ${att.lateThreshold} = retard. Les samedis et dimanches ne sont PAS comptabilisés.
+Seuls les employés présents dans la base RH sont inclus (les autres noms du système de pointage sont ignorés).
+
+Périodes disponibles (${att.periods.length}):
+${periodList}
+
+${monthSections}`;
+}
+

@@ -6,6 +6,9 @@ export interface Reminder {
     title: string;
     description?: string;
     dueDate: string;
+    dueTime?: string | null;
+    recurrence?: string;
+    recurrenceInterval?: number | null;
     isCompleted: boolean;
     completedAt: string | null;
     createdAt: string;
@@ -15,6 +18,9 @@ export interface CreateReminderDto {
     title: string;
     description?: string;
     dueDate: string;
+    dueTime?: string;
+    recurrence?: string;
+    recurrenceInterval?: number;
 }
 
 export const remindersApi = {

@@ -13,17 +13,17 @@ import LeadProfileSidebar from './LeadProfileSidebar';
 
 /* ─── Constants ─────────────────────────────────────────── */
 
-const PIPELINE_STAGES: SaleStage[] = ['PROSPECTION', 'QUALIFICATION', 'PROPOSITION', 'NEGOCIATION', 'CLOSING'];
+const PIPELINE_STAGES: SaleStage[] = ['QUALIFICATION', 'IDENTIFICATION_BESOIN', 'PROPOSITION', 'NEGOCIATION', 'CLOSING'];
 const ALL_STAGES: SaleStage[] = [...PIPELINE_STAGES, 'GAGNE', 'PERDU'];
 
 const STAGE_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-    PROSPECTION: { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-300' },
-    QUALIFICATION: { bg: 'bg-[#283852]/15', text: 'text-[#283852]', border: 'border-gray-300' },
-    PROPOSITION: { bg: 'bg-[#283852]/20', text: 'text-[#283852]', border: 'border-gray-300' },
-    NEGOCIATION: { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-300' },
-    CLOSING: { bg: 'bg-[#33cbcc]/20', text: 'text-[#33cbcc]', border: 'border-gray-300' },
-    GAGNE: { bg: 'bg-[#33cbcc]', text: 'text-white', border: 'border-gray-300' },
-    PERDU: { bg: 'bg-gray-200', text: 'text-gray-500', border: 'border-gray-300' },
+    QUALIFICATION:         { bg: 'bg-[#283852]/10', text: 'text-[#283852]', border: 'border-gray-300' },
+    IDENTIFICATION_BESOIN: { bg: 'bg-[#283852]/15', text: 'text-[#283852]', border: 'border-gray-300' },
+    PROPOSITION:           { bg: 'bg-[#283852]/20', text: 'text-[#283852]', border: 'border-gray-300' },
+    NEGOCIATION:           { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]', border: 'border-gray-300' },
+    CLOSING:               { bg: 'bg-[#33cbcc]/20', text: 'text-[#33cbcc]', border: 'border-gray-300' },
+    GAGNE:                 { bg: 'bg-[#33cbcc]',    text: 'text-white',     border: 'border-gray-300' },
+    PERDU:                 { bg: 'bg-gray-200',     text: 'text-gray-500',  border: 'border-gray-300' },
 };
 
 const ACTIVITY_TYPES: ActivityType[] = [
@@ -1151,7 +1151,7 @@ const SalesPipeline = () => {
                                 </tr>
                             ) : (
                                 leads.map((lead, i) => {
-                                    const colors = STAGE_COLORS[lead.saleStage] || STAGE_COLORS.PROSPECTION;
+                                    const colors = STAGE_COLORS[lead.saleStage] || STAGE_COLORS.QUALIFICATION;
                                     const overdue = isOverdue(lead);
                                     const successColor =
                                         lead.successRate > 70 ? 'text-[#33cbcc]' :

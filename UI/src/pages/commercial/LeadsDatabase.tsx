@@ -519,11 +519,15 @@ export default function LeadsDatabase() {
     const { role } = useAuth();
     const isManager = role === 'MANAGER';
 
+    const { data: employees } = useEmployees();
+    const commercials = (employees || []).filter(e => e.user?.role === 'COMMERCIAL');
+
     // Filters
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
     const [filterPriority, setFilterPriority] = useState('');
     const [filterType, setFilterType] = useState('');
+    const [filterCommercial, setFilterCommercial] = useState('');
     const [page, setPage] = useState(1);
     const limit = 20;
 
@@ -546,6 +550,7 @@ export default function LeadsDatabase() {
     if (filterStatus) filters.leadStatus = filterStatus;
     if (filterPriority) filters.priority = filterPriority;
     if (filterType) filters.leadType = filterType;
+    if (filterCommercial) filters.assignedToId = filterCommercial;
     if (search) filters.search = search;
 
     const { data, isLoading } = useLeads(filters);
@@ -666,6 +671,22 @@ export default function LeadsDatabase() {
                         {leadTypes.map(lt => (
                             <option key={lt} value={lt}>
                                 {t(`commercial.leads.types.${lt}`)}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        value={filterCommercial}
+                        onChange={e => {
+                            setFilterCommercial(e.target.value);
+                            setPage(1);
+                        }}
+                        className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] transition-colors outline-none text-gray-800 text-sm"
+                    >
+                        <option value="">{t('commercial.leads.allCommercials')}</option>
+                        {commercials.map(emp => (
+                            <option key={emp.id} value={emp.id}>
+                                {emp.firstName} {emp.lastName}
                             </option>
                         ))}
                     </select>

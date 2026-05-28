@@ -505,6 +505,7 @@
     "clientFollowUp": "Follow-Up",
     "businessExpenses": "Living Expenses",
     "reminders": "Reminders",
+    "attendance": "Attendance",
     "sections": {
       "work": "Work",
       "people": "People",
@@ -513,7 +514,8 @@
       "comms": "Comms",
       "commercial": "Commercial",
       "accounting": "Accounting",
-      "carwash": "Carwash"
+      "carwash": "Carwash",
+      "discipline": "Discipline"
     }
   },
   "planning": {
@@ -2580,13 +2582,18 @@
         "needPlaceholder": "Describe the need...",
         "assignedService": "Assigned service",
         "noService": "— No service —",
+        "selectDeptFirst": "Please select a department in step 1 first",
         "defaultCold": "default",
         "summary": "Summary",
         "contactCount": "Contacts",
         "needCount": "Needs",
         "createLead": "Create lead",
+        "create": "Create",
         "next": "Next",
-        "previous": "Previous"
+        "previous": "Previous",
+        "companyPlaceholder": "Company name",
+        "contactNamePlaceholder": "Full name",
+        "contactRolePlaceholder": "Director, Manager..."
       },
       "editLead": "Edit Lead",
       "search": "Search leads...",
@@ -2596,7 +2603,16 @@
       "activitySector": "Activity Sector",
       "clientNeeds": "Client Needs",
       "potentialRevenue": "Potential Revenue",
+      "department": "Department",
       "source": "Source",
+      "sources": {
+        "RECOMMANDATION": "Recommendation",
+        "APPEL": "Phone Call",
+        "RESEAUX_SOCIAUX": "Social Media",
+        "PARTENAIRE": "Partners",
+        "SITE_WEB": "Website",
+        "AUTRE": "Other Sources"
+      },
       "country": "Country",
       "region": "Region",
       "city": "City",
@@ -2646,6 +2662,7 @@
       "allStatuses": "All Statuses",
       "allPriorities": "All Priorities",
       "allTypes": "All Types",
+      "allCommercials": "All Commercials",
       "noLeads": "No leads found",
       "showing": "Showing {{from}}-{{to}} of {{total}}",
       "statuses": {
@@ -2665,13 +2682,8 @@
       },
       "types": {
         "PROSPECT": "Prospect",
-        "CLIENT_EXISTANT": "Existing Client",
-        "RECOMMANDATION": "Referral",
-        "APPEL_ENTRANT": "Inbound Call",
-        "SALON": "Trade Show",
-        "SITE_WEB": "Website",
-        "RESEAU_SOCIAL": "Social Media",
-        "PARTENAIRE": "Partner"
+        "CLIENT_ACTIF": "Active Client",
+        "CLIENT_INACTIF": "Inactive Client"
       }
     },
     "pipeline": {
@@ -2744,8 +2756,8 @@
       "noResults": "No results found",
       "showing": "Showing {{from}}-{{to}} of {{total}}",
       "stages": {
-        "PROSPECTION": "Prospecting",
         "QUALIFICATION": "Qualification",
+        "IDENTIFICATION_BESOIN": "Needs Identification",
         "PROPOSITION": "Proposal",
         "NEGOCIATION": "Negotiation",
         "CLOSING": "Closing",
@@ -2911,13 +2923,8 @@
     },
     "types": {
       "PROSPECT": "Prospect",
-      "CLIENT_EXISTANT": "Existing Client",
-      "RECOMMANDATION": "Referral",
-      "APPEL_ENTRANT": "Inbound Call",
-      "SALON": "Trade Show",
-      "SITE_WEB": "Website",
-      "RESEAU_SOCIAL": "Social Media",
-      "PARTENAIRE": "Partner"
+      "CLIENT_ACTIF": "Active Client",
+      "CLIENT_INACTIF": "Inactive Client"
     },
     "activityTypes": {
       "VISITE_CLIENT": "Client Visit",

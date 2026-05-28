@@ -15,7 +15,7 @@ export class RemindersController {
     @Post()
     create(
         @Request() req,
-        @Body() body: { title: string; description?: string; dueDate: string },
+        @Body() body: { title: string; description?: string; dueDate: string; dueTime?: string; recurrence?: string; recurrenceInterval?: number },
     ) {
         return this.remindersService.create(req.user.userId, body);
     }

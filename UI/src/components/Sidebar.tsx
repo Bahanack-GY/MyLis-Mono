@@ -65,6 +65,12 @@ const CEO_SECTIONS: Section[] = [
         ],
     },
     {
+        key: 'discipline',
+        items: [
+            { icon: Clock01Icon, label: 'attendance', path: '/discipline/attendance' },
+        ],
+    },
+    {
         key: 'comms',
         items: [
             { icon: Message02Icon, label: 'messages', path: '/messages' },
@@ -78,7 +84,7 @@ const ALL_SECTIONS: Section[] = [
     {
         key: 'work',
         items: [
-            { icon: DashboardSquare01Icon, label: 'dashboard', path: '/dashboard' },
+            { icon: DashboardSquare01Icon, label: 'dashboard', path: '/dashboard', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
             { icon: Task01Icon, label: 'tasks', path: '/tasks', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
             { icon: Calendar01Icon, label: 'planning', path: '/planning', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'STAGIAIRE'] },
             { icon: Briefcase01Icon, label: 'projects', path: '/projects', roles: ['EMPLOYEE', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL'] },
@@ -129,6 +135,13 @@ const ALL_SECTIONS: Section[] = [
         ],
     },
     {
+        key: 'discipline',
+        roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'],
+        items: [
+            { icon: Clock01Icon, label: 'attendance', path: '/discipline/attendance' },
+        ],
+    },
+    {
         key: 'accounting',
         roles: ['MANAGER', 'ACCOUNTANT'],
         items: [
@@ -163,13 +176,25 @@ function filterSections(sections: Section[], role: Role | null): Section[] {
     if (!role) return [];
     if (role === 'CEO') return CEO_SECTIONS;
 
-    return sections
+    const filtered = sections
         .filter(section => !section.roles || section.roles.includes(role))
         .map(section => ({
             ...section,
             items: section.items.filter(item => !item.roles || item.roles.includes(role)),
         }))
         .filter(section => section.items.length > 0);
+
+    // For accountants, surface accounting first, then finance, then the rest.
+    if (role === 'ACCOUNTANT') {
+        const order = ['accounting', 'finance'];
+        const pinned = order
+            .map(key => filtered.find(s => s.key === key))
+            .filter((s): s is Section => Boolean(s));
+        const rest = filtered.filter(s => !order.includes(s.key));
+        return [...pinned, ...rest];
+    }
+
+    return filtered;
 }
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setMobileMenuOpen }: SidebarProps) => {

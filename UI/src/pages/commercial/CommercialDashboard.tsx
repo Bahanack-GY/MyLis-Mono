@@ -45,8 +45,8 @@ function getDateRange(preset: DatePreset, customFrom: string, customTo: string) 
 const formatFCFA = (n: number) => new Intl.NumberFormat('fr-FR').format(Math.round(n)) + ' FCFA';
 
 const STAGE_COLORS: Record<string, string> = {
-    PROSPECTION: '#33cbcc',
-    QUALIFICATION: '#2bb5b6',
+    QUALIFICATION: '#33cbcc',
+    IDENTIFICATION_BESOIN: '#2bb5b6',
     PROPOSITION: '#22a0a1',
     NEGOCIATION: '#1a8a8b',
     CLOSING: '#127576',

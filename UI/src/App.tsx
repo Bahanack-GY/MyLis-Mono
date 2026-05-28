@@ -82,11 +82,18 @@ const AIReports = lazy(() => import("./pages/accounting/AIReports"))
 const Suppliers = lazy(() => import("./pages/accounting/Suppliers"))
 const CashFlow = lazy(() => import("./pages/accounting/CashFlow"))
 const FundMovements = lazy(() => import("./pages/accounting/FundMovements"))
+
+// Discipline (MANAGER + CEO + HEAD_OF_DEPARTMENT)
+const Attendance = lazy(() => import("./pages/discipline/Attendance"))
 const MonthlyRankings = lazy(() => import("./pages/admin/MonthlyRankings"))
 
 // CEO sees CeoDashboard in admin mode; toggling to "manager view" shows AdminDashboard.
+// Accountants are sent straight to the accounting dashboard.
 const DashboardRouter = () => {
   const { role, viewMode } = useAuth();
+  if (role === 'ACCOUNTANT' && viewMode === 'admin') {
+    return <Navigate to="/accounting" replace />;
+  }
   if (role === 'CEO') {
     return viewMode === 'admin' ? <CeoDashboard /> : <AdminDashboard />;
   }
@@ -213,6 +220,13 @@ function App() {
             <Route path="/accounting/ai-reports" element={<AIReports />} />
             <Route path="/accounting/suppliers" element={<Suppliers />} />
             <Route path="/accounting/cash-flow" element={<CashFlow />} />
+          </Route>
+        </Route>
+
+        {/* Discipline — MANAGER + CEO + HEAD_OF_DEPARTMENT */}
+        <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'CEO', 'HEAD_OF_DEPARTMENT']} />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="/discipline/attendance" element={<Attendance />} />
           </Route>
         </Route>
 

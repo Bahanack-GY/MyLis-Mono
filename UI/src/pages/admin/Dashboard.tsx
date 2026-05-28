@@ -103,7 +103,11 @@ const Dashboard = () => {
 
   const formatFCFA = (amount: number) => new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
   const revenue = invoiceStats?.totalRevenue ?? 0;
-  const totalExpenses = (expenseStats?.totalYear ?? 0) + (expenseStats?.totalProjects ?? 0);
+  // "Dépenses" must reflect actual recorded expenses only.
+  // Don't add expenseStats.totalProjects — that is prorated project budgets,
+  // not money actually spent, and it creates a phantom non-zero value when
+  // no expense has been entered yet.
+  const totalExpenses = expenseStats?.totalYear ?? 0;
   const profit = revenue - totalExpenses;
   const pending = invoiceStats?.totalPending ?? 0;
 

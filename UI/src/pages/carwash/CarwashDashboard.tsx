@@ -107,18 +107,55 @@ const PERIODS = [
 
 type Tab = 'overview' | 'employees' | 'revenue' | 'charges';
 
+const CARWASH_FILTER_KEY = 'carwash_dashboard_filter';
+
+function loadCarwashFilter() {
+    try {
+        const raw = localStorage.getItem(CARWASH_FILTER_KEY);
+        if (raw) return JSON.parse(raw) as { period: string; start: string; end: string };
+    } catch { /* ignore */ }
+    return null;
+}
+
 export default function CarwashDashboard() {
     const [tab, setTab] = useState<Tab>('overview');
-    const [period, setPeriod] = useState('month');
+    const saved = loadCarwashFilter();
     const [stationId, setStationId] = useState<number | undefined>();
-    const [customStart, setCustomStart] = useState('');
-    const [customEnd, setCustomEnd] = useState('');
+
+    // uiPeriod: controls which button is highlighted (UI only, does NOT trigger fetch)
+    const [uiPeriod, setUiPeriod] = useState(saved?.period ?? 'month');
+    // draft: what the user is typing in the date inputs (does NOT trigger fetch)
+    const [draftStart, setDraftStart] = useState(saved?.start ?? '');
+    const [draftEnd, setDraftEnd] = useState(saved?.end ?? '');
+    // committed: the only thing that drives the actual data fetch
+    const [committed, setCommitted] = useState<{ period: string; start: string; end: string }>({
+        period: saved?.period ?? 'month',
+        start: saved?.start ?? '',
+        end: saved?.end ?? '',
+    });
+
+    const handlePeriodChange = (p: string) => {
+        setUiPeriod(p);
+        if (p !== 'custom') {
+            // Non-custom periods apply immediately
+            const next = { period: p, start: '', end: '' };
+            setCommitted(next);
+            localStorage.setItem(CARWASH_FILTER_KEY, JSON.stringify(next));
+        }
+        // custom: just shows the inputs — nothing commits until Filtrer is clicked
+    };
+
+    const handleApplyCustom = () => {
+        const next = { period: 'custom', start: draftStart, end: draftEnd };
+        setCommitted(next);
+        localStorage.setItem(CARWASH_FILTER_KEY, JSON.stringify(next));
+    };
 
     const dateRange = useMemo(() => {
-        if (period === 'custom' && customStart && customEnd)
-            return { startDate: customStart, endDate: customEnd };
-        return getDateRange(period);
-    }, [period, customStart, customEnd]);
+        if (committed.period === 'custom' && committed.start && committed.end)
+            return { startDate: committed.start, endDate: committed.end };
+        return getDateRange(committed.period);
+    }, [committed]);
 
     const { data: stations = [] } = useCarwashStations();
     const { data: employees = [], isLoading: empLoading } = useCarwashEmployees(stationId);
@@ -197,24 +234,31 @@ export default function CarwashDashboard() {
                 {/* Period filter */}
                 <div className="flex bg-white border border-gray-200 rounded-xl p-1 gap-0.5">
                     {PERIODS.map(p => (
-                        <button key={p.key} onClick={() => setPeriod(p.key)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${period === p.key ? 'bg-[#283852] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                        <button key={p.key} onClick={() => handlePeriodChange(p.key)}
+                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${uiPeriod === p.key ? 'bg-[#283852] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                             {p.label}
                         </button>
                     ))}
-                    <button onClick={() => setPeriod('custom')}
-                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${period === 'custom' ? 'bg-[#283852] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
+                    <button onClick={() => handlePeriodChange('custom')}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${uiPeriod === 'custom' ? 'bg-[#283852] text-white' : 'text-gray-600 hover:bg-gray-100'}`}>
                         Personnalisé
                     </button>
                 </div>
 
-                {period === 'custom' && (
-                    <div className="flex items-center gap-2">
-                        <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)}
+                {uiPeriod === 'custom' && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                        <input type="date" value={draftStart} onChange={e => setDraftStart(e.target.value)}
                             className="bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/40" />
                         <span className="text-gray-400 text-sm">→</span>
-                        <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)}
+                        <input type="date" value={draftEnd} onChange={e => setDraftEnd(e.target.value)}
                             className="bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/40" />
+                        <button
+                            onClick={handleApplyCustom}
+                            disabled={!draftStart || !draftEnd}
+                            className="px-4 py-2 bg-[#283852] text-white text-sm font-semibold rounded-xl hover:bg-[#1e2d43] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Filtrer
+                        </button>
                     </div>
                 )}
             </div>

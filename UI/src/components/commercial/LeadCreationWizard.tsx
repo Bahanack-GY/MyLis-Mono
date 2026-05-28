@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cancel01Icon, Building02Icon, Location01Icon, UserGroupIcon, Task01Icon, BarChartIcon, Add01Icon, Delete02Icon, StarIcon, ArrowLeft01Icon, ArrowRight01Icon, Loading02Icon, CallIcon, Mail01Icon, Briefcase01Icon } from 'hugeicons-react';
 import { useCreateLead } from '../../api/commercial/hooks';
-import { useDepartmentServices } from '../../api/departments/hooks';
-import type { CreateLeadContactDto, CreateLeadNeedDto, LeadType, SaleStage } from '../../api/commercial/types';
+import { useDepartments, useDepartmentServices } from '../../api/departments/hooks';
+import type { CreateLeadContactDto, CreateLeadNeedDto, LeadSource, LeadType, SaleStage } from '../../api/commercial/types';
 
 /* ── Types ───────────────────────────────────────────────── */
 
@@ -13,7 +13,8 @@ interface WizardForm {
     company: string;
     activitySector: string;
     leadType: LeadType;
-    source: string;
+    source: LeadSource | '';
+    departmentId: string;
     potentialRevenue: string;
     paymentDelay: string;
     // Step 2 — Localisation
@@ -41,22 +42,25 @@ const emptyContact = (): CreateLeadContactDto => ({
 const emptyNeed = (): CreateLeadNeedDto => ({ description: '', serviceId: null });
 
 const LEAD_TYPES: LeadType[] = [
-    'PROSPECT', 'CLIENT_EXISTANT', 'RECOMMANDATION', 'APPEL_ENTRANT',
-    'SALON', 'SITE_WEB', 'RESEAU_SOCIAL', 'PARTENAIRE',
+    'PROSPECT', 'CLIENT_ACTIF', 'CLIENT_INACTIF',
+];
+
+const LEAD_SOURCES: LeadSource[] = [
+    'RECOMMANDATION', 'APPEL', 'RESEAUX_SOCIAUX', 'PARTENAIRE', 'SITE_WEB', 'AUTRE',
 ];
 
 const SALE_STAGES: SaleStage[] = [
-    'PROSPECTION', 'QUALIFICATION', 'PROPOSITION', 'NEGOCIATION', 'CLOSING',
+    'QUALIFICATION', 'IDENTIFICATION_BESOIN', 'PROPOSITION', 'NEGOCIATION', 'CLOSING',
 ];
 
 /* ── Step definitions ────────────────────────────────────── */
 
 const STEPS = [
-    { key: 'company',    labelKey: 'wizard.steps.company',    Icon: Building02Icon   },
-    { key: 'location',   labelKey: 'wizard.steps.location',   Icon: Location01Icon      },
-    { key: 'contacts',   labelKey: 'wizard.steps.contacts',   Icon: UserGroupIcon       },
-    { key: 'needs',      labelKey: 'wizard.steps.needs',      Icon: Task01Icon  },
-    { key: 'commercial', labelKey: 'wizard.steps.commercial', Icon: BarChartIcon   },
+    { key: 'company',    labelKey: 'commercial.leads.wizard.steps.company',    Icon: Building02Icon   },
+    { key: 'location',   labelKey: 'commercial.leads.wizard.steps.location',   Icon: Location01Icon      },
+    { key: 'contacts',   labelKey: 'commercial.leads.wizard.steps.contacts',   Icon: UserGroupIcon       },
+    { key: 'needs',      labelKey: 'commercial.leads.wizard.steps.needs',      Icon: Task01Icon  },
+    { key: 'commercial', labelKey: 'commercial.leads.wizard.steps.commercial', Icon: BarChartIcon   },
 ] as const;
 
 /* ── Styles ──────────────────────────────────────────────── */
@@ -70,19 +74,21 @@ const sectionTitle = 'text-sm font-bold text-gray-700 mb-4';
 export default function LeadCreationWizard({ onClose }: { onClose: () => void }) {
     const { t } = useTranslation();
     const createLead = useCreateLead();
-    const { data: allServices } = useDepartmentServices();
+    const { data: departments } = useDepartments();
 
     const [step, setStep] = useState(0);
     const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
 
     const [form, setForm] = useState<WizardForm>({
-        company: '', activitySector: '', leadType: 'PROSPECT', source: '',
+        company: '', activitySector: '', leadType: 'PROSPECT', source: '', departmentId: '',
         potentialRevenue: '', paymentDelay: '30',
         country: '', region: '', city: '', commune: '', postalCode: '', address: '',
         contacts: [{ ...emptyContact(), isPrimary: true }],
         needs: [emptyNeed()],
-        saleStage: 'PROSPECTION', competitor: '', competitorOffer: '', comment: '',
+        saleStage: 'QUALIFICATION', competitor: '', competitorOffer: '', comment: '',
     });
+
+    const { data: departmentServices } = useDepartmentServices(form.departmentId || undefined);
 
     const set = <K extends keyof WizardForm>(key: K, value: WizardForm[K]) =>
         setForm(prev => ({ ...prev, [key]: value }));
@@ -153,7 +159,15 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
         exit:   (d: number) => ({ opacity: 0, x: d > 0 ? -40 : 40 }),
     };
 
-    const activeServices = (allServices || []).filter(s => s.isActive);
+    const activeServices = (departmentServices || []).filter(s => s.isActive);
+
+    const setDepartment = (id: string) => {
+        setForm(prev => ({
+            ...prev,
+            departmentId: id,
+            needs: prev.needs.map(n => ({ ...n, serviceId: null })),
+        }));
+    };
 
     return (
         <>
@@ -247,7 +261,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                 autoFocus
                                                 value={form.company}
                                                 onChange={e => set('company', e.target.value)}
-                                                placeholder="Nom de l'entreprise"
+                                                placeholder={t('commercial.leads.wizard.companyPlaceholder', "Nom de l'entreprise")}
                                                 className={inputCls}
                                             />
                                         </div>
@@ -269,11 +283,23 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                         </div>
                                         <div>
                                             <label className={labelCls}>{t('commercial.leads.source', 'Source')}</label>
-                                            <input
-                                                value={form.source}
-                                                onChange={e => set('source', e.target.value)}
-                                                className={inputCls}
-                                            />
+                                            <select value={form.source} onChange={e => set('source', e.target.value as LeadSource)} className={inputCls}>
+                                                <option value="">{t('common.select', 'Sélectionner')}</option>
+                                                {LEAD_SOURCES.map(s => (
+                                                    <option key={s} value={s}>{t(`commercial.leads.sources.${s}`)}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="sm:col-span-2">
+                                            <label className={labelCls}>
+                                                {t('commercial.leads.department')} <span className="text-[#283852]">*</span>
+                                            </label>
+                                            <select value={form.departmentId} onChange={e => setDepartment(e.target.value)} className={inputCls}>
+                                                <option value="">{t('common.select', 'Sélectionner')}</option>
+                                                {(departments || []).map(d => (
+                                                    <option key={d.id} value={d.id}>{d.name}</option>
+                                                ))}
+                                            </select>
                                         </div>
                                         <div>
                                             <label className={labelCls}>{t('commercial.leads.potentialRevenue')}</label>
@@ -394,7 +420,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                     <input
                                                         value={c.name}
                                                         onChange={e => updateContact(i, 'name', e.target.value)}
-                                                        placeholder="Nom complet"
+                                                        placeholder={t('commercial.leads.wizard.contactNamePlaceholder', 'Nom complet')}
                                                         className={inputCls}
                                                     />
                                                 </div>
@@ -405,7 +431,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                     <input
                                                         value={c.role ?? ''}
                                                         onChange={e => updateContact(i, 'role', e.target.value)}
-                                                        placeholder="Directeur, Manager..."
+                                                        placeholder={t('commercial.leads.wizard.contactRolePlaceholder', 'Directeur, Manager...')}
                                                         className={inputCls}
                                                     />
                                                 </div>
@@ -496,7 +522,7 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                             <Cancel01Icon size={14} />
                                                         </button>
                                                     </div>
-                                                ) : (
+                                                ) : form.departmentId ? (
                                                     <select
                                                         value=""
                                                         onChange={e => updateNeed(i, 'serviceId', e.target.value || null)}
@@ -509,6 +535,10 @@ export default function LeadCreationWizard({ onClose }: { onClose: () => void })
                                                             </option>
                                                         ))}
                                                     </select>
+                                                ) : (
+                                                    <p className="text-xs text-amber-500 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                                                        {t('commercial.leads.wizard.selectDeptFirst', 'Sélectionnez d\'abord un département à l\'étape 1')}
+                                                    </p>
                                                 )}
                                             </div>
                                         </motion.div>

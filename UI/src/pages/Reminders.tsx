@@ -1,9 +1,27 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation, type TFunction } from 'react-i18next';
-import { Notification01Icon, Cancel01Icon, Tick01Icon, Delete01Icon, Add01Icon, Calendar01Icon, AlignLeftIcon, Loading02Icon, Alert01Icon, CheckmarkCircle01Icon, Clock01Icon } from 'hugeicons-react';
+import { Notification01Icon, Cancel01Icon, Tick01Icon, Delete01Icon, Add01Icon, Calendar01Icon, AlignLeftIcon, Loading02Icon, Alert01Icon, CheckmarkCircle01Icon, Clock01Icon, RepeatIcon } from 'hugeicons-react';
 import { useReminders, useCreateReminder, useMarkReminderDone, useDeleteReminder } from '../api/reminders/hooks';
 import type { Reminder } from '../api/reminders/api';
+
+/* ─── Recurrence helpers ───────────────────────────────────── */
+
+const RECURRENCE_OPTIONS = [
+    { value: 'none',    label: 'remindersPage.recurrence.none',    fallback: 'One-time' },
+    { value: 'daily',   label: 'remindersPage.recurrence.daily',   fallback: 'Daily' },
+    { value: 'weekly',  label: 'remindersPage.recurrence.weekly',  fallback: 'Weekly' },
+    { value: 'monthly', label: 'remindersPage.recurrence.monthly', fallback: 'Monthly' },
+    { value: 'yearly',  label: 'remindersPage.recurrence.yearly',  fallback: 'Yearly' },
+    { value: 'custom',  label: 'remindersPage.recurrence.custom',  fallback: 'Custom' },
+];
+
+const recurrenceLabel = (recurrence?: string, interval?: number | null, t?: TFunction): string | null => {
+    if (!recurrence || recurrence === 'none') return null;
+    if (recurrence === 'custom') return t ? t('remindersPage.recurrence.everyNDays', 'Every {{n}} days', { n: interval || 1 }) : `Every ${interval || 1} days`;
+    const opt = RECURRENCE_OPTIONS.find(o => o.value === recurrence);
+    return t ? t(opt?.label ?? '', opt?.fallback ?? '') : (opt?.fallback ?? recurrence);
+};
 
 /* ─── Helpers ─────────────────────────────────────────────── */
 
@@ -20,54 +38,30 @@ const fmtDate = (d: string) =>
 
 interface UrgencyInfo {
     label: string;
-    labelClass: string;
-    cardClass: string;
-    dotClass: string;
+    badgeClass: string;
 }
 
 const getUrgency = (dueDate: string, isCompleted: boolean, t: TFunction): UrgencyInfo => {
     if (isCompleted) return {
         label: t('remindersPage.urgency.done', 'Done'),
-        labelClass: 'text-gray-400',
-        cardClass: 'bg-gray-50 border-gray-100 opacity-60',
-        dotClass: 'bg-gray-300',
+        badgeClass: 'bg-gray-100 text-gray-400',
     };
     const d = daysUntil(dueDate);
     if (d < 0) return {
         label: t('remindersPage.urgency.overdue', '{{days}}d overdue', { days: Math.abs(d) }),
-        labelClass: 'text-red-600 font-semibold',
-        cardClass: 'bg-red-50 border-red-200',
-        dotClass: 'bg-red-500',
+        badgeClass: 'bg-gray-200 text-gray-700 font-semibold',
     };
     if (d === 0) return {
         label: t('remindersPage.urgency.today', 'Today'),
-        labelClass: 'text-orange-600 font-semibold',
-        cardClass: 'bg-orange-50 border-orange-200',
-        dotClass: 'bg-orange-500',
+        badgeClass: 'bg-gray-200 text-gray-700 font-semibold',
     };
     if (d === 1) return {
         label: t('remindersPage.urgency.tomorrow', 'Tomorrow'),
-        labelClass: 'text-yellow-600 font-semibold',
-        cardClass: 'bg-yellow-50 border-yellow-200',
-        dotClass: 'bg-yellow-500',
-    };
-    if (d <= 5) return {
-        label: t('remindersPage.urgency.inDays', 'In {{days}} days', { days: d }),
-        labelClass: 'text-[#33cbcc] font-medium',
-        cardClass: 'bg-[#33cbcc]/5 border-[#33cbcc]/20',
-        dotClass: 'bg-[#33cbcc]',
-    };
-    if (d <= 10) return {
-        label: t('remindersPage.urgency.inDays', 'In {{days}} days', { days: d }),
-        labelClass: 'text-[#283852]',
-        cardClass: 'bg-[#283852]/5 border-[#283852]/15',
-        dotClass: 'bg-[#283852]',
+        badgeClass: 'bg-gray-100 text-gray-600 font-medium',
     };
     return {
         label: t('remindersPage.urgency.inDays', 'In {{days}} days', { days: d }),
-        labelClass: 'text-gray-500',
-        cardClass: 'bg-gray-50 border-gray-100',
-        dotClass: 'bg-gray-400',
+        badgeClass: 'bg-gray-100 text-gray-500',
     };
 };
 
@@ -76,20 +70,36 @@ const getUrgency = (dueDate: string, isCompleted: boolean, t: TFunction): Urgenc
 const CreateModal = ({ onClose }: { onClose: () => void }) => {
     const { t } = useTranslation();
     const create = useCreateReminder();
-    const [form, setForm] = useState({ title: '', description: '', dueDate: '' });
+    const [form, setForm] = useState({
+        title: '',
+        description: '',
+        dueDate: '',
+        dueTime: '',
+        recurrence: 'none',
+        recurrenceInterval: 7,
+    });
     const isValid = form.title.trim().length > 0 && form.dueDate.length > 0;
 
     const handleSubmit = async () => {
         if (!isValid) return;
-        await create.mutateAsync({ title: form.title.trim(), description: form.description.trim() || undefined, dueDate: form.dueDate });
+        await create.mutateAsync({
+            title: form.title.trim(),
+            description: form.description.trim() || undefined,
+            dueDate: form.dueDate,
+            dueTime: form.dueTime || undefined,
+            recurrence: form.recurrence !== 'none' ? form.recurrence : undefined,
+            recurrenceInterval: form.recurrence === 'custom' ? form.recurrenceInterval : undefined,
+        });
         onClose();
     };
+
+    const inputCls = 'w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-gray-400 transition-all bg-gray-50';
 
     return (
         <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         >
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -97,25 +107,25 @@ const CreateModal = ({ onClose }: { onClose: () => void }) => {
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
+                className="bg-white rounded-2xl shadow-xl w-full max-w-md border border-gray-100"
             >
                 {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
-                            <Notification01Icon size={18} className="text-[#33cbcc]" />
+                        <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center">
+                            <Notification01Icon size={16} className="text-gray-600" />
                         </div>
-                        <h3 className="text-base font-bold text-gray-800">{t('remindersPage.newReminder', 'New Reminder')}</h3>
+                        <h3 className="text-sm font-bold text-gray-800">{t('remindersPage.newReminder', 'New Reminder')}</h3>
                     </div>
                     <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors">
-                        <Cancel01Icon size={18} />
+                        <Cancel01Icon size={16} />
                     </button>
                 </div>
 
                 {/* Body */}
                 <div className="px-6 py-5 space-y-4">
                     <div>
-                        <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                        <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
                             {t('remindersPage.title', 'Title')} *
                         </label>
                         <input
@@ -125,9 +135,10 @@ const CreateModal = ({ onClose }: { onClose: () => void }) => {
                             onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
                             onKeyDown={e => { if (e.key === 'Enter' && isValid) handleSubmit(); }}
                             placeholder={t('remindersPage.titlePlaceholder', 'What do you want to be reminded of?')}
-                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+                            className={inputCls}
                         />
                     </div>
+
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
                             <AlignLeftIcon size={10} />
@@ -137,23 +148,70 @@ const CreateModal = ({ onClose }: { onClose: () => void }) => {
                             value={form.description}
                             onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
                             placeholder={t('remindersPage.descriptionPlaceholder', 'Additional details (optional)...')}
-                            rows={3}
-                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all resize-none"
+                            rows={2}
+                            className={`${inputCls} resize-none`}
                         />
                     </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                                <Calendar01Icon size={10} />
+                                {t('remindersPage.dueDate', 'Date')} *
+                            </label>
+                            <input
+                                type="date"
+                                value={form.dueDate}
+                                min={today()}
+                                onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))}
+                                className={inputCls}
+                            />
+                        </div>
+                        <div>
+                            <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                                <Clock01Icon size={10} />
+                                {t('remindersPage.dueTime', 'Time')}
+                            </label>
+                            <input
+                                type="time"
+                                value={form.dueTime}
+                                onChange={e => setForm(p => ({ ...p, dueTime: e.target.value }))}
+                                className={inputCls}
+                            />
+                        </div>
+                    </div>
+
                     <div>
                         <label className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                            <Calendar01Icon size={10} />
-                            {t('remindersPage.dueDate', 'Due Date')} *
+                            <RepeatIcon size={10} />
+                            {t('remindersPage.recurrence.label', 'Repeat')}
                         </label>
-                        <input
-                            type="date"
-                            value={form.dueDate}
-                            min={today()}
-                            onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))}
-                            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
-                        />
+                        <select
+                            value={form.recurrence}
+                            onChange={e => setForm(p => ({ ...p, recurrence: e.target.value }))}
+                            className={inputCls}
+                        >
+                            {RECURRENCE_OPTIONS.map(o => (
+                                <option key={o.value} value={o.value}>{t(o.label, o.fallback)}</option>
+                            ))}
+                        </select>
                     </div>
+
+                    {form.recurrence === 'custom' && (
+                        <div>
+                            <label className="block text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+                                {t('remindersPage.recurrence.intervalLabel', 'Every (days)')}
+                            </label>
+                            <input
+                                type="number"
+                                min={1}
+                                max={365}
+                                value={form.recurrenceInterval}
+                                onChange={e => setForm(p => ({ ...p, recurrenceInterval: Math.max(1, parseInt(e.target.value) || 1) }))}
+                                className={inputCls}
+                            />
+                        </div>
+                    )}
                 </div>
 
                 {/* Footer */}
@@ -164,7 +222,7 @@ const CreateModal = ({ onClose }: { onClose: () => void }) => {
                     <button
                         onClick={handleSubmit}
                         disabled={!isValid || create.isPending}
-                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-lg shadow-[#33cbcc]/20"
+                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d40] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                     >
                         {create.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
                         {t('remindersPage.create', 'Create')}
@@ -182,6 +240,7 @@ const ReminderCard = ({ reminder }: { reminder: Reminder }) => {
     const markDone = useMarkReminderDone();
     const del = useDeleteReminder();
     const urgency = getUrgency(reminder.dueDate, reminder.isCompleted, t);
+    const recLabel = recurrenceLabel(reminder.recurrence, reminder.recurrenceInterval, t);
 
     return (
         <motion.div
@@ -189,39 +248,56 @@ const ReminderCard = ({ reminder }: { reminder: Reminder }) => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className={`flex items-start gap-4 rounded-2xl border p-4 transition-all ${urgency.cardClass}`}
+            className={`flex items-start gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-4 transition-all ${reminder.isCompleted ? 'opacity-50' : ''}`}
         >
-            <span className={`w-2.5 h-2.5 rounded-full shrink-0 mt-1.5 ${urgency.dotClass}`} />
-
             <div className="flex-1 min-w-0">
-                <p className={`text-sm font-semibold text-gray-800 ${reminder.isCompleted ? 'line-through text-gray-400' : ''}`}>
-                    {reminder.title}
-                </p>
+                <div className="flex items-start justify-between gap-3">
+                    <p className={`text-sm font-semibold text-gray-800 leading-snug ${reminder.isCompleted ? 'line-through' : ''}`}>
+                        {reminder.title}
+                    </p>
+                    <span className={`shrink-0 text-[10px] px-2 py-0.5 rounded-full ${urgency.badgeClass}`}>
+                        {urgency.label}
+                    </span>
+                </div>
+
                 {reminder.description && (
-                    <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{reminder.description}</p>
+                    <p className="text-xs text-gray-400 mt-1 line-clamp-2">{reminder.description}</p>
                 )}
-                <div className="flex items-center gap-3 mt-2">
+
+                <div className="flex items-center flex-wrap gap-x-3 gap-y-1 mt-2.5">
                     <span className="flex items-center gap-1 text-[11px] text-gray-400">
                         <Calendar01Icon size={11} />
                         {fmtDate(reminder.dueDate)}
                     </span>
-                    <span className={`text-[11px] ${urgency.labelClass}`}>{urgency.label}</span>
+                    {reminder.dueTime && (
+                        <span className="flex items-center gap-1 text-[11px] text-gray-400">
+                            <Clock01Icon size={11} />
+                            {reminder.dueTime}
+                        </span>
+                    )}
+                    {recLabel && (
+                        <span className="flex items-center gap-1 text-[11px] text-gray-400">
+                            <RepeatIcon size={11} />
+                            {recLabel}
+                        </span>
+                    )}
                 </div>
+
                 {reminder.isCompleted && reminder.completedAt && (
-                    <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                    <p className="text-[10px] text-gray-400 mt-1.5 flex items-center gap-1">
                         <CheckmarkCircle01Icon size={10} />
                         {t('remindersPage.completedOn', 'Done')} — {fmtDate(reminder.completedAt.slice(0, 10))}
                     </p>
                 )}
             </div>
 
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1 shrink-0 mt-0.5">
                 {!reminder.isCompleted && (
                     <button
                         onClick={() => markDone.mutate(reminder.id)}
                         disabled={markDone.isPending}
                         title={t('remindersPage.markDone', 'Mark as done')}
-                        className="p-2 rounded-xl hover:bg-[#33cbcc]/10 text-gray-400 hover:text-[#33cbcc] transition-colors"
+                        className="p-2 rounded-xl hover:bg-gray-100 text-gray-300 hover:text-gray-600 transition-colors"
                     >
                         {markDone.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Tick01Icon size={16} />}
                     </button>
@@ -230,7 +306,7 @@ const ReminderCard = ({ reminder }: { reminder: Reminder }) => {
                     onClick={() => del.mutate(reminder.id)}
                     disabled={del.isPending}
                     title={t('common.delete', 'Delete')}
-                    className="p-2 rounded-xl hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                    className="p-2 rounded-xl hover:bg-gray-100 text-gray-300 hover:text-gray-500 transition-colors"
                 >
                     {del.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Delete01Icon size={16} />}
                 </button>
@@ -249,51 +325,46 @@ export default function Reminders() {
 
     const pending = reminders.filter(r => !r.isCompleted);
     const done = reminders.filter(r => r.isCompleted);
-    const urgent = pending.filter(r => daysUntil(r.dueDate) <= 1);
+    const urgent = pending.filter(r => daysUntil(r.dueDate) <= 0);
 
     const displayed = filter === 'pending' ? pending : filter === 'done' ? done : reminders;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-6">
-            <div className="max-w-3xl mx-auto">
+        <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+            <div className="max-w-2xl mx-auto">
 
                 {/* Header */}
-                <div className="flex items-start justify-between mb-6">
+                <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-3">
-                            <Notification01Icon size={28} className="text-[#33cbcc]" />
+                        <h1 className="text-xl font-bold text-gray-800">
                             {t('remindersPage.pageTitle', 'Reminders')}
                         </h1>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-xs text-gray-400 mt-0.5">
                             {pending.length} {t('remindersPage.pending', 'pending')}
-                            {urgent.length > 0 && (
-                                <span className="ml-2 text-red-500 font-semibold">
-                                    · {urgent.length} {t('remindersPage.urgent', 'urgent')}
-                                </span>
-                            )}
+                            {urgent.length > 0 && ` · ${urgent.length} ${t('remindersPage.urgent', 'overdue')}`}
                         </p>
                     </div>
                     <button
                         onClick={() => setShowCreate(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d40] transition-colors shadow-lg"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d40] transition-colors"
                     >
-                        <Add01Icon size={16} />
+                        <Add01Icon size={15} />
                         {t('remindersPage.new', 'New')}
                     </button>
                 </div>
 
-                {/* Urgent banner */}
+                {/* Overdue notice */}
                 {urgent.length > 0 && filter !== 'done' && (
                     <motion.div
-                        initial={{ opacity: 0, y: -8 }}
+                        initial={{ opacity: 0, y: -6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center gap-3 bg-red-50 border border-red-200 rounded-2xl px-4 py-3 mb-4"
+                        className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-4 py-3 mb-4 shadow-sm"
                     >
-                        <Alert01Icon size={18} className="text-red-500 shrink-0" />
-                        <p className="text-sm text-red-700 font-medium">
+                        <Alert01Icon size={16} className="text-gray-500 shrink-0" />
+                        <p className="text-sm text-gray-600">
                             {urgent.length === 1
-                                ? t('remindersPage.urgentBanner1', '1 reminder is due today or overdue')
-                                : t('remindersPage.urgentBannerN', '{{count}} reminders are due today or overdue', { count: urgent.length })}
+                                ? t('remindersPage.urgentBanner1', '1 reminder is overdue')
+                                : t('remindersPage.urgentBannerN', '{{count}} reminders are overdue', { count: urgent.length })}
                         </p>
                     </motion.div>
                 )}
@@ -306,12 +377,12 @@ export default function Reminders() {
                             onClick={() => setFilter(f)}
                             className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
                                 filter === f
-                                    ? 'bg-[#283852] text-white shadow'
+                                    ? 'bg-[#283852] text-white'
                                     : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-300'
                             }`}
                         >
                             {f === 'pending' ? t('remindersPage.filterPending', 'Pending') : f === 'done' ? t('remindersPage.filterDone', 'Done') : t('remindersPage.filterAll', 'All')}
-                            <span className="ml-1.5 text-[10px] opacity-70">
+                            <span className="ml-1.5 opacity-60">
                                 {f === 'pending' ? pending.length : f === 'done' ? done.length : reminders.length}
                             </span>
                         </button>
@@ -321,56 +392,36 @@ export default function Reminders() {
                 {/* List */}
                 {isLoading ? (
                     <div className="flex justify-center py-16">
-                        <Loading02Icon size={28} className="animate-spin text-[#33cbcc]" />
+                        <Loading02Icon size={24} className="animate-spin text-gray-300" />
                     </div>
                 ) : displayed.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
-                            <Notification01Icon size={28} className="text-gray-300" />
+                        <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mb-3">
+                            <Notification01Icon size={24} className="text-gray-300" />
                         </div>
-                        <p className="text-gray-500 font-medium">
+                        <p className="text-sm text-gray-400">
                             {filter === 'done'
                                 ? t('remindersPage.noDone', 'No completed reminders yet')
-                                : t('remindersPage.noPending', 'No reminders — you\'re all caught up!')}
+                                : t('remindersPage.noPending', 'You\'re all caught up!')}
                         </p>
                         {filter === 'pending' && (
                             <button
                                 onClick={() => setShowCreate(true)}
-                                className="mt-4 flex items-center gap-1.5 text-sm text-[#33cbcc] font-medium hover:underline"
+                                className="mt-3 flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 transition-colors"
                             >
-                                <Add01Icon size={14} />
+                                <Add01Icon size={13} />
                                 {t('remindersPage.createFirst', 'Create your first reminder')}
                             </button>
                         )}
                     </div>
                 ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                         <AnimatePresence mode="popLayout">
                             {displayed.map(r => <ReminderCard key={r.id} reminder={r} />)}
                         </AnimatePresence>
                     </div>
                 )}
             </div>
-
-            {/* Timeline legend */}
-            {!isLoading && displayed.length > 0 && (
-                <div className="max-w-3xl mx-auto mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 px-1">
-                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('remindersPage.legendTitle', 'Legend:')}</span>
-                    {[
-                        { dot: 'bg-red-500', label: t('remindersPage.legend.overdue', 'Overdue') },
-                        { dot: 'bg-orange-500', label: t('remindersPage.legend.today', 'Today') },
-                        { dot: 'bg-yellow-500', label: t('remindersPage.legend.tomorrow', 'Tomorrow') },
-                        { dot: 'bg-[#33cbcc]', label: t('remindersPage.legend.leq5Days', '≤ 5 days') },
-                        { dot: 'bg-[#283852]', label: t('remindersPage.legend.leq10Days', '≤ 10 days') },
-                        { dot: 'bg-gray-400', label: t('remindersPage.legend.later', 'Later') },
-                    ].map(({ dot, label }) => (
-                        <div key={label} className="flex items-center gap-1.5">
-                            <span className={`w-2 h-2 rounded-full ${dot}`} />
-                            <span className="text-[10px] text-gray-500">{label}</span>
-                        </div>
-                    ))}
-                </div>
-            )}
 
             {/* Create Modal */}
             <AnimatePresence>
