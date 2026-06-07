@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3025').replace(/\/$/, '');
+const API_BASE = ((import.meta.env.VITE_API_URL as string) ?? '').replace(/\/$/, '');
 
 /**
  * Opens an SSE connection to `path?token=<jwt>` and invalidates the given

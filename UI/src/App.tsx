@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react"
+﻿import { lazy, Suspense } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
 import DashboardLayout from "./layouts/DashboardLayout"
 import ProtectedRoute from "./components/ProtectedRoute"
@@ -92,154 +92,154 @@ const MonthlyRankings = lazy(() => import("./pages/admin/MonthlyRankings"))
 const DashboardRouter = () => {
   const { role, viewMode } = useAuth();
   if (role === 'ACCOUNTANT' && viewMode === 'admin') {
-    return <Navigate to="/accounting" replace />;
+  return <Navigate to="/accounting" replace />;
   }
   if (role === 'CEO') {
-    return viewMode === 'admin' ? <CeoDashboard /> : <AdminDashboard />;
+  return viewMode === 'admin' ? <CeoDashboard /> : <AdminDashboard />;
   }
   return <RolePageSwitch adminComponent={AdminDashboard} employeeComponent={EmployeeDashboard} />;
 };
 
 function App() {
   return (
-    <Suspense fallback={null}>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+  <Suspense fallback={null}>
+  <Routes>
+  <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        {/* Public routes */}
-        <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
-        </Route>
+  {/* Public routes */}
+  <Route element={<PublicRoute />}>
+  <Route path="/login" element={<Login />} />
+  </Route>
 
-        {/* Routes for all authenticated users — dual-view pages */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<DashboardRouter />} />
-            <Route path="/tasks" element={
-              <RolePageSwitch adminComponent={AdminTasks} employeeComponent={EmployeeTasks} />
-            } />
-            <Route path="/planning" element={
-              <RolePageSwitch adminComponent={AdminPlanning} employeeComponent={EmployeePlanning} />
-            } />
-            <Route path="/projects" element={
-              <RolePageSwitch adminComponent={AdminProjects} employeeComponent={EmployeeProjects} />
-            } />
-            <Route path="/tickets" element={
-              <RolePageSwitch adminComponent={AdminTickets} employeeComponent={EmployeeTickets} />
-            } />
-            <Route path="/meetings" element={
-              <RolePageSwitch adminComponent={AdminMeetings} employeeComponent={EmployeeMeetings} />
-            } />
-            <Route path="/demands" element={
-              <RolePageSwitch adminComponent={AdminDemands} employeeComponent={EmployeeDemands} />
-            } />
-            <Route path="/documents" element={
-              <RolePageSwitch adminComponent={AdminDocuments} employeeComponent={EmployeeDocuments} />
-            } />
-            <Route path="/notifications" element={
-              <RolePageSwitch adminComponent={AdminNotifications} employeeComponent={EmployeeNotifications} />
-            } />
-            <Route path="/profile" element={
-              <RolePageSwitch adminComponent={AdminProfile} employeeComponent={EmployeeProfile} />
-            } />
-            <Route path="/formations" element={<Formations />} />
-            <Route path="/sanctions" element={<Sanctions />} />
-            <Route path="/my-payslips" element={<MyPayslips />} />
-            <Route path="/business-expenses" element={
-              <RolePageSwitch adminComponent={AdminBusinessExpenses} employeeComponent={EmployeeBusinessExpenses} />
-            } />
-            <Route path="/reports" element={
-              <RolePageSwitch adminComponent={AdminReports} employeeComponent={EmployeeReports} />
-            } />
-            <Route path="/reminders" element={<Reminders />} />
-          </Route>
+  {/* Routes for all authenticated users — dual-view pages */}
+  <Route element={<ProtectedRoute />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/dashboard" element={<DashboardRouter />} />
+  <Route path="/tasks" element={
+  <RolePageSwitch adminComponent={AdminTasks} employeeComponent={EmployeeTasks} />
+  } />
+  <Route path="/planning" element={
+  <RolePageSwitch adminComponent={AdminPlanning} employeeComponent={EmployeePlanning} />
+  } />
+  <Route path="/projects" element={
+  <RolePageSwitch adminComponent={AdminProjects} employeeComponent={EmployeeProjects} />
+  } />
+  <Route path="/tickets" element={
+  <RolePageSwitch adminComponent={AdminTickets} employeeComponent={EmployeeTickets} />
+  } />
+  <Route path="/meetings" element={
+  <RolePageSwitch adminComponent={AdminMeetings} employeeComponent={EmployeeMeetings} />
+  } />
+  <Route path="/demands" element={
+  <RolePageSwitch adminComponent={AdminDemands} employeeComponent={EmployeeDemands} />
+  } />
+  <Route path="/documents" element={
+  <RolePageSwitch adminComponent={AdminDocuments} employeeComponent={EmployeeDocuments} />
+  } />
+  <Route path="/notifications" element={
+  <RolePageSwitch adminComponent={AdminNotifications} employeeComponent={EmployeeNotifications} />
+  } />
+  <Route path="/profile" element={
+  <RolePageSwitch adminComponent={AdminProfile} employeeComponent={EmployeeProfile} />
+  } />
+  <Route path="/formations" element={<Formations />} />
+  <Route path="/sanctions" element={<Sanctions />} />
+  <Route path="/my-payslips" element={<MyPayslips />} />
+  <Route path="/business-expenses" element={
+  <RolePageSwitch adminComponent={AdminBusinessExpenses} employeeComponent={EmployeeBusinessExpenses} />
+  } />
+  <Route path="/reports" element={
+  <RolePageSwitch adminComponent={AdminReports} employeeComponent={EmployeeReports} />
+  } />
+  <Route path="/reminders" element={<Reminders />} />
+  </Route>
 
-          {/* Messages — outside DashboardLayout (full screen) */}
-          <Route path="/messages" element={
-            <RolePageSwitch adminComponent={AdminMessages} employeeComponent={EmployeeMessages} />
-          } />
-        </Route>
+  {/* Messages — outside DashboardLayout (full screen) */}
+  <Route path="/messages" element={
+  <RolePageSwitch adminComponent={AdminMessages} employeeComponent={EmployeeMessages} />
+  } />
+  </Route>
 
-        {/* Routes for MANAGER and HEAD_OF_DEPARTMENT only */}
-        <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT']} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/employees" element={<Employees />} />
-            <Route path="/departments" element={<Departments />} />
-            <Route path="/employees/rankings" element={<MonthlyRankings />} />
-          </Route>
-          <Route path="/employees/:id" element={<EmployeeDetailLayout />} />
-          <Route path="/departments/:id" element={<DepartmentDetailLayout />} />
-        </Route>
+  {/* Routes for MANAGER and HEAD_OF_DEPARTMENT only */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/employees" element={<Employees />} />
+  <Route path="/departments" element={<Departments />} />
+  <Route path="/employees/rankings" element={<MonthlyRankings />} />
+  </Route>
+  <Route path="/employees/:id" element={<EmployeeDetailLayout />} />
+  <Route path="/departments/:id" element={<DepartmentDetailLayout />} />
+  </Route>
 
-        {/* Activity + WhatsApp — MANAGER only */}
-        <Route element={<ProtectedRoute allowedRoles={['MANAGER']} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/activity" element={<ActivityPage />} />
-            <Route path="/whatsapp" element={<WhatsAppPage />} />
-          </Route>
-        </Route>
+  {/* Activity + WhatsApp — MANAGER only */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/activity" element={<ActivityPage />} />
+  <Route path="/whatsapp" element={<WhatsAppPage />} />
+  </Route>
+  </Route>
 
-        {/* Routes for MANAGER, HEAD_OF_DEPARTMENT and ACCOUNTANT */}
-        <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT']} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/invoices" element={<Invoices />} />
-            <Route path="/expenses" element={<Expenses />} />
-            <Route path="/clients" element={<Clients />} />
-          </Route>
-          <Route path="/projects/:id" element={<ProjectDetailLayout />} />
-          <Route path="/clients/:id" element={<ClientDetailLayout />} />
-        </Route>
+  {/* Routes for MANAGER, HEAD_OF_DEPARTMENT and ACCOUNTANT */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/invoices" element={<Invoices />} />
+  <Route path="/expenses" element={<Expenses />} />
+  <Route path="/clients" element={<Clients />} />
+  </Route>
+  <Route path="/projects/:id" element={<ProjectDetailLayout />} />
+  <Route path="/clients/:id" element={<ClientDetailLayout />} />
+  </Route>
 
-        {/* Commercial routes — MANAGER + HEAD_OF_DEPARTMENT + COMMERCIAL */}
-        <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL']} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/commercial" element={<CommercialDashboard />} />
-            <Route path="/commercial/leads" element={<LeadsDatabase />} />
-            <Route path="/commercial/pipeline" element={<SalesPipeline />} />
-            <Route path="/commercial/suivi" element={<LeadFollowUp />} />
-          </Route>
-        </Route>
+  {/* Commercial routes — MANAGER + HEAD_OF_DEPARTMENT + COMMERCIAL */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/commercial" element={<CommercialDashboard />} />
+  <Route path="/commercial/leads" element={<LeadsDatabase />} />
+  <Route path="/commercial/pipeline" element={<SalesPipeline />} />
+  <Route path="/commercial/suivi" element={<LeadFollowUp />} />
+  </Route>
+  </Route>
 
-        {/* Client Follow-Up — MANAGER + HEAD_OF_DEPARTMENT only */}
-        <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT']} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/commercial/follow-up" element={<ClientFollowUp />} />
-          </Route>
-        </Route>
+  {/* Client Follow-Up — MANAGER + HEAD_OF_DEPARTMENT only */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/commercial/follow-up" element={<ClientFollowUp />} />
+  </Route>
+  </Route>
 
-        {/* Accounting routes — MANAGER + ACCOUNTANT */}
-        <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'ACCOUNTANT']} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/accounting" element={<AccountantDashboard />} />
-            <Route path="/accounting/accounts" element={<ChartOfAccounts />} />
-            <Route path="/accounting/entries" element={<JournalEntries />} />
-            <Route path="/accounting/reports" element={<Reports />} />
-            <Route path="/accounting/fiscal-years" element={<FiscalYears />} />
-            <Route path="/accounting/payroll" element={<Payroll />} />
-            <Route path="/accounting/tax" element={<TaxDeclarations />} />
-            <Route path="/accounting/ai-reports" element={<AIReports />} />
-            <Route path="/accounting/suppliers" element={<Suppliers />} />
-            <Route path="/accounting/cash-flow" element={<CashFlow />} />
-          </Route>
-        </Route>
+  {/* Accounting routes — MANAGER + ACCOUNTANT */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'ACCOUNTANT']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/accounting" element={<AccountantDashboard />} />
+  <Route path="/accounting/accounts" element={<ChartOfAccounts />} />
+  <Route path="/accounting/entries" element={<JournalEntries />} />
+  <Route path="/accounting/reports" element={<Reports />} />
+  <Route path="/accounting/fiscal-years" element={<FiscalYears />} />
+  <Route path="/accounting/payroll" element={<Payroll />} />
+  <Route path="/accounting/tax" element={<TaxDeclarations />} />
+  <Route path="/accounting/ai-reports" element={<AIReports />} />
+  <Route path="/accounting/suppliers" element={<Suppliers />} />
+  <Route path="/accounting/cash-flow" element={<CashFlow />} />
+  </Route>
+  </Route>
 
-        {/* Discipline — MANAGER + CEO + HEAD_OF_DEPARTMENT */}
-        <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'CEO', 'HEAD_OF_DEPARTMENT']} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/discipline/attendance" element={<Attendance />} />
-          </Route>
-        </Route>
+  {/* Discipline — MANAGER + CEO + HEAD_OF_DEPARTMENT */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'CEO', 'HEAD_OF_DEPARTMENT']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/discipline/attendance" element={<Attendance />} />
+  </Route>
+  </Route>
 
-        {/* Fund Movements — CEO + ACCOUNTANT */}
-        <Route element={<ProtectedRoute allowedRoles={['CEO', 'ACCOUNTANT']} />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="/accounting/fund-movements" element={<FundMovements />} />
-          </Route>
-        </Route>
+  {/* Fund Movements — CEO + ACCOUNTANT */}
+  <Route element={<ProtectedRoute allowedRoles={['CEO', 'ACCOUNTANT']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/accounting/fund-movements" element={<FundMovements />} />
+  </Route>
+  </Route>
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </Suspense>
+  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+  </Routes>
+  </Suspense>
   )
 }
 

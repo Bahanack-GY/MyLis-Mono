@@ -1,34 +1,34 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+﻿import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Loading02Icon } from 'hugeicons-react';
 import { useAuth } from '../contexts/AuthContext';
 import type { Role } from '../api/auth/types';
 
 interface ProtectedRouteProps {
-    allowedRoles?: Role[];
-    children?: React.ReactNode;
+  allowedRoles?: Role[];
+  children?: React.ReactNode;
 }
 
 const ProtectedRoute = ({ allowedRoles, children }: ProtectedRouteProps) => {
-    const { isAuthenticated, isLoading, role } = useAuth();
-    const location = useLocation();
+  const { isAuthenticated, isLoading, role } = useAuth();
+  const location = useLocation();
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center h-screen bg-gray-50">
-                <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
-            </div>
-        );
-    }
+  if (isLoading) {
+  return (
+  <div className="flex items-center justify-center h-screen bg-gray-50">
+  <Loading02Icon className="w-8 h-8 animate-spin text-[#33cbcc]" />
+  </div>
+  );
+  }
 
-    if (!isAuthenticated) {
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
+  if (!isAuthenticated) {
+  return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
-    if (allowedRoles && role && role !== 'CEO' && !allowedRoles.includes(role)) {
-        return <Navigate to="/dashboard" replace />;
-    }
+  if (allowedRoles && role && role !== 'CEO' && !allowedRoles.includes(role)) {
+  return <Navigate to="/dashboard" replace />;
+  }
 
-    return children ? <>{children}</> : <Outlet />;
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default ProtectedRoute;

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+﻿import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search01Icon, Add01Icon, Cancel01Icon, Loading02Icon, BookOpen01Icon, File01Icon, Tick01Icon, Delete02Icon, ViewIcon, Calendar01Icon, FilterIcon, Alert02Icon, MinusSignIcon } from 'hugeicons-react';
@@ -48,9 +48,9 @@ const formatDate = (dateStr: string | undefined) => {
 };
 
 const inputCls =
- 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+ 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors';
 const labelCls =
- 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
+ 'flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1.5';
 
 /* ------------------------------------------------------------------ */
 /* Hooks */
@@ -152,10 +152,10 @@ const CreateEntryModal = ({
   setThirdPartyId(id);
   if (!id) return;
   const name = isVente
-   ? clients.find((c: any) => c.id === id)?.name
-   : suppliers.find((s: any) => s.id === id)?.name;
+  ? clients.find((c: any) => c.id === id)?.name
+  : suppliers.find((s: any) => s.id === id)?.name;
   if (name && !form.description.trim()) {
-   setForm(p => ({ ...p, description: isVente ? `Vente - ${name}` : `Achat - ${name}` }));
+  setForm(p => ({ ...p, description: isVente ? `Vente - ${name}` : `Achat - ${name}` }));
   }
  };
 
@@ -220,27 +220,27 @@ const CreateEntryModal = ({
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+ className="fixed inset-0 z-50 flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ opacity: 0, scale: 0.95, y: 10 }}
- animate={{ opacity: 1, scale: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95, y: 10 }}
- transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col"
+ className="bg-white w-full max-w-lg h-full flex flex-col border-l border-[#e5e8ef]"
  >
  {/* Header */}
- <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
+ <div className="w-10 h-10  bg-[#33cbcc]/10 flex items-center justify-center">
  <BookOpen01Icon size={20} className="text-[#33cbcc]"/>
  </div>
- <h2 className="text-lg font-bold text-gray-800">Nouvelle ecriture comptable</h2>
+ <h2 className="text-lg font-bold text-[#1c2b3a]">Nouvelle ecriture comptable</h2>
  </div>
  <button
  onClick={onClose}
- className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+ className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"
  >
  <Cancel01Icon size={18} />
  </button>
@@ -280,20 +280,20 @@ const CreateEntryModal = ({
 
  {showThirdParty && (
   <div>
-   <label className={labelCls}>
-    {isVente ? '🧑‍💼 Client' : '🏭 Fournisseur'}
-   </label>
-   <select
-    value={thirdPartyId}
-    onChange={(e) => handleThirdPartyChange(e.target.value)}
-    className={inputCls + ' appearance-none cursor-pointer'}
-   >
-    <option value="">-- {isVente ? 'Sélectionner un client' : 'Sélectionner un fournisseur'} --</option>
-    {isVente
-     ? clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)
-     : suppliers.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)
-    }
-   </select>
+  <label className={labelCls}>
+  {isVente ? '🧑‍💼 Client' : '🏭 Fournisseur'}
+  </label>
+  <select
+  value={thirdPartyId}
+  onChange={(e) => handleThirdPartyChange(e.target.value)}
+  className={inputCls + ' appearance-none cursor-pointer'}
+  >
+  <option value="">-- {isVente ? 'Sélectionner un client' : 'Sélectionner un fournisseur'} --</option>
+  {isVente
+  ? clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)
+  : suppliers.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)
+  }
+  </select>
   </div>
  )}
 
@@ -321,7 +321,7 @@ const CreateEntryModal = ({
  </div>
 
  {/* Lines */}
- <div className="border-t border-gray-100 pt-5">
+ <div className="border-t border-[#e5e8ef] pt-5">
  <div className="flex items-center justify-between mb-3">
  <label className={labelCls + ' mb-0'}>
  <File01Icon size={12} />
@@ -338,7 +338,7 @@ const CreateEntryModal = ({
  </div>
 
  {/* Lines header */}
- <div className="grid grid-cols-12 gap-2 mb-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-1">
+ <div className="grid grid-cols-12 gap-2 mb-2 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider px-1">
  <div className="col-span-5">Compte</div>
  <div className="col-span-2">Debit</div>
  <div className="col-span-2">Credit</div>
@@ -353,7 +353,7 @@ const CreateEntryModal = ({
  <select
  value={line.accountId}
  onChange={(e) => updateLine(idx, 'accountId', e.target.value)}
- className="w-full bg-white rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer"
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-3 py-2 text-xs text-[#1c2b3a] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors appearance-none cursor-pointer"
  >
  <option value="">Selectionner un compte</option>
  {accounts.map((a) => (
@@ -370,7 +370,7 @@ const CreateEntryModal = ({
  value={line.debit}
  onChange={(e) => updateLine(idx, 'debit', e.target.value)}
  placeholder="0"
- className="w-full bg-white rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-3 py-2 text-xs text-[#1c2b3a] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  </div>
  <div className="col-span-2">
@@ -380,7 +380,7 @@ const CreateEntryModal = ({
  value={line.credit}
  onChange={(e) => updateLine(idx, 'credit', e.target.value)}
  placeholder="0"
- className="w-full bg-white rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-3 py-2 text-xs text-[#1c2b3a] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  </div>
  <div className="col-span-2">
@@ -389,7 +389,7 @@ const CreateEntryModal = ({
  value={line.label}
  onChange={(e) => updateLine(idx, 'label', e.target.value)}
  placeholder="Libelle"
- className="w-full bg-white rounded-lg border border-gray-200 px-3 py-2 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all"
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-3 py-2 text-xs text-[#1c2b3a] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  </div>
  <div className="col-span-1 flex justify-center">
@@ -397,7 +397,7 @@ const CreateEntryModal = ({
  <button
  type="button"
  onClick={() => removeLine(idx)}
- className="p-1.5 rounded-lg text-gray-400 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
+ className="p-1.5 text-[#8892a4] hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
  >
  <MinusSignIcon size={14} />
  </button>
@@ -408,14 +408,14 @@ const CreateEntryModal = ({
  </div>
 
  {/* Totals */}
- <div className="mt-4 bg-gray-50 rounded-xl p-4">
+ <div className="mt-4 bg-[#f8f9fc]  p-4">
  <div className="grid grid-cols-12 gap-2">
- <div className="col-span-5 text-sm font-semibold text-gray-700">Totaux</div>
+ <div className="col-span-5 text-sm font-semibold text-[#1c2b3a]">Totaux</div>
  <div className="col-span-2">
- <span className="text-sm font-bold text-gray-800">{formatXAF(totalDebit)}</span>
+ <span className="text-sm font-bold text-[#1c2b3a]">{formatXAF(totalDebit)}</span>
  </div>
  <div className="col-span-2">
- <span className="text-sm font-bold text-gray-800">{formatXAF(totalCredit)}</span>
+ <span className="text-sm font-bold text-[#1c2b3a]">{formatXAF(totalCredit)}</span>
  </div>
  <div className="col-span-3">
  {totalDebit > 0 || totalCredit > 0 ? (
@@ -438,20 +438,20 @@ const CreateEntryModal = ({
  </div>
 
  {/* Footer */}
- <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3 shrink-0">
  <button
  onClick={onClose}
- className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+ className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
  >
  Annuler
  </button>
  <button
  disabled={!isValid || createMut.isPending}
  onClick={handleSubmit}
- className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors ${
+ className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white transition-colors ${
  isValid && !createMut.isPending
- ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] '
- : 'bg-gray-300 cursor-not-allowed shadow-none'
+ ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
+ : 'bg-gray-300 cursor-not-allowed'
  }`}
  >
  {createMut.isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Add01Icon size={16} />}
@@ -498,24 +498,24 @@ const EntryDetailModal = ({
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+ className="fixed inset-0 z-50 flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ opacity: 0, scale: 0.95, y: 10 }}
- animate={{ opacity: 1, scale: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95, y: 10 }}
- transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
+ className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
  >
  {/* Header */}
- <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
+ <div className="w-10 h-10  bg-[#33cbcc]/10 flex items-center justify-center">
  <File01Icon size={20} className="text-[#33cbcc]"/>
  </div>
  <div>
- <h2 className="text-lg font-bold text-gray-800">{entry.entryNumber}</h2>
+ <h2 className="text-lg font-bold text-[#1c2b3a]">{entry.entryNumber}</h2>
  <div className="flex items-center gap-2 mt-0.5">
  <span
  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${statusStyle.bg} ${statusStyle.text}`}
@@ -532,7 +532,7 @@ const EntryDetailModal = ({
  </div>
  <button
  onClick={onClose}
- className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+ className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"
  >
  <Cancel01Icon size={18} />
  </button>
@@ -542,46 +542,46 @@ const EntryDetailModal = ({
  <div className="p-6 space-y-5 overflow-y-auto flex-1">
  <div className="grid grid-cols-2 gap-4">
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Journal</p>
- <p className="text-sm font-medium text-gray-800 mt-1">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">Journal</p>
+ <p className="text-sm font-medium text-[#1c2b3a] mt-1">
  {entry.journal?.code} - {entry.journal?.name}
  </p>
  </div>
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Date</p>
- <p className="text-sm text-gray-600 mt-1">{formatDate(entry.date)}</p>
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">Date</p>
+ <p className="text-sm text-[#8892a4] mt-1">{formatDate(entry.date)}</p>
  </div>
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">
  Description
  </p>
- <p className="text-sm text-gray-600 mt-1">{entry.description}</p>
+ <p className="text-sm text-[#8892a4] mt-1">{entry.description}</p>
  </div>
  {entry.reference && (
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">
  Reference
  </p>
- <p className="text-sm text-gray-600 mt-1">{entry.reference}</p>
+ <p className="text-sm text-[#8892a4] mt-1">{entry.reference}</p>
  </div>
  )}
  {entry.createdBy && (
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">
  Créé par
  </p>
- <p className="text-sm text-gray-600 mt-1">{entry.createdBy.email}</p>
+ <p className="text-sm text-[#8892a4] mt-1">{entry.createdBy.email}</p>
  </div>
  )}
  </div>
 
  {/* Lines */}
- <div className="border-t border-gray-100 pt-4">
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">
+ <div className="border-t border-[#e5e8ef] pt-4">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-3">
  Lignes d'ecriture
  </p>
- <div className="bg-gray-50 rounded-xl overflow-hidden">
- <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-200">
+ <div className="bg-[#f8f9fc]  overflow-hidden">
+ <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider border-b border-[#e5e8ef]">
  <div className="col-span-2">Code</div>
  <div className="col-span-4">Compte</div>
  <div className="col-span-2 text-right">Debit</div>
@@ -591,19 +591,19 @@ const EntryDetailModal = ({
  {(entry.lines || []).map((line, i) => (
  <div
  key={line.id || i}
- className="grid grid-cols-12 gap-2 px-4 py-2.5 border-b border-gray-100 last:border-0 text-sm"
+ className="grid grid-cols-12 gap-2 px-4 py-2.5 border-b border-[#e5e8ef] last:border-0 text-sm"
  >
- <div className="col-span-2 font-mono text-gray-600 text-xs">
+ <div className="col-span-2 font-mono text-[#8892a4] text-xs">
  {line.account?.code || '--'}
  </div>
- <div className="col-span-4 text-gray-800">{line.account?.name || '--'}</div>
- <div className="col-span-2 text-right font-medium text-gray-800">
+ <div className="col-span-4 text-[#1c2b3a]">{line.account?.name || '--'}</div>
+ <div className="col-span-2 text-right font-medium text-[#1c2b3a]">
  {line.debit > 0 ? formatXAF(line.debit) : ''}
  </div>
- <div className="col-span-2 text-right font-medium text-gray-800">
+ <div className="col-span-2 text-right font-medium text-[#1c2b3a]">
  {line.credit > 0 ? formatXAF(line.credit) : ''}
  </div>
- <div className="col-span-2 text-gray-500 text-xs truncate">
+ <div className="col-span-2 text-[#8892a4] text-xs truncate">
  {line.label || ''}
  </div>
  </div>
@@ -612,25 +612,25 @@ const EntryDetailModal = ({
  </div>
 
  {/* Totals */}
- <div className="bg-gray-50 rounded-xl p-4">
+ <div className="bg-[#f8f9fc]  p-4">
  <div className="flex justify-between text-sm">
- <span className="font-semibold text-gray-700">Total Debit</span>
- <span className="font-bold text-gray-800">{formatXAF(entry.totalDebit)}</span>
+ <span className="font-semibold text-[#1c2b3a]">Total Debit</span>
+ <span className="font-bold text-[#1c2b3a]">{formatXAF(entry.totalDebit)}</span>
  </div>
  <div className="flex justify-between text-sm mt-1">
- <span className="font-semibold text-gray-700">Total Credit</span>
- <span className="font-bold text-gray-800">{formatXAF(entry.totalCredit)}</span>
+ <span className="font-semibold text-[#1c2b3a]">Total Credit</span>
+ <span className="font-bold text-[#1c2b3a]">{formatXAF(entry.totalCredit)}</span>
  </div>
  </div>
  </div>
 
  {/* Footer */}
  {entry.status === 'DRAFT' && (
- <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3 shrink-0">
  <button
  onClick={() => deleteMut.mutate(entry.id, { onSuccess: onClose })}
  disabled={deleteMut.isPending}
- className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors disabled:opacity-50"
  >
  {deleteMut.isPending ? (
  <Loading02Icon size={14} className="animate-spin"/>
@@ -642,7 +642,7 @@ const EntryDetailModal = ({
  <button
  onClick={() => validateMut.mutate(entry.id, { onSuccess: onClose })}
  disabled={validateMut.isPending}
- className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  {validateMut.isPending ? (
  <Loading02Icon size={14} className="animate-spin"/>
@@ -703,11 +703,11 @@ export default function JournalEntries() {
  if (isLoading) {
  return (
  <div className="space-y-6">
- <div className="h-8 bg-gray-200 rounded-lg w-64 animate-pulse"/>
+ <div className="h-8 bg-gray-200  w-64 animate-pulse"/>
  <div className="h-4 bg-gray-100 rounded w-48 animate-pulse"/>
  <div className="space-y-3">
  {[...Array(6)].map((_, i) => (
- <div key={i} className="h-14 bg-gray-100 rounded-2xl animate-pulse"/>
+ <div key={i} className="h-14 bg-gray-100  animate-pulse"/>
  ))}
  </div>
  </div>
@@ -727,14 +727,14 @@ export default function JournalEntries() {
  <div className="flex items-center gap-3">
  <button
  onClick={() => setShowCreateInvoiceModal(true)}
- className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-colors"
+ className="flex items-center gap-2 bg-white border border-gray-200 text-gray-700 px-5 py-2.5  text-sm font-semibold hover:bg-gray-50 transition-colors"
  >
  <File01Icon size={16} className="text-[#33cbcc]"/>
  Nouvelle Facture
  </button>
  <button
  onClick={() => setShowCreateModal(true)}
- className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
+ className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5  text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
  >
  <Add01Icon size={16} />
  Nouvelle Ecriture
@@ -743,14 +743,14 @@ export default function JournalEntries() {
  </div>
 
  {/* Filters */}
- <div className="bg-white rounded-2xl p-4">
+ <div className="bg-white  p-4">
  <div className="flex items-center gap-2 mb-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
  <FilterIcon size={12} />
  Filtres
  </div>
  <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
  {/* Search01Icon */}
- <div className="md:col-span-2 flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+ <div className="md:col-span-2 flex items-center gap-3 bg-white border border-[#e5e8ef]  px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
  <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
  <input
  type="text"
@@ -765,7 +765,7 @@ export default function JournalEntries() {
  <select
  value={filterJournal}
  onChange={(e) => setFilterJournal(e.target.value)}
- className="bg-gray-50 rounded-xl border-0 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
+ className="bg-gray-50  border-0 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
  >
  <option value="">Tous les journaux</option>
  {(journals || []).map((j) => (
@@ -779,7 +779,7 @@ export default function JournalEntries() {
  <select
  value={filterStatus}
  onChange={(e) => setFilterStatus(e.target.value)}
- className="bg-gray-50 rounded-xl border-0 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
+ className="bg-gray-50  border-0 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
  >
  <option value="">Tous les statuts</option>
  <option value="DRAFT">Brouillon</option>
@@ -792,14 +792,14 @@ export default function JournalEntries() {
  type="date"
  value={dateFrom}
  onChange={(e) => setDateFrom(e.target.value)}
- className="flex-1 bg-gray-50 rounded-xl border-0 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20"
+ className="flex-1 bg-gray-50  border-0 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20"
  placeholder="Du"
  />
  <input
  type="date"
  value={dateTo}
  onChange={(e) => setDateTo(e.target.value)}
- className="flex-1 bg-gray-50 rounded-xl border-0 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20"
+ className="flex-1 bg-gray-50  border-0 px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20"
  placeholder="Au"
  />
  </div>
@@ -808,7 +808,7 @@ export default function JournalEntries() {
 
  {/* Entries Table */}
  {filteredEntries.length > 0 ? (
- <div className="bg-white rounded-2xl overflow-hidden">
+ <div className="bg-white  overflow-hidden">
  {/* Table header */}
  <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
  <div className="col-span-1">N</div>
@@ -878,7 +878,7 @@ export default function JournalEntries() {
  }}
  disabled={validateMut.isPending}
  title="Valider"
- className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#2bb5b6] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-[#33cbcc] hover:text-[#2bb5b6] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <Tick01Icon size={14} />
  </button>
@@ -889,7 +889,7 @@ export default function JournalEntries() {
  }}
  disabled={deleteMut.isPending}
  title="Supprimer"
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <Delete02Icon size={14} />
  </button>
@@ -901,7 +901,7 @@ export default function JournalEntries() {
  setSelectedEntry(entry);
  }}
  title="Details"
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
  >
  <ViewIcon size={14} />
  </button>
@@ -911,7 +911,7 @@ export default function JournalEntries() {
  })}
  </div>
  ) : (
- <div className="bg-white rounded-2xl p-12 text-center">
+ <div className="bg-white  p-12 text-center">
  <BookOpen01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">Aucune ecriture trouvee</p>
  </div>

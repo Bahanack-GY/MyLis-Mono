@@ -2,15 +2,17 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-const apiTarget = 'http://server:3025'
+const apiTarget = process.env.VITE_API_TARGET || 'http://localhost:3000'
 const apiPaths = [
   '/auth', '/users', '/employees', '/tasks', '/hr',
   '/organization', '/logs', '/tickets', '/clients',
   '/projects', '/meetings', '/invoices', '/notifications',
   '/chat', '/demands', '/expenses', '/salary', '/uploads',
   '/api', '/leads', '/lead-activities', '/client-payments',
-  '/task-natures', '/teams', '/departments', '/gamification',
-  '/payroll', '/tax', '/accounting',
+  '/task-natures', '/charge-natures', '/teams', '/departments', '/gamification',
+  '/payroll', '/tax', '/accounting', '/reminders',
+  '/attendance', '/business-expenses', '/carwash', '/commercial-goals', '/fund-movements',
+  '/reports', '/suppliers', '/messages',
 ]
 
 // https://vite.dev/config/
@@ -41,9 +43,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
-    hmr: {
-      clientPort: parseInt(process.env.UI_PORT || '8080'),
-    },
+    hmr: process.env.UI_PORT ? { clientPort: parseInt(process.env.UI_PORT) } : true,
     proxy: {
       ...Object.fromEntries(
         apiPaths.map(path => [path, {
@@ -57,6 +57,7 @@ export default defineConfig({
       '/socket.io': {
         target: apiTarget,
         ws: true,
+        changeOrigin: true,
       },
     },
   },

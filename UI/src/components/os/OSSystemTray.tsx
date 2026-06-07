@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Wifi01Icon, VolumeHighIcon, BatteryFullIcon } from 'hugeicons-react';
 
 function formatTime(date: Date) {
@@ -13,19 +13,19 @@ export default function OSSystemTray() {
   const [now, setNow] = useState(new Date());
 
   useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(interval);
+  const interval = setInterval(() => setNow(new Date()), 60_000);
+  return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="flex items-center gap-3 text-gray-300 px-3">
-      <Wifi01Icon size={14} />
-      <VolumeHighIcon size={14} />
-      <BatteryFullIcon size={14} />
-      <div className="text-xs text-right leading-tight ml-1">
-        <div>{formatTime(now)}</div>
-        <div className="text-gray-400">{formatDate(now)}</div>
-      </div>
-    </div>
+  <div className="flex items-center gap-3 text-gray-300 px-3">
+  <Wifi01Icon size={14} />
+  <VolumeHighIcon size={14} />
+  <BatteryFullIcon size={14} />
+  <div className="text-xs text-right leading-tight ml-1">
+  <div>{formatTime(now)}</div>
+  <div className="text-gray-400">{formatDate(now)}</div>
+  </div>
+  </div>
   );
 }

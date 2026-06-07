@@ -1,18 +1,18 @@
-import { useTranslation } from 'react-i18next';
+﻿import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import React, { useState } from 'react';
 import { ArrowUpRight01Icon, Tick01Icon, Wallet01Icon, Clock01Icon, Building01Icon, Calendar01Icon, Upload01Icon, File01Icon, Download01Icon, ViewIcon, CircleIcon, UserGroupIcon, PencilIcon, Add01Icon, Delete02Icon, Loading02Icon, Wrench01Icon } from 'hugeicons-react';
 import {
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    PieChart,
-    Pie,
-    Cell,
-    BarChart,
-    Bar
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar
 } from 'recharts';
 import type { ProjectTab } from '../components/ProjectDetailSidebar';
 import type { ProjectData } from '../layouts/ProjectDetailLayout';
@@ -22,944 +22,944 @@ import { useCreateMilestone, useUpdateMilestone, useToggleMilestone, useDeleteMi
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProjectDetailProps {
-    project: ProjectData;
-    activeTab: ProjectTab;
-    onEdit: () => void;
+  project: ProjectData;
+  activeTab: ProjectTab;
+  onEdit: () => void;
 }
 
 /* ─── Status config ─────────────────────────────────────── */
 
 const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
-    active:    { bg: 'bg-[#33cbcc]/10',  text: 'text-[#33cbcc]',  dot: 'bg-[#33cbcc]' },
-    completed: { bg: 'bg-[#283852]',     text: 'text-white',       dot: 'bg-white' },
-    on_hold:   { bg: 'bg-[#283852]/10',  text: 'text-[#283852]',   dot: 'bg-[#283852]' },
-    overdue:   { bg: 'bg-[#283852]/10',  text: 'text-[#283852]',   dot: 'bg-[#283852]' },
+  active:   { bg: 'bg-[#33cbcc]/10',  text: 'text-[#33cbcc]',  dot: 'bg-[#33cbcc]' },
+  completed: { bg: 'bg-[#283852]',   text: 'text-white',   dot: 'bg-white' },
+  on_hold:   { bg: 'bg-[#283852]/10',  text: 'text-[#283852]',   dot: 'bg-[#283852]' },
+  overdue:   { bg: 'bg-[#283852]/10',  text: 'text-[#283852]',   dot: 'bg-[#283852]' },
 };
 
 const STATUS_I18N: Record<string, string> = {
-    active: 'statusActive',
-    completed: 'statusCompleted',
-    on_hold: 'statusOnHold',
-    overdue: 'statusOverdue',
+  active: 'statusActive',
+  completed: 'statusCompleted',
+  on_hold: 'statusOnHold',
+  overdue: 'statusOverdue',
 };
 
 const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
 const fmtCurrency = (n: number) => `${new Intl.NumberFormat('fr-FR').format(n)} FCFA`;
 
 /* ═══════════════════════════════════════════════════════════
-   OVERVIEW TAB
-   ═══════════════════════════════════════════════════════════ */
+  OVERVIEW TAB
+  ═══════════════════════════════════════════════════════════ */
 
 const DONUT_COLORS = ['#283852', '#33cbcc', '#283852'];
 
 const OverviewView = ({ project, onEdit }: { project: ProjectData; onEdit: () => void }) => {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
-    const daysRemaining = project.endDate
-        ? Math.max(0, Math.ceil((new Date(project.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-        : 0;
+  const daysRemaining = project.endDate
+  ? Math.max(0, Math.ceil((new Date(project.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  : 0;
 
-    const tasksInProgress = project.tasks.filter(tk =>
-        tk.state === 'IN_PROGRESS' || tk.state === 'BLOCKED'
-    ).length;
-    const tasksTodo = project.tasksTotal - project.tasksDone - tasksInProgress;
+  const tasksInProgress = project.tasks.filter(tk =>
+  tk.state === 'IN_PROGRESS' || tk.state === 'BLOCKED'
+  ).length;
+  const tasksTodo = project.tasksTotal - project.tasksDone - tasksInProgress;
 
-    const donutData = [
-        { name: t('projectDetail.overview.todo'), value: Math.max(0, tasksTodo) },
-        { name: t('projectDetail.overview.inProgress'), value: Math.max(0, tasksInProgress) },
-        { name: t('projectDetail.overview.done'), value: project.tasksDone },
-    ];
+  const donutData = [
+  { name: t('projectDetail.overview.todo'), value: Math.max(0, tasksTodo) },
+  { name: t('projectDetail.overview.inProgress'), value: Math.max(0, tasksInProgress) },
+  { name: t('projectDetail.overview.done'), value: project.tasksDone },
+  ];
 
-    // Task status distribution bar chart
-    const STATE_LABELS: Record<string, string> = {
-        CREATED: 'Created',
-        ASSIGNED: 'Assigned',
-        IN_PROGRESS: 'In Progress',
-        BLOCKED: 'Blocked',
-        COMPLETED: 'Completed',
-        REVIEWED: 'Reviewed',
-    };
-    const STATE_COLORS: Record<string, string> = {
-        CREATED: '#283852',
-        ASSIGNED: '#283852',
-        IN_PROGRESS: '#33cbcc',
-        BLOCKED: '#283852',
-        COMPLETED: '#283852',
-        REVIEWED: '#33cbcc',
-    };
-    const statusBarData = Object.keys(STATE_LABELS).map(state => ({
-        name: STATE_LABELS[state],
-        count: project.tasks.filter(tk => tk.state === state).length,
-        fill: STATE_COLORS[state],
-    })).filter(d => d.count > 0);
+  // Task status distribution bar chart
+  const STATE_LABELS: Record<string, string> = {
+  CREATED: 'Created',
+  ASSIGNED: 'Assigned',
+  IN_PROGRESS: 'In Progress',
+  BLOCKED: 'Blocked',
+  COMPLETED: 'Completed',
+  REVIEWED: 'Reviewed',
+  };
+  const STATE_COLORS: Record<string, string> = {
+  CREATED: '#283852',
+  ASSIGNED: '#283852',
+  IN_PROGRESS: '#33cbcc',
+  BLOCKED: '#283852',
+  COMPLETED: '#283852',
+  REVIEWED: '#33cbcc',
+  };
+  const statusBarData = Object.keys(STATE_LABELS).map(state => ({
+  name: STATE_LABELS[state],
+  count: project.tasks.filter(tk => tk.state === state).length,
+  fill: STATE_COLORS[state],
+  })).filter(d => d.count > 0);
 
-    const profit = project.revenue - project.budget;
-    const stats = [
-        { label: t('projectDetail.overview.progress'), value: `${project.progress}%`, icon: ArrowUpRight01Icon, color: '#33cbcc' },
-        { label: t('projectDetail.overview.tasksDone'), value: `${project.tasksDone}/${project.tasksTotal}`, icon: Tick01Icon, color: '#33cbcc' },
-        { label: t('projects.formCost'), value: project.budget > 0 ? fmtCurrency(project.budget) : '—', icon: Wallet01Icon, color: '#283852' },
-        { label: t('projects.formRevenue'), value: project.revenue > 0 ? fmtCurrency(project.revenue) : '—', icon: ArrowUpRight01Icon, color: profit >= 0 ? '#33cbcc' : '#283852' },
-        { label: t('projectDetail.overview.daysLeft'), value: `${daysRemaining}`, icon: Clock01Icon, color: project.status === 'overdue' ? '#283852' : '#283852' },
-    ];
+  const profit = project.revenue - project.budget;
+  const stats = [
+  { label: t('projectDetail.overview.progress'), value: `${project.progress}%`, icon: ArrowUpRight01Icon, color: '#33cbcc' },
+  { label: t('projectDetail.overview.tasksDone'), value: `${project.tasksDone}/${project.tasksTotal}`, icon: Tick01Icon, color: '#33cbcc' },
+  { label: t('projects.formCost'), value: project.budget > 0 ? fmtCurrency(project.budget) : '—', icon: Wallet01Icon, color: '#283852' },
+  { label: t('projects.formRevenue'), value: project.revenue > 0 ? fmtCurrency(project.revenue) : '—', icon: ArrowUpRight01Icon, color: profit >= 0 ? '#33cbcc' : '#283852' },
+  { label: t('projectDetail.overview.daysLeft'), value: `${daysRemaining}`, icon: Clock01Icon, color: project.status === 'overdue' ? '#283852' : '#283852' },
+  ];
 
-    const style = STATUS_STYLES[project.status] || STATUS_STYLES.active;
+  const style = STATUS_STYLES[project.status] || STATUS_STYLES.active;
 
-    return (
-        <div className="space-y-8">
-            {/* Project header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <h1 className="text-3xl font-bold text-gray-800">{project.name}</h1>
-                        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full ${style.bg} ${style.text}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                            {t(`projects.${STATUS_I18N[project.status]}`)}
-                        </span>
-                    </div>
-                    <p className="text-gray-500">{project.description}</p>
-                </div>
-                <button
-                    onClick={onEdit}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#33cbcc] text-white text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 shrink-0"
-                >
-                    <PencilIcon size={15} />
-                    {t('projects.editTitle')}
-                </button>
-                {/* Members avatars */}
-                {project.members.length > 0 && (
-                    <div className="flex items-center gap-2">
-                        <UserGroupIcon size={16} className="text-gray-400" />
-                        <div className="flex -space-x-2">
-                            {project.members.slice(0, 5).map(m => (
-                                <img
-                                    key={m.id}
-                                    src={m.avatarUrl || `https://ui-avatars.com/api/?name=${m.firstName}+${m.lastName}`}
-                                    alt={`${m.firstName} ${m.lastName}`}
-                                    title={`${m.firstName} ${m.lastName}`}
-                                    className="w-8 h-8 rounded-full border-2 border-white"
-                                />
-                            ))}
-                            {project.members.length > 5 && (
-                                <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-500">
-                                    +{project.members.length - 5}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
+  return (
+  <div className="space-y-8">
+  {/* Project header */}
+  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div>
+  <div className="flex items-center gap-3 mb-2">
+  <h1 className="text-3xl font-bold text-gray-800">{project.name}</h1>
+  <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full ${style.bg} ${style.text}`}>
+  <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+  {t(`projects.${STATUS_I18N[project.status]}`)}
+  </span>
+  </div>
+  <p className="text-gray-500">{project.description}</p>
+  </div>
+  <button
+  onClick={onEdit}
+  className="flex items-center gap-2 px-4 py-2.5  bg-[#33cbcc] text-white text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20 shrink-0"
+  >
+  <PencilIcon size={15} />
+  {t('projects.editTitle')}
+  </button>
+  {/* Members avatars */}
+  {project.members.length > 0 && (
+  <div className="flex items-center gap-2">
+  <UserGroupIcon size={16} className="text-gray-400" />
+  <div className="flex -space-x-2">
+  {project.members.slice(0, 5).map(m => (
+  <img
+  key={m.id}
+  src={m.avatarUrl || `https://ui-avatars.com/api/?name=${m.firstName}+${m.lastName}`}
+  alt={`${m.firstName} ${m.lastName}`}
+  title={`${m.firstName} ${m.lastName}`}
+  className="w-8 h-8 rounded-full border-2 border-white"
+  />
+  ))}
+  {project.members.length > 5 && (
+  <div className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-500">
+  +{project.members.length - 5}
+  </div>
+  )}
+  </div>
+  </div>
+  )}
+  </div>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
-                {stats.map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
-                    >
-                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
-                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
-                        </div>
-                        <div className="p-5 bg-white relative overflow-hidden">
-                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
-                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
-                                <stat.icon size={110} strokeWidth={1.2} />
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+  {/* Stats row */}
+  <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+  {stats.map((stat, i) => (
+  <motion.div
+  key={i}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: i * 0.1 }}
+  className="border border-gray-100  overflow-hidden cursor-pointer"
+  >
+  <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+  <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
+  </div>
+  <div className="p-5 bg-white relative overflow-hidden">
+  <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+  <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+  <stat.icon size={110} strokeWidth={1.2} />
+  </div>
+  </div>
+  </motion.div>
+  ))}
+  </div>
 
-            {/* Charts row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Task status distribution */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-white p-6 rounded-3xl border border-gray-100 lg:col-span-2"
-                >
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">{t('projectDetail.overview.weeklyActivity')}</h3>
-                    <div className="h-64">
-                        {statusBarData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                                <BarChart data={statusBarData} barSize={36}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                                    <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                                    <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                                    <Bar dataKey="count" radius={[8, 8, 0, 0]}>
-                                        {statusBarData.map((entry, i) => (
-                                            <Cell key={i} fill={entry.fill} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                                {t('projectDetail.tasks.noTasks')}
-                            </div>
-                        )}
-                    </div>
-                </motion.div>
+  {/* Charts row */}
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  {/* Task status distribution */}
+  <motion.div
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ delay: 0.3 }}
+  className="bg-white p-6  border border-gray-100 lg:col-span-2"
+  >
+  <h3 className="text-lg font-bold text-gray-800 mb-4">{t('projectDetail.overview.weeklyActivity')}</h3>
+  <div className="h-64">
+  {statusBarData.length > 0 ? (
+  <ResponsiveContainer width="100%" height="100%" debounce={50}>
+  <BarChart data={statusBarData} barSize={36}>
+  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+  <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} />
+  <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
+  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+  <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+  {statusBarData.map((entry, i) => (
+  <Cell key={i} fill={entry.fill} />
+  ))}
+  </Bar>
+  </BarChart>
+  </ResponsiveContainer>
+  ) : (
+  <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+  {t('projectDetail.tasks.noTasks')}
+  </div>
+  )}
+  </div>
+  </motion.div>
 
-                {/* Task status donut */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="bg-white p-6 rounded-3xl border border-gray-100 flex flex-col"
-                >
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">{t('projectDetail.overview.taskBreakdown')}</h3>
-                    <div className="h-50 relative">
-                        <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                            <PieChart>
-                                <Pie
-                                    data={donutData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={55}
-                                    outerRadius={75}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                    strokeWidth={0}
-                                >
-                                    {donutData.map((_, i) => (
-                                        <Cell key={i} fill={DONUT_COLORS[i]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
-                            </PieChart>
-                        </ResponsiveContainer>
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="text-center">
-                                <p className="text-xs text-gray-400">{t('projectDetail.overview.total')}</p>
-                                <p className="text-2xl font-bold text-gray-800">{project.tasksTotal}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="space-y-2 mt-4">
-                        {donutData.map((entry, i) => (
-                            <div key={i} className="flex items-center justify-between text-sm">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: DONUT_COLORS[i] }} />
-                                    <span className="text-gray-600">{entry.name}</span>
-                                </div>
-                                <span className="font-semibold text-gray-800">{entry.value}</span>
-                            </div>
-                        ))}
-                    </div>
-                </motion.div>
-            </div>
+  {/* Task status donut */}
+  <motion.div
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ delay: 0.4 }}
+  className="bg-white p-6  border border-gray-100 flex flex-col"
+  >
+  <h3 className="text-lg font-bold text-gray-800 mb-4">{t('projectDetail.overview.taskBreakdown')}</h3>
+  <div className="h-50 relative">
+  <ResponsiveContainer width="100%" height="100%" debounce={50}>
+  <PieChart>
+  <Pie
+  data={donutData}
+  cx="50%"
+  cy="50%"
+  innerRadius={55}
+  outerRadius={75}
+  paddingAngle={5}
+  dataKey="value"
+  strokeWidth={0}
+  >
+  {donutData.map((_, i) => (
+  <Cell key={i} fill={DONUT_COLORS[i]} />
+  ))}
+  </Pie>
+  <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} />
+  </PieChart>
+  </ResponsiveContainer>
+  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+  <div className="text-center">
+  <p className="text-xs text-gray-400">{t('projectDetail.overview.total')}</p>
+  <p className="text-2xl font-bold text-gray-800">{project.tasksTotal}</p>
+  </div>
+  </div>
+  </div>
+  <div className="space-y-2 mt-4">
+  {donutData.map((entry, i) => (
+  <div key={i} className="flex items-center justify-between text-sm">
+  <div className="flex items-center gap-2">
+  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: DONUT_COLORS[i] }} />
+  <span className="text-gray-600">{entry.name}</span>
+  </div>
+  <span className="font-semibold text-gray-800">{entry.value}</span>
+  </div>
+  ))}
+  </div>
+  </motion.div>
+  </div>
 
-            {/* Services */}
-            {project.services && project.services.length > 0 && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="bg-white rounded-2xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
-                        <Wrench01Icon size={14} />
-                        <span className="font-semibold uppercase tracking-wider">Services</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        {project.services.map(s => (
-                            <div key={s.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] text-sm font-medium">
-                                <span>{s.name}</span>
-                                {s.price != null && (
-                                    <span className="text-xs opacity-70">{new Intl.NumberFormat('fr-FR').format(s.price)} FCFA</span>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                </motion.div>
-            )}
+  {/* Services */}
+  {project.services && project.services.length > 0 && (
+  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="bg-white  p-5 border border-gray-100">
+  <div className="flex items-center gap-2 text-xs text-gray-400 mb-3">
+  <Wrench01Icon size={14} />
+  <span className="font-semibold uppercase tracking-wider">Services</span>
+  </div>
+  <div className="flex flex-wrap gap-2">
+  {project.services.map(s => (
+  <div key={s.id} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] text-sm font-medium">
+  <span>{s.name}</span>
+  {s.price != null && (
+  <span className="text-xs opacity-70">{new Intl.NumberFormat('fr-FR').format(s.price)} FCFA</span>
+  )}
+  </div>
+  ))}
+  </div>
+  </motion.div>
+  )}
 
-            {/* Info grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white rounded-2xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                        <Building01Icon size={14} />
-                        {t('projects.formDepartment')}
-                    </div>
-                    <p className="font-semibold text-gray-800">{project.department || '—'}</p>
-                </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="bg-white rounded-2xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                        <Calendar01Icon size={14} />
-                        {t('projects.startDate')}
-                    </div>
-                    <p className="font-semibold text-gray-800">{fmtDate(project.startDate)}</p>
-                </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="bg-white rounded-2xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                        <Calendar01Icon size={14} />
-                        {t('projects.formDueDate')}
-                    </div>
-                    <p className="font-semibold text-gray-800">{fmtDate(project.endDate)}</p>
-                </motion.div>
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }} className="bg-white rounded-2xl p-5 border border-gray-100">
-                    <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
-                        <ArrowUpRight01Icon size={14} />
-                        {t('projects.progress')}
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <motion.div
-                                initial={{ width: 0 }}
-                                animate={{ width: `${project.progress}%` }}
-                                transition={{ delay: 0.8, duration: 1 }}
-                                className="h-full rounded-full bg-[#33cbcc]"
-                            />
-                        </div>
-                        <span className="text-sm font-bold text-gray-800">{project.progress}%</span>
-                    </div>
-                </motion.div>
-            </div>
-        </div>
-    );
+  {/* Info grid */}
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="bg-white  p-5 border border-gray-100">
+  <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+  <Building01Icon size={14} />
+  {t('projects.formDepartment')}
+  </div>
+  <p className="font-semibold text-gray-800">{project.department || '—'}</p>
+  </motion.div>
+  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }} className="bg-white  p-5 border border-gray-100">
+  <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+  <Calendar01Icon size={14} />
+  {t('projects.startDate')}
+  </div>
+  <p className="font-semibold text-gray-800">{fmtDate(project.startDate)}</p>
+  </motion.div>
+  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="bg-white  p-5 border border-gray-100">
+  <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+  <Calendar01Icon size={14} />
+  {t('projects.formDueDate')}
+  </div>
+  <p className="font-semibold text-gray-800">{fmtDate(project.endDate)}</p>
+  </motion.div>
+  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }} className="bg-white  p-5 border border-gray-100">
+  <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
+  <ArrowUpRight01Icon size={14} />
+  {t('projects.progress')}
+  </div>
+  <div className="flex items-center gap-3">
+  <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+  <motion.div
+  initial={{ width: 0 }}
+  animate={{ width: `${project.progress}%` }}
+  transition={{ delay: 0.8, duration: 1 }}
+  className="h-full rounded-full bg-[#33cbcc]"
+  />
+  </div>
+  <span className="text-sm font-bold text-gray-800">{project.progress}%</span>
+  </div>
+  </motion.div>
+  </div>
+  </div>
+  );
 };
 
 /* ═══════════════════════════════════════════════════════════
-   TASKS TAB
-   ═══════════════════════════════════════════════════════════ */
+  TASKS TAB
+  ═══════════════════════════════════════════════════════════ */
 
 const DIFFICULTY_STYLES: Record<string, { bg: string; text: string }> = {
-    EASY:   { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]' },
-    MEDIUM: { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
-    HARD:   { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
+  EASY:   { bg: 'bg-[#33cbcc]/10', text: 'text-[#33cbcc]' },
+  MEDIUM: { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
+  HARD:   { bg: 'bg-[#283852]/10', text: 'text-[#283852]' },
 };
 
 type KanbanStatus = 'todo' | 'in_progress' | 'done';
 
 const STATE_TO_KANBAN: Record<string, KanbanStatus> = {
-    CREATED: 'todo',
-    ASSIGNED: 'todo',
-    IN_PROGRESS: 'in_progress',
-    BLOCKED: 'in_progress',
-    COMPLETED: 'done',
-    REVIEWED: 'done',
+  CREATED: 'todo',
+  ASSIGNED: 'todo',
+  IN_PROGRESS: 'in_progress',
+  BLOCKED: 'in_progress',
+  COMPLETED: 'done',
+  REVIEWED: 'done',
 };
 
 const TasksView = ({ project }: { project: ProjectData }) => {
-    const { t } = useTranslation();
+  const { t } = useTranslation();
 
-    const columns: { key: KanbanStatus; label: string; icon: typeof CircleIcon; color: string }[] = [
-        { key: 'todo',        label: t('projectDetail.tasks.todo'),       icon: CircleIcon,      color: '#283852' },
-        { key: 'in_progress', label: t('projectDetail.tasks.inProgress'), icon: CircleIcon,   color: '#33cbcc' },
-        { key: 'done',        label: t('projectDetail.tasks.done'),       icon: Tick01Icon, color: '#283852' },
-    ];
+  const columns: { key: KanbanStatus; label: string; icon: typeof CircleIcon; color: string }[] = [
+  { key: 'todo',   label: t('projectDetail.tasks.todo'),   icon: CircleIcon,   color: '#283852' },
+  { key: 'in_progress', label: t('projectDetail.tasks.inProgress'), icon: CircleIcon,   color: '#33cbcc' },
+  { key: 'done',   label: t('projectDetail.tasks.done'),   icon: Tick01Icon, color: '#283852' },
+  ];
 
-    return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.tasks.title')}</h2>
-            </div>
+  return (
+  <div className="space-y-6">
+  <div className="flex items-center justify-between">
+  <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.tasks.title')}</h2>
+  </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {columns.map((col) => {
-                    const colTasks = project.tasks.filter(tk => STATE_TO_KANBAN[tk.state] === col.key);
-                    return (
-                        <div key={col.key} className="space-y-4">
-                            <div className="flex items-center gap-2 mb-2">
-                                <col.icon size={18} style={{ color: col.color }} />
-                                <h3 className="font-semibold text-gray-700">{col.label}</h3>
-                                <span className="text-xs font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{colTasks.length}</span>
-                            </div>
-                            <div className="space-y-3">
-                                {colTasks.map((task, i) => {
-                                    const dStyle = DIFFICULTY_STYLES[task.difficulty || 'MEDIUM'] || DIFFICULTY_STYLES.MEDIUM;
-                                    const assignee = task.assignedTo;
-                                    const avatarUrl = assignee?.avatarUrl || (assignee ? `https://ui-avatars.com/api/?name=${assignee.firstName}+${assignee.lastName}` : '');
-                                    return (
-                                        <motion.div
-                                            key={task.id}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: i * 0.05 }}
-                                            className="bg-white rounded-2xl p-4 border border-gray-100 hover:border-[#33cbcc]/30 transition-colors"
-                                        >
-                                            <p className="font-medium text-gray-800 text-sm mb-3">{task.title}</p>
-                                            <div className="flex items-center justify-between">
-                                                {assignee ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <img src={avatarUrl} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
-                                                        <span className="text-xs text-gray-500">{assignee.firstName}</span>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-xs text-gray-400 italic">{t('projectDetail.tasks.unassigned')}</span>
-                                                )}
-                                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${dStyle.bg} ${dStyle.text}`}>
-                                                    {task.difficulty || 'MEDIUM'}
-                                                </span>
-                                            </div>
-                                            {task.dueDate && (
-                                                <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-400">
-                                                    <Calendar01Icon size={12} />
-                                                    <span>{fmtDate(task.dueDate)}</span>
-                                                </div>
-                                            )}
-                                        </motion.div>
-                                    );
-                                })}
-                                {colTasks.length === 0 && (
-                                    <div className="text-center text-sm text-gray-400 py-8 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
-                                        {t('projectDetail.tasks.noTasks')}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-        </div>
-    );
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  {columns.map((col) => {
+  const colTasks = project.tasks.filter(tk => STATE_TO_KANBAN[tk.state] === col.key);
+  return (
+  <div key={col.key} className="space-y-4">
+  <div className="flex items-center gap-2 mb-2">
+  <col.icon size={18} style={{ color: col.color }} />
+  <h3 className="font-semibold text-gray-700">{col.label}</h3>
+  <span className="text-xs font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{colTasks.length}</span>
+  </div>
+  <div className="space-y-3">
+  {colTasks.map((task, i) => {
+  const dStyle = DIFFICULTY_STYLES[task.difficulty || 'MEDIUM'] || DIFFICULTY_STYLES.MEDIUM;
+  const assignee = task.assignedTo;
+  const avatarUrl = assignee?.avatarUrl || (assignee ? `https://ui-avatars.com/api/?name=${assignee.firstName}+${assignee.lastName}` : '');
+  return (
+  <motion.div
+  key={task.id}
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: i * 0.05 }}
+  className="bg-white  p-4 border border-gray-100 hover:border-[#33cbcc]/30 transition-colors"
+  >
+  <p className="font-medium text-gray-800 text-sm mb-3">{task.title}</p>
+  <div className="flex items-center justify-between">
+  {assignee ? (
+  <div className="flex items-center gap-2">
+  <img src={avatarUrl} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
+  <span className="text-xs text-gray-500">{assignee.firstName}</span>
+  </div>
+  ) : (
+  <span className="text-xs text-gray-400 italic">{t('projectDetail.tasks.unassigned')}</span>
+  )}
+  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${dStyle.bg} ${dStyle.text}`}>
+  {task.difficulty || 'MEDIUM'}
+  </span>
+  </div>
+  {task.dueDate && (
+  <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-400">
+  <Calendar01Icon size={12} />
+  <span>{fmtDate(task.dueDate)}</span>
+  </div>
+  )}
+  </motion.div>
+  );
+  })}
+  {colTasks.length === 0 && (
+  <div className="text-center text-sm text-gray-400 py-8 bg-gray-50/50  border border-dashed border-gray-200">
+  {t('projectDetail.tasks.noTasks')}
+  </div>
+  )}
+  </div>
+  </div>
+  );
+  })}
+  </div>
+  </div>
+  );
 };
 
 /* ═══════════════════════════════════════════════════════════
-   BUDGET TAB
-   ═══════════════════════════════════════════════════════════ */
+  BUDGET TAB
+  ═══════════════════════════════════════════════════════════ */
 
 const EXPENSE_CATEGORIES = ['Loyer', 'Salaire', 'Facture', 'Fourniture', 'Licence/Logiciel', 'Demande', 'Autre'];
 
 const emptyExpenseForm = (): CreateExpenseDto => ({
-    title: '',
-    amount: 0,
-    category: EXPENSE_CATEGORIES[0],
-    type: 'ONE_TIME',
-    frequency: null,
-    date: new Date().toISOString().split('T')[0],
+  title: '',
+  amount: 0,
+  category: EXPENSE_CATEGORIES[0],
+  type: 'ONE_TIME',
+  frequency: null,
+  date: new Date().toISOString().split('T')[0],
 });
 
 const BudgetView = ({ project }: { project: ProjectData }) => {
-    const { t } = useTranslation();
-    const { data: expenses = [], isLoading: expensesLoading } = useProjectExpenses(project.id);
-    const createExpense = useCreateExpense();
-    const deleteExpense = useDeleteExpense();
+  const { t } = useTranslation();
+  const { data: expenses = [], isLoading: expensesLoading } = useProjectExpenses(project.id);
+  const createExpense = useCreateExpense();
+  const deleteExpense = useDeleteExpense();
 
-    const [showForm, setShowForm] = useState(false);
-    const [form, setForm] = useState<CreateExpenseDto>(emptyExpenseForm());
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState<CreateExpenseDto>(emptyExpenseForm());
 
-    const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount), 0);
-    const revenue = project.revenue;
-    const profit = revenue - totalExpenses;
+  const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount), 0);
+  const revenue = project.revenue;
+  const profit = revenue - totalExpenses;
 
-    const summaryStats = [
-        { label: t('projects.formRevenue'), value: revenue > 0 ? fmtCurrency(revenue) : '—', color: '#33cbcc', icon: ArrowUpRight01Icon },
-        { label: t('projectDetail.budget.expenses'), value: totalExpenses > 0 ? fmtCurrency(totalExpenses) : '—', color: '#283852', icon: Wallet01Icon },
-        { label: t('projectDetail.budget.profit'), value: (revenue > 0 || totalExpenses > 0) ? fmtCurrency(profit) : '—', color: profit >= 0 ? '#33cbcc' : '#283852', icon: ArrowUpRight01Icon },
-    ];
+  const summaryStats = [
+  { label: t('projects.formRevenue'), value: revenue > 0 ? fmtCurrency(revenue) : '—', color: '#33cbcc', icon: ArrowUpRight01Icon },
+  { label: t('projectDetail.budget.expenses'), value: totalExpenses > 0 ? fmtCurrency(totalExpenses) : '—', color: '#283852', icon: Wallet01Icon },
+  { label: t('projectDetail.budget.profit'), value: (revenue > 0 || totalExpenses > 0) ? fmtCurrency(profit) : '—', color: profit >= 0 ? '#33cbcc' : '#283852', icon: ArrowUpRight01Icon },
+  ];
 
-    const donutData = [
-        { name: t('projectDetail.budget.expenses'), value: totalExpenses },
-        { name: t('projects.formRevenue'), value: Math.max(0, revenue - totalExpenses) },
-    ];
-    const PIE_COLORS = ['#283852', '#33cbcc'];
+  const donutData = [
+  { name: t('projectDetail.budget.expenses'), value: totalExpenses },
+  { name: t('projects.formRevenue'), value: Math.max(0, revenue - totalExpenses) },
+  ];
+  const PIE_COLORS = ['#283852', '#33cbcc'];
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setForm(prev => {
-            const next = { ...prev, [name]: name === 'amount' ? Number(value) : value };
-            if (name === 'type' && value === 'ONE_TIME') next.frequency = null;
-            if (name === 'type' && value === 'RECURRENT' && !prev.frequency) next.frequency = 'MONTHLY';
-            return next;
-        });
-    };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const { name, value } = e.target;
+  setForm(prev => {
+  const next = { ...prev, [name]: name === 'amount' ? Number(value) : value };
+  if (name === 'type' && value === 'ONE_TIME') next.frequency = null;
+  if (name === 'type' && value === 'RECURRENT' && !prev.frequency) next.frequency = 'MONTHLY';
+  return next;
+  });
+  };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        await createExpense.mutateAsync({ ...form, projectId: project.id });
-        setForm(emptyExpenseForm());
-        setShowForm(false);
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  await createExpense.mutateAsync({ ...form, projectId: project.id });
+  setForm(emptyExpenseForm());
+  setShowForm(false);
+  };
 
-    const inputCls = 'w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] outline-none text-gray-800 text-sm transition-colors';
+  const inputCls = 'w-full px-3 py-2 bg-gray-50 border border-gray-200  focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] outline-none text-gray-800 text-sm transition-colors';
 
-    return (
-        <div className="space-y-8">
-            <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.budget.title')}</h2>
+  return (
+  <div className="space-y-8">
+  <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.budget.title')}</h2>
 
-            {/* Summary stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                {summaryStats.map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
-                    >
-                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
-                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
-                        </div>
-                        <div className="p-5 bg-white relative overflow-hidden">
-                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
-                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
-                                <stat.icon size={110} strokeWidth={1.2} />
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+  {/* Summary stats */}
+  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+  {summaryStats.map((stat, i) => (
+  <motion.div
+  key={i}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: i * 0.1 }}
+  className="border border-gray-100  overflow-hidden cursor-pointer"
+  >
+  <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+  <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
+  </div>
+  <div className="p-5 bg-white relative overflow-hidden">
+  <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+  <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+  <stat.icon size={110} strokeWidth={1.2} />
+  </div>
+  </div>
+  </motion.div>
+  ))}
+  </div>
 
-            {/* Donut chart + expenses list */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Donut */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 }}
-                    className="bg-white p-6 rounded-3xl border border-gray-100"
-                >
-                    <h3 className="text-lg font-bold text-gray-800 mb-4">{t('projectDetail.budget.expenseBreakdown')}</h3>
-                    <div className="h-64 relative">
-                        {revenue === 0 && totalExpenses === 0 ? (
-                            <div className="flex items-center justify-center h-full text-gray-400 text-sm">—</div>
-                        ) : (
-                            <ResponsiveContainer width="100%" height="100%" debounce={50}>
-                                <PieChart>
-                                    <Pie
-                                        data={donutData}
-                                        cx="50%"
-                                        cy="50%"
-                                        innerRadius={60}
-                                        outerRadius={85}
-                                        paddingAngle={4}
-                                        dataKey="value"
-                                        strokeWidth={0}
-                                    >
-                                        {donutData.map((_, i) => (
-                                            <Cell key={i} fill={PIE_COLORS[i]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
-                                        formatter={(value) => fmtCurrency(value as number)}
-                                    />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        )}
-                        {(revenue > 0 || totalExpenses > 0) && (
-                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="text-center">
-                                    <p className="text-xs text-gray-400">{t('projectDetail.budget.utilization')}</p>
-                                    <p className="text-2xl font-bold text-gray-800">
-                                        {revenue > 0 ? `${Math.min(100, Math.round((totalExpenses / revenue) * 100))}%` : '—'}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </motion.div>
+  {/* Donut chart + expenses list */}
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  {/* Donut */}
+  <motion.div
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ delay: 0.3 }}
+  className="bg-white p-6  border border-gray-100"
+  >
+  <h3 className="text-lg font-bold text-gray-800 mb-4">{t('projectDetail.budget.expenseBreakdown')}</h3>
+  <div className="h-64 relative">
+  {revenue === 0 && totalExpenses === 0 ? (
+  <div className="flex items-center justify-center h-full text-gray-400 text-sm">—</div>
+  ) : (
+  <ResponsiveContainer width="100%" height="100%" debounce={50}>
+  <PieChart>
+  <Pie
+  data={donutData}
+  cx="50%"
+  cy="50%"
+  innerRadius={60}
+  outerRadius={85}
+  paddingAngle={4}
+  dataKey="value"
+  strokeWidth={0}
+  >
+  {donutData.map((_, i) => (
+  <Cell key={i} fill={PIE_COLORS[i]} />
+  ))}
+  </Pie>
+  <Tooltip
+  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+  formatter={(value) => fmtCurrency(value as number)}
+  />
+  </PieChart>
+  </ResponsiveContainer>
+  )}
+  {(revenue > 0 || totalExpenses > 0) && (
+  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+  <div className="text-center">
+  <p className="text-xs text-gray-400">{t('projectDetail.budget.utilization')}</p>
+  <p className="text-2xl font-bold text-gray-800">
+  {revenue > 0 ? `${Math.min(100, Math.round((totalExpenses / revenue) * 100))}%` : '—'}
+  </p>
+  </div>
+  </div>
+  )}
+  </div>
+  </motion.div>
 
-                {/* Expenses list */}
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="bg-white p-6 rounded-3xl border border-gray-100 flex flex-col"
-                >
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-800">{t('projectDetail.budget.expenses')}</h3>
-                        <button
-                            onClick={() => setShowForm(v => !v)}
-                            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors"
-                        >
-                            <Add01Icon size={13} />
-                            {t('projectDetail.budget.addExpense')}
-                        </button>
-                    </div>
+  {/* Expenses list */}
+  <motion.div
+  initial={{ opacity: 0, scale: 0.95 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ delay: 0.4 }}
+  className="bg-white p-6  border border-gray-100 flex flex-col"
+  >
+  <div className="flex items-center justify-between mb-4">
+  <h3 className="text-lg font-bold text-gray-800">{t('projectDetail.budget.expenses')}</h3>
+  <button
+  onClick={() => setShowForm(v => !v)}
+  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6]  transition-colors"
+  >
+  <Add01Icon size={13} />
+  {t('projectDetail.budget.addExpense')}
+  </button>
+  </div>
 
-                    {/* Inline add form */}
-                    <AnimatePresence>
-                        {showForm && (
-                            <motion.form
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                onSubmit={handleSubmit}
-                                className="mb-4 space-y-3 overflow-hidden"
-                            >
-                                <input type="text" name="title" required placeholder="Titre / Description" value={form.title} onChange={handleChange} className={inputCls} />
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input type="number" name="amount" required min="0" placeholder="Montant (FCFA)" value={form.amount || ''} onChange={handleChange} className={inputCls} />
-                                    <input type="date" name="date" required value={form.date} onChange={handleChange} className={inputCls} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <select name="category" value={form.category} onChange={handleChange} className={inputCls}>
-                                        {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                                    </select>
-                                    <select name="type" value={form.type} onChange={handleChange} className={inputCls}>
-                                        <option value="ONE_TIME">Ponctuelle</option>
-                                        <option value="RECURRENT">Récurrente</option>
-                                    </select>
-                                </div>
-                                {form.type === 'RECURRENT' && (
-                                    <select name="frequency" value={form.frequency || 'MONTHLY'} onChange={handleChange} className={inputCls}>
-                                        <option value="DAILY">Quotidienne</option>
-                                        <option value="WEEKLY">Hebdomadaire</option>
-                                        <option value="MONTHLY">Mensuelle</option>
-                                        <option value="YEARLY">Annuelle</option>
-                                    </select>
-                                )}
-                                <div className="flex gap-2 justify-end">
-                                    <button type="button" onClick={() => setShowForm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                                        Annuler
-                                    </button>
-                                    <button type="submit" disabled={createExpense.isPending} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-50">
-                                        {createExpense.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <Add01Icon size={12} />}
-                                        Enregistrer
-                                    </button>
-                                </div>
-                            </motion.form>
-                        )}
-                    </AnimatePresence>
+  {/* Inline add form */}
+  <AnimatePresence>
+  {showForm && (
+  <motion.form
+  initial={{ opacity: 0, height: 0 }}
+  animate={{ opacity: 1, height: 'auto' }}
+  exit={{ opacity: 0, height: 0 }}
+  onSubmit={handleSubmit}
+  className="mb-4 space-y-3 overflow-hidden"
+  >
+  <input type="text" name="title" required placeholder="Titre / Description" value={form.title} onChange={handleChange} className={inputCls} />
+  <div className="grid grid-cols-2 gap-3">
+  <input type="number" name="amount" required min="0" placeholder="Montant (FCFA)" value={form.amount || ''} onChange={handleChange} className={inputCls} />
+  <input type="date" name="date" required value={form.date} onChange={handleChange} className={inputCls} />
+  </div>
+  <div className="grid grid-cols-2 gap-3">
+  <select name="category" value={form.category} onChange={handleChange} className={inputCls}>
+  {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+  </select>
+  <select name="type" value={form.type} onChange={handleChange} className={inputCls}>
+  <option value="ONE_TIME">Ponctuelle</option>
+  <option value="RECURRENT">Récurrente</option>
+  </select>
+  </div>
+  {form.type === 'RECURRENT' && (
+  <select name="frequency" value={form.frequency || 'MONTHLY'} onChange={handleChange} className={inputCls}>
+  <option value="DAILY">Quotidienne</option>
+  <option value="WEEKLY">Hebdomadaire</option>
+  <option value="MONTHLY">Mensuelle</option>
+  <option value="YEARLY">Annuelle</option>
+  </select>
+  )}
+  <div className="flex gap-2 justify-end">
+  <button type="button" onClick={() => setShowForm(false)} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200  transition-colors">
+  Annuler
+  </button>
+  <button type="submit" disabled={createExpense.isPending} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6]  transition-colors disabled:opacity-50">
+  {createExpense.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <Add01Icon size={12} />}
+  Enregistrer
+  </button>
+  </div>
+  </motion.form>
+  )}
+  </AnimatePresence>
 
-                    {/* List */}
-                    <div className="flex-1 overflow-y-auto space-y-2 max-h-64">
-                        {expensesLoading ? (
-                            <div className="flex justify-center py-6"><Loading02Icon size={20} className="animate-spin text-[#33cbcc]" /></div>
-                        ) : expenses.length === 0 ? (
-                            <div className="flex items-center justify-center h-20 text-gray-400 text-sm">{t('projectDetail.tasks.noTasks')}</div>
-                        ) : (
-                            expenses.map(exp => (
-                                <div key={exp.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl group">
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-gray-800 truncate">{exp.title}</p>
-                                        <p className="text-xs text-gray-400">{exp.chargeNature} · {new Date(exp.date).toLocaleDateString()}</p>
-                                    </div>
-                                    <div className="flex items-center gap-3 ml-2 shrink-0">
-                                        <span className="text-sm font-semibold text-gray-800">{fmtCurrency(Number(exp.amount))}</span>
-                                        <button
-                                            onClick={() => deleteExpense.mutate(exp.id)}
-                                            className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-[#283852] transition-all"
-                                        >
-                                            <Delete02Icon size={14} />
-                                        </button>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
-                </motion.div>
-            </div>
-        </div>
-    );
+  {/* List */}
+  <div className="flex-1 overflow-y-auto space-y-2 max-h-64">
+  {expensesLoading ? (
+  <div className="flex justify-center py-6"><Loading02Icon size={20} className="animate-spin text-[#33cbcc]" /></div>
+  ) : expenses.length === 0 ? (
+  <div className="flex items-center justify-center h-20 text-gray-400 text-sm">{t('projectDetail.tasks.noTasks')}</div>
+  ) : (
+  expenses.map(exp => (
+  <div key={exp.id} className="flex items-center justify-between p-3 bg-gray-50  group">
+  <div className="flex-1 min-w-0">
+  <p className="text-sm font-medium text-gray-800 truncate">{exp.title}</p>
+  <p className="text-xs text-gray-400">{exp.chargeNature} · {new Date(exp.date).toLocaleDateString()}</p>
+  </div>
+  <div className="flex items-center gap-3 ml-2 shrink-0">
+  <span className="text-sm font-semibold text-gray-800">{fmtCurrency(Number(exp.amount))}</span>
+  <button
+  onClick={() => deleteExpense.mutate(exp.id)}
+  className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-[#283852] transition-all"
+  >
+  <Delete02Icon size={14} />
+  </button>
+  </div>
+  </div>
+  ))
+  )}
+  </div>
+  </motion.div>
+  </div>
+  </div>
+  );
 };
 
 /* ═══════════════════════════════════════════════════════════
-   DOCUMENTS TAB
-   ═══════════════════════════════════════════════════════════ */
+  DOCUMENTS TAB
+  ═══════════════════════════════════════════════════════════ */
 
 interface DocItem {
-    id: number;
-    name: string;
-    type: string;
-    size: string;
-    date: string;
+  id: number;
+  name: string;
+  type: string;
+  size: string;
+  date: string;
 }
 
 const DOC_COLORS: Record<string, string> = {
-    Contract: '#33cbcc',
-    SRS: '#283852',
-    Design: '#283852',
-    Technical: '#283852',
-    Notes: '#283852',
-    Brief: '#283852',
-    Planning: '#33cbcc',
+  Contract: '#33cbcc',
+  SRS: '#283852',
+  Design: '#283852',
+  Technical: '#283852',
+  Notes: '#283852',
+  Brief: '#283852',
+  Planning: '#33cbcc',
 };
 
 const DocumentsView = ({ project: _project }: { project: ProjectData }) => {
-    const { t } = useTranslation();
-    const docs: DocItem[] = [];
+  const { t } = useTranslation();
+  const docs: DocItem[] = [];
 
-    return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.documents.title')}</h2>
-                <label className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors cursor-pointer shadow-lg shadow-[#33cbcc]/20">
-                    <Upload01Icon size={16} />
-                    {t('projectDetail.documents.upload')}
-                    <input type="file" className="hidden" multiple />
-                </label>
-            </div>
+  return (
+  <div className="space-y-6">
+  <div className="flex items-center justify-between">
+  <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.documents.title')}</h2>
+  <label className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5  text-sm font-semibold hover:bg-[#2bb5b6] transition-colors cursor-pointer shadow-lg shadow-[#33cbcc]/20">
+  <Upload01Icon size={16} />
+  {t('projectDetail.documents.upload')}
+  <input type="file" className="hidden" multiple />
+  </label>
+  </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {docs.map((doc, i) => (
-                    <motion.div
-                        key={doc.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.05 }}
-                        className="bg-white rounded-2xl p-5 border border-gray-100 flex items-center gap-4 group hover:border-[#33cbcc]/30 transition-colors"
-                    >
-                        <div
-                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: `${DOC_COLORS[doc.type] || '#283852'}15` }}
-                        >
-                            <File01Icon size={22} style={{ color: DOC_COLORS[doc.type] || '#283852' }} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-800 text-sm truncate">{doc.name}</p>
-                            <div className="flex items-center gap-3 mt-1">
-                                <span className="text-xs text-gray-400">{doc.size}</span>
-                                <span className="text-xs text-gray-300">|</span>
-                                <span className="text-xs text-gray-400">{doc.date}</span>
-                                <span
-                                    className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                                    style={{
-                                        backgroundColor: `${DOC_COLORS[doc.type] || '#283852'}15`,
-                                        color: DOC_COLORS[doc.type] || '#283852',
-                                    }}
-                                >
-                                    {doc.type}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                <ViewIcon size={16} />
-                            </button>
-                            <button className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                                <Download01Icon size={16} />
-                            </button>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {docs.map((doc, i) => (
+  <motion.div
+  key={doc.id}
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: i * 0.05 }}
+  className="bg-white  p-5 border border-gray-100 flex items-center gap-4 group hover:border-[#33cbcc]/30 transition-colors"
+  >
+  <div
+  className="w-12 h-12  flex items-center justify-center shrink-0"
+  style={{ backgroundColor: `${DOC_COLORS[doc.type] || '#283852'}15` }}
+  >
+  <File01Icon size={22} style={{ color: DOC_COLORS[doc.type] || '#283852' }} />
+  </div>
+  <div className="flex-1 min-w-0">
+  <p className="font-medium text-gray-800 text-sm truncate">{doc.name}</p>
+  <div className="flex items-center gap-3 mt-1">
+  <span className="text-xs text-gray-400">{doc.size}</span>
+  <span className="text-xs text-gray-300">|</span>
+  <span className="text-xs text-gray-400">{doc.date}</span>
+  <span
+  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+  style={{
+  backgroundColor: `${DOC_COLORS[doc.type] || '#283852'}15`,
+  color: DOC_COLORS[doc.type] || '#283852',
+  }}
+  >
+  {doc.type}
+  </span>
+  </div>
+  </div>
+  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+  <button className="p-2  hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+  <ViewIcon size={16} />
+  </button>
+  <button className="p-2  hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+  <Download01Icon size={16} />
+  </button>
+  </div>
+  </motion.div>
+  ))}
+  </div>
 
-            {docs.length === 0 && (
-                <div className="text-center py-16 text-gray-400">
-                    <File01Icon size={48} className="mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium">{t('projectDetail.documents.empty')}</p>
-                </div>
-            )}
-        </div>
-    );
+  {docs.length === 0 && (
+  <div className="text-center py-16 text-gray-400">
+  <File01Icon size={48} className="mx-auto mb-4 opacity-30" />
+  <p className="text-lg font-medium">{t('projectDetail.documents.empty')}</p>
+  </div>
+  )}
+  </div>
+  );
 };
 
 /* ═══════════════════════════════════════════════════════════
-   MILESTONES TAB
-   ═══════════════════════════════════════════════════════════ */
+  MILESTONES TAB
+  ═══════════════════════════════════════════════════════════ */
 
 type MilestoneStatus = 'completed' | 'upcoming';
 
 const MS_STYLES: Record<MilestoneStatus, { ring: string; dot: string; line: string; badge: string; badgeText: string }> = {
-    completed: { ring: 'ring-[#283852]',  dot: 'bg-[#283852]',  line: 'bg-[#283852]',  badge: 'bg-[#283852]',  badgeText: 'text-white' },
-    upcoming:  { ring: 'ring-gray-300',  dot: 'bg-gray-300',  line: 'bg-gray-200',  badge: 'bg-gray-50',  badgeText: 'text-gray-500' },
+  completed: { ring: 'ring-[#283852]',  dot: 'bg-[#283852]',  line: 'bg-[#283852]',  badge: 'bg-[#283852]',  badgeText: 'text-white' },
+  upcoming:  { ring: 'ring-gray-300',  dot: 'bg-gray-300',  line: 'bg-gray-200',  badge: 'bg-gray-50',  badgeText: 'text-gray-500' },
 };
 
 const emptyMsForm = () => ({ title: '', description: '', dueDate: '' });
 
 const MilestonesView = ({ project }: { project: ProjectData }) => {
-    const { t } = useTranslation();
-    const { user } = useAuth();
-    const canEdit = user?.role === 'MANAGER' || user?.role === 'HEAD_OF_DEPARTMENT';
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const canEdit = user?.role === 'MANAGER' || user?.role === 'HEAD_OF_DEPARTMENT';
 
-    const createMs = useCreateMilestone(project.id);
-    const updateMs = useUpdateMilestone(project.id);
-    const toggleMs = useToggleMilestone(project.id);
-    const deleteMs = useDeleteMilestone(project.id);
+  const createMs = useCreateMilestone(project.id);
+  const updateMs = useUpdateMilestone(project.id);
+  const toggleMs = useToggleMilestone(project.id);
+  const deleteMs = useDeleteMilestone(project.id);
 
-    const [showAdd, setShowAdd] = useState(false);
-    const [addForm, setAddForm] = useState(emptyMsForm());
-    const [editId, setEditId] = useState<string | null>(null);
-    const [editForm, setEditForm] = useState(emptyMsForm());
+  const [showAdd, setShowAdd] = useState(false);
+  const [addForm, setAddForm] = useState(emptyMsForm());
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState(emptyMsForm());
 
-    const milestones = [...(project.milestones || [])].sort((a, b) => a.order - b.order);
+  const milestones = [...(project.milestones || [])].sort((a, b) => a.order - b.order);
 
-    const handleAdd = () => {
-        if (!addForm.title.trim()) return;
-        createMs.mutate(
-            { title: addForm.title, description: addForm.description || undefined, dueDate: addForm.dueDate || undefined, order: milestones.length },
-            { onSuccess: () => { setShowAdd(false); setAddForm(emptyMsForm()); } }
-        );
-    };
+  const handleAdd = () => {
+  if (!addForm.title.trim()) return;
+  createMs.mutate(
+  { title: addForm.title, description: addForm.description || undefined, dueDate: addForm.dueDate || undefined, order: milestones.length },
+  { onSuccess: () => { setShowAdd(false); setAddForm(emptyMsForm()); } }
+  );
+  };
 
-    const handleEdit = (id: string) => {
-        updateMs.mutate(
-            { milestoneId: id, dto: { title: editForm.title, description: editForm.description || undefined, dueDate: editForm.dueDate || undefined } },
-            { onSuccess: () => setEditId(null) }
-        );
-    };
+  const handleEdit = (id: string) => {
+  updateMs.mutate(
+  { milestoneId: id, dto: { title: editForm.title, description: editForm.description || undefined, dueDate: editForm.dueDate || undefined } },
+  { onSuccess: () => setEditId(null) }
+  );
+  };
 
-    const inputCls = 'w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] outline-none text-gray-800 text-sm transition-colors';
+  const inputCls = 'w-full px-3 py-2 bg-gray-50 border border-gray-200  focus:ring-2 focus:ring-[#33cbcc]/20 focus:border-[#33cbcc] outline-none text-gray-800 text-sm transition-colors';
 
-    return (
-        <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.milestones.title')}</h2>
-                {canEdit && (
-                    <button
-                        onClick={() => setShowAdd(v => !v)}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#33cbcc] text-white text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
-                    >
-                        <Add01Icon size={16} />
-                        {t('projectDetail.milestones.add')}
-                    </button>
-                )}
-            </div>
+  return (
+  <div className="space-y-6">
+  <div className="flex items-center justify-between">
+  <h2 className="text-2xl font-bold text-gray-800">{t('projectDetail.milestones.title')}</h2>
+  {canEdit && (
+  <button
+  onClick={() => setShowAdd(v => !v)}
+  className="flex items-center gap-2 px-4 py-2.5  bg-[#33cbcc] text-white text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-lg shadow-[#33cbcc]/20"
+  >
+  <Add01Icon size={16} />
+  {t('projectDetail.milestones.add')}
+  </button>
+  )}
+  </div>
 
-            {/* Progress bar */}
-            {milestones.length > 0 && (
-                <div className="bg-white rounded-2xl p-5 border border-gray-100">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-gray-600">{t('projectDetail.overview.progress')}</span>
-                        <span className="text-sm font-bold text-gray-800">{project.milestonesDone}/{project.milestonesTotal}</span>
-                    </div>
-                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${project.progress}%` }}
-                            transition={{ duration: 1 }}
-                            className="h-full rounded-full bg-[#33cbcc]"
-                        />
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1.5">{project.progress}% {t('projectDetail.overview.progress').toLowerCase()}</p>
-                </div>
-            )}
+  {/* Progress bar */}
+  {milestones.length > 0 && (
+  <div className="bg-white  p-5 border border-gray-100">
+  <div className="flex items-center justify-between mb-2">
+  <span className="text-sm font-medium text-gray-600">{t('projectDetail.overview.progress')}</span>
+  <span className="text-sm font-bold text-gray-800">{project.milestonesDone}/{project.milestonesTotal}</span>
+  </div>
+  <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+  <motion.div
+  initial={{ width: 0 }}
+  animate={{ width: `${project.progress}%` }}
+  transition={{ duration: 1 }}
+  className="h-full rounded-full bg-[#33cbcc]"
+  />
+  </div>
+  <p className="text-xs text-gray-400 mt-1.5">{project.progress}% {t('projectDetail.overview.progress').toLowerCase()}</p>
+  </div>
+  )}
 
-            {/* Add form */}
-            <AnimatePresence>
-                {showAdd && canEdit && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="bg-white rounded-2xl border border-[#33cbcc]/30 p-5 space-y-3 overflow-hidden"
-                    >
-                        <input type="text" placeholder={t('projectDetail.milestones.namePlaceholder')} value={addForm.title} onChange={e => setAddForm(p => ({ ...p, title: e.target.value }))} className={inputCls} />
-                        <input type="text" placeholder={t('projectDetail.milestones.descPlaceholder')} value={addForm.description} onChange={e => setAddForm(p => ({ ...p, description: e.target.value }))} className={inputCls} />
-                        <input type="date" value={addForm.dueDate} onChange={e => setAddForm(p => ({ ...p, dueDate: e.target.value }))} className={inputCls} />
-                        <div className="flex gap-2 justify-end">
-                            <button onClick={() => { setShowAdd(false); setAddForm(emptyMsForm()); }} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{t('projectDetail.milestones.cancel')}</button>
-                            <button onClick={handleAdd} disabled={createMs.isPending || !addForm.title.trim()} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-50">
-                                {createMs.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <Add01Icon size={12} />}
-                                {t('projectDetail.milestones.save')}
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+  {/* Add form */}
+  <AnimatePresence>
+  {showAdd && canEdit && (
+  <motion.div
+  initial={{ opacity: 0, height: 0 }}
+  animate={{ opacity: 1, height: 'auto' }}
+  exit={{ opacity: 0, height: 0 }}
+  className="bg-white  border border-[#33cbcc]/30 p-5 space-y-3 overflow-hidden"
+  >
+  <input type="text" placeholder={t('projectDetail.milestones.namePlaceholder')} value={addForm.title} onChange={e => setAddForm(p => ({ ...p, title: e.target.value }))} className={inputCls} />
+  <input type="text" placeholder={t('projectDetail.milestones.descPlaceholder')} value={addForm.description} onChange={e => setAddForm(p => ({ ...p, description: e.target.value }))} className={inputCls} />
+  <input type="date" value={addForm.dueDate} onChange={e => setAddForm(p => ({ ...p, dueDate: e.target.value }))} className={inputCls} />
+  <div className="flex gap-2 justify-end">
+  <button onClick={() => { setShowAdd(false); setAddForm(emptyMsForm()); }} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200  transition-colors">{t('projectDetail.milestones.cancel')}</button>
+  <button onClick={handleAdd} disabled={createMs.isPending || !addForm.title.trim()} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6]  transition-colors disabled:opacity-50">
+  {createMs.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <Add01Icon size={12} />}
+  {t('projectDetail.milestones.save')}
+  </button>
+  </div>
+  </motion.div>
+  )}
+  </AnimatePresence>
 
-            {/* Milestones list */}
-            <div className="relative">
-                {milestones.map((ms, i) => {
-                    const isDone = ms.completedAt != null;
-                    const style = MS_STYLES[isDone ? 'completed' : 'upcoming'];
-                    const isLast = i === milestones.length - 1;
-                    const isEditing = editId === ms.id;
+  {/* Milestones list */}
+  <div className="relative">
+  {milestones.map((ms, i) => {
+  const isDone = ms.completedAt != null;
+  const style = MS_STYLES[isDone ? 'completed' : 'upcoming'];
+  const isLast = i === milestones.length - 1;
+  const isEditing = editId === ms.id;
 
-                    return (
-                        <motion.div
-                            key={ms.id}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.07 }}
-                            className="flex gap-6 relative"
-                        >
-                            <div className="flex flex-col items-center">
-                                <button
-                                    onClick={() => canEdit && toggleMs.mutate(ms.id)}
-                                    className={`w-5 h-5 rounded-full ring-4 ${style.ring} ${style.dot} z-10 shrink-0 mt-1 ${canEdit ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
-                                />
-                                {!isLast && <div className={`w-0.5 flex-1 ${style.line} min-h-16`} />}
-                            </div>
+  return (
+  <motion.div
+  key={ms.id}
+  initial={{ opacity: 0, x: -20 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ delay: i * 0.07 }}
+  className="flex gap-6 relative"
+  >
+  <div className="flex flex-col items-center">
+  <button
+  onClick={() => canEdit && toggleMs.mutate(ms.id)}
+  className={`w-5 h-5 rounded-full ring-4 ${style.ring} ${style.dot} z-10 shrink-0 mt-1 ${canEdit ? 'cursor-pointer hover:opacity-80 transition-opacity' : 'cursor-default'}`}
+  />
+  {!isLast && <div className={`w-0.5 flex-1 ${style.line} min-h-16`} />}
+  </div>
 
-                            <div className={`bg-white rounded-2xl p-5 border flex-1 mb-6 transition-colors ${isDone ? 'border-[#283852]/20' : 'border-gray-100'} hover:border-[#33cbcc]/30`}>
-                                {isEditing ? (
-                                    <div className="space-y-3">
-                                        <input type="text" value={editForm.title} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} className={inputCls} />
-                                        <input type="text" placeholder={t('projectDetail.milestones.descPlaceholder')} value={editForm.description} onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))} className={inputCls} />
-                                        <input type="date" value={editForm.dueDate} onChange={e => setEditForm(p => ({ ...p, dueDate: e.target.value }))} className={inputCls} />
-                                        <div className="flex gap-2 justify-end">
-                                            <button onClick={() => setEditId(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">{t('projectDetail.milestones.cancel')}</button>
-                                            <button onClick={() => handleEdit(ms.id)} disabled={updateMs.isPending} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] rounded-lg transition-colors disabled:opacity-50">
-                                                {updateMs.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <PencilIcon size={12} />}
-                                                {t('projectDetail.milestones.save')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex-1 min-w-0">
-                                            <h4 className={`font-semibold text-gray-800 ${isDone ? 'line-through opacity-60' : ''}`}>{ms.title}</h4>
-                                            {ms.description && <p className="text-sm text-gray-500 mt-1">{ms.description}</p>}
-                                            {ms.dueDate && (
-                                                <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-400">
-                                                    <Calendar01Icon size={12} />
-                                                    <span>{fmtDate(ms.dueDate)}</span>
-                                                </div>
-                                            )}
-                                            {isDone && ms.completedAt && (
-                                                <div className="flex items-center gap-1.5 mt-2 text-xs text-[#283852]/60">
-                                                    <Tick01Icon size={12} />
-                                                    <span>
-                                                        {t('projectDetail.milestones.completedOn', { date: fmtDate(ms.completedAt) })}
-                                                        {ms.completedByName && (
-                                                            <span className="font-medium"> &mdash; {ms.completedByName}</span>
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2 shrink-0">
-                                            <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${style.badge} ${style.badgeText}`}>
-                                                {t(`projectDetail.milestones.${isDone ? 'completed' : 'upcoming'}`)}
-                                            </span>
-                                            {canEdit && (
-                                                <div className="flex items-center gap-1">
-                                                    <button
-                                                        onClick={() => { setEditId(ms.id); setEditForm({ title: ms.title, description: ms.description || '', dueDate: ms.dueDate ? ms.dueDate.slice(0, 10) : '' }); }}
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors"
-                                                    >
-                                                        <PencilIcon size={14} />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => deleteMs.mutate(ms.id)}
-                                                        className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
-                                                    >
-                                                        <Delete02Icon size={14} />
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-                    );
-                })}
-            </div>
+  <div className={`bg-white  p-5 border flex-1 mb-6 transition-colors ${isDone ? 'border-[#283852]/20' : 'border-gray-100'} hover:border-[#33cbcc]/30`}>
+  {isEditing ? (
+  <div className="space-y-3">
+  <input type="text" value={editForm.title} onChange={e => setEditForm(p => ({ ...p, title: e.target.value }))} className={inputCls} />
+  <input type="text" placeholder={t('projectDetail.milestones.descPlaceholder')} value={editForm.description} onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))} className={inputCls} />
+  <input type="date" value={editForm.dueDate} onChange={e => setEditForm(p => ({ ...p, dueDate: e.target.value }))} className={inputCls} />
+  <div className="flex gap-2 justify-end">
+  <button onClick={() => setEditId(null)} className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 hover:bg-gray-200  transition-colors">{t('projectDetail.milestones.cancel')}</button>
+  <button onClick={() => handleEdit(ms.id)} disabled={updateMs.isPending} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6]  transition-colors disabled:opacity-50">
+  {updateMs.isPending ? <Loading02Icon size={12} className="animate-spin" /> : <PencilIcon size={12} />}
+  {t('projectDetail.milestones.save')}
+  </button>
+  </div>
+  </div>
+  ) : (
+  <div className="flex items-start justify-between gap-4">
+  <div className="flex-1 min-w-0">
+  <h4 className={`font-semibold text-gray-800 ${isDone ? 'line-through opacity-60' : ''}`}>{ms.title}</h4>
+  {ms.description && <p className="text-sm text-gray-500 mt-1">{ms.description}</p>}
+  {ms.dueDate && (
+  <div className="flex items-center gap-1.5 mt-2 text-xs text-gray-400">
+  <Calendar01Icon size={12} />
+  <span>{fmtDate(ms.dueDate)}</span>
+  </div>
+  )}
+  {isDone && ms.completedAt && (
+  <div className="flex items-center gap-1.5 mt-2 text-xs text-[#283852]/60">
+  <Tick01Icon size={12} />
+  <span>
+  {t('projectDetail.milestones.completedOn', { date: fmtDate(ms.completedAt) })}
+  {ms.completedByName && (
+  <span className="font-medium"> &mdash; {ms.completedByName}</span>
+  )}
+  </span>
+  </div>
+  )}
+  </div>
+  <div className="flex items-center gap-2 shrink-0">
+  <span className={`text-[10px] font-semibold px-2.5 py-1 rounded-full ${style.badge} ${style.badgeText}`}>
+  {t(`projectDetail.milestones.${isDone ? 'completed' : 'upcoming'}`)}
+  </span>
+  {canEdit && (
+  <div className="flex items-center gap-1">
+  <button
+  onClick={() => { setEditId(ms.id); setEditForm({ title: ms.title, description: ms.description || '', dueDate: ms.dueDate ? ms.dueDate.slice(0, 10) : '' }); }}
+  className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors"
+  >
+  <PencilIcon size={14} />
+  </button>
+  <button
+  onClick={() => deleteMs.mutate(ms.id)}
+  className="p-1.5  text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-colors"
+  >
+  <Delete02Icon size={14} />
+  </button>
+  </div>
+  )}
+  </div>
+  </div>
+  )}
+  </div>
+  </motion.div>
+  );
+  })}
+  </div>
 
-            {milestones.length === 0 && !showAdd && (
-                <div className="text-center py-16 text-gray-400">
-                    <Clock01Icon size={48} className="mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium">{t('projectDetail.milestones.empty')}</p>
-                </div>
-            )}
-        </div>
-    );
+  {milestones.length === 0 && !showAdd && (
+  <div className="text-center py-16 text-gray-400">
+  <Clock01Icon size={48} className="mx-auto mb-4 opacity-30" />
+  <p className="text-lg font-medium">{t('projectDetail.milestones.empty')}</p>
+  </div>
+  )}
+  </div>
+  );
 };
 
 /* ═══════════════════════════════════════════════════════════
-   MAIN COMPONENT
-   ═══════════════════════════════════════════════════════════ */
+  MAIN COMPONENT
+  ═══════════════════════════════════════════════════════════ */
 
 const ProjectDetail = ({ project, activeTab, onEdit }: ProjectDetailProps) => {
-    switch (activeTab) {
-        case 'overview':
-            return <OverviewView project={project} onEdit={onEdit} />;
-        case 'tasks':
-            return <TasksView project={project} />;
-        case 'budget':
-            return <BudgetView project={project} />;
-        case 'documents':
-            return <DocumentsView project={project} />;
-        case 'milestones':
-            return <MilestonesView project={project} />;
-        default:
-            return <OverviewView project={project} onEdit={onEdit} />;
-    }
+  switch (activeTab) {
+  case 'overview':
+  return <OverviewView project={project} onEdit={onEdit} />;
+  case 'tasks':
+  return <TasksView project={project} />;
+  case 'budget':
+  return <BudgetView project={project} />;
+  case 'documents':
+  return <DocumentsView project={project} />;
+  case 'milestones':
+  return <MilestonesView project={project} />;
+  default:
+  return <OverviewView project={project} onEdit={onEdit} />;
+  }
 };
 
 export default ProjectDetail;

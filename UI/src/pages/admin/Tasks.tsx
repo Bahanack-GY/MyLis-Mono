@@ -1,13 +1,14 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+﻿import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft01Icon, ArrowRight01Icon, ArrowDown01Icon, ArrowUp01Icon, Flag01Icon, Search01Icon, Cancel01Icon, Alert01Icon, Clock01Icon, Add01Icon, Calendar01Icon, AlignLeftIcon, Briefcase01Icon, BarChartHorizontalIcon, RefreshIcon, Loading02Icon, ZapIcon, PencilIcon, Delete02Icon, Time01Icon, FloppyDiskIcon, ListViewIcon, Tag01Icon, Settings01Icon, Task01Icon, Target01Icon, Attachment01Icon, Download01Icon, File01Icon, Alert02Icon, StarIcon, Activity01Icon } from 'hugeicons-react';
+import { ArrowLeft01Icon, ArrowRight01Icon, ArrowDown01Icon, ArrowUp01Icon, Flag01Icon, Search01Icon, Cancel01Icon, Alert01Icon, Clock01Icon, Add01Icon, Calendar01Icon, AlignLeftIcon, Briefcase01Icon, BarChartHorizontalIcon, RefreshIcon, Loading02Icon, ZapIcon, PencilIcon, Delete02Icon, Time01Icon, FloppyDiskIcon, Tag01Icon, Settings01Icon, Task01Icon, Target01Icon, Attachment01Icon, Download01Icon, File01Icon, Alert02Icon, StarIcon, Activity01Icon } from 'hugeicons-react';
 import { useTasks, useInfiniteTasksByStates, useCreateTask, useUpdateTask, useDeleteTask, useTaskHistory, useWeeklyCheckForEmployee, useCreateSubtask, useToggleSubtask, useDeleteSubtask, useUploadTaskAttachment, useDeleteTaskAttachment, useGlobalDistribution } from '../../api/tasks/hooks';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import type { Task } from '../../api/tasks/types';
 import type { Subtask, TaskAttachment } from '../../api/tasks/types';
 import { TasksAdminSkeleton } from '../../components/Skeleton';
+import ToggleSwitch from '../../components/ToggleSwitch';
 import { API_URL } from '../../api/config';
 import { useEmployees } from '../../api/employees/hooks';
 import { useProjects } from '../../api/projects/hooks';
@@ -25,75 +26,75 @@ type ColorKey = keyof typeof TASK_COLORS;
 type ViewMode = 'day' | 'week' | 'month' | 'year';
 
 interface GanttTask {
-    id: number;
-    apiId?: string;
-    title: string;
-    subtitle: string;
-    startDate: Date;
-    endDate: Date;
-    color: ColorKey;
-    hasFlag?: boolean;
-    description?: string;
-    status?: 'todo' | 'in_progress' | 'done';
-    lane?: number;
-    projectId?: string;
-    difficulty?: string;
-    selfAssigned?: boolean;
-    natureId?: string;
-    natureName?: string;
-    startedAt?: string | null;
-    completedAt?: string | null;
-    subtasks?: Subtask[];
-    attachments?: TaskAttachment[];
-    leadId?: string;
-    urgent?: boolean;
-    important?: boolean;
+  id: number;
+  apiId?: string;
+  title: string;
+  subtitle: string;
+  startDate: Date;
+  endDate: Date;
+  color: ColorKey;
+  hasFlag?: boolean;
+  description?: string;
+  status?: 'todo' | 'in_progress' | 'done';
+  lane?: number;
+  projectId?: string;
+  difficulty?: string;
+  selfAssigned?: boolean;
+  natureId?: string;
+  natureName?: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  subtasks?: Subtask[];
+  attachments?: TaskAttachment[];
+  leadId?: string;
+  urgent?: boolean;
+  important?: boolean;
 }
 
 interface EmployeeRow {
-    id: number;
-    apiId: string;
-    name: string;
-    role: string;
-    avatar: string;
-    departmentId: string;
-    departmentName: string;
-    tasks: GanttTask[];
-    laneCount?: number;
+  id: number;
+  apiId: string;
+  name: string;
+  role: string;
+  avatar: string;
+  departmentId: string;
+  departmentName: string;
+  tasks: GanttTask[];
+  laneCount?: number;
 }
 
 /* ─── 4-Color palette ────────────────────────────────────── */
 
 const TASK_COLORS = {
-    teal:  { bg: '#33cbcc1A', text: '#33cbcc', border: '#33cbcc' },
-    blue:  { bg: '#2838521A', text: '#283852', border: '#283852' },
-    amber: { bg: '#2838521A', text: '#283852', border: '#283852' },
-    rose:  { bg: '#2838521A', text: '#283852', border: '#283852' },
+  teal:  { bg: '#33cbcc1A', text: '#33cbcc', border: '#33cbcc' },
+  blue:  { bg: '#2838521A', text: '#283852', border: '#283852' },
+  amber: { bg: '#2838521A', text: '#283852', border: '#283852' },
+  rose:  { bg: '#2838521A', text: '#283852', border: '#283852' },
 };
 
 /* ─── Date helpers ────────────────────────────────────────── */
 
 const diffDays = (a: Date, b: Date) =>
-    Math.round((b.getTime() - a.getTime()) / 86_400_000);
+  Math.round((b.getTime() - a.getTime()) / 86_400_000);
 
 const addDays = (d: Date, n: number) => {
-    const r = new Date(d);
-    r.setDate(r.getDate() + n);
-    return r;
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
 };
 
 const startOfWeek = (d: Date) => {
-    const r = new Date(d);
-    const day = r.getDay();
-    r.setDate(r.getDate() - day + (day === 0 ? -6 : 1));
-    r.setHours(0, 0, 0, 0);
-    return r;
+  const r = new Date(d);
+  const day = r.getDay();
+  r.setDate(r.getDate() - day + (day === 0 ? -6 : 1));
+  r.setHours(0, 0, 0, 0);
+  return r;
 };
 
 const isSameDay = (a: Date, b: Date) =>
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
+  a.getFullYear() === b.getFullYear() &&
+  a.getMonth() === b.getMonth() &&
+  a.getDate() === b.getDate();
 
 const numDaysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate();
 
@@ -113,28 +114,28 @@ const DAY_PX: Record<ViewMode, number> = { day: 600, week: 100, month: 52, year:
 /* ─── Lane Helper ─────────────────────────────────────────── */
 
 const assignLanes = (tasks: GanttTask[]): GanttTask[] => {
-    if (!tasks.length) return [];
-    
-    // Sort by start date
-    const sorted = [...tasks].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-    const lanes: Date[] = [];
-    
-    return sorted.map(task => {
-        let laneIndex = -1;
-        // Find first lane where this task fits (start date > lane end date, since end date is inclusive)
-        for (let i = 0; i < lanes.length; i++) {
-            if (task.startDate.getTime() > lanes[i].getTime()) {
-                laneIndex = i;
-                lanes[i] = task.endDate;
-                break;
-            }
-        }
-        if (laneIndex === -1) {
-            laneIndex = lanes.length;
-            lanes.push(task.endDate);
-        }
-        return { ...task, lane: laneIndex };
-    });
+  if (!tasks.length) return [];
+ 
+  // Sort by start date
+  const sorted = [...tasks].sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+  const lanes: Date[] = [];
+ 
+  return sorted.map(task => {
+  let laneIndex = -1;
+  // Find first lane where this task fits (start date > lane end date, since end date is inclusive)
+  for (let i = 0; i < lanes.length; i++) {
+  if (task.startDate.getTime() > lanes[i].getTime()) {
+  laneIndex = i;
+  lanes[i] = task.endDate;
+  break;
+  }
+  }
+  if (laneIndex === -1) {
+  laneIndex = lanes.length;
+  lanes.push(task.endDate);
+  }
+  return { ...task, lane: laneIndex };
+  });
 };
 
 /* ─── (no mock data — uses API only) ──────────────────────── */
@@ -142,570 +143,570 @@ const assignLanes = (tasks: GanttTask[]): GanttTask[] => {
 /* ─── Subtasks Section ───────────────────────────────────── */
 
 const SubtasksSection = ({ task }: { task: GanttTask }) => {
-    const { t } = useTranslation();
-    const createSubtask = useCreateSubtask();
-    const toggleSubtask = useToggleSubtask();
-    const deleteSubtask = useDeleteSubtask();
-    const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const { t } = useTranslation();
+  const createSubtask = useCreateSubtask();
+  const toggleSubtask = useToggleSubtask();
+  const deleteSubtask = useDeleteSubtask();
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
 
-    const subtasks = task.subtasks || [];
-    const completedSubtasks = subtasks.filter(s => s.completed).length;
-    const totalSubtasks = subtasks.length;
-    const progressPercentage = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
+  const subtasks = task.subtasks || [];
+  const completedSubtasks = subtasks.filter(s => s.completed).length;
+  const totalSubtasks = subtasks.length;
+  const progressPercentage = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
-    const handleAddSubtask = () => {
-        if (!newSubtaskTitle.trim() || !task.apiId) return;
-        createSubtask.mutate(
-            { taskId: task.apiId, title: newSubtaskTitle.trim() },
-            {
-                onSuccess: () => setNewSubtaskTitle(''),
-            }
-        );
-    };
+  const handleAddSubtask = () => {
+  if (!newSubtaskTitle.trim() || !task.apiId) return;
+  createSubtask.mutate(
+  { taskId: task.apiId, title: newSubtaskTitle.trim() },
+  {
+  onSuccess: () => setNewSubtaskTitle(''),
+  }
+  );
+  };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            handleAddSubtask();
-        }
-    };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === 'Enter') {
+  e.preventDefault();
+  handleAddSubtask();
+  }
+  };
 
-    if (totalSubtasks === 0 && !newSubtaskTitle) {
-        return (
-            <div>
-                <div className="flex items-center justify-between mb-2">
-                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('subtasks.title', 'Subtasks')}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                    <input
-                        type="text"
-                        value={newSubtaskTitle}
-                        onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={t('subtasks.addPlaceholder', 'Add a subtask...')}
-                        className="flex-1 text-sm text-gray-700 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
-                    />
-                    <button
-                        onClick={handleAddSubtask}
-                        disabled={!newSubtaskTitle.trim() || createSubtask.isPending}
-                        className="p-2 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    >
-                        {createSubtask.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
-                    </button>
-                </div>
-            </div>
-        );
-    }
+  if (totalSubtasks === 0 && !newSubtaskTitle) {
+  return (
+  <div>
+  <div className="flex items-center justify-between mb-2">
+  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">{t('subtasks.title', 'Subtasks')}</p>
+  </div>
+  <div className="flex items-center gap-2">
+  <input
+  type="text"
+  value={newSubtaskTitle}
+  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+  onKeyDown={handleKeyDown}
+  placeholder={t('subtasks.addPlaceholder', 'Add a subtask...')}
+  className="flex-1 text-sm text-[#1c2b3a] border border-[#e5e8ef] px-3 py-2 focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
+  />
+  <button
+  onClick={handleAddSubtask}
+  disabled={!newSubtaskTitle.trim() || createSubtask.isPending}
+  className="p-2  bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+  >
+  {createSubtask.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
+  </button>
+  </div>
+  </div>
+  );
+  }
 
-    return (
-        <div>
-            <div className="flex items-center justify-between mb-2">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('subtasks.title', 'Subtasks')}</p>
-                <span className="text-xs font-medium text-gray-500">
-                    {completedSubtasks}/{totalSubtasks}
-                </span>
-            </div>
+  return (
+  <div>
+  <div className="flex items-center justify-between mb-2">
+  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('subtasks.title', 'Subtasks')}</p>
+  <span className="text-xs font-medium text-[#8892a4]">
+  {completedSubtasks}/{totalSubtasks}
+  </span>
+  </div>
 
-            {/* Progress bar */}
-            {totalSubtasks > 0 && (
-                <div className="mb-3">
-                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-[#33cbcc] transition-all duration-300"
-                            style={{ width: `${progressPercentage}%` }}
-                        />
-                    </div>
-                </div>
-            )}
+  {/* Progress bar */}
+  {totalSubtasks > 0 && (
+  <div className="mb-3">
+  <div className="w-full h-2 bg-[#f8f9fc] rounded-full overflow-hidden">
+  <div
+  className="h-full bg-[#33cbcc] transition-all duration-300"
+  style={{ width: `${progressPercentage}%` }}
+  />
+  </div>
+  </div>
+  )}
 
-            {/* Subtasks list */}
-            <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
-                {subtasks.map((subtask) => (
-                    <div key={subtask.id} className="flex items-center gap-2 group">
-                        <input
-                            type="checkbox"
-                            checked={subtask.completed}
-                            onChange={() => toggleSubtask.mutate(subtask.id)}
-                            className="w-4 h-4 rounded border-gray-300 text-[#33cbcc] focus:ring-[#33cbcc]/30 cursor-pointer"
-                        />
-                        <span className={`flex-1 text-sm ${subtask.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                            {subtask.title}
-                        </span>
-                        <button
-                            onClick={() => deleteSubtask.mutate(subtask.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-all"
-                        >
-                            <Delete02Icon size={14} />
-                        </button>
-                    </div>
-                ))}
-            </div>
+  {/* Subtasks list */}
+  <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
+  {subtasks.map((subtask) => (
+  <div key={subtask.id} className="flex items-center gap-2 group">
+  <input
+  type="checkbox"
+  checked={subtask.completed}
+  onChange={() => toggleSubtask.mutate(subtask.id)}
+  className="w-4 h-4 rounded border-[#e5e8ef] text-[#33cbcc] focus:ring-[#33cbcc]/30 cursor-pointer"
+  />
+  <span className={`flex-1 text-sm ${subtask.completed ? 'line-through text-[#b0bac9]' : 'text-[#1c2b3a]'}`}>
+  {subtask.title}
+  </span>
+  <button
+  onClick={() => deleteSubtask.mutate(subtask.id)}
+  className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[#283852]/10 text-[#8892a4] hover:text-[#283852] transition-all"
+  >
+  <Delete02Icon size={14} />
+  </button>
+  </div>
+  ))}
+  </div>
 
-            {/* Add new subtask */}
-            <div className="flex items-center gap-2">
-                <input
-                    type="text"
-                    value={newSubtaskTitle}
-                    onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={t('subtasks.addPlaceholder', 'Add a subtask...')}
-                    className="flex-1 text-sm text-gray-700 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc]"
-                />
-                <button
-                    onClick={handleAddSubtask}
-                    disabled={!newSubtaskTitle.trim() || createSubtask.isPending}
-                    className="p-2 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                    {createSubtask.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
-                </button>
-            </div>
-        </div>
-    );
+  {/* Add new subtask */}
+  <div className="flex items-center gap-2">
+  <input
+  type="text"
+  value={newSubtaskTitle}
+  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+  onKeyDown={handleKeyDown}
+  placeholder={t('subtasks.addPlaceholder', 'Add a subtask...')}
+  className="flex-1 text-sm text-[#1c2b3a] border border-[#e5e8ef] px-3 py-2 focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
+  />
+  <button
+  onClick={handleAddSubtask}
+  disabled={!newSubtaskTitle.trim() || createSubtask.isPending}
+  className="p-2  bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+  >
+  {createSubtask.isPending ? <Loading02Icon size={16} className="animate-spin" /> : <Add01Icon size={16} />}
+  </button>
+  </div>
+  </div>
+  );
 };
 
 /* ─── Task Detail Modal ───────────────────────────────────── */
 
 const fmtDuration = (ms: number, t: (k: string) => string) => {
-    const totalMins = Math.floor(ms / 60_000);
-    const days = Math.floor(totalMins / 1440);
-    const hours = Math.floor((totalMins % 1440) / 60);
-    const mins = totalMins % 60;
-    const parts: string[] = [];
-    if (days > 0) parts.push(`${days}${t('tasksPage.dayShort')}`);
-    if (hours > 0) parts.push(`${hours}${t('tasksPage.hourShort')}`);
-    if (mins > 0 || parts.length === 0) parts.push(`${mins}${t('tasksPage.minShort')}`);
-    return parts.join(' ');
+  const totalMins = Math.floor(ms / 60_000);
+  const days = Math.floor(totalMins / 1440);
+  const hours = Math.floor((totalMins % 1440) / 60);
+  const mins = totalMins % 60;
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}${t('tasksPage.dayShort')}`);
+  if (hours > 0) parts.push(`${hours}${t('tasksPage.hourShort')}`);
+  if (mins > 0 || parts.length === 0) parts.push(`${mins}${t('tasksPage.minShort')}`);
+  return parts.join(' ');
 };
 
 const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory }: { task: GanttTask; employee: EmployeeRow; onClose: () => void; onEdit?: () => void; onDelete?: () => void; onHistory?: () => void }) => {
-    const { t } = useTranslation();
-    const c = TASK_COLORS[task.color];
-    const duration = diffDays(task.startDate, task.endDate) + 1;
-    const fmt = (d: Date) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-    const totalTimeMs = task.startedAt && task.completedAt
-        ? new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime() - (task.totalBlockedMs ?? 0)
-        : null;
+  const { t } = useTranslation();
+  const c = TASK_COLORS[task.color];
+  const duration = diffDays(task.startDate, task.endDate) + 1;
+  const fmt = (d: Date) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  const totalTimeMs = task.startedAt && task.completedAt
+  ? new Date(task.completedAt).getTime() - new Date(task.startedAt).getTime() - (task.totalBlockedMs ?? 0)
+  : null;
 
-    const statusMap: Record<string, { label: string; cls: string }> = {
-        todo:        { label: t('tasksPage.todo'),       cls: 'bg-gray-100 text-gray-600' },
-        in_progress: { label: t('tasksPage.inProgress'), cls: 'bg-[#283852]/10 text-[#283852]' },
-        done:        { label: t('tasksPage.done'),       cls: 'bg-[#283852] text-white' },
-    };
-    const st = task.status ? statusMap[task.status] : null;
+  const statusMap: Record<string, { label: string; cls: string }> = {
+  todo:   { label: t('tasksPage.todo'),   cls: 'bg-[#f8f9fc] text-[#8892a4]' },
+  in_progress: { label: t('tasksPage.inProgress'), cls: 'bg-[#283852]/10 text-[#283852]' },
+  done:   { label: t('tasksPage.done'),   cls: 'bg-[#283852] text-white' },
+  };
+  const st = task.status ? statusMap[task.status] : null;
 
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-            onClick={onClose}
-        >
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
-            >
-                {/* Accent bar */}
-                <div className="h-1.5 shrink-0" style={{ backgroundColor: c.border }} />
+  return (
+  <motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+  className="fixed inset-0 z-100 flex justify-end bg-black/30"
+  onClick={onClose}
+  >
+  <motion.div
+  initial={{ x: '100%' }}
+  animate={{ x: 0 }}
+  exit={{ x: '100%' }}
+  transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+  onClick={e => e.stopPropagation()}
+  className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
+  >
+  {/* Accent bar */}
+  <div className="h-1.5 shrink-0" style={{ backgroundColor: c.border }} />
 
-                <div className="flex-1 overflow-y-auto p-6 space-y-5">
-                    {/* Title */}
-                    <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                                <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: c.border }} />
-                                <h3 className="text-lg font-bold text-gray-800">{task.title}</h3>
-                                {task.hasFlag && <Flag01Icon size={14} className="text-[#283852] shrink-0" />}
-                                {task.selfAssigned && (
-                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] shrink-0">
-                                        <ZapIcon size={10} />
-                                        Self-assigned
-                                    </span>
-                                )}
-                                {task.urgent && (
-                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
-                                        <Alert02Icon size={10} />
-                                        {t('tasksPage.urgent')}
-                                    </span>
-                                )}
-                                {task.important && (
-                                    <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
-                                        <StarIcon size={10} />
-                                        {t('tasksPage.important')}
-                                    </span>
-                                )}
-                            </div>
-                            <p className="text-sm text-gray-500 pl-5">{task.subtitle}</p>
-                        </div>
-                        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0">
-                            <Cancel01Icon size={18} />
-                        </button>
-                    </div>
+  <div className="flex-1 overflow-y-auto p-6 space-y-5">
+  {/* Title */}
+  <div className="flex items-start justify-between gap-3">
+  <div className="flex-1 min-w-0">
+  <div className="flex items-center gap-2 mb-1">
+  <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: c.border }} />
+  <h3 className="text-lg font-bold text-[#1c2b3a]">{task.title}</h3>
+  {task.hasFlag && <Flag01Icon size={14} className="text-[#283852] shrink-0" />}
+  {task.selfAssigned && (
+  <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc] shrink-0">
+  <ZapIcon size={10} />
+  Self-assigned
+  </span>
+  )}
+  {task.urgent && (
+  <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
+  <Alert02Icon size={10} />
+  {t('tasksPage.urgent')}
+  </span>
+  )}
+  {task.important && (
+  <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">
+  <StarIcon size={10} />
+  {t('tasksPage.important')}
+  </span>
+  )}
+  </div>
+  <p className="text-sm text-[#8892a4] pl-5">{task.subtitle}</p>
+  </div>
+  <button onClick={onClose} className="p-1.5  hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors shrink-0">
+  <Cancel01Icon size={18} />
+  </button>
+  </div>
 
-                    {/* Assigned to */}
-                    <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
-                        <img src={employee.avatar} alt="" className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
-                        <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-gray-800 truncate">{employee.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{employee.role}</p>
-                        </div>
-                    </div>
+  {/* Assigned to */}
+  <div className="flex items-center gap-3 bg-[#f8f9fc]  p-3">
+  <img src={employee.avatar} alt="" className="w-10 h-10 rounded-full border-2 border-white shadow-sm" />
+  <div className="min-w-0 flex-1">
+  <p className="text-sm font-semibold text-[#1c2b3a] truncate">{employee.name}</p>
+  <p className="text-xs text-[#8892a4] truncate">{employee.role}</p>
+  </div>
+  </div>
 
-                    {/* Detail cards */}
-                    <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-gray-50 rounded-xl p-3">
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('tasksPage.startDate')}</p>
-                            <p className="text-sm font-semibold text-gray-800">{fmt(task.startDate)}</p>
-                        </div>
-                        <div className="bg-gray-50 rounded-xl p-3">
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('tasksPage.endDate')}</p>
-                            <p className="text-sm font-semibold text-gray-800">{fmt(task.endDate)}</p>
-                        </div>
-                        <div className="bg-gray-50 rounded-xl p-3">
-                            <div className="flex items-center gap-1.5 mb-1">
-                                <Clock01Icon size={11} className="text-gray-400" />
-                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.duration')}</p>
-                            </div>
-                            <p className="text-sm font-semibold text-gray-800">{duration} {duration === 1 ? t('tasksPage.day') : t('tasksPage.days')}</p>
-                        </div>
-                        {st && (
-                            <div className="bg-gray-50 rounded-xl p-3">
-                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">{t('tasksPage.status')}</p>
-                                <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
-                            </div>
-                        )}
-                    </div>
+  {/* Detail cards */}
+  <div className="grid grid-cols-2 gap-3">
+  <div className="bg-[#f8f9fc]  p-3">
+  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1">{t('tasksPage.startDate')}</p>
+  <p className="text-sm font-semibold text-[#1c2b3a]">{fmt(task.startDate)}</p>
+  </div>
+  <div className="bg-[#f8f9fc]  p-3">
+  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1">{t('tasksPage.endDate')}</p>
+  <p className="text-sm font-semibold text-[#1c2b3a]">{fmt(task.endDate)}</p>
+  </div>
+  <div className="bg-[#f8f9fc]  p-3">
+  <div className="flex items-center gap-1.5 mb-1">
+  <Clock01Icon size={11} className="text-[#8892a4]" />
+  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">{t('tasksPage.duration')}</p>
+  </div>
+  <p className="text-sm font-semibold text-[#1c2b3a]">{duration} {duration === 1 ? t('tasksPage.day') : t('tasksPage.days')}</p>
+  </div>
+  {st && (
+  <div className="bg-[#f8f9fc]  p-3">
+  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1">{t('tasksPage.status')}</p>
+  <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
+  </div>
+  )}
+  </div>
 
-                    {/* Nature */}
-                    {task.natureName && (
-                        <div className="flex items-center gap-2">
-                            <Tag01Icon size={12} className="text-gray-400" />
-                            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.nature')}</span>
-                            <span className="text-sm font-medium text-gray-700">{task.natureName}</span>
-                        </div>
-                    )}
+  {/* Nature */}
+  {task.natureName && (
+  <div className="flex items-center gap-2">
+  <Tag01Icon size={12} className="text-[#8892a4]" />
+  <span className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">{t('tasksPage.nature')}</span>
+  <span className="text-sm font-medium text-[#1c2b3a]">{task.natureName}</span>
+  </div>
+  )}
 
-                    {/* Subtasks section */}
-                    <SubtasksSection task={task} />
+  {/* Subtasks section */}
+  <SubtasksSection task={task} />
 
-                    {/* Attachments */}
-                    {task.attachments && task.attachments.length > 0 && (
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <Attachment01Icon size={12} className="text-gray-400" />
-                                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{t('tasksPage.attachments', 'Attachments')}</p>
-                                <span className="text-xs font-medium text-gray-500">{task.attachments.length}</span>
-                            </div>
-                            <div className="space-y-2 max-h-40 overflow-y-auto">
-                                {task.attachments.map(att => (
-                                    <div key={att.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                                        <File01Icon size={14} className="text-gray-400 shrink-0" />
-                                        <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
-                                        <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
-                                        <a
-                                            href={API_URL + att.filePath}
-                                            download={att.fileName}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"
-                                        >
-                                            <Download01Icon size={14} />
-                                        </a>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+  {/* Attachments */}
+  {task.attachments && task.attachments.length > 0 && (
+  <div>
+  <div className="flex items-center gap-2 mb-2">
+  <Attachment01Icon size={12} className="text-[#8892a4]" />
+  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">{t('tasksPage.attachments', 'Attachments')}</p>
+  <span className="text-xs font-medium text-[#8892a4]">{task.attachments.length}</span>
+  </div>
+  <div className="space-y-2 max-h-40 overflow-y-auto">
+  {task.attachments.map(att => (
+  <div key={att.id} className="flex items-center gap-2 bg-[#f8f9fc]  px-3 py-2">
+  <File01Icon size={14} className="text-[#8892a4] shrink-0" />
+  <span className="flex-1 text-sm text-[#1c2b3a] truncate">{att.fileName}</span>
+  <span className="text-[10px] text-[#8892a4] shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
+  <a
+  href={API_URL + att.filePath}
+  download={att.fileName}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="p-1 rounded hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#33cbcc] transition-colors shrink-0"
+  >
+  <Download01Icon size={14} />
+  </a>
+  </div>
+  ))}
+  </div>
+  </div>
+  )}
 
-                    {/* Timestamps + total time */}
-                    {(task.startedAt || task.completedAt) && (
-                        <div className="grid grid-cols-2 gap-3">
-                            {task.startedAt && (
-                                <div className="bg-[#283852]/10 rounded-xl p-3">
-                                    <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider mb-1">{t('tasksPage.startedAt')}</p>
-                                    <p className="text-sm font-semibold text-gray-800">{new Date(task.startedAt).toLocaleString()}</p>
-                                </div>
-                            )}
-                            {task.completedAt && (
-                                <div className="bg-[#33cbcc]/10 rounded-xl p-3">
-                                    <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider mb-1">{t('tasksPage.completedAt')}</p>
-                                    <p className="text-sm font-semibold text-gray-800">{new Date(task.completedAt).toLocaleString()}</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    {totalTimeMs !== null && totalTimeMs > 0 && (
-                        <div className="bg-[#33cbcc]/5 border border-[#33cbcc]/15 rounded-xl p-3 flex items-center gap-2">
-                            <Clock01Icon size={14} className="text-[#33cbcc]" />
-                            <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider">{t('tasksPage.totalTime')}</p>
-                            <p className="text-sm font-bold text-gray-800 ml-auto">{fmtDuration(totalTimeMs, t)}</p>
-                        </div>
-                    )}
+  {/* Timestamps + total time */}
+  {(task.startedAt || task.completedAt) && (
+  <div className="grid grid-cols-2 gap-3">
+  {task.startedAt && (
+  <div className="bg-[#283852]/10  p-3">
+  <p className="text-[10px] font-semibold text-[#283852] uppercase tracking-wider mb-1">{t('tasksPage.startedAt')}</p>
+  <p className="text-sm font-semibold text-[#1c2b3a]">{new Date(task.startedAt).toLocaleString()}</p>
+  </div>
+  )}
+  {task.completedAt && (
+  <div className="bg-[#33cbcc]/10  p-3">
+  <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider mb-1">{t('tasksPage.completedAt')}</p>
+  <p className="text-sm font-semibold text-[#1c2b3a]">{new Date(task.completedAt).toLocaleString()}</p>
+  </div>
+  )}
+  </div>
+  )}
+  {totalTimeMs !== null && totalTimeMs > 0 && (
+  <div className="bg-[#33cbcc]/5 border border-[#33cbcc]/15  p-3 flex items-center gap-2">
+  <Clock01Icon size={14} className="text-[#33cbcc]" />
+  <p className="text-[10px] font-semibold text-[#33cbcc] uppercase tracking-wider">{t('tasksPage.totalTime')}</p>
+  <p className="text-sm font-bold text-[#1c2b3a] ml-auto">{fmtDuration(totalTimeMs, t)}</p>
+  </div>
+  )}
 
-                    {/* Description */}
-                    {task.description && (
-                        <div>
-                            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('tasksPage.description')}</p>
-                            <RichTextDisplay content={task.description} className="text-sm text-gray-600 leading-relaxed" />
-                        </div>
-                    )}
+  {/* Description */}
+  {task.description && (
+  <div>
+  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">{t('tasksPage.description')}</p>
+  <RichTextDisplay content={task.description} className="text-sm text-[#8892a4] leading-relaxed" />
+  </div>
+  )}
 
-                    {/* Action buttons */}
-                    {(onEdit || onDelete || onHistory) && (
-                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                            {!task.selfAssigned && onEdit && (
-                                <button
-                                    onClick={() => { onClose(); onEdit(); }}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors"
-                                >
-                                    <PencilIcon size={12} /> {t('tasksPage.editTask')}
-                                </button>
-                            )}
-                            {!task.selfAssigned && onDelete && (
-                                <button
-                                    onClick={() => { if (window.confirm(t('tasksPage.confirmDelete'))) { onClose(); onDelete(); } }}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors"
-                                >
-                                    <Delete02Icon size={12} /> {t('tasksPage.deleteTask')}
-                                </button>
-                            )}
-                            {onHistory && (
-                                <button
-                                    onClick={() => { onClose(); onHistory(); }}
-                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors"
-                                >
-                                    <Time01Icon size={12} /> {t('tasksPage.viewHistory')}
-                                </button>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </motion.div>
-        </motion.div>
-    );
+  {/* Action buttons */}
+  {(onEdit || onDelete || onHistory) && (
+  <div className="flex items-center gap-2 pt-2 border-t border-[#e5e8ef]">
+  {!task.selfAssigned && onEdit && (
+  <button
+  onClick={() => { onClose(); onEdit(); }}
+  className="flex items-center gap-1.5 px-3 py-1.5  text-xs font-medium bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors"
+  >
+  <PencilIcon size={12} /> {t('tasksPage.editTask')}
+  </button>
+  )}
+  {!task.selfAssigned && onDelete && (
+  <button
+  onClick={() => { if (window.confirm(t('tasksPage.confirmDelete'))) { onClose(); onDelete(); } }}
+  className="flex items-center gap-1.5 px-3 py-1.5  text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors"
+  >
+  <Delete02Icon size={12} /> {t('tasksPage.deleteTask')}
+  </button>
+  )}
+  {onHistory && (
+  <button
+  onClick={() => { onClose(); onHistory(); }}
+  className="flex items-center gap-1.5 px-3 py-1.5  text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors"
+  >
+  <Time01Icon size={12} /> {t('tasksPage.viewHistory')}
+  </button>
+  )}
+  </div>
+  )}
+  </div>
+  </motion.div>
+  </motion.div>
+  );
 };
 
 /* ─── Edit Gantt Task Modal ─────────────────────────────── */
 
 const EditGanttTaskModal = ({
-    task,
-    onClose,
-    onSave,
-    isSaving,
+  task,
+  onClose,
+  onSave,
+  isSaving,
 }: {
-    task: GanttTask;
-    onClose: () => void;
-    onSave: (dto: { title?: string; description?: string; difficulty?: string; startDate?: string; endDate?: string; natureId?: string; urgent?: boolean; important?: boolean }) => void;
-    isSaving: boolean;
+  task: GanttTask;
+  onClose: () => void;
+  onSave: (dto: { title?: string; description?: string; difficulty?: string; startDate?: string; endDate?: string; natureId?: string; urgent?: boolean; important?: boolean }) => void;
+  isSaving: boolean;
 }) => {
-    const { t } = useTranslation();
-    const { data: taskNatures } = useTaskNatures();
-    const uploadAttachment = useUploadTaskAttachment();
-    const deleteAttachment = useDeleteTaskAttachment();
-    const fmtD = (d: Date) => {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-    };
-    const [form, setForm] = useState({
-        title: task.title,
-        description: task.description || '',
-        difficulty: task.difficulty || 'MEDIUM',
-        startDate: fmtD(task.startDate),
-        endDate: fmtD(task.endDate),
-        natureId: task.natureId || '',
-        urgent: task.urgent || false,
-        important: task.important || false,
-    });
-    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
-    const labelCls = 'text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5 block';
-    return (
-        <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-        >
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
-            >
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
-                            <PencilIcon size={18} className="text-[#33cbcc]" />
-                        </div>
-                        <h3 className="text-base font-bold text-gray-800">{t('tasksPage.editTask')}</h3>
-                    </div>
-                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><Cancel01Icon size={18} /></button>
-                </div>
-                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-                    <div>
-                        <label className={labelCls}>{t('tasksPage.titlePlaceholder')}</label>
-                        <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={inputCls} />
-                    </div>
-                    <div>
-                        <label className={labelCls}>{t('tasksPage.descriptionPlaceholder')}</label>
-                        <RichTextEditor value={form.description} onChange={html => setForm(f => ({ ...f, description: html }))} placeholder={t('tasksPage.descriptionPlaceholder')} />
-                    </div>
-                    <div>
-                        <label className={labelCls}>{t('tasksPage.difficulty')}</label>
-                        <select value={form.difficulty} onChange={e => setForm(f => ({ ...f, difficulty: e.target.value }))} className={inputCls}>
-                            <option value="EASY">{t('tasksPage.difficultyEasy')}</option>
-                            <option value="MEDIUM">{t('tasksPage.difficultyMedium')}</option>
-                            <option value="HARD">{t('tasksPage.difficultyHard')}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className={labelCls}>{t('tasksPage.nature')}</label>
-                        <select value={form.natureId} onChange={e => setForm(f => ({ ...f, natureId: e.target.value }))} className={inputCls}>
-                            <option value="">{t('tasksPage.natureNone')}</option>
-                            {(taskNatures || []).map(n => (
-                                <option key={n.id} value={n.id}>{n.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="flex items-center gap-6 mb-4">
-                        <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                            <Alert02Icon size={14} className="text-[#283852]" />
-                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer select-none">
-                            <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                            <StarIcon size={14} className="text-[#283852]" />
-                            <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
-                        </label>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className={labelCls}>{t('tasksPage.startDate')}</label>
-                            <input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={inputCls} />
-                        </div>
-                        <div>
-                            <label className={labelCls}>{t('tasksPage.endDate')}</label>
-                            <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={inputCls} />
-                        </div>
-                    </div>
+  const { t } = useTranslation();
+  const { data: taskNatures } = useTaskNatures();
+  const uploadAttachment = useUploadTaskAttachment();
+  const deleteAttachment = useDeleteTaskAttachment();
+  const fmtD = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+  };
+  const [form, setForm] = useState({
+  title: task.title,
+  description: task.description || '',
+  difficulty: task.difficulty || 'MEDIUM',
+  startDate: fmtD(task.startDate),
+  endDate: fmtD(task.endDate),
+  natureId: task.natureId || '',
+  urgent: task.urgent || false,
+  important: task.important || false,
+  });
+  const inputCls = 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors';
+  const labelCls = 'text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1.5 block';
+  return (
+  <motion.div
+  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+  onClick={onClose}
+  className="fixed inset-0 z-[110] flex justify-end bg-black/30"
+  >
+  <motion.div
+  initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+  transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+  onClick={e => e.stopPropagation()}
+  className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
+  >
+  <div className="px-6 py-4 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
+  <div className="flex items-center gap-3">
+  <div className="w-9 h-9  bg-[#33cbcc]/10 flex items-center justify-center">
+  <PencilIcon size={18} className="text-[#33cbcc]" />
+  </div>
+  <h3 className="text-base font-bold text-[#1c2b3a]">{t('tasksPage.editTask')}</h3>
+  </div>
+  <button onClick={onClose} className="p-1.5  hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"><Cancel01Icon size={18} /></button>
+  </div>
+  <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+  <div>
+  <label className={labelCls}>{t('tasksPage.titlePlaceholder')}</label>
+  <input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} className={inputCls} />
+  </div>
+  <div>
+  <label className={labelCls}>{t('tasksPage.descriptionPlaceholder')}</label>
+  <RichTextEditor value={form.description} onChange={html => setForm(f => ({ ...f, description: html }))} placeholder={t('tasksPage.descriptionPlaceholder')} />
+  </div>
+  <div>
+  <label className={labelCls}>{t('tasksPage.difficulty')}</label>
+  <select value={form.difficulty} onChange={e => setForm(f => ({ ...f, difficulty: e.target.value }))} className={inputCls}>
+  <option value="EASY">{t('tasksPage.difficultyEasy')}</option>
+  <option value="MEDIUM">{t('tasksPage.difficultyMedium')}</option>
+  <option value="HARD">{t('tasksPage.difficultyHard')}</option>
+  </select>
+  </div>
+  <div>
+  <label className={labelCls}>{t('tasksPage.nature')}</label>
+  <select value={form.natureId} onChange={e => setForm(f => ({ ...f, natureId: e.target.value }))} className={inputCls}>
+  <option value="">{t('tasksPage.natureNone')}</option>
+  {(taskNatures || []).map(n => (
+  <option key={n.id} value={n.id}>{n.name}</option>
+  ))}
+  </select>
+  </div>
+  <div className="flex items-center gap-6 mb-4">
+  <label className="flex items-center gap-2 cursor-pointer select-none">
+  <input type="checkbox" checked={form.urgent} onChange={e => setForm(f => ({ ...f, urgent: e.target.checked }))} className="w-4 h-4 rounded border-[#e5e8ef] text-[#283852] focus:ring-[#33cbcc]/30" />
+  <Alert02Icon size={14} className="text-[#283852]" />
+  <span className="text-xs font-medium text-[#8892a4]">{t('tasksPage.urgent')}</span>
+  </label>
+  <label className="flex items-center gap-2 cursor-pointer select-none">
+  <input type="checkbox" checked={form.important} onChange={e => setForm(f => ({ ...f, important: e.target.checked }))} className="w-4 h-4 rounded border-[#e5e8ef] text-[#283852] focus:ring-[#33cbcc]/30" />
+  <StarIcon size={14} className="text-[#283852]" />
+  <span className="text-xs font-medium text-[#8892a4]">{t('tasksPage.important')}</span>
+  </label>
+  </div>
+  <div className="grid grid-cols-2 gap-3">
+  <div>
+  <label className={labelCls}>{t('tasksPage.startDate')}</label>
+  <input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} className={inputCls} />
+  </div>
+  <div>
+  <label className={labelCls}>{t('tasksPage.endDate')}</label>
+  <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} className={inputCls} />
+  </div>
+  </div>
 
-                    {/* Attachments */}
-                    {task.apiId && (
-                        <div>
-                            <label className={labelCls}>
-                                <span className="flex items-center gap-1.5"><Attachment01Icon size={11} /> {t('tasksPage.attachments', 'Attachments')}</span>
-                            </label>
-                            {(task.attachments || []).length > 0 && (
-                                <div className="space-y-1.5 mb-2">
-                                    {task.attachments!.map(att => (
-                                        <div key={att.id} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 group">
-                                            <File01Icon size={14} className="text-gray-400 shrink-0" />
-                                            <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
-                                            <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
-                                            <a href={API_URL + att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"><Download01Icon size={14} /></a>
-                                            <button
-                                                onClick={() => { if (window.confirm(t('tasksPage.deleteAttachmentConfirm', 'Delete this attachment?'))) deleteAttachment.mutate({ taskId: task.apiId!, attachmentId: att.id }); }}
-                                                className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
-                                            ><Delete02Icon size={14} /></button>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                            <label className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
-                                <Add01Icon size={14} />
-                                {t('tasksPage.addFiles', 'Add files')}
-                                <input
-                                    type="file"
-                                    multiple
-                                    className="hidden"
-                                    onChange={e => {
-                                        const files = Array.from(e.target.files || []);
-                                        files.forEach(file => uploadAttachment.mutate({ taskId: task.apiId!, file }));
-                                        e.target.value = '';
-                                    }}
-                                />
-                            </label>
-                        </div>
-                    )}
-                </div>
-                <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
-                    <button onClick={onClose} className="px-4 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors">{t('tasksPage.cancel')}</button>
-                    <button
-                        onClick={() => onSave({ title: form.title, description: form.description, difficulty: form.difficulty, startDate: form.startDate || undefined, endDate: form.endDate || undefined, natureId: form.natureId || undefined, urgent: form.urgent, important: form.important })}
-                        disabled={!form.title.trim() || isSaving}
-                        className="px-5 py-2 bg-[#33cbcc] text-white rounded-xl text-sm font-medium hover:bg-[#2bb5b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-                    >
-                        {isSaving ? <Loading02Icon size={14} className="animate-spin" /> : <FloppyDiskIcon size={14} />}
-                        {t('tasksPage.save')}
-                    </button>
-                </div>
-            </motion.div>
-        </motion.div>
-    );
+  {/* Attachments */}
+  {task.apiId && (
+  <div>
+  <label className={labelCls}>
+  <span className="flex items-center gap-1.5"><Attachment01Icon size={11} /> {t('tasksPage.attachments', 'Attachments')}</span>
+  </label>
+  {(task.attachments || []).length > 0 && (
+  <div className="space-y-1.5 mb-2">
+  {task.attachments!.map(att => (
+  <div key={att.id} className="flex items-center gap-2 bg-[#f8f9fc]  px-3 py-2 group">
+  <File01Icon size={14} className="text-[#8892a4] shrink-0" />
+  <span className="flex-1 text-sm text-[#1c2b3a] truncate">{att.fileName}</span>
+  <span className="text-[10px] text-[#8892a4] shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
+  <a href={API_URL + att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#33cbcc] transition-colors shrink-0"><Download01Icon size={14} /></a>
+  <button
+  onClick={() => { if (window.confirm(t('tasksPage.deleteAttachmentConfirm', 'Delete this attachment?'))) deleteAttachment.mutate({ taskId: task.apiId!, attachmentId: att.id }); }}
+  className="p-1 rounded hover:bg-[#283852]/10 text-[#8892a4] hover:text-[#283852] transition-colors shrink-0"
+  ><Delete02Icon size={14} /></button>
+  </div>
+  ))}
+  </div>
+  )}
+  <label className="flex items-center justify-center gap-2 w-full py-2.5 border-2 border-dashed border-[#e5e8ef] text-sm text-[#8892a4] hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
+  <Add01Icon size={14} />
+  {t('tasksPage.addFiles', 'Add files')}
+  <input
+  type="file"
+  multiple
+  className="hidden"
+  onChange={e => {
+  const files = Array.from(e.target.files || []);
+  files.forEach(file => uploadAttachment.mutate({ taskId: task.apiId!, file }));
+  e.target.value = '';
+  }}
+  />
+  </label>
+  </div>
+  )}
+  </div>
+  <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3 shrink-0">
+  <button onClick={onClose} className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors">{t('tasksPage.cancel')}</button>
+  <button
+  onClick={() => onSave({ title: form.title, description: form.description, difficulty: form.difficulty, startDate: form.startDate || undefined, endDate: form.endDate || undefined, natureId: form.natureId || undefined, urgent: form.urgent, important: form.important })}
+  disabled={!form.title.trim() || isSaving}
+  className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+  >
+  {isSaving ? <Loading02Icon size={14} className="animate-spin" /> : <FloppyDiskIcon size={14} />}
+  {t('tasksPage.save')}
+  </button>
+  </div>
+  </motion.div>
+  </motion.div>
+  );
 };
 
 /* ─── Gantt Time01Icon Modal ─────────────────────────────────── */
 
 const GanttHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () => void }) => {
-    const { t } = useTranslation();
-    const { data: history = [], isLoading } = useTaskHistory(taskId);
-    return (
-        <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-        >
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden"
-            >
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                            <Time01Icon size={18} className="text-[#283852]" />
-                        </div>
-                        <h3 className="text-base font-bold text-gray-800">{t('tasksPage.historyTitle')}</h3>
-                    </div>
-                    <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"><Cancel01Icon size={18} /></button>
-                </div>
-                <div className="flex-1 overflow-y-auto px-6 py-5">
-                    {isLoading ? (
-                        <div className="flex justify-center py-8"><Loading02Icon size={24} className="animate-spin text-[#33cbcc]" /></div>
-                    ) : (history as any[]).length === 0 ? (
-                        <p className="text-center text-sm text-gray-400 py-8">{t('tasksPage.historyEmpty')}</p>
-                    ) : (
-                        <div className="space-y-4">
-                            {(history as any[]).map((entry: any) => (
-                                <div key={entry.id} className="bg-gray-50 rounded-xl p-4 space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs font-semibold text-[#283852]">{entry.changedByName}</span>
-                                        <span className="text-[11px] text-gray-400">{new Date(entry.createdAt).toLocaleString()}</span>
-                                    </div>
-                                    <div className="space-y-1">
-                                        {Object.entries(entry.changes).map(([field, change]: [string, any]) => (
-                                            <div key={field} className="text-[11px] text-gray-600">
-                                                <span className="font-medium text-gray-700 capitalize">{field}:</span>{' '}
-                                                <span className="line-through text-gray-400">{String(change.from ?? '—')}</span>
-                                                {' → '}
-                                                <span className="text-[#33cbcc] font-medium">{String(change.to ?? '—')}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </motion.div>
-        </motion.div>
-    );
+  const { t } = useTranslation();
+  const { data: history = [], isLoading } = useTaskHistory(taskId);
+  return (
+  <motion.div
+  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+  onClick={onClose}
+  className="fixed inset-0 z-[110] flex justify-end bg-black/30"
+  >
+  <motion.div
+  initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+  transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+  onClick={e => e.stopPropagation()}
+  className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
+  >
+  <div className="px-6 py-4 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
+  <div className="flex items-center gap-3">
+  <div className="w-9 h-9  bg-[#283852]/10 flex items-center justify-center">
+  <Time01Icon size={18} className="text-[#283852]" />
+  </div>
+  <h3 className="text-base font-bold text-[#1c2b3a]">{t('tasksPage.historyTitle')}</h3>
+  </div>
+  <button onClick={onClose} className="p-1.5  hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"><Cancel01Icon size={18} /></button>
+  </div>
+  <div className="flex-1 overflow-y-auto px-6 py-5">
+  {isLoading ? (
+  <div className="flex justify-center py-8"><Loading02Icon size={24} className="animate-spin text-[#33cbcc]" /></div>
+  ) : (history as any[]).length === 0 ? (
+  <p className="text-center text-sm text-[#8892a4] py-8">{t('tasksPage.historyEmpty')}</p>
+  ) : (
+  <div className="space-y-4">
+  {(history as any[]).map((entry: any) => (
+  <div key={entry.id} className="bg-[#f8f9fc]  p-4 space-y-2">
+  <div className="flex items-center justify-between">
+  <span className="text-xs font-semibold text-[#283852]">{entry.changedByName}</span>
+  <span className="text-[11px] text-[#8892a4]">{new Date(entry.createdAt).toLocaleString()}</span>
+  </div>
+  <div className="space-y-1">
+  {Object.entries(entry.changes).map(([field, change]: [string, any]) => (
+  <div key={field} className="text-[11px] text-[#8892a4]">
+  <span className="font-medium text-[#1c2b3a] capitalize">{field}:</span>{' '}
+  <span className="line-through text-[#8892a4]">{String(change.from ?? '—')}</span>
+  {' → '}
+  <span className="text-[#33cbcc] font-medium">{String(change.to ?? '—')}</span>
+  </div>
+  ))}
+  </div>
+  </div>
+  ))}
+  </div>
+  )}
+  </div>
+  </motion.div>
+  </motion.div>
+  );
 };
 
 /* ─── Add Task Modal ─────────────────────────────────────── */
@@ -719,1921 +720,1899 @@ const PRIORITY_COLOR: Record<string, ColorKey> = { low: 'teal', medium: 'blue', 
 /* ─── Commercial Activity Types ───────────────────────────── */
 
 const COMMERCIAL_ACTIVITY_GROUPS: { natureKey: string; types: string[] }[] = [
-    { natureKey: 'VENTE_ACTIVE',           types: ['VISITE_CLIENT', 'TEL_CLIENT', 'CLOSING', 'REUNION_CLIENT', 'PRESTATION', 'LIVRAISON'] },
-    { natureKey: 'VENTE_PROSPECTION',      types: ['VISITE_PROSPECT', 'TEL_PROSPECT', 'SALON_EXPOSITION', 'REUNION_PROSPECT'] },
-    { natureKey: 'RESOLUTION_PROBLEMES',   types: ['SAV', 'RAPPROCHEMENT_COMPTES'] },
-    { natureKey: 'TACHES_ADMINISTRATIVES', types: ['PAPERASSE', 'EMAIL', 'TEL_INTERNE', 'REUNION_INTERNE'] },
-    { natureKey: 'TEMPS_IMPRODUCTIF',      types: ['PAUSE', 'MALADIE', 'CONGES'] },
-    { natureKey: 'MARKETING_DIGITAL',      types: ['CREATION_CONTENU', 'POST_RESEAUX_SOCIAUX'] },
-    { natureKey: 'AUTRE',                  types: ['AUTRE'] },
+  { natureKey: 'VENTE_ACTIVE',   types: ['VISITE_CLIENT', 'TEL_CLIENT', 'CLOSING', 'REUNION_CLIENT', 'PRESTATION', 'LIVRAISON'] },
+  { natureKey: 'VENTE_PROSPECTION',   types: ['VISITE_PROSPECT', 'TEL_PROSPECT', 'SALON_EXPOSITION', 'REUNION_PROSPECT'] },
+  { natureKey: 'RESOLUTION_PROBLEMES',   types: ['SAV', 'RAPPROCHEMENT_COMPTES'] },
+  { natureKey: 'TACHES_ADMINISTRATIVES', types: ['PAPERASSE', 'EMAIL', 'TEL_INTERNE', 'REUNION_INTERNE'] },
+  { natureKey: 'TEMPS_IMPRODUCTIF',   types: ['PAUSE', 'MALADIE', 'CONGES'] },
+  { natureKey: 'MARKETING_DIGITAL',   types: ['CREATION_CONTENU', 'POST_RESEAUX_SOCIAUX'] },
+  { natureKey: 'AUTRE',   types: ['AUTRE'] },
 ];
 
 const COMMERCIAL_NATURE_NAMES: Record<string, string> = {
-    VENTE_ACTIVE:           'Vente Active',
-    VENTE_PROSPECTION:      'Vente Prospection',
-    RESOLUTION_PROBLEMES:   'Résolution de problèmes',
-    TACHES_ADMINISTRATIVES: 'Tâches administratives',
-    TEMPS_IMPRODUCTIF:      'Temps improductif',
-    MARKETING_DIGITAL:      'Marketing digital',
-    AUTRE:                  'Autre',
+  VENTE_ACTIVE:   'Vente Active',
+  VENTE_PROSPECTION:   'Vente Prospection',
+  RESOLUTION_PROBLEMES:   'Résolution de problèmes',
+  TACHES_ADMINISTRATIVES: 'Tâches administratives',
+  TEMPS_IMPRODUCTIF:   'Temps improductif',
+  MARKETING_DIGITAL:   'Marketing digital',
+  AUTRE:   'Autre',
 };
 
 const ACTIVITY_TO_NATURE_KEY: Record<string, string> = Object.fromEntries(
-    COMMERCIAL_ACTIVITY_GROUPS.flatMap(g => g.types.map(t => [t, g.natureKey]))
+  COMMERCIAL_ACTIVITY_GROUPS.flatMap(g => g.types.map(t => [t, g.natureKey]))
 );
 
 interface TaskForm {
-    title: string;
-    description: string;
-    project: string;
-    activityType: string;
-    nature: string;
-    lead: string;
-    startDate: string;
-    endDate: string;
-    time: string;
-    difficulty: string;
-    priority: string;
-    repeat: string;
-    urgent: boolean;
-    important: boolean;
+  title: string;
+  description: string;
+  project: string;
+  activityType: string;
+  nature: string;
+  lead: string;
+  startDate: string;
+  endDate: string;
+  time: string;
+  difficulty: string;
+  priority: string;
+  repeat: string;
+  urgent: boolean;
+  important: boolean;
 }
 
 const AddTaskModal = ({
-    employees,
-    initialEmployee,
-    initialDate,
-    onClose,
-    onAdd,
+  employees,
+  initialEmployee,
+  initialDate,
+  onClose,
+  onAdd,
 }: {
-    employees: EmployeeRow[];
-    initialEmployee?: EmployeeRow;
-    initialDate: Date;
-    onClose: () => void;
-    onAdd: (empId: number, task: GanttTask, files?: File[]) => void;
+  employees: EmployeeRow[];
+  initialEmployee?: EmployeeRow;
+  initialDate: Date;
+  onClose: () => void;
+  onAdd: (empId: number, task: GanttTask, files?: File[]) => void;
 }) => {
-    const { t } = useTranslation();
-    const deptScope = useDepartmentScope();
-    const { data: apiProjectsList } = useProjects(deptScope);
-    const { data: taskNatures } = useTaskNatures();
-    const [selectedEmpId, setSelectedEmpId] = useState(initialEmployee?.id ?? employees[0]?.id ?? 0);
-    const selectedEmp = employees.find(e => e.id === selectedEmpId) ?? employees[0];
-    const { data: compliance, isLoading: complianceLoading } = useWeeklyCheckForEmployee(selectedEmp?.apiId || null);
-    const isNonCompliant = compliance && !compliance.canCreate;
+  const { t } = useTranslation();
+  const deptScope = useDepartmentScope();
+  const { data: apiProjectsList } = useProjects(deptScope);
+  const { data: taskNatures } = useTaskNatures();
+  const [selectedEmpId, setSelectedEmpId] = useState(initialEmployee?.id ?? employees[0]?.id ?? 0);
+  const selectedEmp = employees.find(e => e.id === selectedEmpId) ?? employees[0];
+  const { data: compliance, isLoading: complianceLoading } = useWeeklyCheckForEmployee(selectedEmp?.apiId || null);
+  const isNonCompliant = compliance && !compliance.canCreate;
 
-    const selectedEmpRole = selectedEmp?.role || '';
-    const isSelectedCommercial = selectedEmpRole.toLowerCase().includes('commercial');
-    const { data: leadsData } = useQuery({
-        queryKey: ['leads', 'for-task', selectedEmp?.apiId],
-        queryFn: () => leadsApi.getAll({ assignedToId: selectedEmp?.apiId }),
-        enabled: isSelectedCommercial && !!selectedEmp?.apiId,
-    });
-    const leads = (leadsData as any)?.data || [];
+  const selectedEmpRole = selectedEmp?.role || '';
+  const isSelectedCommercial = selectedEmpRole.toLowerCase().includes('commercial');
+  const { data: leadsData } = useQuery({
+  queryKey: ['leads', 'for-task', selectedEmp?.apiId],
+  queryFn: () => leadsApi.getAll({ assignedToId: selectedEmp?.apiId }),
+  enabled: isSelectedCommercial && !!selectedEmp?.apiId,
+  });
+  const leads = (leadsData as any)?.data || [];
 
-    const fmtDate = (d: Date) => {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-    };
+  const fmtDate = (d: Date) => {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+  };
 
-    const makeEmpty = (): TaskForm => ({
-        title: '',
-        description: '',
-        project: '',
-        activityType: '',
-        nature: '',
-        lead: '',
-        startDate: fmtDate(initialDate),
-        endDate: fmtDate(addDays(initialDate, 3)),
-        time: '',
-        difficulty: 'medium',
-        priority: 'medium',
-        repeat: 'none',
-        urgent: false,
-        important: false,
-    });
+  const makeEmpty = (): TaskForm => ({
+  title: '',
+  description: '',
+  project: '',
+  activityType: '',
+  nature: '',
+  lead: '',
+  startDate: fmtDate(initialDate),
+  endDate: fmtDate(addDays(initialDate, 3)),
+  time: '',
+  difficulty: 'medium',
+  priority: 'medium',
+  repeat: 'none',
+  urgent: false,
+  important: false,
+  });
 
-    const [tasks, setTasks] = useState<TaskForm[]>([makeEmpty()]);
-    const [taskFiles, setTaskFiles] = useState<File[][]>([[]]);
+  const [tasks, setTasks] = useState<TaskForm[]>([makeEmpty()]);
+  const [taskFiles, setTaskFiles] = useState<File[][]>([[]]);
 
-    const update = (idx: number, field: keyof TaskForm, value: string | boolean) => {
-        setTasks(prev => prev.map((tf, i) => {
-            if (i !== idx) return tf;
-            const updated = { ...tf, [field]: value };
-            if (field === 'activityType' && isSelectedCommercial && typeof value === 'string' && value) {
-                const natureKey = ACTIVITY_TO_NATURE_KEY[value];
-                const natureName = natureKey ? COMMERCIAL_NATURE_NAMES[natureKey] : undefined;
-                const match = natureName
-                    ? (taskNatures || []).find(n => n.name.toLowerCase() === natureName.toLowerCase())
-                    : undefined;
-                if (match) updated.nature = match.id;
-            }
-            return updated;
-        }));
-    };
+  const update = (idx: number, field: keyof TaskForm, value: string | boolean) => {
+  setTasks(prev => prev.map((tf, i) => {
+  if (i !== idx) return tf;
+  const updated = { ...tf, [field]: value };
+  if (field === 'activityType' && isSelectedCommercial && typeof value === 'string' && value) {
+  const natureKey = ACTIVITY_TO_NATURE_KEY[value];
+  const natureName = natureKey ? COMMERCIAL_NATURE_NAMES[natureKey] : undefined;
+  const match = natureName
+  ? (taskNatures || []).find(n => n.name.toLowerCase() === natureName.toLowerCase())
+  : undefined;
+  if (match) updated.nature = match.id;
+  }
+  return updated;
+  }));
+  };
 
-    const validCount = tasks.filter(tf => tf.title.trim().length > 0).length;
+  const validCount = tasks.filter(tf => tf.title.trim().length > 0).length;
 
-    const handleSubmit = () => {
-        if (validCount === 0 || !selectedEmp) return;
-        tasks.forEach((tf, idx) => {
-            if (!tf.title.trim()) return;
-            const project = tf.project ? (apiProjectsList || []).find(p => p.id === tf.project) : null;
-            const natureObj = tf.nature ? (taskNatures || []).find(n => n.id === tf.nature) : null;
-            const task: GanttTask = {
-                id: nextTaskId++,
-                title: tf.title.trim(),
-                subtitle: project?.name || tf.description.slice(0, 24) || '',
-                startDate: new Date(tf.startDate + 'T00:00:00'),
-                endDate: new Date(tf.endDate + 'T00:00:00'),
-                color: PRIORITY_COLOR[tf.priority] || 'blue',
-                status: 'todo',
-                description: tf.description.trim() || undefined,
-                projectId: tf.project || undefined,
-                difficulty: tf.difficulty.toUpperCase(),
-                natureId: tf.nature || undefined,
-                natureName: natureObj?.name,
-                leadId: tf.lead || undefined,
-                urgent: tf.urgent,
-                important: tf.important,
-            };
-            onAdd(selectedEmpId, task, taskFiles[idx]);
-        });
-        onClose();
-    };
+  const handleSubmit = () => {
+  if (validCount === 0 || !selectedEmp) return;
+  tasks.forEach((tf, idx) => {
+  if (!tf.title.trim()) return;
+  const project = tf.project ? (apiProjectsList || []).find(p => p.id === tf.project) : null;
+  const natureObj = tf.nature ? (taskNatures || []).find(n => n.id === tf.nature) : null;
+  const task: GanttTask = {
+  id: nextTaskId++,
+  title: tf.title.trim(),
+  subtitle: project?.name || tf.description.slice(0, 24) || '',
+  startDate: new Date(tf.startDate + 'T00:00:00'),
+  endDate: new Date(tf.endDate + 'T00:00:00'),
+  color: PRIORITY_COLOR[tf.priority] || 'blue',
+  status: 'todo',
+  description: tf.description.trim() || undefined,
+  projectId: tf.project || undefined,
+  difficulty: tf.difficulty.toUpperCase(),
+  natureId: tf.nature || undefined,
+  natureName: natureObj?.name,
+  leadId: tf.lead || undefined,
+  urgent: tf.urgent,
+  important: tf.important,
+  };
+  onAdd(selectedEmpId, task, taskFiles[idx]);
+  });
+  onClose();
+  };
 
-    const inputCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
-    const selectCls = 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
-    const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
+  const inputCls = 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors';
+  const selectCls = 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors appearance-none cursor-pointer';
+  const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1.5';
 
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-100 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-            onClick={onClose}
-        >
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col"
-            >
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
-                            <Add01Icon size={18} className="text-[#33cbcc]" />
-                        </div>
-                        <h3 className="text-base font-bold text-gray-800">{t('tasksPage.addTask')}</h3>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        {validCount > 0 && (
-                            <span className="text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-2.5 py-1 rounded-full">
-                                {validCount} {t('tasksPage.tasksReady')}
-                            </span>
-                        )}
-                        <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
-                            <Cancel01Icon size={18} />
-                        </button>
-                    </div>
-                </div>
+  return (
+  <motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+  className="fixed inset-0 z-100 flex justify-end bg-black/30"
+  onClick={onClose}
+  >
+  <motion.div
+  initial={{ x: '100%' }}
+  animate={{ x: 0 }}
+  exit={{ x: '100%' }}
+  transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+  onClick={e => e.stopPropagation()}
+  className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
+  >
+  {/* Header */}
+  <div className="px-6 py-4 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
+  <div className="flex items-center gap-3">
+  <div className="w-9 h-9 rounded-full bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
+  <Add01Icon size={18} className="text-[#33cbcc]" />
+  </div>
+  <h3 className="text-base font-bold text-[#1c2b3a]">{t('tasksPage.addTask')}</h3>
+  </div>
+  <div className="flex items-center gap-3">
+  {validCount > 0 && (
+  <span className="text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-2.5 py-1 rounded-full">
+  {validCount} {t('tasksPage.tasksReady')}
+  </span>
+  )}
+  <button onClick={onClose} className="p-1.5  hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
+  <Cancel01Icon size={18} />
+  </button>
+  </div>
+  </div>
 
-                {/* Scrollable content */}
-                <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
-                    {/* Employee selector */}
-                    <div>
-                        <label className={labelCls}>
-                            {t('tasksPage.assignee')}
-                        </label>
-                        <div className="relative">
-                            {selectedEmp && (
-                                <img
-                                    src={selectedEmp.avatar}
-                                    alt=""
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-gray-200 pointer-events-none"
-                                />
-                            )}
-                            <select
-                                value={selectedEmpId}
-                                onChange={e => setSelectedEmpId(Number(e.target.value))}
-                                className={`${selectCls} pl-11`}
-                            >
-                                {employees.map(emp => (
-                                    <option key={emp.id} value={emp.id}>{emp.name} — {emp.role}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
+  {/* Scrollable content */}
+  <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
+  {/* Employee selector */}
+  <div>
+  <label className={labelCls}>
+  {t('tasksPage.assignee')}
+  </label>
+  <div className="relative">
+  {selectedEmp && (
+  <img
+  src={selectedEmp.avatar}
+  alt=""
+  className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-gray-200 pointer-events-none"
+  />
+  )}
+  <select
+  value={selectedEmpId}
+  onChange={e => setSelectedEmpId(Number(e.target.value))}
+  className={`${selectCls} pl-11`}
+  >
+  {employees.map(emp => (
+  <option key={emp.id} value={emp.id}>{emp.name} — {emp.role}</option>
+  ))}
+  </select>
+  </div>
+  </div>
 
-                    {/* Weekly compliance warning */}
-                    {complianceLoading && selectedEmp?.apiId && (
-                        <div className="flex items-center gap-2 text-xs text-gray-400 px-1">
-                            <Loading02Icon size={12} className="animate-spin" />
-                            {t('tasks.weeklyCompliance.checking')}
-                        </div>
-                    )}
-                    {isNonCompliant && (
-                        <div className="bg-[#283852]/10 border border-gray-200 rounded-xl p-4 space-y-3">
-                            <div className="flex items-center gap-2">
-                                <Alert01Icon size={14} className="text-[#283852] shrink-0" />
-                                <p className="text-sm font-semibold text-[#283852]">{t('tasks.weeklyCompliance.adminWarningTitle')}</p>
-                            </div>
-                            <p className="text-xs text-[#283852]">
-                                {t('tasks.weeklyCompliance.adminWarningMessage', { name: selectedEmp?.name || '' })}
-                            </p>
-                            <div className="space-y-1.5 max-h-32 overflow-y-auto">
-                                {compliance!.pendingTasks.map(pt => (
-                                    <div key={pt.id} className="flex items-center justify-between bg-white border border-gray-200 rounded-lg px-3 py-2">
-                                        <span className="text-xs font-medium text-gray-700 truncate">{pt.title}</span>
-                                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">{pt.state}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+  {/* Weekly compliance warning */}
+  {complianceLoading && selectedEmp?.apiId && (
+  <div className="flex items-center gap-2 text-xs text-[#8892a4] px-1">
+  <Loading02Icon size={12} className="animate-spin" />
+  {t('tasks.weeklyCompliance.checking')}
+  </div>
+  )}
+  {isNonCompliant && (
+  <div className="bg-[#283852]/10 border border-[#e5e8ef]  p-4 space-y-3">
+  <div className="flex items-center gap-2">
+  <Alert01Icon size={14} className="text-[#283852] shrink-0" />
+  <p className="text-sm font-semibold text-[#283852]">{t('tasks.weeklyCompliance.adminWarningTitle')}</p>
+  </div>
+  <p className="text-xs text-[#283852]">
+  {t('tasks.weeklyCompliance.adminWarningMessage', { name: selectedEmp?.name || '' })}
+  </p>
+  <div className="space-y-1.5 max-h-32 overflow-y-auto">
+  {compliance!.pendingTasks.map(pt => (
+  <div key={pt.id} className="flex items-center justify-between bg-white border border-[#e5e8ef]  px-3 py-2">
+  <span className="text-xs font-medium text-[#1c2b3a] truncate">{pt.title}</span>
+  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#283852]/10 text-[#283852] shrink-0">{pt.state}</span>
+  </div>
+  ))}
+  </div>
+  </div>
+  )}
 
-                    {tasks.map((task, idx) => (
-                        <div key={idx} className="space-y-4">
-                            {tasks.length > 1 && (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-[#33cbcc]">{t('tasksPage.taskNumber')} {idx + 1}</span>
-                                    <div className="flex-1 h-px bg-gray-100" />
-                                </div>
-                            )}
+  {tasks.map((task, idx) => (
+  <div key={idx} className="space-y-4">
+  {tasks.length > 1 && (
+  <div className="flex items-center gap-2">
+  <span className="text-xs font-bold text-[#33cbcc]">{t('tasksPage.taskNumber')} {idx + 1}</span>
+  <div className="flex-1 h-px bg-[#e5e8ef]" />
+  </div>
+  )}
 
-                            {/* Title */}
-                            <input
-                                autoFocus={idx === 0}
-                                value={task.title}
-                                onChange={e => update(idx, 'title', e.target.value)}
-                                placeholder={t('tasksPage.titlePlaceholder')}
-                                className={inputCls}
-                            />
+  {/* Title */}
+  <input
+  autoFocus={idx === 0}
+  value={task.title}
+  onChange={e => update(idx, 'title', e.target.value)}
+  placeholder={t('tasksPage.titlePlaceholder')}
+  className={inputCls}
+  />
 
-                            {/* Description */}
-                            <div className="relative">
-                                <AlignLeftIcon size={14} className="absolute left-4 top-3 text-gray-400 pointer-events-none" />
-                                <input
-                                    value={task.description}
-                                    onChange={e => update(idx, 'description', e.target.value)}
-                                    placeholder={t('tasksPage.descriptionPlaceholder')}
-                                    className={`${inputCls} pl-10`}
-                                />
-                            </div>
+  {/* Description */}
+  <div className="relative">
+  <AlignLeftIcon size={14} className="absolute left-4 top-3 text-[#8892a4] pointer-events-none" />
+  <input
+  value={task.description}
+  onChange={e => update(idx, 'description', e.target.value)}
+  placeholder={t('tasksPage.descriptionPlaceholder')}
+  className={`${inputCls} pl-10`}
+  />
+  </div>
 
-                            {/* Project */}
-                            <div>
-                                <label className={labelCls}>
-                                    <Briefcase01Icon size={11} />
-                                    {t('tasksPage.project')}
-                                </label>
-                                <select
-                                    value={task.project}
-                                    onChange={e => update(idx, 'project', e.target.value)}
-                                    className={selectCls}
-                                >
-                                    <option value="">{t('tasksPage.projectNone')}</option>
-                                    {(apiProjectsList || []).map(p => (
-                                        <option key={p.id} value={p.id}>{p.name}</option>
-                                    ))}
-                                </select>
-                            </div>
+  {/* Project */}
+  <div>
+  <label className={labelCls}>
+  <Briefcase01Icon size={11} />
+  {t('tasksPage.project')}
+  </label>
+  <select
+  value={task.project}
+  onChange={e => update(idx, 'project', e.target.value)}
+  className={selectCls}
+  >
+  <option value="">{t('tasksPage.projectNone')}</option>
+  {(apiProjectsList || []).map(p => (
+  <option key={p.id} value={p.id}>{p.name}</option>
+  ))}
+  </select>
+  </div>
 
-                            {/* Activity Type (commercial employees only) */}
-                            {isSelectedCommercial && (
-                                <div>
-                                    <label className={labelCls}>
-                                        <Activity01Icon size={11} />
-                                        {t('tasksPage.activityType')}
-                                    </label>
-                                    <select
-                                        value={task.activityType}
-                                        onChange={e => update(idx, 'activityType', e.target.value)}
-                                        className={selectCls}
-                                    >
-                                        <option value="">{t('tasksPage.activityTypeNone')}</option>
-                                        {COMMERCIAL_ACTIVITY_GROUPS.map(group => (
-                                            <optgroup key={group.natureKey} label={t(`tasksPage.commercialNatures.${group.natureKey}`)}>
-                                                {group.types.map(type => (
-                                                    <option key={type} value={type}>
-                                                        {t(`tasksPage.commercialActivityTypes.${type}`)}
-                                                    </option>
-                                                ))}
-                                            </optgroup>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
+  {/* Activity Type (commercial employees only) */}
+  {isSelectedCommercial && (
+  <div>
+  <label className={labelCls}>
+  <Activity01Icon size={11} />
+  {t('tasksPage.activityType')}
+  </label>
+  <select
+  value={task.activityType}
+  onChange={e => update(idx, 'activityType', e.target.value)}
+  className={selectCls}
+  >
+  <option value="">{t('tasksPage.activityTypeNone')}</option>
+  {COMMERCIAL_ACTIVITY_GROUPS.map(group => (
+  <optgroup key={group.natureKey} label={t(`tasksPage.commercialNatures.${group.natureKey}`)}>
+  {group.types.map(type => (
+  <option key={type} value={type}>
+  {t(`tasksPage.commercialActivityTypes.${type}`)}
+  </option>
+  ))}
+  </optgroup>
+  ))}
+  </select>
+  </div>
+  )}
 
-                            {/* Nature */}
-                            <div>
-                                <label className={labelCls}>
-                                    <Tag01Icon size={11} />
-                                    {t('tasksPage.nature')}
-                                </label>
-                                <select
-                                    value={task.nature}
-                                    onChange={e => update(idx, 'nature', e.target.value)}
-                                    className={selectCls}
-                                >
-                                    <option value="">{t('tasksPage.natureNone')}</option>
-                                    {(taskNatures || []).map(n => (
-                                        <option key={n.id} value={n.id}>{n.name}</option>
-                                    ))}
-                                </select>
-                            </div>
+  {/* Nature */}
+  <div>
+  <label className={labelCls}>
+  <Tag01Icon size={11} />
+  {t('tasksPage.nature')}
+  </label>
+  <select
+  value={task.nature}
+  onChange={e => update(idx, 'nature', e.target.value)}
+  className={selectCls}
+  >
+  <option value="">{t('tasksPage.natureNone')}</option>
+  {(taskNatures || []).map(n => (
+  <option key={n.id} value={n.id}>{n.name}</option>
+  ))}
+  </select>
+  </div>
 
-                            {/* Lead (commercial employees only) */}
-                            {isSelectedCommercial && leads.length > 0 && (
-                                <div>
-                                    <label className={labelCls}>
-                                        <Target01Icon size={11} />
-                                        {t('tasksPage.lead', 'Lead')}
-                                    </label>
-                                    <select
-                                        value={task.lead}
-                                        onChange={e => update(idx, 'lead', e.target.value)}
-                                        className={selectCls}
-                                    >
-                                        <option value="">{t('tasksPage.leadNone', 'Aucun lead')}</option>
-                                        {leads.map((lead: any) => (
-                                            <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
+  {/* Lead (commercial employees only) */}
+  {isSelectedCommercial && leads.length > 0 && (
+  <div>
+  <label className={labelCls}>
+  <Target01Icon size={11} />
+  {t('tasksPage.lead', 'Lead')}
+  </label>
+  <select
+  value={task.lead}
+  onChange={e => update(idx, 'lead', e.target.value)}
+  className={selectCls}
+  >
+  <option value="">{t('tasksPage.leadNone', 'Aucun lead')}</option>
+  {leads.map((lead: any) => (
+  <option key={lead.id} value={lead.id}>{lead.code} — {lead.company}</option>
+  ))}
+  </select>
+  </div>
+  )}
 
-                            {/* Start date + End date + Time */}
-                            <div className="grid grid-cols-3 gap-3">
-                                <div>
-                                    <label className={labelCls}>
-                                        <Calendar01Icon size={11} />
-                                        {t('tasksPage.startDate')}
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={task.startDate}
-                                        onChange={e => update(idx, 'startDate', e.target.value)}
-                                        className={inputCls}
-                                    />
-                                </div>
-                                <div>
-                                    <label className={labelCls}>
-                                        <Calendar01Icon size={11} />
-                                        {t('tasksPage.endDate')}
-                                    </label>
-                                    <input
-                                        type="date"
-                                        value={task.endDate}
-                                        onChange={e => update(idx, 'endDate', e.target.value)}
-                                        className={inputCls}
-                                    />
-                                </div>
-                                <div>
-                                    <label className={labelCls}>
-                                        <Clock01Icon size={11} />
-                                        {t('tasksPage.time')}
-                                    </label>
-                                    <input
-                                        type="time"
-                                        value={task.time}
-                                        onChange={e => update(idx, 'time', e.target.value)}
-                                        className={inputCls}
-                                    />
-                                </div>
-                            </div>
+  {/* Start date + End date + Time */}
+  <div className="grid grid-cols-3 gap-3">
+  <div>
+  <label className={labelCls}>
+  <Calendar01Icon size={11} />
+  {t('tasksPage.startDate')}
+  </label>
+  <input
+  type="date"
+  value={task.startDate}
+  onChange={e => update(idx, 'startDate', e.target.value)}
+  className={inputCls}
+  />
+  </div>
+  <div>
+  <label className={labelCls}>
+  <Calendar01Icon size={11} />
+  {t('tasksPage.endDate')}
+  </label>
+  <input
+  type="date"
+  value={task.endDate}
+  onChange={e => update(idx, 'endDate', e.target.value)}
+  className={inputCls}
+  />
+  </div>
+  <div>
+  <label className={labelCls}>
+  <Clock01Icon size={11} />
+  {t('tasksPage.time')}
+  </label>
+  <input
+  type="time"
+  value={task.time}
+  onChange={e => update(idx, 'time', e.target.value)}
+  className={inputCls}
+  />
+  </div>
+  </div>
 
-                            {/* Difficulty + Priority + Repeat */}
-                            <div className="grid grid-cols-3 gap-3">
-                                <div>
-                                    <label className={labelCls}>
-                                        <BarChartHorizontalIcon size={11} />
-                                        {t('tasksPage.difficulty')}
-                                    </label>
-                                    <select
-                                        value={task.difficulty}
-                                        onChange={e => update(idx, 'difficulty', e.target.value)}
-                                        className={selectCls}
-                                    >
-                                        <option value="easy">{t('tasksPage.difficultyEasy')}</option>
-                                        <option value="medium">{t('tasksPage.difficultyMedium')}</option>
-                                        <option value="hard">{t('tasksPage.difficultyHard')}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className={labelCls}>
-                                        <Flag01Icon size={11} />
-                                        {t('tasksPage.priority')}
-                                    </label>
-                                    <select
-                                        value={task.priority}
-                                        onChange={e => update(idx, 'priority', e.target.value)}
-                                        className={selectCls}
-                                    >
-                                        <option value="low">{t('tasksPage.priorityLow')}</option>
-                                        <option value="medium">{t('tasksPage.priorityMedium')}</option>
-                                        <option value="high">{t('tasksPage.priorityHigh')}</option>
-                                        <option value="urgent">{t('tasksPage.priorityUrgent')}</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className={labelCls}>
-                                        <RefreshIcon size={11} />
-                                        {t('tasksPage.repeat')}
-                                    </label>
-                                    <select
-                                        value={task.repeat}
-                                        onChange={e => update(idx, 'repeat', e.target.value)}
-                                        className={selectCls}
-                                    >
-                                        <option value="none">{t('tasksPage.repeatNone')}</option>
-                                        <option value="daily">{t('tasksPage.repeatDaily')}</option>
-                                        <option value="weekly">{t('tasksPage.repeatWeekly')}</option>
-                                        <option value="monthly">{t('tasksPage.repeatMonthly')}</option>
-                                    </select>
-                                </div>
-                            </div>
+  {/* Difficulty + Priority + Repeat */}
+  <div className="grid grid-cols-3 gap-3">
+  <div>
+  <label className={labelCls}>
+  <BarChartHorizontalIcon size={11} />
+  {t('tasksPage.difficulty')}
+  </label>
+  <select
+  value={task.difficulty}
+  onChange={e => update(idx, 'difficulty', e.target.value)}
+  className={selectCls}
+  >
+  <option value="easy">{t('tasksPage.difficultyEasy')}</option>
+  <option value="medium">{t('tasksPage.difficultyMedium')}</option>
+  <option value="hard">{t('tasksPage.difficultyHard')}</option>
+  </select>
+  </div>
+  <div>
+  <label className={labelCls}>
+  <Flag01Icon size={11} />
+  {t('tasksPage.priority')}
+  </label>
+  <select
+  value={task.priority}
+  onChange={e => update(idx, 'priority', e.target.value)}
+  className={selectCls}
+  >
+  <option value="low">{t('tasksPage.priorityLow')}</option>
+  <option value="medium">{t('tasksPage.priorityMedium')}</option>
+  <option value="high">{t('tasksPage.priorityHigh')}</option>
+  <option value="urgent">{t('tasksPage.priorityUrgent')}</option>
+  </select>
+  </div>
+  <div>
+  <label className={labelCls}>
+  <RefreshIcon size={11} />
+  {t('tasksPage.repeat')}
+  </label>
+  <select
+  value={task.repeat}
+  onChange={e => update(idx, 'repeat', e.target.value)}
+  className={selectCls}
+  >
+  <option value="none">{t('tasksPage.repeatNone')}</option>
+  <option value="daily">{t('tasksPage.repeatDaily')}</option>
+  <option value="weekly">{t('tasksPage.repeatWeekly')}</option>
+  <option value="monthly">{t('tasksPage.repeatMonthly')}</option>
+  </select>
+  </div>
+  </div>
 
-                            {/* Urgent / Important */}
-                            <div className="flex items-center gap-6">
-                                <label className="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" checked={task.urgent} onChange={e => update(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                                    <Alert02Icon size={14} className="text-[#283852]" />
-                                    <span className="text-xs font-medium text-gray-600">{t('tasksPage.urgent')}</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer select-none">
-                                    <input type="checkbox" checked={task.important} onChange={e => update(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#283852] focus:ring-[#33cbcc]/30" />
-                                    <StarIcon size={14} className="text-[#283852]" />
-                                    <span className="text-xs font-medium text-gray-600">{t('tasksPage.important')}</span>
-                                </label>
-                            </div>
+  {/* Urgent / Important */}
+  <div className="flex items-center gap-6">
+  <label className="flex items-center gap-2 cursor-pointer select-none">
+  <input type="checkbox" checked={task.urgent} onChange={e => update(idx, 'urgent', e.target.checked)} className="w-4 h-4 rounded border-[#e5e8ef] text-[#283852] focus:ring-[#33cbcc]/30" />
+  <Alert02Icon size={14} className="text-[#283852]" />
+  <span className="text-xs font-medium text-[#8892a4]">{t('tasksPage.urgent')}</span>
+  </label>
+  <label className="flex items-center gap-2 cursor-pointer select-none">
+  <input type="checkbox" checked={task.important} onChange={e => update(idx, 'important', e.target.checked)} className="w-4 h-4 rounded border-[#e5e8ef] text-[#283852] focus:ring-[#33cbcc]/30" />
+  <StarIcon size={14} className="text-[#283852]" />
+  <span className="text-xs font-medium text-[#8892a4]">{t('tasksPage.important')}</span>
+  </label>
+  </div>
 
-                            {/* File attachments */}
-                            <div>
-                                <label className={labelCls}>
-                                    <Attachment01Icon size={11} />
-                                    {t('tasksPage.attachments', 'Attachments')}
-                                </label>
-                                <label className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
-                                    <Add01Icon size={14} />
-                                    {t('tasksPage.addFiles', 'Add files')}
-                                    <input
-                                        type="file"
-                                        multiple
-                                        className="hidden"
-                                        onChange={e => {
-                                            const files = Array.from(e.target.files || []);
-                                            if (files.length > 0) {
-                                                setTaskFiles(prev => {
-                                                    const updated = [...prev];
-                                                    updated[idx] = [...(updated[idx] || []), ...files];
-                                                    return updated;
-                                                });
-                                            }
-                                            e.target.value = '';
-                                        }}
-                                    />
-                                </label>
-                                {(taskFiles[idx] || []).length > 0 && (
-                                    <div className="mt-2 space-y-1.5">
-                                        {taskFiles[idx].map((file, fi) => (
-                                            <div key={fi} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                                                <File01Icon size={14} className="text-gray-400 shrink-0" />
-                                                <span className="flex-1 text-sm text-gray-700 truncate">{file.name}</span>
-                                                <span className="text-[10px] text-gray-400 shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setTaskFiles(prev => {
-                                                            const updated = [...prev];
-                                                            updated[idx] = updated[idx].filter((_, i) => i !== fi);
-                                                            return updated;
-                                                        });
-                                                    }}
-                                                    className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
-                                                >
-                                                    <Cancel01Icon size={14} />
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ))}
+  {/* File attachments */}
+  <div>
+  <label className={labelCls}>
+  <Attachment01Icon size={11} />
+  {t('tasksPage.attachments', 'Attachments')}
+  </label>
+  <label className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-[#e5e8ef] text-sm text-[#8892a4] hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors cursor-pointer">
+  <Add01Icon size={14} />
+  {t('tasksPage.addFiles', 'Add files')}
+  <input
+  type="file"
+  multiple
+  className="hidden"
+  onChange={e => {
+  const files = Array.from(e.target.files || []);
+  if (files.length > 0) {
+  setTaskFiles(prev => {
+  const updated = [...prev];
+  updated[idx] = [...(updated[idx] || []), ...files];
+  return updated;
+  });
+  }
+  e.target.value = '';
+  }}
+  />
+  </label>
+  {(taskFiles[idx] || []).length > 0 && (
+  <div className="mt-2 space-y-1.5">
+  {taskFiles[idx].map((file, fi) => (
+  <div key={fi} className="flex items-center gap-2 bg-[#f8f9fc]  px-3 py-2">
+  <File01Icon size={14} className="text-[#8892a4] shrink-0" />
+  <span className="flex-1 text-sm text-[#1c2b3a] truncate">{file.name}</span>
+  <span className="text-[10px] text-[#8892a4] shrink-0">{(file.size / 1024).toFixed(0)} KB</span>
+  <button
+  type="button"
+  onClick={() => {
+  setTaskFiles(prev => {
+  const updated = [...prev];
+  updated[idx] = updated[idx].filter((_, i) => i !== fi);
+  return updated;
+  });
+  }}
+  className="p-1 rounded hover:bg-[#283852]/10 text-[#8892a4] hover:text-[#283852] transition-colors shrink-0"
+  >
+  <Cancel01Icon size={14} />
+  </button>
+  </div>
+  ))}
+  </div>
+  )}
+  </div>
+  </div>
+  ))}
 
-                    {/* Add another task */}
-                    <button
-                        onClick={() => { setTasks(prev => [...prev, makeEmpty()]); setTaskFiles(prev => [...prev, []]); }}
-                        className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-sm font-medium text-gray-400 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <Add01Icon size={16} />
-                        {t('tasksPage.addAnother')}
-                    </button>
-                </div>
+  {/* Add another task */}
+  <button
+  onClick={() => { setTasks(prev => [...prev, makeEmpty()]); setTaskFiles(prev => [...prev, []]); }}
+  className="w-full py-3 border-2 border-dashed border-[#e5e8ef] text-sm font-medium text-[#8892a4] hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors flex items-center justify-center gap-2"
+  >
+  <Add01Icon size={16} />
+  {t('tasksPage.addAnother')}
+  </button>
+  </div>
 
-                {/* Footer */}
-                <div className="px-6 py-4 border-t border-gray-100 flex gap-3 shrink-0">
-                    <button
-                        onClick={onClose}
-                        className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-                    >
-                        {t('tasksPage.cancel')}
-                    </button>
-                    <button
-                        onClick={handleSubmit}
-                        disabled={validCount === 0 || !!isNonCompliant}
-                        className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all
-                            ${validCount > 0 && !isNonCompliant ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] shadow-sm shadow-[#33cbcc]/20' : 'bg-gray-300 cursor-not-allowed'}`}
-                    >
-                        {t('tasksPage.createTask')}
-                    </button>
-                </div>
-            </motion.div>
-        </motion.div>
-    );
+  {/* Footer */}
+  <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3 shrink-0">
+  <button
+  onClick={onClose}
+  className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
+  >
+  {t('tasksPage.cancel')}
+  </button>
+  <button
+  onClick={handleSubmit}
+  disabled={validCount === 0 || !!isNonCompliant}
+  className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white transition-colors
+  ${validCount > 0 && !isNonCompliant ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]' : 'bg-[#b0bac9] cursor-not-allowed'}`}
+  >
+  {t('tasksPage.createTask')}
+  </button>
+  </div>
+  </motion.div>
+  </motion.div>
+  );
 };
 
 /* ─── Board Column with fixed height + lazy loading ─────── */
 
 const BoardColumn = ({ dot, label, count, tasks, hasMore, isLoadingMore, onLoadMore, renderCard }: {
-    dot: string;
-    label: string;
-    count: number;
-    tasks: any[];
-    hasMore: boolean;
-    isLoadingMore: boolean;
-    onLoadMore: () => void;
-    renderCard: (task: any) => React.ReactNode;
+  dot: string;
+  label: string;
+  count: number;
+  tasks: any[];
+  hasMore: boolean;
+  isLoadingMore: boolean;
+  onLoadMore: () => void;
+  renderCard: (task: any) => React.ReactNode;
 }) => {
-    const sentinelRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const el = sentinelRef.current;
-        if (!el) return;
-        const observer = new IntersectionObserver(
-            ([entry]) => { if (entry.isIntersecting && hasMore && !isLoadingMore) onLoadMore(); },
-            { threshold: 0.1 },
-        );
-        observer.observe(el);
-        return () => observer.disconnect();
-    }, [hasMore, isLoadingMore, onLoadMore]);
+  useEffect(() => {
+  const el = sentinelRef.current;
+  if (!el) return;
+  const observer = new IntersectionObserver(
+  ([entry]) => { if (entry.isIntersecting && hasMore && !isLoadingMore) onLoadMore(); },
+  { threshold: 0.1 },
+  );
+  observer.observe(el);
+  return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, onLoadMore]);
 
-    return (
-        <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dot }} />
-                    <span className="text-sm font-bold text-gray-700">{label}</span>
-                </div>
-                <span className="text-xs font-semibold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
-                    {count}
-                </span>
-            </div>
-            <div className="flex flex-col gap-3 h-[calc(100vh-340px)] overflow-y-auto pr-1">
-                {tasks.map(task => renderCard(task))}
-                {(hasMore || isLoadingMore) && (
-                    <div ref={sentinelRef} className="flex items-center justify-center py-3">
-                        <Loading02Icon size={16} className="animate-spin text-gray-300" />
-                    </div>
-                )}
-                {!isLoadingMore && tasks.length === 0 && (
-                    <div className="flex-1 rounded-2xl border-2 border-dashed border-gray-100 flex items-center justify-center py-10">
-                        <p className="text-xs text-gray-300">—</p>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+  return (
+  <div className="flex flex-col gap-3">
+  <div className="flex items-center justify-between px-1">
+  <div className="flex items-center gap-2">
+  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: dot }} />
+  <span className="text-sm font-bold text-gray-700">{label}</span>
+  </div>
+  <span className="text-xs font-semibold text-gray-400 bg-gray-100 rounded-full px-2 py-0.5">
+  {count}
+  </span>
+  </div>
+  <div className="flex flex-col gap-3 h-[calc(100vh-340px)] overflow-y-auto pr-1">
+  {tasks.map(task => renderCard(task))}
+  {(hasMore || isLoadingMore) && (
+  <div ref={sentinelRef} className="flex items-center justify-center py-3">
+  <Loading02Icon size={16} className="animate-spin text-gray-300" />
+  </div>
+  )}
+  {!isLoadingMore && tasks.length === 0 && (
+  <div className="flex-1  border-2 border-dashed border-gray-100 flex items-center justify-center py-10">
+  <p className="text-xs text-gray-300">—</p>
+  </div>
+  )}
+  </div>
+  </div>
+  );
 };
 
 /* ═══════════════════════════════════════════════════════════ */
-/*  Main Component                                           */
+/*  Main Component   */
 /* ═══════════════════════════════════════════════════════════ */
 
 const Tasks = () => {
-    const { t } = useTranslation();
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const [pageView, setPageView] = useState<'calendar' | 'board'>('board');
-    const [viewMode, setViewMode] = useState<ViewMode>('week');
-    const [boardFilterEmployee, setBoardFilterEmployee] = useState('');
-    const [boardFilterDepartment, setBoardFilterDepartment] = useState('');
-    const [boardCurrentDate, setBoardCurrentDate] = useState(() => new Date());
-    const [boardViewMode, setBoardViewMode] = useState<'week' | 'month'>('week');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
-    const [modalData, setModalData] = useState<{ task: GanttTask; employee: EmployeeRow } | null>(null);
-    const [addTaskData, setAddTaskData] = useState<{ employee?: EmployeeRow; date: Date } | null>(null);
-    const [editingGanttTask, setEditingGanttTask] = useState<{ task: GanttTask; emp: EmployeeRow } | null>(null);
-    const [historyTaskId, setHistoryTaskId] = useState<string | null>(null);
-    const [showNatureManager, setShowNatureManager] = useState(false);
-    const [distView, setDistView] = useState<'nature' | 'activity'>('nature');
-    const [distPeriod, setDistPeriod] = useState<'day' | 'week' | 'month' | 'year'>('week');
-    const [distOffset, setDistOffset] = useState(0);
-    const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-    const toggleRow = (id: number) => setExpandedRows(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
-
-    // API data
-    const deptScope = useDepartmentScope();
-    // Calendar view needs full task list; board view uses its own paginated queries
-    const { data: apiTasks, isLoading: loadingTasks } = useTasks(deptScope, undefined, undefined, pageView === 'calendar');
-    const { data: apiEmployees, isLoading: loadingEmployees } = useEmployees(deptScope);
-    const distRange = useMemo(() => {
-        const pad = (n: number) => String(n).padStart(2, '0');
-        const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-        const now = new Date();
-        if (distPeriod === 'day') {
-            const d = new Date(now);
-            d.setDate(now.getDate() + distOffset);
-            const s = fmt(d);
-            return { from: s, to: s, label: d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) };
-        }
-        if (distPeriod === 'week') {
-            const day = now.getDay();
-            const toMon = day === 0 ? -6 : 1 - day;
-            const mon = new Date(now); mon.setDate(now.getDate() + toMon + distOffset * 7);
-            const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-            return { from: fmt(mon), to: fmt(sun), label: `${mon.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} – ${sun.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}` };
-        }
-        if (distPeriod === 'month') {
-            const first = new Date(now.getFullYear(), now.getMonth() + distOffset, 1);
-            const last  = new Date(first.getFullYear(), first.getMonth() + 1, 0);
-            return { from: fmt(first), to: fmt(last), label: first.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) };
-        }
-        // year
-        const year = now.getFullYear() + distOffset;
-        return { from: `${year}-01-01`, to: `${year}-12-31`, label: String(year) };
-    }, [distPeriod, distOffset]);
-    const { data: globalDist } = useGlobalDistribution(distRange.from, distRange.to);
-    const { data: apiDepartments } = useDepartments();
-    const createTaskMutation = useCreateTask();
-    const updateTaskMutation = useUpdateTask();
-    const deleteTaskMutation = useDeleteTask();
-    const uploadAttachmentMutation = useUploadTaskAttachment();
-
-    // Map API data to display shapes — no mock fallback
-    const TASK_COLOR_MAP: Record<string, ColorKey> = {
-        'EASY': 'teal', 'MEDIUM': 'blue', 'HARD': 'rose',
-    };
-    const STATE_STATUS_MAP: Record<string, 'todo' | 'in_progress' | 'done'> = {
-        'CREATED': 'todo', 'ASSIGNED': 'todo', 'IN_PROGRESS': 'in_progress',
-        'BLOCKED': 'in_progress', 'COMPLETED': 'done', 'REVIEWED': 'done',
-    };
-    const initialData: EmployeeRow[] = (apiEmployees || []).map((emp, i) => {
-        const empTasks = (apiTasks || []).filter(t => t.assignedToId === emp.id);
-        
-        const mappedTasks = empTasks.map((t, j) => {
-            const start = t.startDate ? new Date(t.startDate) : (t.dueDate ? new Date(t.dueDate) : new Date());
-            const end = t.endDate ? new Date(t.endDate) : start;
-            
-            return {
-                id: j + 1,
-                apiId: t.id,
-                title: t.title,
-                subtitle: t.project?.name || '',
-                startDate: start,
-                endDate: end,
-                color: (TASK_COLOR_MAP[t.difficulty] || 'blue') as ColorKey,
-                status: (STATE_STATUS_MAP[t.state] || 'todo') as 'todo' | 'in_progress' | 'done',
-                description: t.description || undefined,
-                selfAssigned: t.selfAssigned || false,
-                natureId: t.natureId || undefined,
-                natureName: t.nature?.name,
-                startedAt: t.startedAt || null,
-                completedAt: t.completedAt || null,
-                subtasks: t.subtasks || [],
-                attachments: t.attachments || [],
-                urgent: t.urgent || false,
-                important: t.important || false,
-            };
-        });
-
-        const tasksWithLanes = assignLanes(mappedTasks);
-        const laneCount = tasksWithLanes.reduce((max, t) => Math.max(max, (t.lane || 0) + 1), 1);
-
-        return {
-            id: i + 1,
-            apiId: emp.id,
-            name: `${emp.firstName} ${emp.lastName}`,
-            role: emp.position?.title || '',
-            avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}`,
-            departmentId: emp.departmentId || '',
-            departmentName: emp.department?.name || '',
-            tasks: tasksWithLanes,
-            laneCount,
-        } as EmployeeRow;
-    });
-
-    const [employees, setEmployees] = useState(initialData);
-
-    // Sync when API data changes
-    useEffect(() => {
-        setEmployees(initialData);
-    }, [apiEmployees, apiTasks]);
-    const [drag, setDrag] = useState<{
-        taskId: number; empId: number;
-        type: 'move' | 'resize-start' | 'resize-end';
-        startX: number; deltaDays: number;
-        origStart: Date; origEnd: Date;
-    } | null>(null);
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const headerScrollRef = useRef<HTMLDivElement>(null);
-    const wasDragging = useRef(false);
-    const dayPxRef = useRef(0);
-    const [timelineWidth, setTimelineWidth] = useState(0);
-
-    useEffect(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-        const ro = new ResizeObserver(entries => {
-            setTimelineWidth(entries[0]?.contentRect.width ?? 0);
-        });
-        ro.observe(el);
-        return () => ro.disconnect();
-    }, []);
-
-    // Sync fixed header horizontal scroll with the body timeline scroll
-    useEffect(() => {
-        const body = scrollRef.current;
-        if (!body) return;
-        const onScroll = () => {
-            const header = headerScrollRef.current;
-            if (header) header.scrollLeft = body.scrollLeft;
-        };
-        body.addEventListener('scroll', onScroll, { passive: true });
-        return () => body.removeEventListener('scroll', onScroll);
-    }, []);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    /* ── View range ── */
-
-    let viewStart: Date;
-    let viewDays: number;
-    const dayPx = viewMode === 'week' && timelineWidth > 0
-        ? Math.floor(timelineWidth / 7)
-        : DAY_PX[viewMode];
-    dayPxRef.current = dayPx;
-
-    if (viewMode === 'day') {
-        viewStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-        viewDays = 1;
-    } else if (viewMode === 'week') {
-        viewStart = startOfWeek(currentDate);
-        viewDays = 7;
-    } else if (viewMode === 'month') {
-        viewStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        viewDays = numDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
-    } else {
-        viewStart = new Date(currentDate.getFullYear(), 0, 1);
-        const isLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
-        viewDays = isLeap(currentDate.getFullYear()) ? 366 : 365;
-    }
-
-    const viewEnd = addDays(viewStart, viewDays - 1);
-    const totalWidth = viewDays * dayPx;
-
-    /* ── Columns (for week / month header) ── */
-
-    const columns = Array.from({ length: viewDays }, (_, i) => {
-        const date = addDays(viewStart, i);
-        return {
-            index: i,
-            date,
-            dow: date.getDay(),
-            isWeekend: date.getDay() === 0 || date.getDay() === 6,
-            isToday: isSameDay(date, today),
-        };
-    });
-
-    /* ── Year-view month headers ── */
-
-    const yearMonths = viewMode === 'year'
-        ? Array.from({ length: 12 }, (_, m) => {
-            const mStart = new Date(currentDate.getFullYear(), m, 1);
-            const days = numDaysInMonth(currentDate.getFullYear(), m);
-            return { month: m, name: MONTH_NAMES[m], startIdx: diffDays(viewStart, mStart), days, width: days * dayPx };
-        })
-        : [];
-
-    /* ── Today column index ── */
-
-    const todayIdx = diffDays(viewStart, today);
-    const showTodayLine = todayIdx >= 0 && todayIdx < viewDays;
-
-    /* ── Filtering ── */
-
-    const filteredEmployees = employees.filter(e => {
-        // Row-click selection takes priority — ignore text search when one employee is pinned
-        if (selectedEmployeeId !== null) return e.id === selectedEmployeeId;
-        // Text search filters by name or role
-        if (!searchQuery) return true;
-        return e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               e.role.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-
-    const selectedEmployee = selectedEmployeeId !== null
-        ? employees.find(e => e.id === selectedEmployeeId)
-        : null;
-
-    const allExpanded = filteredEmployees.length > 0 && filteredEmployees.every(e => expandedRows.has(e.id));
-    const toggleAllRows = () => setExpandedRows(allExpanded ? new Set() : new Set(filteredEmployees.map(e => e.id)));
-
-    /* ── Navigation ── */
-
-    const nav = (dir: number) => {
-        const d = new Date(currentDate);
-        if (viewMode === 'day') d.setDate(d.getDate() + dir);
-        else if (viewMode === 'week') d.setDate(d.getDate() + dir * 7);
-        else if (viewMode === 'month') d.setMonth(d.getMonth() + dir);
-        else d.setFullYear(d.getFullYear() + dir);
-        setCurrentDate(d);
-    };
-
-    const navLabel = (() => {
-        if (viewMode === 'day')
-            return currentDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-        if (viewMode === 'week') {
-            const ws = startOfWeek(currentDate);
-            const we = addDays(ws, 6);
-            const o: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-            if (ws.getMonth() !== we.getMonth())
-                return `${ws.toLocaleDateString(undefined, o)} – ${we.toLocaleDateString(undefined, { ...o, year: 'numeric' })}`;
-            return `${ws.toLocaleDateString(undefined, o)} – ${we.getDate()}, ${we.getFullYear()}`;
-        }
-        if (viewMode === 'month')
-            return currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-        return `${currentDate.getFullYear()}`;
-    })();
-
-    /* ── Board date range ── */
-
-    const boardViewStart = boardViewMode === 'week'
-        ? startOfWeek(boardCurrentDate)
-        : new Date(boardCurrentDate.getFullYear(), boardCurrentDate.getMonth(), 1);
-
-    const boardViewDays = boardViewMode === 'week'
-        ? 7
-        : numDaysInMonth(boardCurrentDate.getFullYear(), boardCurrentDate.getMonth());
-
-    const boardViewEnd = addDays(boardViewStart, boardViewDays - 1);
-
-    // Board-view paginated queries — one per status group
-    const boardEndOfDay = new Date(boardViewEnd.getFullYear(), boardViewEnd.getMonth(), boardViewEnd.getDate(), 23, 59, 59, 999);
-    const boardFilters = {
-        departmentId: boardFilterDepartment || deptScope || undefined,
-        employeeId: boardFilterEmployee || undefined,
-        boardFrom: boardViewStart.toISOString(),
-        boardTo: boardEndOfDay.toISOString(),
-    };
-    const todoQuery = useInfiniteTasksByStates(['CREATED', 'ASSIGNED'], boardFilters, pageView === 'board');
-    const inProgressQuery = useInfiniteTasksByStates(['IN_PROGRESS', 'BLOCKED'], boardFilters, pageView === 'board');
-    const doneQuery = useInfiniteTasksByStates(['COMPLETED', 'REVIEWED'], boardFilters, pageView === 'board');
-    const boardTotalCount =
-        (todoQuery.data?.pages[0]?.count ?? 0) +
-        (inProgressQuery.data?.pages[0]?.count ?? 0) +
-        (doneQuery.data?.pages[0]?.count ?? 0);
-
-    // Map raw API task to board card shape
-    const deptNameMap = Object.fromEntries((apiDepartments || []).map(d => [d.id, (d as any).name as string]));
-    const TASK_COLOR_MAP_BOARD: Record<string, ColorKey> = { EASY: 'teal', MEDIUM: 'blue', HARD: 'rose' };
-    const STATE_STATUS_MAP_BOARD: Record<string, 'todo' | 'in_progress' | 'done'> = {
-        CREATED: 'todo', ASSIGNED: 'todo', IN_PROGRESS: 'in_progress',
-        BLOCKED: 'in_progress', COMPLETED: 'done', REVIEWED: 'done',
-    };
-    const mapBoardTask = (t: Task) => {
-        const emp = t.assignedTo;
-        const start = t.startDate ? new Date(t.startDate) : (t.dueDate ? new Date(t.dueDate) : new Date());
-        const end = t.endDate ? new Date(t.endDate) : start;
-        return {
-            ...t,
-            apiId: t.id,
-            startDate: start,
-            endDate: end,
-            status: STATE_STATUS_MAP_BOARD[t.state] || 'todo',
-            subtitle: t.project?.name || '',
-            color: (TASK_COLOR_MAP_BOARD[t.difficulty] || 'blue') as ColorKey,
-            natureName: t.nature?.name,
-            employee: {
-                apiId: emp?.id || '',
-                avatar: emp?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(((emp?.firstName || '') + '+' + (emp?.lastName || '')))}`,
-                name: emp ? `${emp.firstName} ${emp.lastName}` : '',
-                departmentName: emp?.departmentId ? (deptNameMap[emp.departmentId] || '') : '',
-            },
-        };
-    };
-
-    const boardNavLabel = boardViewMode === 'week'
-        ? (() => {
-            const we = addDays(boardViewStart, 6);
-            const o: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-            if (boardViewStart.getMonth() !== we.getMonth())
-                return `${boardViewStart.toLocaleDateString(undefined, o)} – ${we.toLocaleDateString(undefined, { ...o, year: 'numeric' })}`;
-            return `${boardViewStart.toLocaleDateString(undefined, o)} – ${we.getDate()}, ${we.getFullYear()}`;
-        })()
-        : boardCurrentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-
-    const boardNav = (dir: number) => {
-        const d = new Date(boardCurrentDate);
-        if (boardViewMode === 'week') d.setDate(d.getDate() + dir * 7);
-        else d.setMonth(d.getMonth() + dir);
-        setBoardCurrentDate(d);
-    };
-
-    /* ── Task bar position ── */
-
-    const getBar = (task: GanttTask) => {
-        const ts = new Date(task.startDate); ts.setHours(0, 0, 0, 0);
-        const te = new Date(task.endDate);   te.setHours(0, 0, 0, 0);
-        const cs = ts < viewStart ? viewStart : ts;
-        const ce = te > viewEnd ? viewEnd : te;
-        if (cs > viewEnd || ce < viewStart) return null;
-        const offset = diffDays(viewStart, cs);
-        const span = diffDays(cs, ce) + 1;
-        return { left: offset * dayPx + 4, width: span * dayPx - 8 };
-    };
-
-    /* ── Drag helpers ── */
-
-    const getPreviewDates = (d: NonNullable<typeof drag>) => {
-        const maxD = diffDays(d.origStart, d.origEnd);
-        let s = new Date(d.origStart);
-        let e = new Date(d.origEnd);
-        if (d.type === 'move') {
-            s = addDays(s, d.deltaDays);
-            e = addDays(e, d.deltaDays);
-        } else if (d.type === 'resize-start') {
-            s = addDays(s, Math.min(d.deltaDays, maxD));
-        } else {
-            e = addDays(e, Math.max(d.deltaDays, -maxD));
-        }
-        return { start: s, end: e };
-    };
-
-    const startDrag = (
-        e: React.PointerEvent,
-        task: GanttTask,
-        emp: EmployeeRow,
-        type: 'move' | 'resize-start' | 'resize-end',
-    ) => {
-        e.stopPropagation();
-        e.preventDefault();
-        const startX = e.clientX;
-        const origStart = new Date(task.startDate);
-        const origEnd = new Date(task.endDate);
-        let currentDelta = 0;
-        wasDragging.current = false;
-        document.body.style.userSelect = 'none';
-        document.body.style.cursor = type === 'move' ? 'grabbing' : 'col-resize';
-
-        const onMove = (ev: PointerEvent) => {
-            const delta = Math.round((ev.clientX - startX) / dayPxRef.current);
-            if (delta !== currentDelta) {
-                currentDelta = delta;
-                wasDragging.current = true;
-                setDrag({ taskId: task.id, empId: emp.id, type, startX, deltaDays: delta, origStart, origEnd });
-            }
-        };
-
-        const onUp = () => {
-            document.removeEventListener('pointermove', onMove);
-            document.removeEventListener('pointerup', onUp);
-            document.body.style.userSelect = '';
-            document.body.style.cursor = '';
-
-            if (currentDelta !== 0) {
-                const maxD = diffDays(origStart, origEnd);
-                let s = new Date(origStart);
-                let en = new Date(origEnd);
-                if (type === 'move') { s = addDays(s, currentDelta); en = addDays(en, currentDelta); }
-                else if (type === 'resize-start') { s = addDays(s, Math.min(currentDelta, maxD)); }
-                else { en = addDays(en, Math.max(currentDelta, -maxD)); }
-
-                setEmployees(prev => prev.map(em => {
-                    if (em.id !== emp.id) return em;
-                    const updatedTasks = em.tasks.map(t => t.id !== task.id ? t : { ...t, startDate: s, endDate: en });
-                    const tasksWithLanes = assignLanes(updatedTasks);
-                    const laneCount = tasksWithLanes.reduce((max, t) => Math.max(max, (t.lane || 0) + 1), 1);
-                    return { ...em, tasks: tasksWithLanes, laneCount };
-                }));
-
-                // Persist to backend
-                if (task.apiId) {
-                    updateTaskMutation.mutate({
-                        id: task.apiId,
-                        dto: {
-                            startDate: s.toISOString(),
-                            endDate: en.toISOString(),
-                        },
-                    });
-                }
-            }
-            setDrag(null);
-            setTimeout(() => { wasDragging.current = false; }, 50);
-        };
-
-        document.addEventListener('pointermove', onMove);
-        document.addEventListener('pointerup', onUp);
-        setDrag({ taskId: task.id, empId: emp.id, type, startX, deltaDays: 0, origStart, origEnd });
-    };
-
-    const fmtShort = (d: Date) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-
-    /* ── Add task handler ── */
-
-    const handleAddTask = async (empId: number, task: GanttTask, files?: File[]) => {
-        const emp = employees.find(e => e.id === empId);
-        setEmployees(prev => prev.map(em => {
-            if (em.id !== empId) return em;
-            const newTasks = [...em.tasks, task];
-            const tasksWithLanes = assignLanes(newTasks);
-            const laneCount = tasksWithLanes.reduce((max, t) => Math.max(max, (t.lane || 0) + 1), 1);
-            return { ...em, tasks: tasksWithLanes, laneCount };
-        }));
-        // Also call API to persist
-        try {
-            const created = await createTaskMutation.mutateAsync({
-                title: task.title,
-                description: task.description || undefined,
-                difficulty: (task.difficulty as any) || 'MEDIUM',
-                state: 'ASSIGNED',
-                assignedToId: emp?.apiId,
-                projectId: task.projectId || undefined,
-                natureId: task.natureId || undefined,
-                leadId: task.leadId || undefined,
-                startDate: task.startDate.toISOString(),
-                endDate: task.endDate.toISOString(),
-                dueDate: task.endDate.toISOString(),
-                urgent: task.urgent || false,
-                important: task.important || false,
-            });
-            // Upload attachments if any
-            if (files && files.length > 0 && created?.id) {
-                for (const file of files) {
-                    await uploadAttachmentMutation.mutateAsync({ taskId: created.id, file });
-                }
-            }
-        } catch {
-            // Error handled by mutation onError callback
-        }
-    };
-
-    const handleRowClick = (e: React.MouseEvent<HTMLDivElement>, emp: EmployeeRow) => {
-        if (wasDragging.current) return;
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const dayOffset = Math.floor(x / dayPx);
-        const clickedDate = addDays(viewStart, dayOffset);
-        setAddTaskData({ employee: emp, date: clickedDate });
-    };
-
-    /* ── Auto-scroll to today ── */
-
-    useEffect(() => {
-        if (scrollRef.current && showTodayLine) {
-            scrollRef.current.scrollLeft = Math.max(0, todayIdx * dayPx - 200);
-        }
-    }, [currentDate, viewMode]);
-
-    /* ════════════════════════ JSX ════════════════════════ */
-
-    if (loadingTasks || loadingEmployees) {
-        return <TasksAdminSkeleton />;
-    }
-
-    return (
-        <div className="space-y-5">
-
-            {/* ═══ Page header ═══ */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">{t('tasksPage.title')}</h1>
-                    <p className="text-sm text-gray-400 mt-1">{t('tasksPage.subtitle')}</p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                    {/* Calendar / Board toggle */}
-                    <div className="flex bg-gray-100 rounded-xl p-1">
-                        <button
-                            onClick={() => setPageView('calendar')}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${pageView === 'calendar' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            <Calendar01Icon size={14} />
-                            {t('tasksPage.calendarView')}
-                        </button>
-                        <button
-                            onClick={() => setPageView('board')}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${pageView === 'board' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            <ListViewIcon size={14} />
-                            {t('tasksPage.boardView')}
-                        </button>
-                    </div>
-                    <button
-                        onClick={() => setShowNatureManager(true)}
-                        className="p-2.5 rounded-xl border border-gray-200 text-gray-500 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors"
-                        title={t('taskNatures.manageTitle')}
-                    >
-                        <Settings01Icon size={16} />
-                    </button>
-                    <button
-                        onClick={() => setAddTaskData({ date: new Date() })}
-                        className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20 flex-1 sm:flex-none justify-center"
-                    >
-                        <Add01Icon size={16} />
-                        {t('tasksPage.addTask')}
-                    </button>
-                    <div className="relative w-full sm:w-auto">
-                        <Search01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            placeholder={t('tasksPage.searchPlaceholder')}
-                            className="w-full sm:w-60 bg-white border border-[#e5e8ef] rounded-2xl py-3.5 pl-11 pr-4 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors"
-                        />
-                        {searchQuery && (
-                            <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b0bac9] hover:text-[#1c2b3a]">
-                                <Cancel01Icon size={14} />
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* ═══ Distribution chart ═══ */}
-            <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                        <div>
-                            <h3 className="text-sm font-bold text-gray-800">Répartition des activités</h3>
-                            <p className="text-[11px] text-gray-400 mt-0.5">Distribution globale du temps et des activités</p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2">
-                            {/* Period selector */}
-                            <div className="flex bg-gray-100 rounded-xl p-1">
-                                {(['day', 'week', 'month', 'year'] as const).map(p => (
-                                    <button key={p} onClick={() => { setDistPeriod(p); setDistOffset(0); }}
-                                        className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${distPeriod === p ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-                                        {p === 'day' ? 'Jour' : p === 'week' ? 'Semaine' : p === 'month' ? 'Mois' : 'Année'}
-                                    </button>
-                                ))}
-                            </div>
-                            {/* Navigation */}
-                            <div className="flex items-center gap-1">
-                                <button onClick={() => setDistOffset(o => o - 1)} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
-                                    <ArrowLeft01Icon size={15} />
-                                </button>
-                                <span className="text-xs font-semibold text-gray-700 min-w-[120px] text-center capitalize">{distRange.label}</span>
-                                <button onClick={() => setDistOffset(o => o + 1)} disabled={distOffset >= 0}
-                                    className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors disabled:opacity-30">
-                                    <ArrowRight01Icon size={15} />
-                                </button>
-                            </div>
-                            {/* View toggle */}
-                            <div className="flex bg-gray-100 rounded-xl p-1">
-                                <button onClick={() => setDistView('nature')}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${distView === 'nature' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-                                    Nature
-                                </button>
-                                <button onClick={() => setDistView('activity')}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${distView === 'activity' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
-                                    Activité
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {!globalDist ? (
-                        <div className="flex items-center justify-center h-52">
-                            <div className="w-5 h-5 border-2 border-[#33cbcc] border-t-transparent rounded-full animate-spin" />
-                        </div>
-                    ) :
-
-                    distView === 'nature' ? (() => {
-                        const CHART_PALETTE = ['#33cbcc','#283852','#f59e0b','#8b5cf6','#ef4444','#10b981','#ec4899','#f97316','#06b6d4','#6366f1'];
-                        const data = globalDist.natureDistribution;
-                        if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">Aucune donnée</p>;
-                        return (
-                            <div className="flex flex-col md:flex-row items-center gap-6">
-                                <div className="w-full md:w-64 h-52">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie data={data} dataKey="hours" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
-                                                {data.map((_entry, i) => (
-                                                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip formatter={(v: any) => [`${v}h`, 'Heures']} />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                </div>
-                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    {data.map((entry, i) => (
-                                        <div key={i} className="flex items-center gap-2.5">
-                                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_PALETTE[i % CHART_PALETTE.length] }} />
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-medium text-gray-700 truncate">{entry.name}</p>
-                                                <p className="text-[11px] text-gray-400">{entry.hours}h · {entry.percentage}%</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })() : (() => {
-                        const CHART_PALETTE = ['#33cbcc','#283852','#f59e0b','#8b5cf6','#ef4444','#10b981','#ec4899','#f97316','#06b6d4','#6366f1'];
-                        const ACTIVITY_LABELS: Record<string, string> = {
-                            VISITE_CLIENT: 'Visite client', VISITE_PROSPECT: 'Visite prospect',
-                            APPEL: 'Appel', EMAIL: 'Email', REUNION: 'Réunion',
-                            DEMO: 'Démo', RELANCE: 'Relance', AUTRE: 'Autre',
-                        };
-                        const data = globalDist.activityDistribution.map(d => ({
-                            ...d,
-                            name: ACTIVITY_LABELS[d.type] || d.type,
-                        }));
-                        if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">Aucune activité enregistrée</p>;
-                        return (
-                            <div className="flex flex-col md:flex-row items-center gap-6">
-                                <div className="w-full md:w-64 h-52">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <PieChart>
-                                            <Pie data={data} dataKey="count" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
-                                                {data.map((_entry, i) => (
-                                                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
-                                                ))}
-                                            </Pie>
-                                            <Tooltip formatter={(v: any) => [`${v}`, 'Activités']} />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                </div>
-                                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    {data.map((entry, i) => (
-                                        <div key={i} className="flex items-center gap-2.5">
-                                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_PALETTE[i % CHART_PALETTE.length] }} />
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-medium text-gray-700 truncate">{entry.name}</p>
-                                                <p className="text-[11px] text-gray-400">{entry.count} activité{entry.count > 1 ? 's' : ''} · {entry.percentage}%</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })()}
-                </div>
-
-            {/* ═══ Board view ═══ */}
-            {pageView === 'board' && (() => {
-                const selectCls = 'bg-white rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
-
-                // Apply client-side text search on already-loaded results
-                const filterBySearch = (tasks: ReturnType<typeof mapBoardTask>[]) => {
-                    if (!searchQuery) return tasks;
-                    const q = searchQuery.toLowerCase();
-                    return tasks.filter(t =>
-                        t.title.toLowerCase().includes(q) ||
-                        t.employee.name.toLowerCase().includes(q),
-                    );
-                };
-
-                const todoTasks = filterBySearch((todoQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
-                const inProgressTasks = filterBySearch((inProgressQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
-                const doneTasks = filterBySearch((doneQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
-
-                const BOARD_COLS = [
-                    { key: 'todo' as const,        label: t('tasksPage.todo'),       dot: '#9ca3af', query: todoQuery,       tasks: todoTasks },
-                    { key: 'in_progress' as const, label: t('tasksPage.inProgress'), dot: '#283852', query: inProgressQuery, tasks: inProgressTasks },
-                    { key: 'done' as const,        label: t('tasksPage.done'),        dot: '#33cbcc', query: doneQuery,       tasks: doneTasks },
-                ];
-
-                const diffLabel: Record<ColorKey, string> = {
-                    teal:  t('tasksPage.difficultyEasy'),
-                    blue:  t('tasksPage.difficultyMedium'),
-                    amber: t('tasksPage.difficultyHard'),
-                    rose:  t('tasksPage.difficultyHard'),
-                };
-
-                return (
-                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-                        {/* Date navigation */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                            <div className="flex items-center gap-3 flex-wrap">
-                                {/* Week / Month toggle */}
-                                <div className="flex bg-gray-100 rounded-xl p-1">
-                                    {(['week', 'month'] as const).map(v => (
-                                        <button
-                                            key={v}
-                                            onClick={() => setBoardViewMode(v)}
-                                            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${boardViewMode === v ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                                        >
-                                            {t(`tasksPage.view_${v}`)}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Prev / label / Next */}
-                                <div className="flex items-center gap-1">
-                                    <button onClick={() => boardNav(-1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-                                        <ArrowLeft01Icon size={18} />
-                                    </button>
-                                    <span className="text-sm font-bold text-gray-800 min-w-42 text-center select-none capitalize">{boardNavLabel}</span>
-                                    <button onClick={() => boardNav(1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-                                        <ArrowRight01Icon size={18} />
-                                    </button>
-                                </div>
-
-                                {/* Today */}
-                                <button
-                                    onClick={() => setBoardCurrentDate(new Date())}
-                                    className="text-xs font-semibold text-[#33cbcc] px-3 py-1.5 rounded-lg hover:bg-[#33cbcc]/10 transition-colors border border-[#33cbcc]/30"
-                                >
-                                    {t('tasksPage.today')}
-                                </button>
-                            </div>
-
-                            <span className="text-xs text-gray-400">
-                                {boardTotalCount} {boardTotalCount === 1 ? t('tasksPage.taskNumber') : t('tasksPage.taskNumber') + 's'}
-                            </span>
-                        </div>
-
-                        {/* Employee / Department filters */}
-                        <div className="flex flex-wrap gap-3">
-                            <select
-                                value={boardFilterDepartment}
-                                onChange={e => { setBoardFilterDepartment(e.target.value); setBoardFilterEmployee(''); }}
-                                className={selectCls}
-                            >
-                                <option value="">{t('tasksPage.allDepartments')}</option>
-                                {(apiDepartments || []).map(d => (
-                                    <option key={d.id} value={d.id}>{d.name}</option>
-                                ))}
-                            </select>
-
-                            <select
-                                value={boardFilterEmployee}
-                                onChange={e => setBoardFilterEmployee(e.target.value)}
-                                className={selectCls}
-                            >
-                                <option value="">{t('tasksPage.allEmployees')}</option>
-                                {employees
-                                    .filter(e => !boardFilterDepartment || e.departmentId === boardFilterDepartment)
-                                    .map(e => (
-                                        <option key={e.apiId} value={e.apiId}>{e.name}</option>
-                                    ))}
-                            </select>
-
-                            {(boardFilterDepartment || boardFilterEmployee) && (
-                                <button
-                                    onClick={() => { setBoardFilterDepartment(''); setBoardFilterEmployee(''); }}
-                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:bg-[#283852]/10 hover:border-gray-300 hover:text-[#283852] transition-colors"
-                                >
-                                    <Cancel01Icon size={14} />
-                                    {t('tasksPage.showAll')}
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Columns */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                            {BOARD_COLS.map(col => (
-                                <BoardColumn
-                                    key={col.key}
-                                    dot={col.dot}
-                                    label={col.label}
-                                    count={col.query.data?.pages[0]?.count ?? 0}
-                                    tasks={col.tasks}
-                                    hasMore={col.query.hasNextPage ?? false}
-                                    isLoadingMore={col.query.isFetchingNextPage}
-                                    onLoadMore={() => col.query.fetchNextPage()}
-                                    renderCard={(task) => {
-                                        const c = TASK_COLORS[task.color as ColorKey];
-                                        return (
-                                            <motion.div
-                                                key={task.id}
-                                                initial={{ opacity: 0, y: 6 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                onClick={() => setModalData({ task, employee: task.employee })}
-                                                className="bg-white rounded-2xl border border-gray-100 p-4 cursor-pointer hover:border-[#33cbcc]/30 transition-all"
-                                                style={{ borderLeft: `3px solid ${c.border}` }}
-                                            >
-                                                <div className="flex items-start justify-between gap-2 mb-3">
-                                                    <p className="text-sm font-semibold text-gray-800 leading-snug">{task.title}</p>
-                                                    {task.urgent && <Alert02Icon size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
-                                                    {task.important && <StarIcon size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
-                                                </div>
-                                                {task.subtitle && (
-                                                    <div className="flex items-center gap-1.5 mb-2">
-                                                        <Briefcase01Icon size={11} className="text-gray-400 shrink-0" />
-                                                        <span className="text-[11px] text-gray-400">{task.subtitle}</span>
-                                                    </div>
-                                                )}
-                                                {task.natureName && (
-                                                    <div className="flex items-center gap-1.5 mb-2">
-                                                        <Tag01Icon size={11} className="text-gray-400 shrink-0" />
-                                                        <span className="text-[11px] text-gray-400">{task.natureName}</span>
-                                                    </div>
-                                                )}
-                                                <div className="flex items-center gap-1.5 mb-3">
-                                                    <Calendar01Icon size={11} className="text-gray-400 shrink-0" />
-                                                    <span className="text-[11px] text-gray-400">
-                                                        {(task.startDate as Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                        {' – '}
-                                                        {(task.endDate as Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <div className="flex items-center gap-2 min-w-0">
-                                                        <img
-                                                            src={task.employee.avatar}
-                                                            alt={task.employee.name}
-                                                            className="w-6 h-6 rounded-full border border-gray-200 shrink-0 object-cover"
-                                                        />
-                                                        <div className="min-w-0">
-                                                            <p className="text-[11px] text-gray-600 font-medium truncate">{task.employee.name}</p>
-                                                            {task.employee.departmentName && (
-                                                                <p className="text-[10px] text-gray-400 truncate">{task.employee.departmentName}</p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <span
-                                                        className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full"
-                                                        style={{ backgroundColor: c.bg, color: c.text }}
-                                                    >
-                                                        {diffLabel[task.color as ColorKey]}
-                                                    </span>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </motion.div>
-                );
-            })()}
-
-            {pageView === 'calendar' && <>
-            {/* ═══ Toolbar: view toggle + nav ═══ */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3 flex-wrap">
-                    {/* View mode toggle */}
-                    <div className="flex bg-gray-100 rounded-xl p-1">
-                        {(['day', 'week', 'month', 'year'] as ViewMode[]).map(v => (
-                            <button
-                                key={v}
-                                onClick={() => setViewMode(v)}
-                                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                                    viewMode === v
-                                        ? 'bg-white text-gray-800 shadow-sm'
-                                        : 'text-gray-500 hover:text-gray-700'
-                                }`}
-                            >
-                                {t(`tasksPage.view_${v}`)}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Prev / label / Next */}
-                    <div className="flex items-center gap-1">
-                        <button onClick={() => nav(-1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-                            <ArrowLeft01Icon size={20} />
-                        </button>
-                        <span className="text-sm font-bold text-gray-800 min-w-42.5 text-center capitalize select-none">{navLabel}</span>
-                        <button onClick={() => nav(1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-500 transition-colors">
-                            <ArrowRight01Icon size={20} />
-                        </button>
-                    </div>
-
-                    {/* Today */}
-                    <button
-                        onClick={() => setCurrentDate(new Date())}
-                        className="text-xs font-semibold text-[#33cbcc] px-3 py-1.5 rounded-lg hover:bg-[#33cbcc]/10 transition-colors border border-[#33cbcc]/30"
-                    >
-                        {t('tasksPage.today')}
-                    </button>
-                </div>
-
-                {/* Priority legend */}
-                <div className="hidden sm:flex items-center gap-4">
-                    {([
-                        { color: 'teal' as ColorKey,  key: 'priorityLow' },
-                        { color: 'blue' as ColorKey,  key: 'priorityMedium' },
-                        { color: 'amber' as ColorKey, key: 'priorityHigh' },
-                        { color: 'rose' as ColorKey,  key: 'priorityUrgent' },
-                    ]).map(({ color, key }) => (
-                        <div key={key} className="flex items-center gap-1.5">
-                            <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: TASK_COLORS[color].border }} />
-                            <span className="text-[11px] text-gray-400">{t(`tasksPage.${key}`)}</span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* ═══ Selected employee banner ═══ */}
-            <AnimatePresence>
-                {selectedEmployee && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                    >
-                        <div className="flex items-center gap-3 bg-[#33cbcc]/8 rounded-xl px-4 py-3 border border-[#33cbcc]/15">
-                            <img src={selectedEmployee.avatar} alt="" className="w-9 h-9 rounded-full border-2 border-[#33cbcc] shrink-0" />
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold text-gray-800 truncate">{selectedEmployee.name}</p>
-                                <p className="text-xs text-gray-500 truncate">
-                                    {selectedEmployee.role} &middot; {selectedEmployee.tasks.length} task{selectedEmployee.tasks.length !== 1 ? 's' : ''}
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => setSelectedEmployeeId(null)}
-                                className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] hover:text-[#2aa8a9] px-3 py-1.5 rounded-lg hover:bg-[#33cbcc]/10 transition-colors shrink-0"
-                            >
-                                <ArrowLeft01Icon size={14} />
-                                <span className="hidden sm:inline">{t('tasksPage.showAll')}</span>
-                            </button>
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* ═══ Gantt chart ═══ */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-100 shadow-sm" style={{ overflow: 'clip' }}>
-                <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 300px)' }}>
-
-                    {/* ── Fixed header row (employees label + date headers) ── */}
-                    <div className="flex shrink-0 border-b border-gray-100 bg-white z-20">
-                        {/* Left: employees label + expand-all */}
-                        <div className="shrink-0 w-15 sm:w-65 border-r border-gray-100 flex items-center justify-between px-3 sm:px-5" style={{ height: `${HEADER_H}px` }}>
-                            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden sm:block">
-                                {t('tasksPage.employees')}
-                            </span>
-                            <button
-                                onClick={toggleAllRows}
-                                title={allExpanded ? 'Collapse all' : 'Expand all'}
-                                className="hidden sm:flex items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-[#33cbcc] transition-colors px-2 py-1 rounded-lg hover:bg-[#33cbcc]/8"
-                            >
-                                {allExpanded ? <ArrowUp01Icon size={13} /> : <ArrowDown01Icon size={13} />}
-                                {allExpanded ? 'Collapse' : 'Expand'}
-                            </button>
-                        </div>
-                        {/* Right: date header — mirrors the scrollRef scroll position */}
-                        <div ref={headerScrollRef} className="flex-1 overflow-hidden">
-                            <div
-                                style={{ width: `${totalWidth}px`, height: `${HEADER_H}px` }}
-                                className="relative"
-                                id="gantt-header-inner"
-                            >
-                                {viewMode === 'year' ? (
-                                    <div className="flex h-full">
-                                        {yearMonths.map(m => {
-                                            const isCurrentMonth = today.getFullYear() === currentDate.getFullYear() && today.getMonth() === m.month;
-                                            return (
-                                                <div key={m.month} style={{ width: `${m.width}px` }}
-                                                    className={`shrink-0 flex items-center justify-center border-r border-gray-200 ${isCurrentMonth ? 'bg-[#33cbcc]/5' : m.month % 2 === 1 ? 'bg-gray-50/40' : ''}`}>
-                                                    <span className={`text-xs font-semibold ${isCurrentMonth ? 'text-[#33cbcc]' : 'text-gray-600'}`}>{m.name}</span>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : viewMode === 'day' ? (
-                                    <div className="flex h-full">
-                                        <div style={{ width: `${dayPx}px` }} className={`shrink-0 flex items-center justify-center gap-3 ${columns[0]?.isToday ? 'bg-[#33cbcc]/10' : ''}`}>
-                                            <span className={`text-sm font-semibold ${columns[0]?.isToday ? 'text-[#33cbcc]' : 'text-gray-600'}`}>{DAY_NAMES_FULL[columns[0]?.dow ?? 0]}</span>
-                                            {columns[0]?.isToday
-                                                ? <span className="w-8 h-8 rounded-full bg-[#33cbcc] text-white text-sm font-bold flex items-center justify-center shadow-sm shadow-[#33cbcc]/20">{columns[0]?.date.getDate()}</span>
-                                                : <span className="text-lg font-bold text-gray-800">{columns[0]?.date.getDate()}</span>}
-                                            <span className={`text-sm font-medium ${columns[0]?.isToday ? 'text-[#33cbcc]' : 'text-gray-400'}`}>{MONTH_NAMES[columns[0]?.date.getMonth() ?? 0]}</span>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="flex h-full">
-                                        {columns.map(col => (
-                                            <div key={col.index} style={{ width: `${dayPx}px` }}
-                                                className={`shrink-0 flex flex-col items-center justify-center border-r border-gray-50 ${col.isWeekend ? 'bg-gray-50/50' : ''}`}>
-                                                <span className={`text-[11px] font-medium ${col.isToday ? 'text-[#33cbcc]' : col.isWeekend ? 'text-gray-300' : 'text-gray-400'}`}>
-                                                    {viewMode === 'week' ? DAY_NAMES_FULL[col.dow] : DAY_NAMES_SHORT[col.dow]}
-                                                </span>
-                                                {col.isToday
-                                                    ? <span className="w-7 h-7 rounded-full bg-[#33cbcc] text-white text-xs font-bold flex items-center justify-center mt-1 shadow-sm shadow-[#33cbcc]/20">{col.date.getDate()}</span>
-                                                    : <span className={`text-sm font-semibold mt-1 ${col.isWeekend ? 'text-gray-300' : 'text-gray-700'}`}>{col.date.getDate()}</span>}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* ── Scrollable body ── */}
-                    <div className="flex flex-1 overflow-y-auto">
-
-                    {/* ── Employee column ── */}
-                    <div className="shrink-0 w-15 sm:w-65 border-r border-gray-100 z-10 bg-white">
-
-                        {filteredEmployees.map(emp => {
-                            const isActive = selectedEmployeeId === emp.id;
-                            const isExpanded = expandedRows.has(emp.id);
-                            const visibleLanes = isExpanded ? (emp.laneCount || 1) : Math.min(emp.laneCount || 1, MAX_VISIBLE_LANES);
-                            const h = Math.max(ROW_H, visibleLanes * (TASK_H + TASK_GAP) + TASK_GAP * 2);
-                            const hiddenCount = emp.tasks.filter(t => (t.lane || 0) >= MAX_VISIBLE_LANES).length;
-                            return (
-                                <div
-                                    key={emp.id}
-                                    style={{ height: `${h}px` }}
-                                    className={`border-b border-gray-50 flex items-center gap-3 px-2 sm:px-5 transition-all group relative
-                                        ${isActive ? 'bg-[#33cbcc]/5' : 'hover:bg-gray-50/80'}`}
-                                >
-                                    <div
-                                        className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
-                                        onClick={() => setSelectedEmployeeId(prev => prev === emp.id ? null : emp.id)}
-                                    >
-                                        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden shrink-0 border-2 transition-colors
-                                            ${isActive ? 'border-[#33cbcc] ring-2 ring-[#33cbcc]/20' : 'border-gray-100 group-hover:border-[#33cbcc]/40'}`}>
-                                            <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
-                                        </div>
-                                        <div className="min-w-0 hidden sm:block flex-1">
-                                            <div className="flex items-center gap-2">
-                                                <p className="text-sm font-semibold text-gray-800 truncate">{emp.name}</p>
-                                                {emp.tasks.length > 0 && (
-                                                    <span className="shrink-0 text-[10px] font-bold text-[#33cbcc] bg-[#33cbcc]/10 rounded-full px-1.5 py-0.5 leading-none">
-                                                        {emp.tasks.length}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <p className="text-xs text-gray-400 truncate mt-0.5">{emp.role}</p>
-                                        </div>
-                                    </div>
-                                    {!isExpanded && hiddenCount > 0 && (
-                                        <button
-                                            onClick={() => toggleRow(emp.id)}
-                                            className="hidden sm:flex shrink-0 items-center gap-1 text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 rounded-full px-2 py-0.5 transition-colors"
-                                        >
-                                            <ArrowDown01Icon size={10} />
-                                            +{hiddenCount}
-                                        </button>
-                                    )}
-                                    {isExpanded && hiddenCount > 0 && (
-                                        <button
-                                            onClick={() => toggleRow(emp.id)}
-                                            className="hidden sm:flex shrink-0 items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-gray-600 rounded-full px-2 py-0.5 transition-colors"
-                                        >
-                                            <ArrowUp01Icon size={10} />
-                                        </button>
-                                    )}
-                                </div>
-                            );
-                        })}
-
-                        {filteredEmployees.length === 0 && (
-                            <div style={{ height: `${ROW_H}px` }} className="flex items-center justify-center px-4">
-                                <p className="text-xs text-gray-400">{t('tasksPage.noResults')}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* ── Timeline (scrollable) ── */}
-                    <div ref={scrollRef} className="flex-1 overflow-x-auto">
-                        <div style={{ width: `${totalWidth}px` }} className="relative">
-
-                            {/* ── Task rows ── */}
-                            {filteredEmployees.map(emp => {
-                                const isExpanded = expandedRows.has(emp.id);
-                                const visibleLanes = isExpanded ? (emp.laneCount || 1) : Math.min(emp.laneCount || 1, MAX_VISIBLE_LANES);
-                                const rowH = Math.max(ROW_H, visibleLanes * (TASK_H + TASK_GAP) + TASK_GAP * 2);
-                                const hiddenTasks = emp.tasks.filter(t => (t.lane || 0) >= MAX_VISIBLE_LANES);
-                                return (
-                                <div
-                                    key={emp.id}
-                                    style={{ height: `${rowH}px` }}
-                                    className={`border-b border-gray-50 relative flex cursor-pointer overflow-hidden ${selectedEmployeeId === emp.id ? 'bg-[#33cbcc]/2' : ''}`}
-                                    onClick={e => handleRowClick(e, emp)}
-                                >
-                                    {/* Background grid */}
-                                    {viewMode === 'year'
-                                        ? yearMonths.map(m => (
-                                            <div
-                                                key={m.month}
-                                                style={{ width: `${m.width}px` }}
-                                                className={`shrink-0 border-r border-gray-100 ${m.month % 2 === 1 ? 'bg-gray-50/30' : ''}`}
-                                            />
-                                        ))
-                                        : columns.map(col => (
-                                            <div
-                                                key={col.index}
-                                                style={{ width: `${dayPx}px` }}
-                                                className={`shrink-0 border-r border-gray-50 ${col.isWeekend ? 'bg-gray-50/50' : ''}`}
-                                            />
-                                        ))
-                                    }
-
-                                    {/* Task bars */}
-                                    {emp.tasks.map(task => {
-                                        const isDrag = drag?.taskId === task.id;
-                                        // Hide tasks in collapsed lanes
-                                        if (!isExpanded && (task.lane || 0) >= MAX_VISIBLE_LANES) return null;
-
-                                        let bar: { left: number; width: number } | null;
-                                        let preview: { start: Date; end: Date } | null = null;
-
-                                        if (isDrag && drag) {
-                                            preview = getPreviewDates(drag);
-                                            bar = getBar({ ...task, startDate: preview.start, endDate: preview.end });
-                                        } else {
-                                            bar = getBar(task);
-                                        }
-                                        if (!bar) return null;
-
-                                        const c = TASK_COLORS[task.color];
-                                        const narrow = bar.width < 55;
-                                        const top = (task.lane || 0) * (TASK_H + TASK_GAP) + TASK_GAP;
-
-                                        return (
-                                            <div
-                                                key={task.id}
-                                                className={`absolute rounded-xl group/task z-6 select-none
-                                                    ${isDrag ? 'shadow-lg ring-2 ring-[#33cbcc]/30' : ''}`}
-                                                style={{
-                                                    left: `${bar.left}px`,
-                                                    top: `${top}px`,
-                                                    height: `${TASK_H}px`,
-                                                    width: `${Math.max(bar.width, 24)}px`,
-                                                    backgroundColor: c.bg,
-                                                    borderLeft: `4px solid ${c.border}`,
-                                                    opacity: isDrag ? 0.92 : 1,
-                                                    touchAction: 'none',
-                                                    transition: isDrag ? 'none' : 'box-shadow 0.2s, opacity 0.2s',
-                                                }}
-                                            >
-                                                {/* Left resize handle */}
-                                                {!task.selfAssigned && (
-                                                <div
-                                                    className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize z-10 rounded-l-xl opacity-0 group-hover/task:opacity-100 bg-black/5 hover:bg-black/15! transition-opacity"
-                                                    onPointerDown={ev => { ev.stopPropagation(); startDrag(ev, task, emp, 'resize-start'); }}
-                                                />
-                                                )}
-
-                                                {/* Content area — move drag + click for modal */}
-                                                <div
-                                                    className="flex items-center gap-1.5 px-2.5 h-full cursor-grab active:cursor-grabbing relative group/bar"
-                                                    onPointerDown={ev => { if (ev.button === 0 && !task.selfAssigned) startDrag(ev, task, emp, 'move'); }}
-                                                    onClick={e => { e.stopPropagation(); if (!wasDragging.current) setModalData({ task, employee: emp }); }}
-                                                >
-                                                    {!narrow && (
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-xs font-bold truncate" style={{ color: c.text }}>{task.title}</p>
-                                                            <p className="text-[10px] truncate opacity-60 mt-0.5" style={{ color: c.text }}>{task.subtitle}</p>
-                                                        </div>
-                                                    )}
-                                                    {!narrow && task.hasFlag && (
-                                                        <Flag01Icon size={12} className="shrink-0 opacity-50" style={{ color: c.text }} />
-                                                    )}
-                                                    {!narrow && task.selfAssigned && (
-                                                        <ZapIcon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
-                                                    )}
-                                                    {!narrow && task.urgent && (
-                                                        <Alert02Icon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
-                                                    )}
-                                                    {!narrow && task.important && (
-                                                        <StarIcon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
-                                                    )}
-                                                    {/* Full title tooltip on hover */}
-                                                    {!isDrag && (
-                                                        <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover/bar:block z-30 pointer-events-none">
-                                                            <div className="bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5 rounded-lg shadow-lg whitespace-nowrap max-w-xs">
-                                                                <p className="font-bold">{task.title}</p>
-                                                                {task.subtitle && <p className="opacity-70 mt-0.5">{task.subtitle}</p>}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                {/* Right resize handle */}
-                                                {!task.selfAssigned && (
-                                                <div
-                                                    className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10 rounded-r-xl opacity-0 group-hover/task:opacity-100 bg-black/5 hover:bg-black/15! transition-opacity"
-                                                    onPointerDown={ev => { ev.stopPropagation(); startDrag(ev, task, emp, 'resize-end'); }}
-                                                />
-                                                )}
-
-                                                {/* Date tooltip while dragging */}
-                                                {isDrag && preview && (
-                                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] font-medium px-2 py-1 rounded-md whitespace-nowrap pointer-events-none shadow-lg z-20">
-                                                        {fmtShort(preview.start)} – {fmtShort(preview.end)}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-
-                                    {/* +N more pill when collapsed */}
-                                    {!isExpanded && hiddenTasks.length > 0 && (
-                                        <button
-                                            onClick={e => { e.stopPropagation(); toggleRow(emp.id); }}
-                                            className="absolute bottom-1.5 right-2 flex items-center gap-1 text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 rounded-full px-2 py-0.5 transition-colors z-10"
-                                        >
-                                            <ArrowDown01Icon size={10} />
-                                            +{hiddenTasks.length} more
-                                        </button>
-                                    )}
-                                </div>
-                                );
-                            })}
-
-                            {/* Empty state */}
-                            {filteredEmployees.length === 0 && (
-                                <div style={{ height: `${ROW_H}px` }} className="flex items-center justify-center">
-                                    <p className="text-xs text-gray-300">—</p>
-                                </div>
-                            )}
-
-                            {/* Today vertical line */}
-                            {showTodayLine && (
-                                <div
-                                    className="absolute top-0 bottom-0 w-0.5 bg-[#33cbcc]/50 z-5 pointer-events-none"
-                                    style={{ left: `${todayIdx * dayPx + dayPx / 2}px` }}
-                                />
-                            )}
-                        </div>
-                    </div>{/* end scrollRef timeline */}
-                    </div>{/* end scrollable body flex */}
-                </div>{/* end flex-col */}
-            </motion.div>
-            </>}
-
-            {/* ═══ Task detail modal ═══ */}
-            <AnimatePresence>
-                {modalData && (
-                    <TaskDetailModal
-                        task={modalData.task}
-                        employee={modalData.employee}
-                        onClose={() => setModalData(null)}
-                        onEdit={modalData.task.apiId && modalData.task.status !== 'done' ? () => setEditingGanttTask({ task: modalData!.task, emp: modalData!.employee }) : undefined}
-                        onDelete={modalData.task.apiId ? () => {
-                            deleteTaskMutation.mutate(modalData!.task.apiId!);
-                            setModalData(null);
-                        } : undefined}
-                        onHistory={modalData.task.apiId ? () => setHistoryTaskId(modalData!.task.apiId!) : undefined}
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* ═══ Edit Gantt Task modal ═══ */}
-            <AnimatePresence>
-                {editingGanttTask && (
-                    <EditGanttTaskModal
-                        task={editingGanttTask.task}
-                        onClose={() => setEditingGanttTask(null)}
-                        isSaving={updateTaskMutation.isPending}
-                        onSave={(dto) => {
-                            if (!editingGanttTask.task.apiId) return;
-                            updateTaskMutation.mutate(
-                                { id: editingGanttTask.task.apiId, dto: dto as any },
-                                { onSuccess: () => setEditingGanttTask(null) }
-                            );
-                        }}
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* ═══ Time01Icon modal ═══ */}
-            <AnimatePresence>
-                {historyTaskId && (
-                    <GanttHistoryModal
-                        taskId={historyTaskId}
-                        onClose={() => setHistoryTaskId(null)}
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* ═══ Add task modal ═══ */}
-            <AnimatePresence>
-                {addTaskData && (
-                    <AddTaskModal
-                        employees={employees}
-                        initialEmployee={addTaskData.employee}
-                        initialDate={addTaskData.date}
-                        onClose={() => setAddTaskData(null)}
-                        onAdd={handleAddTask}
-                    />
-                )}
-            </AnimatePresence>
-
-            {/* ═══ Nature manager modal ═══ */}
-            <AnimatePresence>
-                {showNatureManager && (
-                    <TaskNatureManager onClose={() => setShowNatureManager(false)} />
-                )}
-            </AnimatePresence>
-        </div>
-    );
+  const { t } = useTranslation();
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [pageView, setPageView] = useState<'calendar' | 'board'>('board');
+  const [viewMode, setViewMode] = useState<ViewMode>('week');
+  const [boardFilterEmployee, setBoardFilterEmployee] = useState('');
+  const [boardFilterDepartment, setBoardFilterDepartment] = useState('');
+  const [boardCurrentDate, setBoardCurrentDate] = useState(() => new Date());
+  const [boardViewMode, setBoardViewMode] = useState<'week' | 'month'>('week');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
+  const [modalData, setModalData] = useState<{ task: GanttTask; employee: EmployeeRow } | null>(null);
+  const [addTaskData, setAddTaskData] = useState<{ employee?: EmployeeRow; date: Date } | null>(null);
+  const [editingGanttTask, setEditingGanttTask] = useState<{ task: GanttTask; emp: EmployeeRow } | null>(null);
+  const [historyTaskId, setHistoryTaskId] = useState<string | null>(null);
+  const [showNatureManager, setShowNatureManager] = useState(false);
+  const [distView, setDistView] = useState<'nature' | 'activity'>('nature');
+  const [distPeriod, setDistPeriod] = useState<'day' | 'week' | 'month' | 'year'>('week');
+  const [distOffset, setDistOffset] = useState(0);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const toggleRow = (id: number) => setExpandedRows(prev => { const s = new Set(prev); s.has(id) ? s.delete(id) : s.add(id); return s; });
+
+  // API data
+  const deptScope = useDepartmentScope();
+  // Calendar view needs full task list; board view uses its own paginated queries
+  const { data: apiTasks, isLoading: loadingTasks } = useTasks(deptScope, undefined, undefined, pageView === 'calendar');
+  const { data: apiEmployees, isLoading: loadingEmployees } = useEmployees(deptScope);
+  const distRange = useMemo(() => {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const fmt = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const now = new Date();
+  if (distPeriod === 'day') {
+  const d = new Date(now);
+  d.setDate(now.getDate() + distOffset);
+  const s = fmt(d);
+  return { from: s, to: s, label: d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }) };
+  }
+  if (distPeriod === 'week') {
+  const day = now.getDay();
+  const toMon = day === 0 ? -6 : 1 - day;
+  const mon = new Date(now); mon.setDate(now.getDate() + toMon + distOffset * 7);
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  return { from: fmt(mon), to: fmt(sun), label: `${mon.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })} – ${sun.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}` };
+  }
+  if (distPeriod === 'month') {
+  const first = new Date(now.getFullYear(), now.getMonth() + distOffset, 1);
+  const last  = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+  return { from: fmt(first), to: fmt(last), label: first.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' }) };
+  }
+  // year
+  const year = now.getFullYear() + distOffset;
+  return { from: `${year}-01-01`, to: `${year}-12-31`, label: String(year) };
+  }, [distPeriod, distOffset]);
+  const { data: globalDist } = useGlobalDistribution(distRange.from, distRange.to);
+  const { data: apiDepartments } = useDepartments();
+  const createTaskMutation = useCreateTask();
+  const updateTaskMutation = useUpdateTask();
+  const deleteTaskMutation = useDeleteTask();
+  const uploadAttachmentMutation = useUploadTaskAttachment();
+
+  // Map API data to display shapes — no mock fallback
+  const TASK_COLOR_MAP: Record<string, ColorKey> = {
+  'EASY': 'teal', 'MEDIUM': 'blue', 'HARD': 'rose',
+  };
+  const STATE_STATUS_MAP: Record<string, 'todo' | 'in_progress' | 'done'> = {
+  'CREATED': 'todo', 'ASSIGNED': 'todo', 'IN_PROGRESS': 'in_progress',
+  'BLOCKED': 'in_progress', 'COMPLETED': 'done', 'REVIEWED': 'done',
+  };
+  const initialData: EmployeeRow[] = (apiEmployees || []).map((emp, i) => {
+  const empTasks = (apiTasks || []).filter(t => t.assignedToId === emp.id);
+ 
+  const mappedTasks = empTasks.map((t, j) => {
+  const start = t.startDate ? new Date(t.startDate) : (t.dueDate ? new Date(t.dueDate) : new Date());
+  const end = t.endDate ? new Date(t.endDate) : start;
+ 
+  return {
+  id: j + 1,
+  apiId: t.id,
+  title: t.title,
+  subtitle: t.project?.name || '',
+  startDate: start,
+  endDate: end,
+  color: (TASK_COLOR_MAP[t.difficulty] || 'blue') as ColorKey,
+  status: (STATE_STATUS_MAP[t.state] || 'todo') as 'todo' | 'in_progress' | 'done',
+  description: t.description || undefined,
+  selfAssigned: t.selfAssigned || false,
+  natureId: t.natureId || undefined,
+  natureName: t.nature?.name,
+  startedAt: t.startedAt || null,
+  completedAt: t.completedAt || null,
+  subtasks: t.subtasks || [],
+  attachments: t.attachments || [],
+  urgent: t.urgent || false,
+  important: t.important || false,
+  };
+  });
+
+  const tasksWithLanes = assignLanes(mappedTasks);
+  const laneCount = tasksWithLanes.reduce((max, t) => Math.max(max, (t.lane || 0) + 1), 1);
+
+  return {
+  id: i + 1,
+  apiId: emp.id,
+  name: `${emp.firstName} ${emp.lastName}`,
+  role: emp.position?.title || '',
+  avatar: emp.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.firstName + '+' + emp.lastName)}`,
+  departmentId: emp.departmentId || '',
+  departmentName: emp.department?.name || '',
+  tasks: tasksWithLanes,
+  laneCount,
+  } as EmployeeRow;
+  });
+
+  const [employees, setEmployees] = useState(initialData);
+
+  // Sync when API data changes
+  useEffect(() => {
+  setEmployees(initialData);
+  }, [apiEmployees, apiTasks]);
+  const [drag, setDrag] = useState<{
+  taskId: number; empId: number;
+  type: 'move' | 'resize-start' | 'resize-end';
+  startX: number; deltaDays: number;
+  origStart: Date; origEnd: Date;
+  } | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
+  const wasDragging = useRef(false);
+  const dayPxRef = useRef(0);
+  const [timelineWidth, setTimelineWidth] = useState(0);
+
+  useEffect(() => {
+  const el = scrollRef.current;
+  if (!el) return;
+  const ro = new ResizeObserver(entries => {
+  setTimelineWidth(entries[0]?.contentRect.width ?? 0);
+  });
+  ro.observe(el);
+  return () => ro.disconnect();
+  }, []);
+
+  // Sync fixed header horizontal scroll with the body timeline scroll
+  useEffect(() => {
+  const body = scrollRef.current;
+  if (!body) return;
+  const onScroll = () => {
+  const header = headerScrollRef.current;
+  if (header) header.scrollLeft = body.scrollLeft;
+  };
+  body.addEventListener('scroll', onScroll, { passive: true });
+  return () => body.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  /* ── View range ── */
+
+  let viewStart: Date;
+  let viewDays: number;
+  const dayPx = viewMode === 'week' && timelineWidth > 0
+  ? Math.floor(timelineWidth / 7)
+  : DAY_PX[viewMode];
+  dayPxRef.current = dayPx;
+
+  if (viewMode === 'day') {
+  viewStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+  viewDays = 1;
+  } else if (viewMode === 'week') {
+  viewStart = startOfWeek(currentDate);
+  viewDays = 7;
+  } else if (viewMode === 'month') {
+  viewStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  viewDays = numDaysInMonth(currentDate.getFullYear(), currentDate.getMonth());
+  } else {
+  viewStart = new Date(currentDate.getFullYear(), 0, 1);
+  const isLeap = (y: number) => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+  viewDays = isLeap(currentDate.getFullYear()) ? 366 : 365;
+  }
+
+  const viewEnd = addDays(viewStart, viewDays - 1);
+  const totalWidth = viewDays * dayPx;
+
+  /* ── Columns (for week / month header) ── */
+
+  const columns = Array.from({ length: viewDays }, (_, i) => {
+  const date = addDays(viewStart, i);
+  return {
+  index: i,
+  date,
+  dow: date.getDay(),
+  isWeekend: date.getDay() === 0 || date.getDay() === 6,
+  isToday: isSameDay(date, today),
+  };
+  });
+
+  /* ── Year-view month headers ── */
+
+  const yearMonths = viewMode === 'year'
+  ? Array.from({ length: 12 }, (_, m) => {
+  const mStart = new Date(currentDate.getFullYear(), m, 1);
+  const days = numDaysInMonth(currentDate.getFullYear(), m);
+  return { month: m, name: MONTH_NAMES[m], startIdx: diffDays(viewStart, mStart), days, width: days * dayPx };
+  })
+  : [];
+
+  /* ── Today column index ── */
+
+  const todayIdx = diffDays(viewStart, today);
+  const showTodayLine = todayIdx >= 0 && todayIdx < viewDays;
+
+  /* ── Filtering ── */
+
+  const filteredEmployees = employees.filter(e => {
+  // Row-click selection takes priority — ignore text search when one employee is pinned
+  if (selectedEmployeeId !== null) return e.id === selectedEmployeeId;
+  // Text search filters by name or role
+  if (!searchQuery) return true;
+  return e.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  e.role.toLowerCase().includes(searchQuery.toLowerCase());
+  });
+
+  const selectedEmployee = selectedEmployeeId !== null
+  ? employees.find(e => e.id === selectedEmployeeId)
+  : null;
+
+  const allExpanded = filteredEmployees.length > 0 && filteredEmployees.every(e => expandedRows.has(e.id));
+  const toggleAllRows = () => setExpandedRows(allExpanded ? new Set() : new Set(filteredEmployees.map(e => e.id)));
+
+  /* ── Navigation ── */
+
+  const nav = (dir: number) => {
+  const d = new Date(currentDate);
+  if (viewMode === 'day') d.setDate(d.getDate() + dir);
+  else if (viewMode === 'week') d.setDate(d.getDate() + dir * 7);
+  else if (viewMode === 'month') d.setMonth(d.getMonth() + dir);
+  else d.setFullYear(d.getFullYear() + dir);
+  setCurrentDate(d);
+  };
+
+  const navLabel = (() => {
+  if (viewMode === 'day')
+  return currentDate.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  if (viewMode === 'week') {
+  const ws = startOfWeek(currentDate);
+  const we = addDays(ws, 6);
+  const o: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  if (ws.getMonth() !== we.getMonth())
+  return `${ws.toLocaleDateString(undefined, o)} – ${we.toLocaleDateString(undefined, { ...o, year: 'numeric' })}`;
+  return `${ws.toLocaleDateString(undefined, o)} – ${we.getDate()}, ${we.getFullYear()}`;
+  }
+  if (viewMode === 'month')
+  return currentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  return `${currentDate.getFullYear()}`;
+  })();
+
+  /* ── Board date range ── */
+
+  const boardViewStart = boardViewMode === 'week'
+  ? startOfWeek(boardCurrentDate)
+  : new Date(boardCurrentDate.getFullYear(), boardCurrentDate.getMonth(), 1);
+
+  const boardViewDays = boardViewMode === 'week'
+  ? 7
+  : numDaysInMonth(boardCurrentDate.getFullYear(), boardCurrentDate.getMonth());
+
+  const boardViewEnd = addDays(boardViewStart, boardViewDays - 1);
+
+  // Board-view paginated queries — one per status group
+  const boardEndOfDay = new Date(boardViewEnd.getFullYear(), boardViewEnd.getMonth(), boardViewEnd.getDate(), 23, 59, 59, 999);
+  const boardFilters = {
+  departmentId: boardFilterDepartment || deptScope || undefined,
+  employeeId: boardFilterEmployee || undefined,
+  boardFrom: boardViewStart.toISOString(),
+  boardTo: boardEndOfDay.toISOString(),
+  };
+  const todoQuery = useInfiniteTasksByStates(['CREATED', 'ASSIGNED'], boardFilters, pageView === 'board');
+  const inProgressQuery = useInfiniteTasksByStates(['IN_PROGRESS', 'BLOCKED'], boardFilters, pageView === 'board');
+  const doneQuery = useInfiniteTasksByStates(['COMPLETED', 'REVIEWED'], boardFilters, pageView === 'board');
+  const boardTotalCount =
+  (todoQuery.data?.pages[0]?.count ?? 0) +
+  (inProgressQuery.data?.pages[0]?.count ?? 0) +
+  (doneQuery.data?.pages[0]?.count ?? 0);
+
+  // Map raw API task to board card shape
+  const deptNameMap = Object.fromEntries((apiDepartments || []).map(d => [d.id, (d as any).name as string]));
+  const TASK_COLOR_MAP_BOARD: Record<string, ColorKey> = { EASY: 'teal', MEDIUM: 'blue', HARD: 'rose' };
+  const STATE_STATUS_MAP_BOARD: Record<string, 'todo' | 'in_progress' | 'done'> = {
+  CREATED: 'todo', ASSIGNED: 'todo', IN_PROGRESS: 'in_progress',
+  BLOCKED: 'in_progress', COMPLETED: 'done', REVIEWED: 'done',
+  };
+  const mapBoardTask = (t: Task) => {
+  const emp = t.assignedTo;
+  const start = t.startDate ? new Date(t.startDate) : (t.dueDate ? new Date(t.dueDate) : new Date());
+  const end = t.endDate ? new Date(t.endDate) : start;
+  return {
+  ...t,
+  apiId: t.id,
+  startDate: start,
+  endDate: end,
+  status: STATE_STATUS_MAP_BOARD[t.state] || 'todo',
+  subtitle: t.project?.name || '',
+  color: (TASK_COLOR_MAP_BOARD[t.difficulty] || 'blue') as ColorKey,
+  natureName: t.nature?.name,
+  employee: {
+  apiId: emp?.id || '',
+  avatar: emp?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(((emp?.firstName || '') + '+' + (emp?.lastName || '')))}`,
+  name: emp ? `${emp.firstName} ${emp.lastName}` : '',
+  departmentName: emp?.departmentId ? (deptNameMap[emp.departmentId] || '') : '',
+  },
+  };
+  };
+
+  const boardNavLabel = boardViewMode === 'week'
+  ? (() => {
+  const we = addDays(boardViewStart, 6);
+  const o: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  if (boardViewStart.getMonth() !== we.getMonth())
+  return `${boardViewStart.toLocaleDateString(undefined, o)} – ${we.toLocaleDateString(undefined, { ...o, year: 'numeric' })}`;
+  return `${boardViewStart.toLocaleDateString(undefined, o)} – ${we.getDate()}, ${we.getFullYear()}`;
+  })()
+  : boardCurrentDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+  const boardNav = (dir: number) => {
+  const d = new Date(boardCurrentDate);
+  if (boardViewMode === 'week') d.setDate(d.getDate() + dir * 7);
+  else d.setMonth(d.getMonth() + dir);
+  setBoardCurrentDate(d);
+  };
+
+  /* ── Task bar position ── */
+
+  const getBar = (task: GanttTask) => {
+  const ts = new Date(task.startDate); ts.setHours(0, 0, 0, 0);
+  const te = new Date(task.endDate);   te.setHours(0, 0, 0, 0);
+  const cs = ts < viewStart ? viewStart : ts;
+  const ce = te > viewEnd ? viewEnd : te;
+  if (cs > viewEnd || ce < viewStart) return null;
+  const offset = diffDays(viewStart, cs);
+  const span = diffDays(cs, ce) + 1;
+  return { left: offset * dayPx + 4, width: span * dayPx - 8 };
+  };
+
+  /* ── Drag helpers ── */
+
+  const getPreviewDates = (d: NonNullable<typeof drag>) => {
+  const maxD = diffDays(d.origStart, d.origEnd);
+  let s = new Date(d.origStart);
+  let e = new Date(d.origEnd);
+  if (d.type === 'move') {
+  s = addDays(s, d.deltaDays);
+  e = addDays(e, d.deltaDays);
+  } else if (d.type === 'resize-start') {
+  s = addDays(s, Math.min(d.deltaDays, maxD));
+  } else {
+  e = addDays(e, Math.max(d.deltaDays, -maxD));
+  }
+  return { start: s, end: e };
+  };
+
+  const startDrag = (
+  e: React.PointerEvent,
+  task: GanttTask,
+  emp: EmployeeRow,
+  type: 'move' | 'resize-start' | 'resize-end',
+  ) => {
+  e.stopPropagation();
+  e.preventDefault();
+  const startX = e.clientX;
+  const origStart = new Date(task.startDate);
+  const origEnd = new Date(task.endDate);
+  let currentDelta = 0;
+  wasDragging.current = false;
+  document.body.style.userSelect = 'none';
+  document.body.style.cursor = type === 'move' ? 'grabbing' : 'col-resize';
+
+  const onMove = (ev: PointerEvent) => {
+  const delta = Math.round((ev.clientX - startX) / dayPxRef.current);
+  if (delta !== currentDelta) {
+  currentDelta = delta;
+  wasDragging.current = true;
+  setDrag({ taskId: task.id, empId: emp.id, type, startX, deltaDays: delta, origStart, origEnd });
+  }
+  };
+
+  const onUp = () => {
+  document.removeEventListener('pointermove', onMove);
+  document.removeEventListener('pointerup', onUp);
+  document.body.style.userSelect = '';
+  document.body.style.cursor = '';
+
+  if (currentDelta !== 0) {
+  const maxD = diffDays(origStart, origEnd);
+  let s = new Date(origStart);
+  let en = new Date(origEnd);
+  if (type === 'move') { s = addDays(s, currentDelta); en = addDays(en, currentDelta); }
+  else if (type === 'resize-start') { s = addDays(s, Math.min(currentDelta, maxD)); }
+  else { en = addDays(en, Math.max(currentDelta, -maxD)); }
+
+  setEmployees(prev => prev.map(em => {
+  if (em.id !== emp.id) return em;
+  const updatedTasks = em.tasks.map(t => t.id !== task.id ? t : { ...t, startDate: s, endDate: en });
+  const tasksWithLanes = assignLanes(updatedTasks);
+  const laneCount = tasksWithLanes.reduce((max, t) => Math.max(max, (t.lane || 0) + 1), 1);
+  return { ...em, tasks: tasksWithLanes, laneCount };
+  }));
+
+  // Persist to backend
+  if (task.apiId) {
+  updateTaskMutation.mutate({
+  id: task.apiId,
+  dto: {
+  startDate: s.toISOString(),
+  endDate: en.toISOString(),
+  },
+  });
+  }
+  }
+  setDrag(null);
+  setTimeout(() => { wasDragging.current = false; }, 50);
+  };
+
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+  setDrag({ taskId: task.id, empId: emp.id, type, startX, deltaDays: 0, origStart, origEnd });
+  };
+
+  const fmtShort = (d: Date) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+  /* ── Add task handler ── */
+
+  const handleAddTask = async (empId: number, task: GanttTask, files?: File[]) => {
+  const emp = employees.find(e => e.id === empId);
+  setEmployees(prev => prev.map(em => {
+  if (em.id !== empId) return em;
+  const newTasks = [...em.tasks, task];
+  const tasksWithLanes = assignLanes(newTasks);
+  const laneCount = tasksWithLanes.reduce((max, t) => Math.max(max, (t.lane || 0) + 1), 1);
+  return { ...em, tasks: tasksWithLanes, laneCount };
+  }));
+  // Also call API to persist
+  try {
+  const created = await createTaskMutation.mutateAsync({
+  title: task.title,
+  description: task.description || undefined,
+  difficulty: (task.difficulty as any) || 'MEDIUM',
+  state: 'ASSIGNED',
+  assignedToId: emp?.apiId,
+  projectId: task.projectId || undefined,
+  natureId: task.natureId || undefined,
+  leadId: task.leadId || undefined,
+  startDate: task.startDate.toISOString(),
+  endDate: task.endDate.toISOString(),
+  dueDate: task.endDate.toISOString(),
+  urgent: task.urgent || false,
+  important: task.important || false,
+  });
+  // Upload attachments if any
+  if (files && files.length > 0 && created?.id) {
+  for (const file of files) {
+  await uploadAttachmentMutation.mutateAsync({ taskId: created.id, file });
+  }
+  }
+  } catch {
+  // Error handled by mutation onError callback
+  }
+  };
+
+  const handleRowClick = (e: React.MouseEvent<HTMLDivElement>, emp: EmployeeRow) => {
+  if (wasDragging.current) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const dayOffset = Math.floor(x / dayPx);
+  const clickedDate = addDays(viewStart, dayOffset);
+  setAddTaskData({ employee: emp, date: clickedDate });
+  };
+
+  /* ── Auto-scroll to today ── */
+
+  useEffect(() => {
+  if (scrollRef.current && showTodayLine) {
+  scrollRef.current.scrollLeft = Math.max(0, todayIdx * dayPx - 200);
+  }
+  }, [currentDate, viewMode]);
+
+  /* ════════════════════════ JSX ════════════════════════ */
+
+  if (loadingTasks || loadingEmployees) {
+  return <TasksAdminSkeleton />;
+  }
+
+  return (
+  <div className="space-y-5">
+
+  {/* ═══ Page header ═══ */}
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+  <div>
+  <h1 className="text-2xl font-bold text-gray-800">{t('tasksPage.title')}</h1>
+  <p className="text-sm text-gray-400 mt-1">{t('tasksPage.subtitle')}</p>
+  </div>
+  <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+  {/* Calendar / Board toggle */}
+  <ToggleSwitch
+    checked={pageView === 'board'}
+    onChange={v => setPageView(v ? 'board' : 'calendar')}
+    labels={[t('tasksPage.calendarView'), t('tasksPage.boardView')]}
+  />
+  <button
+  onClick={() => setShowNatureManager(true)}
+  className="p-2.5  border border-gray-200 text-gray-500 hover:text-[#33cbcc] hover:border-[#33cbcc]/30 transition-colors"
+  title={t('taskNatures.manageTitle')}
+  >
+  <Settings01Icon size={16} />
+  </button>
+  <button
+  onClick={() => setAddTaskData({ date: new Date() })}
+  className="flex items-center gap-2 bg-[#33cbcc] text-white px-4 py-2.5  text-sm font-semibold hover:bg-[#2bb5b6] transition-colors shadow-sm shadow-[#33cbcc]/20 flex-1 sm:flex-none justify-center"
+  >
+  <Add01Icon size={16} />
+  {t('tasksPage.addTask')}
+  </button>
+  <div className="relative w-full sm:w-auto">
+  <Search01Icon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#b0bac9] pointer-events-none" />
+  <input
+  type="text"
+  value={searchQuery}
+  onChange={e => setSearchQuery(e.target.value)}
+  placeholder={t('tasksPage.searchPlaceholder')}
+  className="w-full sm:w-60 bg-white border border-[#e5e8ef]  py-3.5 pl-11 pr-4 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] transition-colors"
+  />
+  {searchQuery && (
+  <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#b0bac9] hover:text-[#1c2b3a]">
+  <Cancel01Icon size={14} />
+  </button>
+  )}
+  </div>
+  </div>
+  </div>
+
+  {/* ═══ Distribution chart ═══ */}
+  <div className="bg-white  border border-gray-100 p-5 shadow-sm">
+  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+  <div>
+  <h3 className="text-sm font-bold text-gray-800">Répartition des activités</h3>
+  <p className="text-[11px] text-gray-400 mt-0.5">Distribution globale du temps et des activités</p>
+  </div>
+  <div className="flex flex-wrap items-center gap-2">
+  {/* Period selector */}
+  <div className="flex bg-gray-100  p-1">
+  {(['day', 'week', 'month', 'year'] as const).map(p => (
+  <button key={p} onClick={() => { setDistPeriod(p); setDistOffset(0); }}
+  className={`px-2.5 py-1.5  text-xs font-semibold transition-all ${distPeriod === p ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+  {p === 'day' ? 'Jour' : p === 'week' ? 'Semaine' : p === 'month' ? 'Mois' : 'Année'}
+  </button>
+  ))}
+  </div>
+  {/* Navigation */}
+  <div className="flex items-center gap-1">
+  <button onClick={() => setDistOffset(o => o - 1)} className="p-1.5  hover:bg-gray-100 text-gray-500 transition-colors">
+  <ArrowLeft01Icon size={15} />
+  </button>
+  <span className="text-xs font-semibold text-gray-700 min-w-[120px] text-center capitalize">{distRange.label}</span>
+  <button onClick={() => setDistOffset(o => o + 1)} disabled={distOffset >= 0}
+  className="p-1.5  hover:bg-gray-100 text-gray-500 transition-colors disabled:opacity-30">
+  <ArrowRight01Icon size={15} />
+  </button>
+  </div>
+  {/* View toggle */}
+  <ToggleSwitch
+    checked={distView === 'activity'}
+    onChange={v => setDistView(v ? 'activity' : 'nature')}
+    labels={['Nature', 'Activité']}
+  />
+  </div>
+  </div>
+
+  {!globalDist ? (
+  <div className="flex items-center justify-center h-52">
+  <div className="w-5 h-5 border-2 border-[#33cbcc] border-t-transparent rounded-full animate-spin" />
+  </div>
+  ) :
+
+  distView === 'nature' ? (() => {
+  const CHART_PALETTE = ['#33cbcc','#283852','#f59e0b','#8b5cf6','#ef4444','#10b981','#ec4899','#f97316','#06b6d4','#6366f1'];
+  const data = globalDist.natureDistribution;
+  if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">Aucune donnée</p>;
+  return (
+  <div className="flex flex-col md:flex-row items-center gap-6">
+  <div className="w-full md:w-64 h-52">
+  <ResponsiveContainer width="100%" height="100%">
+  <PieChart>
+  <Pie data={data} dataKey="hours" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
+  {data.map((_entry, i) => (
+  <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
+  ))}
+  </Pie>
+  <Tooltip formatter={(v: any) => [`${v}h`, 'Heures']} />
+  </PieChart>
+  </ResponsiveContainer>
+  </div>
+  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+  {data.map((entry, i) => (
+  <div key={i} className="flex items-center gap-2.5">
+  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_PALETTE[i % CHART_PALETTE.length] }} />
+  <div className="min-w-0">
+  <p className="text-xs font-medium text-gray-700 truncate">{entry.name}</p>
+  <p className="text-[11px] text-gray-400">{entry.hours}h · {entry.percentage}%</p>
+  </div>
+  </div>
+  ))}
+  </div>
+  </div>
+  );
+  })() : (() => {
+  const CHART_PALETTE = ['#33cbcc','#283852','#f59e0b','#8b5cf6','#ef4444','#10b981','#ec4899','#f97316','#06b6d4','#6366f1'];
+  const ACTIVITY_LABELS: Record<string, string> = {
+  VISITE_CLIENT: 'Visite client', VISITE_PROSPECT: 'Visite prospect',
+  APPEL: 'Appel', EMAIL: 'Email', REUNION: 'Réunion',
+  DEMO: 'Démo', RELANCE: 'Relance', AUTRE: 'Autre',
+  };
+  const data = globalDist.activityDistribution.map(d => ({
+  ...d,
+  name: ACTIVITY_LABELS[d.type] || d.type,
+  }));
+  if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">Aucune activité enregistrée</p>;
+  return (
+  <div className="flex flex-col md:flex-row items-center gap-6">
+  <div className="w-full md:w-64 h-52">
+  <ResponsiveContainer width="100%" height="100%">
+  <PieChart>
+  <Pie data={data} dataKey="count" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
+  {data.map((_entry, i) => (
+  <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
+  ))}
+  </Pie>
+  <Tooltip formatter={(v: any) => [`${v}`, 'Activités']} />
+  </PieChart>
+  </ResponsiveContainer>
+  </div>
+  <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
+  {data.map((entry, i) => (
+  <div key={i} className="flex items-center gap-2.5">
+  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_PALETTE[i % CHART_PALETTE.length] }} />
+  <div className="min-w-0">
+  <p className="text-xs font-medium text-gray-700 truncate">{entry.name}</p>
+  <p className="text-[11px] text-gray-400">{entry.count} activité{entry.count > 1 ? 's' : ''} · {entry.percentage}%</p>
+  </div>
+  </div>
+  ))}
+  </div>
+  </div>
+  );
+  })()}
+  </div>
+
+  {/* ═══ Board view ═══ */}
+  {pageView === 'board' && (() => {
+  const selectCls = 'bg-white  border border-gray-200 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all appearance-none cursor-pointer';
+
+  // Apply client-side text search on already-loaded results
+  const filterBySearch = (tasks: ReturnType<typeof mapBoardTask>[]) => {
+  if (!searchQuery) return tasks;
+  const q = searchQuery.toLowerCase();
+  return tasks.filter(t =>
+  t.title.toLowerCase().includes(q) ||
+  t.employee.name.toLowerCase().includes(q),
+  );
+  };
+
+  const todoTasks = filterBySearch((todoQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
+  const inProgressTasks = filterBySearch((inProgressQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
+  const doneTasks = filterBySearch((doneQuery.data?.pages.flatMap(p => p.rows) || []).map(mapBoardTask));
+
+  const BOARD_COLS = [
+  { key: 'todo' as const,   label: t('tasksPage.todo'),   dot: '#9ca3af', query: todoQuery,   tasks: todoTasks },
+  { key: 'in_progress' as const, label: t('tasksPage.inProgress'), dot: '#283852', query: inProgressQuery, tasks: inProgressTasks },
+  { key: 'done' as const,   label: t('tasksPage.done'),   dot: '#33cbcc', query: doneQuery,   tasks: doneTasks },
+  ];
+
+  const diffLabel: Record<ColorKey, string> = {
+  teal:  t('tasksPage.difficultyEasy'),
+  blue:  t('tasksPage.difficultyMedium'),
+  amber: t('tasksPage.difficultyHard'),
+  rose:  t('tasksPage.difficultyHard'),
+  };
+
+  return (
+  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+  {/* Date navigation */}
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+  <div className="flex items-center gap-3 flex-wrap">
+  {/* Week / Month toggle */}
+  <ToggleSwitch
+    checked={boardViewMode === 'month'}
+    onChange={v => setBoardViewMode(v ? 'month' : 'week')}
+    labels={[t('tasksPage.view_week'), t('tasksPage.view_month')]}
+  />
+
+  {/* Prev / label / Next */}
+  <div className="flex items-center gap-1">
+  <button onClick={() => boardNav(-1)} className="p-2  hover:bg-gray-100 text-gray-500 transition-colors">
+  <ArrowLeft01Icon size={18} />
+  </button>
+  <span className="text-sm font-bold text-gray-800 min-w-42 text-center select-none capitalize">{boardNavLabel}</span>
+  <button onClick={() => boardNav(1)} className="p-2  hover:bg-gray-100 text-gray-500 transition-colors">
+  <ArrowRight01Icon size={18} />
+  </button>
+  </div>
+
+  {/* Today */}
+  <button
+  onClick={() => setBoardCurrentDate(new Date())}
+  className="text-xs font-semibold text-[#33cbcc] px-3 py-1.5  hover:bg-[#33cbcc]/10 transition-colors border border-[#33cbcc]/30"
+  >
+  {t('tasksPage.today')}
+  </button>
+  </div>
+
+  <span className="text-xs text-gray-400">
+  {boardTotalCount} {boardTotalCount === 1 ? t('tasksPage.taskNumber') : t('tasksPage.taskNumber') + 's'}
+  </span>
+  </div>
+
+  {/* Employee / Department filters */}
+  <div className="flex flex-wrap gap-3">
+  <select
+  value={boardFilterDepartment}
+  onChange={e => { setBoardFilterDepartment(e.target.value); setBoardFilterEmployee(''); }}
+  className={selectCls}
+  >
+  <option value="">{t('tasksPage.allDepartments')}</option>
+  {(apiDepartments || []).map(d => (
+  <option key={d.id} value={d.id}>{d.name}</option>
+  ))}
+  </select>
+
+  <select
+  value={boardFilterEmployee}
+  onChange={e => setBoardFilterEmployee(e.target.value)}
+  className={selectCls}
+  >
+  <option value="">{t('tasksPage.allEmployees')}</option>
+  {employees
+  .filter(e => !boardFilterDepartment || e.departmentId === boardFilterDepartment)
+  .map(e => (
+  <option key={e.apiId} value={e.apiId}>{e.name}</option>
+  ))}
+  </select>
+
+  {(boardFilterDepartment || boardFilterEmployee) && (
+  <button
+  onClick={() => { setBoardFilterDepartment(''); setBoardFilterEmployee(''); }}
+  className="flex items-center gap-1.5 px-3 py-2  border border-gray-200 text-sm text-gray-500 hover:bg-[#283852]/10 hover:border-gray-300 hover:text-[#283852] transition-colors"
+  >
+  <Cancel01Icon size={14} />
+  {t('tasksPage.showAll')}
+  </button>
+  )}
+  </div>
+
+  {/* Columns */}
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+  {BOARD_COLS.map(col => (
+  <BoardColumn
+  key={col.key}
+  dot={col.dot}
+  label={col.label}
+  count={col.query.data?.pages[0]?.count ?? 0}
+  tasks={col.tasks}
+  hasMore={col.query.hasNextPage ?? false}
+  isLoadingMore={col.query.isFetchingNextPage}
+  onLoadMore={() => col.query.fetchNextPage()}
+  renderCard={(task) => {
+  const c = TASK_COLORS[task.color as ColorKey];
+  return (
+  <motion.div
+  key={task.id}
+  initial={{ opacity: 0, y: 6 }}
+  animate={{ opacity: 1, y: 0 }}
+  onClick={() => setModalData({ task, employee: task.employee })}
+  className="bg-white  border border-gray-100 p-4 cursor-pointer hover:border-[#33cbcc]/30 transition-all"
+  style={{ borderLeft: `3px solid ${c.border}` }}
+  >
+  <div className="flex items-start justify-between gap-2 mb-3">
+  <p className="text-sm font-semibold text-gray-800 leading-snug">{task.title}</p>
+  {task.urgent && <Alert02Icon size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
+  {task.important && <StarIcon size={13} className="shrink-0 mt-0.5 text-[#283852]" />}
+  </div>
+  {task.subtitle && (
+  <div className="flex items-center gap-1.5 mb-2">
+  <Briefcase01Icon size={11} className="text-gray-400 shrink-0" />
+  <span className="text-[11px] text-gray-400">{task.subtitle}</span>
+  </div>
+  )}
+  {task.natureName && (
+  <div className="flex items-center gap-1.5 mb-2">
+  <Tag01Icon size={11} className="text-gray-400 shrink-0" />
+  <span className="text-[11px] text-gray-400">{task.natureName}</span>
+  </div>
+  )}
+  <div className="flex items-center gap-1.5 mb-3">
+  <Calendar01Icon size={11} className="text-gray-400 shrink-0" />
+  <span className="text-[11px] text-gray-400">
+  {(task.startDate as Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+  {' – '}
+  {(task.endDate as Date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+  </span>
+  </div>
+  <div className="flex items-center justify-between gap-2">
+  <div className="flex items-center gap-2 min-w-0">
+  <img
+  src={task.employee.avatar}
+  alt={task.employee.name}
+  className="w-6 h-6 rounded-full border border-gray-200 shrink-0 object-cover"
+  />
+  <div className="min-w-0">
+  <p className="text-[11px] text-gray-600 font-medium truncate">{task.employee.name}</p>
+  {task.employee.departmentName && (
+  <p className="text-[10px] text-gray-400 truncate">{task.employee.departmentName}</p>
+  )}
+  </div>
+  </div>
+  <span
+  className="shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+  style={{ backgroundColor: c.bg, color: c.text }}
+  >
+  {diffLabel[task.color as ColorKey]}
+  </span>
+  </div>
+  </motion.div>
+  );
+  }}
+  />
+  ))}
+  </div>
+  </motion.div>
+  );
+  })()}
+
+  {pageView === 'calendar' && <>
+  {/* ═══ Toolbar: view toggle + nav ═══ */}
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+  <div className="flex items-center gap-3 flex-wrap">
+  {/* View mode toggle */}
+  <div className="flex bg-gray-100  p-1">
+  {(['day', 'week', 'month', 'year'] as ViewMode[]).map(v => (
+  <button
+  key={v}
+  onClick={() => setViewMode(v)}
+  className={`px-3.5 py-1.5  text-xs font-semibold transition-all ${
+  viewMode === v
+  ? 'bg-white text-gray-800 shadow-sm'
+  : 'text-gray-500 hover:text-gray-700'
+  }`}
+  >
+  {t(`tasksPage.view_${v}`)}
+  </button>
+  ))}
+  </div>
+
+  {/* Prev / label / Next */}
+  <div className="flex items-center gap-1">
+  <button onClick={() => nav(-1)} className="p-2  hover:bg-gray-100 text-gray-500 transition-colors">
+  <ArrowLeft01Icon size={20} />
+  </button>
+  <span className="text-sm font-bold text-gray-800 min-w-42.5 text-center capitalize select-none">{navLabel}</span>
+  <button onClick={() => nav(1)} className="p-2  hover:bg-gray-100 text-gray-500 transition-colors">
+  <ArrowRight01Icon size={20} />
+  </button>
+  </div>
+
+  {/* Today */}
+  <button
+  onClick={() => setCurrentDate(new Date())}
+  className="text-xs font-semibold text-[#33cbcc] px-3 py-1.5  hover:bg-[#33cbcc]/10 transition-colors border border-[#33cbcc]/30"
+  >
+  {t('tasksPage.today')}
+  </button>
+  </div>
+
+  {/* Priority legend */}
+  <div className="hidden sm:flex items-center gap-4">
+  {([
+  { color: 'teal' as ColorKey,  key: 'priorityLow' },
+  { color: 'blue' as ColorKey,  key: 'priorityMedium' },
+  { color: 'amber' as ColorKey, key: 'priorityHigh' },
+  { color: 'rose' as ColorKey,  key: 'priorityUrgent' },
+  ]).map(({ color, key }) => (
+  <div key={key} className="flex items-center gap-1.5">
+  <div className="w-2.5 h-2.5 " style={{ backgroundColor: TASK_COLORS[color].border }} />
+  <span className="text-[11px] text-gray-400">{t(`tasksPage.${key}`)}</span>
+  </div>
+  ))}
+  </div>
+  </div>
+
+  {/* ═══ Selected employee banner ═══ */}
+  <AnimatePresence>
+  {selectedEmployee && (
+  <motion.div
+  initial={{ opacity: 0, height: 0 }}
+  animate={{ opacity: 1, height: 'auto' }}
+  exit={{ opacity: 0, height: 0 }}
+  transition={{ duration: 0.2 }}
+  className="overflow-hidden"
+  >
+  <div className="flex items-center gap-3 bg-[#33cbcc]/8  px-4 py-3 border border-[#33cbcc]/15">
+  <img src={selectedEmployee.avatar} alt="" className="w-9 h-9 rounded-full border-2 border-[#33cbcc] shrink-0" />
+  <div className="flex-1 min-w-0">
+  <p className="text-sm font-semibold text-gray-800 truncate">{selectedEmployee.name}</p>
+  <p className="text-xs text-gray-500 truncate">
+  {selectedEmployee.role} &middot; {selectedEmployee.tasks.length} task{selectedEmployee.tasks.length !== 1 ? 's' : ''}
+  </p>
+  </div>
+  <button
+  onClick={() => setSelectedEmployeeId(null)}
+  className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] hover:text-[#2aa8a9] px-3 py-1.5  hover:bg-[#33cbcc]/10 transition-colors shrink-0"
+  >
+  <ArrowLeft01Icon size={14} />
+  <span className="hidden sm:inline">{t('tasksPage.showAll')}</span>
+  </button>
+  </div>
+  </motion.div>
+  )}
+  </AnimatePresence>
+
+  {/* ═══ Gantt chart ═══ */}
+  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-white  border border-gray-100 shadow-sm" style={{ overflow: 'clip' }}>
+  <div className="flex flex-col" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+
+  {/* ── Fixed header row (employees label + date headers) ── */}
+  <div className="flex shrink-0 border-b border-gray-100 bg-white z-20">
+  {/* Left: employees label + expand-all */}
+  <div className="shrink-0 w-15 sm:w-65 border-r border-gray-100 flex items-center justify-between px-3 sm:px-5" style={{ height: `${HEADER_H}px` }}>
+  <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider hidden sm:block">
+  {t('tasksPage.employees')}
+  </span>
+  <button
+  onClick={toggleAllRows}
+  title={allExpanded ? 'Collapse all' : 'Expand all'}
+  className="hidden sm:flex items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-[#33cbcc] transition-colors px-2 py-1  hover:bg-[#33cbcc]/8"
+  >
+  {allExpanded ? <ArrowUp01Icon size={13} /> : <ArrowDown01Icon size={13} />}
+  {allExpanded ? 'Collapse' : 'Expand'}
+  </button>
+  </div>
+  {/* Right: date header — mirrors the scrollRef scroll position */}
+  <div ref={headerScrollRef} className="flex-1 overflow-hidden">
+  <div
+  style={{ width: `${totalWidth}px`, height: `${HEADER_H}px` }}
+  className="relative"
+  id="gantt-header-inner"
+  >
+  {viewMode === 'year' ? (
+  <div className="flex h-full">
+  {yearMonths.map(m => {
+  const isCurrentMonth = today.getFullYear() === currentDate.getFullYear() && today.getMonth() === m.month;
+  return (
+  <div key={m.month} style={{ width: `${m.width}px` }}
+  className={`shrink-0 flex items-center justify-center border-r border-gray-200 ${isCurrentMonth ? 'bg-[#33cbcc]/5' : m.month % 2 === 1 ? 'bg-gray-50/40' : ''}`}>
+  <span className={`text-xs font-semibold ${isCurrentMonth ? 'text-[#33cbcc]' : 'text-gray-600'}`}>{m.name}</span>
+  </div>
+  );
+  })}
+  </div>
+  ) : viewMode === 'day' ? (
+  <div className="flex h-full">
+  <div style={{ width: `${dayPx}px` }} className={`shrink-0 flex items-center justify-center gap-3 ${columns[0]?.isToday ? 'bg-[#33cbcc]/10' : ''}`}>
+  <span className={`text-sm font-semibold ${columns[0]?.isToday ? 'text-[#33cbcc]' : 'text-gray-600'}`}>{DAY_NAMES_FULL[columns[0]?.dow ?? 0]}</span>
+  {columns[0]?.isToday
+  ? <span className="w-8 h-8 rounded-full bg-[#33cbcc] text-white text-sm font-bold flex items-center justify-center shadow-sm shadow-[#33cbcc]/20">{columns[0]?.date.getDate()}</span>
+  : <span className="text-lg font-bold text-gray-800">{columns[0]?.date.getDate()}</span>}
+  <span className={`text-sm font-medium ${columns[0]?.isToday ? 'text-[#33cbcc]' : 'text-gray-400'}`}>{MONTH_NAMES[columns[0]?.date.getMonth() ?? 0]}</span>
+  </div>
+  </div>
+  ) : (
+  <div className="flex h-full">
+  {columns.map(col => (
+  <div key={col.index} style={{ width: `${dayPx}px` }}
+  className={`shrink-0 flex flex-col items-center justify-center border-r border-gray-50 ${col.isWeekend ? 'bg-gray-50/50' : ''}`}>
+  <span className={`text-[11px] font-medium ${col.isToday ? 'text-[#33cbcc]' : col.isWeekend ? 'text-gray-300' : 'text-gray-400'}`}>
+  {viewMode === 'week' ? DAY_NAMES_FULL[col.dow] : DAY_NAMES_SHORT[col.dow]}
+  </span>
+  {col.isToday
+  ? <span className="w-7 h-7 rounded-full bg-[#33cbcc] text-white text-xs font-bold flex items-center justify-center mt-1 shadow-sm shadow-[#33cbcc]/20">{col.date.getDate()}</span>
+  : <span className={`text-sm font-semibold mt-1 ${col.isWeekend ? 'text-gray-300' : 'text-gray-700'}`}>{col.date.getDate()}</span>}
+  </div>
+  ))}
+  </div>
+  )}
+  </div>
+  </div>
+  </div>
+
+  {/* ── Scrollable body ── */}
+  <div className="flex flex-1 overflow-y-auto">
+
+  {/* ── Employee column ── */}
+  <div className="shrink-0 w-15 sm:w-65 border-r border-gray-100 z-10 bg-white">
+
+  {filteredEmployees.map(emp => {
+  const isActive = selectedEmployeeId === emp.id;
+  const isExpanded = expandedRows.has(emp.id);
+  const visibleLanes = isExpanded ? (emp.laneCount || 1) : Math.min(emp.laneCount || 1, MAX_VISIBLE_LANES);
+  const h = Math.max(ROW_H, visibleLanes * (TASK_H + TASK_GAP) + TASK_GAP * 2);
+  const hiddenCount = emp.tasks.filter(t => (t.lane || 0) >= MAX_VISIBLE_LANES).length;
+  return (
+  <div
+  key={emp.id}
+  style={{ height: `${h}px` }}
+  className={`border-b border-gray-50 flex items-center gap-3 px-2 sm:px-5 transition-all group relative
+  ${isActive ? 'bg-[#33cbcc]/5' : 'hover:bg-gray-50/80'}`}
+  >
+  <div
+  className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer"
+  onClick={() => setSelectedEmployeeId(prev => prev === emp.id ? null : emp.id)}
+  >
+  <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full overflow-hidden shrink-0 border-2 transition-colors
+  ${isActive ? 'border-[#33cbcc] ring-2 ring-[#33cbcc]/20' : 'border-gray-100 group-hover:border-[#33cbcc]/40'}`}>
+  <img src={emp.avatar} alt={emp.name} className="w-full h-full object-cover" />
+  </div>
+  <div className="min-w-0 hidden sm:block flex-1">
+  <div className="flex items-center gap-2">
+  <p className="text-sm font-semibold text-gray-800 truncate">{emp.name}</p>
+  {emp.tasks.length > 0 && (
+  <span className="shrink-0 text-[10px] font-bold text-[#33cbcc] bg-[#33cbcc]/10 rounded-full px-1.5 py-0.5 leading-none">
+  {emp.tasks.length}
+  </span>
+  )}
+  </div>
+  <p className="text-xs text-gray-400 truncate mt-0.5">{emp.role}</p>
+  </div>
+  </div>
+  {!isExpanded && hiddenCount > 0 && (
+  <button
+  onClick={() => toggleRow(emp.id)}
+  className="hidden sm:flex shrink-0 items-center gap-1 text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 rounded-full px-2 py-0.5 transition-colors"
+  >
+  <ArrowDown01Icon size={10} />
+  +{hiddenCount}
+  </button>
+  )}
+  {isExpanded && hiddenCount > 0 && (
+  <button
+  onClick={() => toggleRow(emp.id)}
+  className="hidden sm:flex shrink-0 items-center gap-1 text-[10px] font-semibold text-gray-400 hover:text-gray-600 rounded-full px-2 py-0.5 transition-colors"
+  >
+  <ArrowUp01Icon size={10} />
+  </button>
+  )}
+  </div>
+  );
+  })}
+
+  {filteredEmployees.length === 0 && (
+  <div style={{ height: `${ROW_H}px` }} className="flex items-center justify-center px-4">
+  <p className="text-xs text-gray-400">{t('tasksPage.noResults')}</p>
+  </div>
+  )}
+  </div>
+
+  {/* ── Timeline (scrollable) ── */}
+  <div ref={scrollRef} className="flex-1 overflow-x-auto">
+  <div style={{ width: `${totalWidth}px` }} className="relative">
+
+  {/* ── Task rows ── */}
+  {filteredEmployees.map(emp => {
+  const isExpanded = expandedRows.has(emp.id);
+  const visibleLanes = isExpanded ? (emp.laneCount || 1) : Math.min(emp.laneCount || 1, MAX_VISIBLE_LANES);
+  const rowH = Math.max(ROW_H, visibleLanes * (TASK_H + TASK_GAP) + TASK_GAP * 2);
+  const hiddenTasks = emp.tasks.filter(t => (t.lane || 0) >= MAX_VISIBLE_LANES);
+  return (
+  <div
+  key={emp.id}
+  style={{ height: `${rowH}px` }}
+  className={`border-b border-gray-50 relative flex cursor-pointer overflow-hidden ${selectedEmployeeId === emp.id ? 'bg-[#33cbcc]/2' : ''}`}
+  onClick={e => handleRowClick(e, emp)}
+  >
+  {/* Background grid */}
+  {viewMode === 'year'
+  ? yearMonths.map(m => (
+  <div
+  key={m.month}
+  style={{ width: `${m.width}px` }}
+  className={`shrink-0 border-r border-gray-100 ${m.month % 2 === 1 ? 'bg-gray-50/30' : ''}`}
+  />
+  ))
+  : columns.map(col => (
+  <div
+  key={col.index}
+  style={{ width: `${dayPx}px` }}
+  className={`shrink-0 border-r border-gray-50 ${col.isWeekend ? 'bg-gray-50/50' : ''}`}
+  />
+  ))
+  }
+
+  {/* Task bars */}
+  {emp.tasks.map(task => {
+  const isDrag = drag?.taskId === task.id;
+  // Hide tasks in collapsed lanes
+  if (!isExpanded && (task.lane || 0) >= MAX_VISIBLE_LANES) return null;
+
+  let bar: { left: number; width: number } | null;
+  let preview: { start: Date; end: Date } | null = null;
+
+  if (isDrag && drag) {
+  preview = getPreviewDates(drag);
+  bar = getBar({ ...task, startDate: preview.start, endDate: preview.end });
+  } else {
+  bar = getBar(task);
+  }
+  if (!bar) return null;
+
+  const c = TASK_COLORS[task.color];
+  const narrow = bar.width < 55;
+  const top = (task.lane || 0) * (TASK_H + TASK_GAP) + TASK_GAP;
+
+  return (
+  <div
+  key={task.id}
+  className={`absolute  group/task z-6 select-none
+  ${isDrag ? 'shadow-lg ring-2 ring-[#33cbcc]/30' : ''}`}
+  style={{
+  left: `${bar.left}px`,
+  top: `${top}px`,
+  height: `${TASK_H}px`,
+  width: `${Math.max(bar.width, 24)}px`,
+  backgroundColor: c.bg,
+  borderLeft: `4px solid ${c.border}`,
+  opacity: isDrag ? 0.92 : 1,
+  touchAction: 'none',
+  transition: isDrag ? 'none' : 'box-shadow 0.2s, opacity 0.2s',
+  }}
+  >
+  {/* Left resize handle */}
+  {!task.selfAssigned && (
+  <div
+  className="absolute left-0 top-0 bottom-0 w-2 cursor-col-resize z-10  opacity-0 group-hover/task:opacity-100 bg-black/5 hover:bg-black/15! transition-opacity"
+  onPointerDown={ev => { ev.stopPropagation(); startDrag(ev, task, emp, 'resize-start'); }}
+  />
+  )}
+
+  {/* Content area — move drag + click for modal */}
+  <div
+  className="flex items-center gap-1.5 px-2.5 h-full cursor-grab active:cursor-grabbing relative group/bar"
+  onPointerDown={ev => { if (ev.button === 0 && !task.selfAssigned) startDrag(ev, task, emp, 'move'); }}
+  onClick={e => { e.stopPropagation(); if (!wasDragging.current) setModalData({ task, employee: emp }); }}
+  >
+  {!narrow && (
+  <div className="flex-1 min-w-0">
+  <p className="text-xs font-bold truncate" style={{ color: c.text }}>{task.title}</p>
+  <p className="text-[10px] truncate opacity-60 mt-0.5" style={{ color: c.text }}>{task.subtitle}</p>
+  </div>
+  )}
+  {!narrow && task.hasFlag && (
+  <Flag01Icon size={12} className="shrink-0 opacity-50" style={{ color: c.text }} />
+  )}
+  {!narrow && task.selfAssigned && (
+  <ZapIcon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
+  )}
+  {!narrow && task.urgent && (
+  <Alert02Icon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
+  )}
+  {!narrow && task.important && (
+  <StarIcon size={12} className="shrink-0 opacity-70" style={{ color: c.text }} />
+  )}
+  {/* Full title tooltip on hover */}
+  {!isDrag && (
+  <div className="absolute bottom-full left-0 mb-1.5 hidden group-hover/bar:block z-30 pointer-events-none">
+  <div className="bg-gray-800 text-white text-[11px] font-medium px-2.5 py-1.5  shadow-lg whitespace-nowrap max-w-xs">
+  <p className="font-bold">{task.title}</p>
+  {task.subtitle && <p className="opacity-70 mt-0.5">{task.subtitle}</p>}
+  </div>
+  </div>
+  )}
+  </div>
+
+  {/* Right resize handle */}
+  {!task.selfAssigned && (
+  <div
+  className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize z-10  opacity-0 group-hover/task:opacity-100 bg-black/5 hover:bg-black/15! transition-opacity"
+  onPointerDown={ev => { ev.stopPropagation(); startDrag(ev, task, emp, 'resize-end'); }}
+  />
+  )}
+
+  {/* Date tooltip while dragging */}
+  {isDrag && preview && (
+  <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] font-medium px-2 py-1  whitespace-nowrap pointer-events-none shadow-lg z-20">
+  {fmtShort(preview.start)} – {fmtShort(preview.end)}
+  </div>
+  )}
+  </div>
+  );
+  })}
+
+  {/* +N more pill when collapsed */}
+  {!isExpanded && hiddenTasks.length > 0 && (
+  <button
+  onClick={e => { e.stopPropagation(); toggleRow(emp.id); }}
+  className="absolute bottom-1.5 right-2 flex items-center gap-1 text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 rounded-full px-2 py-0.5 transition-colors z-10"
+  >
+  <ArrowDown01Icon size={10} />
+  +{hiddenTasks.length} more
+  </button>
+  )}
+  </div>
+  );
+  })}
+
+  {/* Empty state */}
+  {filteredEmployees.length === 0 && (
+  <div style={{ height: `${ROW_H}px` }} className="flex items-center justify-center">
+  <p className="text-xs text-gray-300">—</p>
+  </div>
+  )}
+
+  {/* Today vertical line */}
+  {showTodayLine && (
+  <div
+  className="absolute top-0 bottom-0 w-0.5 bg-[#33cbcc]/50 z-5 pointer-events-none"
+  style={{ left: `${todayIdx * dayPx + dayPx / 2}px` }}
+  />
+  )}
+  </div>
+  </div>{/* end scrollRef timeline */}
+  </div>{/* end scrollable body flex */}
+  </div>{/* end flex-col */}
+  </motion.div>
+  </>}
+
+  {/* ═══ Task detail modal ═══ */}
+  <AnimatePresence>
+  {modalData && (
+  <TaskDetailModal
+  task={modalData.task}
+  employee={modalData.employee}
+  onClose={() => setModalData(null)}
+  onEdit={modalData.task.apiId && modalData.task.status !== 'done' ? () => setEditingGanttTask({ task: modalData!.task, emp: modalData!.employee }) : undefined}
+  onDelete={modalData.task.apiId ? () => {
+  deleteTaskMutation.mutate(modalData!.task.apiId!);
+  setModalData(null);
+  } : undefined}
+  onHistory={modalData.task.apiId ? () => setHistoryTaskId(modalData!.task.apiId!) : undefined}
+  />
+  )}
+  </AnimatePresence>
+
+  {/* ═══ Edit Gantt Task modal ═══ */}
+  <AnimatePresence>
+  {editingGanttTask && (
+  <EditGanttTaskModal
+  task={editingGanttTask.task}
+  onClose={() => setEditingGanttTask(null)}
+  isSaving={updateTaskMutation.isPending}
+  onSave={(dto) => {
+  if (!editingGanttTask.task.apiId) return;
+  updateTaskMutation.mutate(
+  { id: editingGanttTask.task.apiId, dto: dto as any },
+  { onSuccess: () => setEditingGanttTask(null) }
+  );
+  }}
+  />
+  )}
+  </AnimatePresence>
+
+  {/* ═══ Time01Icon modal ═══ */}
+  <AnimatePresence>
+  {historyTaskId && (
+  <GanttHistoryModal
+  taskId={historyTaskId}
+  onClose={() => setHistoryTaskId(null)}
+  />
+  )}
+  </AnimatePresence>
+
+  {/* ═══ Add task modal ═══ */}
+  <AnimatePresence>
+  {addTaskData && (
+  <AddTaskModal
+  employees={employees}
+  initialEmployee={addTaskData.employee}
+  initialDate={addTaskData.date}
+  onClose={() => setAddTaskData(null)}
+  onAdd={handleAddTask}
+  />
+  )}
+  </AnimatePresence>
+
+  {/* ═══ Nature manager modal ═══ */}
+  <AnimatePresence>
+  {showNatureManager && (
+  <TaskNatureManager onClose={() => setShowNatureManager(false)} />
+  )}
+  </AnimatePresence>
+  </div>
+  );
 };
 
 export default Tasks;

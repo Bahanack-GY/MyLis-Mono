@@ -1,4 +1,4 @@
-import { StrictMode } from 'react'
+﻿import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './api/queryClient'
@@ -12,15 +12,15 @@ import { SocketProvider } from './contexts/SocketContext'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <AuthProvider>
-          <SocketProvider>
-            <App />
-            <Toaster richColors position="top-right" duration={3000} />
-          </SocketProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+  <QueryClientProvider client={queryClient}>
+  <BrowserRouter>
+  <AuthProvider>
+  <SocketProvider>
+  <App />
+  <Toaster richColors position="top-right" duration={3000} />
+  </SocketProvider>
+  </AuthProvider>
+  </BrowserRouter>
+  </QueryClientProvider>
   </StrictMode>,
 )

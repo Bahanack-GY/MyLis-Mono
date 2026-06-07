@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+﻿import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { BookOpen01Icon, JusticeScale01Icon, PieChartIcon, ArrowUpRight01Icon, Calendar01Icon, Tick01Icon, Alert02Icon, ArrowUp01Icon, ArrowDown01Icon, Loading02Icon } from 'hugeicons-react';
@@ -114,7 +114,7 @@ const GrandLivreTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; d
  {data.map((accountGroup: any) => {
  const lines: any[] = accountGroup.lines || [];
  return (
- <div key={accountGroup.account?.id} className="bg-white rounded-2xl overflow-hidden">
+ <div key={accountGroup.account?.id} className="bg-white  overflow-hidden">
  {/* Account header */}
  <div className="px-6 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
  <div className="flex items-center gap-3">
@@ -218,7 +218,7 @@ const BalanceTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; depa
  }
 
  return (
- <div className="bg-white rounded-2xl overflow-hidden">
+ <div className="bg-white  overflow-hidden">
  {/* Balanced indicator */}
  <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between">
  <h3 className="text-sm font-bold text-gray-800">Balance des comptes</h3>
@@ -337,7 +337,7 @@ const BilanTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  total: number;
  color: string;
  }) => (
- <div className="bg-white rounded-2xl overflow-hidden">
+ <div className="bg-white  overflow-hidden">
  <div className="px-6 py-3 border-b border-gray-100 bg-gray-50/50">
  <h3 className="text-sm font-bold text-gray-800">{title}</h3>
  </div>
@@ -445,7 +445,7 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  icon: any;
  color: string;
  }) => (
- <div className="bg-white rounded-2xl overflow-hidden">
+ <div className="bg-white  overflow-hidden">
  <div className="px-6 py-3 border-b border-gray-100 flex items-center gap-2">
  <Icon size={16} className="text-[#33cbcc]" />
  <h3 className="text-sm font-bold text-gray-800">{title}</h3>
@@ -507,14 +507,14 @@ const ResultatTab = ({ fiscalYearId }: { fiscalYearId: string }) => {
  <motion.div
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
- className={`rounded-2xl p-6 ${
+ className={` p-6 ${
  isPositive ? 'bg-[#33cbcc]/10 border-2 border-gray-200' : 'bg-[#283852]/10 border-2 border-gray-200'
  }`}
  >
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
  <div
- className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+ className={`w-12 h-12  flex items-center justify-center ${
  isPositive ? 'bg-[#33cbcc]/20' : 'bg-[#283852]/20'
  }`}
  >
@@ -566,9 +566,9 @@ export default function Reports() {
  if (fyLoading) {
  return (
  <div className="space-y-6">
- <div className="h-8 bg-gray-200 rounded-lg w-64 animate-pulse"/>
- <div className="h-12 bg-gray-100 rounded-2xl animate-pulse"/>
- <div className="h-64 bg-gray-100 rounded-2xl animate-pulse"/>
+ <div className="h-8 bg-gray-200  w-64 animate-pulse"/>
+ <div className="h-12 bg-gray-100  animate-pulse"/>
+ <div className="h-64 bg-gray-100  animate-pulse"/>
  </div>
  );
  }
@@ -584,7 +584,7 @@ export default function Reports() {
  </div>
 
  {/* Fiscal Year + Department Selector */}
- <div className="bg-white rounded-2xl p-4 flex items-center gap-6 flex-wrap">
+ <div className="bg-white  p-4 flex items-center gap-6 flex-wrap">
  <div className="flex items-center gap-2">
  <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
  <Calendar01Icon size={16} className="text-[#33cbcc]"/>
@@ -593,7 +593,7 @@ export default function Reports() {
  <select
  value={selectedFiscalYearId}
  onChange={(e) => setSelectedFiscalYearId(e.target.value)}
- className="bg-gray-50 rounded-xl border-0 px-4 py-2.5 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
+ className="bg-gray-50  border-0 px-4 py-2.5 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
  >
  {(fiscalYears || []).map((fy) => (
  <option key={fy.id} value={fy.id}>
@@ -607,7 +607,7 @@ export default function Reports() {
  <select
  value={selectedDeptId}
  onChange={(e) => setSelectedDeptId(e.target.value)}
- className="bg-gray-50 rounded-xl border-0 px-4 py-2.5 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
+ className="bg-gray-50  border-0 px-4 py-2.5 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
  >
  <option value="">Tous les departements</option>
  {(departments as any[]).map((d: any) => (
@@ -620,49 +620,49 @@ export default function Reports() {
  {/* Tab sections */}
  <div className="flex gap-4">
   {/* Rapports section */}
-  <div className="flex-1 bg-white rounded-2xl p-3">
-   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Rapports</p>
-   <div className="flex gap-1">
-    {SECTION_RAPPORTS.map((tab) => {
-     const isActive = activeTab === tab.key;
-     const Icon = tab.icon;
-     return (
-      <button
-       key={tab.key}
-       onClick={() => setActiveTab(tab.key)}
-       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-        isActive ? 'bg-[#33cbcc] text-white' : 'text-gray-500 hover:bg-gray-50'
-       }`}
-      >
-       <Icon size={16} />
-       {tab.label}
-      </button>
-     );
-    })}
-   </div>
+  <div className="flex-1 bg-white  p-3">
+  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Rapports</p>
+  <div className="flex gap-1">
+  {SECTION_RAPPORTS.map((tab) => {
+  const isActive = activeTab === tab.key;
+  const Icon = tab.icon;
+  return (
+  <button
+  key={tab.key}
+  onClick={() => setActiveTab(tab.key)}
+  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5  text-sm font-semibold transition-colors ${
+  isActive ? 'bg-[#33cbcc] text-white' : 'text-gray-500 hover:bg-gray-50'
+  }`}
+  >
+  <Icon size={16} />
+  {tab.label}
+  </button>
+  );
+  })}
+  </div>
   </div>
 
   {/* Etats section */}
-  <div className="flex-1 bg-white rounded-2xl p-3">
-   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Etats financiers</p>
-   <div className="flex gap-1">
-    {SECTION_ETATS.map((tab) => {
-     const isActive = activeTab === tab.key;
-     const Icon = tab.icon;
-     return (
-      <button
-       key={tab.key}
-       onClick={() => setActiveTab(tab.key)}
-       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-        isActive ? 'bg-[#283852] text-white' : 'text-gray-500 hover:bg-gray-50'
-       }`}
-      >
-       <Icon size={16} />
-       {tab.label}
-      </button>
-     );
-    })}
-   </div>
+  <div className="flex-1 bg-white  p-3">
+  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Etats financiers</p>
+  <div className="flex gap-1">
+  {SECTION_ETATS.map((tab) => {
+  const isActive = activeTab === tab.key;
+  const Icon = tab.icon;
+  return (
+  <button
+  key={tab.key}
+  onClick={() => setActiveTab(tab.key)}
+  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5  text-sm font-semibold transition-colors ${
+  isActive ? 'bg-[#283852] text-white' : 'text-gray-500 hover:bg-gray-50'
+  }`}
+  >
+  <Icon size={16} />
+  {tab.label}
+  </button>
+  );
+  })}
+  </div>
   </div>
  </div>
 
@@ -680,7 +680,7 @@ export default function Reports() {
  {activeTab === 'resultat' && <ResultatTab fiscalYearId={selectedFiscalYearId} />}
  </motion.div>
  ) : (
- <div className="bg-white rounded-2xl p-12 text-center">
+ <div className="bg-white  p-12 text-center">
  <Calendar01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">
  Selectionnez un exercice fiscal pour afficher les rapports

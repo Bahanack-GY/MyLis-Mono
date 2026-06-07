@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+﻿import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, Tick01Icon, File01Icon, ViewIcon, Invoice01Icon, Building02Icon, UserGroupIcon, Clock01Icon, Alert02Icon, ArrowLeft01Icon, Shield01Icon } from 'hugeicons-react';
@@ -67,7 +67,7 @@ const TYPE_CONFIG: Record<string, { text: string; icon: any; label: string; full
 };
 
 const inputCls =
- 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+ 'w-full bg-white  border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
 const labelCls =
  'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
 
@@ -231,32 +231,32 @@ const GenerateModal = ({
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+ className="fixed inset-0 z-50 flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ opacity: 0, scale: 0.95, y: 10 }}
- animate={{ opacity: 1, scale: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95, y: 10 }}
- transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-sm overflow-hidden"
+ className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
- <Icon size={20} className="text-gray-500" />
+ <div className="w-10 h-10  bg-[#f8f9fc] flex items-center justify-center">
+ <Icon size={20} className="text-[#8892a4]" />
  </div>
- <h2 className="text-lg font-bold text-gray-800">Generer {config.full}</h2>
+ <h2 className="text-lg font-bold text-[#1c2b3a]">Generer {config.full}</h2>
  </div>
  <button
  onClick={onClose}
- className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+ className="p-2  hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"
  >
  <Cancel01Icon size={18} />
  </button>
  </div>
 
- <div className="p-6 space-y-4">
+ <div className="p-6 space-y-4 flex-1 overflow-y-auto">
  {needsMonth && (
  <div className="grid grid-cols-2 gap-4">
  <div>
@@ -264,7 +264,7 @@ const GenerateModal = ({
  <select
  value={month}
  onChange={(e) => setMonth(e.target.value)}
- className={inputCls + ' appearance-none cursor-pointer'}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors appearance-none cursor-pointer"
  >
  {MONTHS.map((name, idx) => (
  <option key={idx} value={idx + 1}>
@@ -279,29 +279,29 @@ const GenerateModal = ({
  type="number"
  value={year}
  onChange={(e) => setYear(e.target.value)}
- className={inputCls}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  </div>
  </div>
  )}
  {!needsMonth && (
- <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
+ <div className="bg-[#f8f9fc] p-4 text-sm text-[#8892a4]">
  La declaration IS sera generee pour l'exercice fiscal selectionne.
  </div>
  )}
  </div>
 
- <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3">
  <button
  onClick={onClose}
- className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+ className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
  >
  Annuler
  </button>
  <button
  disabled={isPending}
  onClick={handleGenerate}
- className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors bg-[#283852] hover:bg-[#1e2d3d] disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white transition-colors bg-[#283852] hover:bg-[#1e2d3d] disabled:opacity-50"
  >
  {isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Add01Icon size={16} />}
  Generer
@@ -348,24 +348,24 @@ const DeclarationDetailModal = ({
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+ className="fixed inset-0 z-50 flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ opacity: 0, scale: 0.95, y: 10 }}
- animate={{ opacity: 1, scale: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95, y: 10 }}
- transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col"
+ className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
  >
  {/* Header */}
- <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+ <div className="w-10 h-10  bg-[#f8f9fc] flex items-center justify-center">
  <Icon size={20} className={config.text} />
  </div>
  <div>
- <h2 className="text-lg font-bold text-gray-800">{config.full}</h2>
+ <h2 className="text-lg font-bold text-[#1c2b3a]">{config.full}</h2>
  <div className="flex items-center gap-2 mt-0.5">
  <span className={`text-[10px] font-semibold ${statusStyle.text}`}>
  {statusStyle.label}
@@ -378,7 +378,7 @@ const DeclarationDetailModal = ({
  </div>
  <button
  onClick={onClose}
- className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+ className="p-2  hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"
  >
  <Cancel01Icon size={18} />
  </button>
@@ -388,37 +388,37 @@ const DeclarationDetailModal = ({
  <div className="p-6 space-y-5 overflow-y-auto flex-1">
  <div className="grid grid-cols-2 gap-4">
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Periode</p>
- <p className="text-sm font-medium text-gray-800 mt-1">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">Periode</p>
+ <p className="text-sm font-medium text-[#1c2b3a] mt-1">
  {declaration.month ? `${MONTHS[declaration.month - 1]} ` : ''}
  {declaration.year}
  </p>
  </div>
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Echeance</p>
- <p className="text-sm text-gray-600 mt-1">{formatDate(declaration.dueDate)}</p>
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">Echeance</p>
+ <p className="text-sm text-[#8892a4] mt-1">{formatDate(declaration.dueDate)}</p>
  </div>
  </div>
 
  {/* Amount */}
- <div className="bg-gray-50 rounded-xl p-4">
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+ <div className="bg-[#f8f9fc] p-4">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">
  Montant a payer
  </p>
- <p className="text-2xl font-bold text-gray-800">{formatXAF(declaration.totalAmount)}</p>
+ <p className="text-2xl font-bold text-[#1c2b3a]">{formatXAF(declaration.totalAmount)}</p>
  </div>
 
  {/* Details */}
  {declaration.details && (
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-3">
  Details du calcul
  </p>
- <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+ <div className="bg-[#f8f9fc] p-4 space-y-2">
  {Object.entries(declaration.details).map(([key, value]) => (
  <div key={key} className="flex justify-between text-sm">
- <span className="text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
- <span className="font-medium text-gray-800">
+ <span className="text-[#8892a4] capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+ <span className="font-medium text-[#1c2b3a]">
  {typeof value === 'number' ? formatXAF(value) : String(value)}
  </span>
  </div>
@@ -428,9 +428,9 @@ const DeclarationDetailModal = ({
  )}
 
  {declaration.filedAt && (
- <div className="bg-gray-50 rounded-xl p-4 flex items-center gap-2">
- <File01Icon size={16} className="text-gray-500"/>
- <span className="text-sm text-gray-600">
+ <div className="bg-[#f8f9fc] p-4 flex items-center gap-2">
+ <File01Icon size={16} className="text-[#8892a4]"/>
+ <span className="text-sm text-[#8892a4]">
  Deposee le {formatDate(declaration.filedAt)}
  </span>
  </div>
@@ -438,12 +438,12 @@ const DeclarationDetailModal = ({
  </div>
 
  {/* Footer */}
- <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 shrink-0">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3 shrink-0">
  {declaration.status === 'DRAFT' && (
  <button
  onClick={() => validateMut.mutate(declaration.id, { onSuccess: onClose })}
  disabled={validateMut.isPending}
- className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
  >
  {validateMut.isPending ? (
  <Loading02Icon size={14} className="animate-spin"/>
@@ -457,7 +457,7 @@ const DeclarationDetailModal = ({
  <button
  onClick={() => fileMut.mutate(declaration.id, { onSuccess: onClose })}
  disabled={fileMut.isPending}
- className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d3d] transition-colors disabled:opacity-50"
  >
  {fileMut.isPending ? (
  <Loading02Icon size={14} className="animate-spin"/>
@@ -469,7 +469,7 @@ const DeclarationDetailModal = ({
  )}
  <button
  onClick={onClose}
- className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+ className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
  >
  Fermer
  </button>
@@ -508,9 +508,9 @@ export default function TaxDeclarations() {
  if (fyLoading) {
  return (
  <div className="space-y-6">
- <div className="h-8 bg-gray-200 rounded-lg w-64 animate-pulse"/>
- <div className="h-12 bg-gray-100 rounded-2xl animate-pulse"/>
- <div className="h-64 bg-gray-100 rounded-2xl animate-pulse"/>
+ <div className="h-8 bg-gray-200  w-64 animate-pulse"/>
+ <div className="h-12 bg-gray-100  animate-pulse"/>
+ <div className="h-64 bg-gray-100  animate-pulse"/>
  </div>
  );
  }
@@ -526,7 +526,7 @@ export default function TaxDeclarations() {
  </div>
 
  {/* Fiscal Year Selector */}
- <div className="bg-white rounded-2xl p-4 flex flex-col md:flex-row md:items-center gap-4">
+ <div className="bg-white  p-4 flex flex-col md:flex-row md:items-center gap-4">
  <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
  <Calendar01Icon size={16} className="text-[#33cbcc]"/>
  Exercice fiscal
@@ -534,7 +534,7 @@ export default function TaxDeclarations() {
  <select
  value={selectedFiscalYearId}
  onChange={(e) => setSelectedFiscalYearId(e.target.value)}
- className="bg-gray-50 rounded-xl border-0 px-4 py-2.5 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
+ className="bg-gray-50  border-0 px-4 py-2.5 text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/20 appearance-none cursor-pointer"
  >
  {(fiscalYears || []).map((fy) => (
  <option key={fy.id} value={fy.id}>
@@ -552,7 +552,7 @@ export default function TaxDeclarations() {
  key={type}
  onClick={() => setGenerateType(type)}
  disabled={!selectedFiscalYearId}
- className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors bg-[#283852] hover:bg-[#1e2d3d] disabled:opacity-40"
+ className="flex items-center gap-2 px-4 py-2.5  text-sm font-semibold text-white transition-colors bg-[#283852] hover:bg-[#1e2d3d] disabled:opacity-40"
  >
  <Icon size={14} />
  Generer {config.label}
@@ -564,7 +564,7 @@ export default function TaxDeclarations() {
 
  {/* Upcoming Obligations */}
  {upcoming && upcoming.length > 0 && (
- <div className="bg-white rounded-2xl p-6">
+ <div className="bg-white  p-6">
  <div className="flex items-center gap-2 mb-4">
  <Clock01Icon size={18} className="text-[#283852]"/>
  <h3 className="text-sm font-bold text-gray-800">Prochaines echeances</h3>
@@ -579,7 +579,7 @@ export default function TaxDeclarations() {
  initial={{ opacity: 0, y: 10 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: i * 0.1 }}
- className={`rounded-xl p-4 border-2 ${
+ className={` p-4 border-2 ${
  isUrgent
  ? 'border-gray-200 bg-[#283852]/5'
  : isWarning
@@ -619,7 +619,7 @@ export default function TaxDeclarations() {
  <Loading02Icon size={24} className="animate-spin text-[#33cbcc]"/>
  </div>
  ) : (declarations || []).length > 0 ? (
- <div className="bg-white rounded-2xl overflow-hidden">
+ <div className="bg-white  overflow-hidden">
  <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100">
  <div className="col-span-1">Type</div>
  <div className="col-span-2">Periode</div>
@@ -691,7 +691,7 @@ export default function TaxDeclarations() {
  }}
  disabled={validateMut.isPending}
  title="Valider"
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-gray-400 hover:text-[#283852] hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
  >
  <Tick01Icon size={14} />
  </button>
@@ -704,7 +704,7 @@ export default function TaxDeclarations() {
  }}
  disabled={fileMut.isPending}
  title="Marquer deposee"
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-gray-400 hover:text-[#283852] hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
  >
  <File01Icon size={14} />
  </button>
@@ -715,7 +715,7 @@ export default function TaxDeclarations() {
  setSelectedDeclaration(decl);
  }}
  title="Details"
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
  >
  <ViewIcon size={14} />
  </button>
@@ -725,7 +725,7 @@ export default function TaxDeclarations() {
  })}
  </div>
  ) : (
- <div className="bg-white rounded-2xl p-12 text-center">
+ <div className="bg-white  p-12 text-center">
  <Shield01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-500 font-medium mb-2">Aucune declaration fiscale</p>
  <p className="text-sm text-gray-400">

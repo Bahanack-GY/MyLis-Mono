@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+﻿import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, Tick01Icon, CalculatorIcon, CreditCardIcon, ViewIcon, ArrowLeft01Icon, UserGroupIcon, Wallet01Icon, ArrowUpRight01Icon, Alert02Icon, DollarCircleIcon, Search01Icon, PencilIcon, Money01Icon, ArrowDown01Icon, Download01Icon, Settings01Icon, Delete02Icon, FilterIcon, Task01Icon, SquareIcon, MinusSignIcon } from 'hugeicons-react';
@@ -106,7 +106,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; label: string }>
 };
 
 const inputCls =
- 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+ 'w-full bg-white  border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
 const labelCls =
  'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
 
@@ -431,38 +431,38 @@ const CreateRunModal = ({ onClose }: { onClose: () => void }) => {
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+ className="fixed inset-0 z-50 flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ opacity: 0, scale: 0.95, y: 10 }}
- animate={{ opacity: 1, scale: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95, y: 10 }}
- transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-sm overflow-hidden"
+ className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
+ <div className="w-10 h-10  bg-[#33cbcc]/10 flex items-center justify-center">
  <Wallet01Icon size={20} className="text-[#33cbcc]"/>
  </div>
- <h2 className="text-lg font-bold text-gray-800">Nouvelle paie</h2>
+ <h2 className="text-lg font-bold text-[#1c2b3a]">Nouvelle paie</h2>
  </div>
  <button
  onClick={onClose}
- className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+ className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"
  >
  <Cancel01Icon size={18} />
  </button>
  </div>
 
- <div className="p-6 space-y-4">
+ <div className="p-6 space-y-4 flex-1 overflow-y-auto">
  <div>
  <label className={labelCls}>Mois</label>
  <select
  value={form.month}
  onChange={(e) => setForm((p) => ({ ...p, month: e.target.value }))}
- className={inputCls + ' appearance-none cursor-pointer'}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors appearance-none cursor-pointer"
  >
  {MONTHS.map((name, idx) => (
  <option key={idx} value={idx + 1}>
@@ -477,22 +477,22 @@ const CreateRunModal = ({ onClose }: { onClose: () => void }) => {
  type="number"
  value={form.year}
  onChange={(e) => setForm((p) => ({ ...p, year: e.target.value }))}
- className={inputCls}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  </div>
  </div>
 
- <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3">
  <button
  onClick={onClose}
- className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+ className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
  >
  Annuler
  </button>
  <button
  disabled={createMut.isPending}
  onClick={handleSubmit}
- className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  {createMut.isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Add01Icon size={16} />}
  Creer
@@ -530,35 +530,38 @@ const PayConfirmModal = ({
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+ className="fixed inset-0 z-[60] flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ scale: 0.95, opacity: 0 }}
- animate={{ scale: 1, opacity: 1 }}
- exit={{ scale: 0.95, opacity: 0 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl p-6 w-full max-w-sm"
+ className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="flex items-center gap-3 mb-4">
- <div className="p-2.5 rounded-xl bg-[#33cbcc]/10">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center gap-3">
+ <div className="p-2.5 bg-[#33cbcc]/10">
  <CreditCardIcon size={20} className="text-[#33cbcc]"/>
  </div>
- <h3 className="text-base font-semibold text-gray-800">Confirmer le paiement</h3>
+ <h3 className="text-base font-semibold text-[#1c2b3a]">Confirmer le paiement</h3>
  </div>
- <p className="text-sm text-gray-500 mb-6">
+ <div className="flex-1 px-6 py-6">
+ <p className="text-sm text-[#8892a4]">
  Etes-vous sur de vouloir proceder au paiement ? Cette action est irreversible.
  </p>
- <div className="flex gap-3 justify-end">
+ </div>
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3">
  <button
  onClick={onClose}
- className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+ className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
  >
  Annuler
  </button>
  <button
  onClick={onConfirm}
  disabled={isPending}
- className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  {isPending && <Loading02Icon size={14} className="animate-spin"/>}
  Payer
@@ -670,7 +673,7 @@ const BulkActionBar = ({
  initial={{ opacity: 0, y: -10 }}
  animate={{ opacity: 1, y: 0 }}
  exit={{ opacity: 0, y: -10 }}
- className="bg-white rounded-2xl border p-4 space-y-3"
+ className="bg-white  border p-4 space-y-3"
  >
  {/* Top row: selection info + department filter */}
  <div className="flex items-center justify-between flex-wrap gap-3">
@@ -701,7 +704,7 @@ const BulkActionBar = ({
  if (e.target.value) selectByDepartment(e.target.value);
  e.target.value = '';
  }}
- className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30 cursor-pointer"
+ className="text-xs border border-gray-200  px-2 py-1.5 text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30 cursor-pointer"
  defaultValue=""
  >
  <option value=""disabled>Par departement...</option>
@@ -718,7 +721,7 @@ const BulkActionBar = ({
  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider self-center mr-1">Retenues:</span>
 
  {/* All ON/OFF buttons */}
- <div className="flex items-center rounded-lg overflow-hidden border-2 border-[#33cbcc]">
+ <div className="flex items-center  overflow-hidden border-2 border-[#33cbcc]">
  <button
  onClick={() => {
  bulkMut.mutate({
@@ -769,7 +772,7 @@ const BulkActionBar = ({
  { key: 'includeIrpp', label: 'IRPP' },
  { key: 'includeCommunalTax', label: 'T.Comm' },
  ].map(({ key, label }) => (
- <div key={key} className="flex items-center rounded-lg overflow-hidden border border-gray-200">
+ <div key={key} className="flex items-center  overflow-hidden border border-gray-200">
  <button
  onClick={() => applyToggle(key, true)}
  disabled={bulkMut.isPending}
@@ -794,13 +797,13 @@ const BulkActionBar = ({
  <button
  onClick={() => setShowAddDeduction(!showAddDeduction)}
  disabled={bulkMut.isPending}
- className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors border border-gray-200 disabled:opacity-50"
+ className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium  bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors border border-gray-200 disabled:opacity-50"
  >
  <Add01Icon size={12} />
  Retenue
  </button>
  {showAddDeduction && (
- <div className="absolute top-full left-0 mt-2 bg-white rounded-xl border border-gray-200 p-3 z-10 w-64 space-y-2">
+ <div className="absolute top-full left-0 mt-2 bg-white  border border-gray-200 p-3 z-10 w-64 space-y-2">
  <select
  value={selectedType}
  onChange={(e) => {
@@ -827,14 +830,14 @@ const BulkActionBar = ({
  <div className="flex gap-2">
  <button
  onClick={() => setShowAddDeduction(false)}
- className="flex-1 px-2 py-1.5 text-xs rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+ className="flex-1 px-2 py-1.5 text-xs  bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
  >
  Annuler
  </button>
  <button
  onClick={addCustomDeduction}
  disabled={!selectedType || !customAmount || bulkMut.isPending}
- className="flex-1 px-2 py-1.5 text-xs font-semibold rounded-lg bg-[#283852] text-white hover:bg-[#283852] transition-colors disabled:opacity-50"
+ className="flex-1 px-2 py-1.5 text-xs font-semibold  bg-[#283852] text-white hover:bg-[#283852] transition-colors disabled:opacity-50"
  >
  Ajouter
  </button>
@@ -850,7 +853,7 @@ const BulkActionBar = ({
  if (e.target.value) removeCustomDeduction(e.target.value);
  e.target.value = '';
  }}
- className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 text-[#283852] bg-[#283852]/10 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30 cursor-pointer"
+ className="text-xs border border-gray-200  px-2 py-1.5 text-[#283852] bg-[#283852]/10 focus:outline-none focus:ring-1 focus:ring-[#33cbcc]/30 cursor-pointer"
  defaultValue=""
  >
  <option value=""disabled>Retirer retenue...</option>
@@ -903,46 +906,51 @@ const PayOneModal = ({
  <motion.div
  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+ className="fixed inset-0 z-[60] flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-sm p-6"
+ className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="flex items-center gap-3 mb-5">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-[#33cbcc]/10 flex items-center justify-center">
  <CreditCardIcon size={18} className="text-[#33cbcc]"/>
  </div>
  <div>
- <h3 className="font-bold text-gray-800">Payer le salaire</h3>
- <p className="text-xs text-gray-500">{empName}</p>
+ <h3 className="font-bold text-[#1c2b3a]">Payer le salaire</h3>
+ <p className="text-xs text-[#8892a4]">{empName}</p>
  </div>
  </div>
 
- <div className="bg-gray-50 rounded-xl p-3 mb-4 flex justify-between items-center">
- <span className="text-sm text-gray-600">Net a payer</span>
+ <div className="flex-1 p-6 space-y-5 overflow-y-auto">
+ <div className="bg-[#f8f9fc] border border-[#e5e8ef] p-3 flex justify-between items-center">
+ <span className="text-sm text-[#8892a4]">Net a payer</span>
  <span className="text-lg font-bold text-[#33cbcc]">{formatXAF(payslip.netSalary)}</span>
  </div>
 
- <div className="mb-5">
+ <div>
  <label className={labelCls}>Date de paiement</label>
  <input
  type="date"
  value={date}
  onChange={(e) => setDate(e.target.value)}
- className={inputCls}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  </div>
+ </div>
 
- <div className="flex gap-3">
- <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3">
+ <button onClick={onClose} className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors">
  Annuler
  </button>
  <button
  onClick={handleConfirm}
  disabled={payOneMut.isPending || !date}
- className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  {payOneMut.isPending ? <Loading02Icon size={14} className="animate-spin"/> : <Tick01Icon size={14}/>}
  Confirmer
@@ -1021,7 +1029,7 @@ const PayrollDetail = ({
  <div className="flex items-center gap-4">
  <button
  onClick={onBack}
- className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+ className="p-2  hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
  >
  <ArrowLeft01Icon size={20} />
  </button>
@@ -1038,7 +1046,7 @@ const PayrollDetail = ({
  <div className="flex gap-2">
  <button
  onClick={() => setShowDeductionTypes(true)}
- className="p-2.5 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+ className="p-2.5  text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
  title="Gerer les types de retenues"
  >
  <Settings01Icon size={18} />
@@ -1047,7 +1055,7 @@ const PayrollDetail = ({
  <button
  onClick={() => calculateMut.mutate(run.id)}
  disabled={calculateMut.isPending}
- className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors disabled:opacity-50"
+ className="flex items-center gap-2 px-4 py-2.5  text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors disabled:opacity-50"
  >
  {calculateMut.isPending ? (
  <Loading02Icon size={16} className="animate-spin"/>
@@ -1061,7 +1069,7 @@ const PayrollDetail = ({
  <button
  onClick={() => validateMut.mutate(run.id)}
  disabled={validateMut.isPending}
- className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
+ className="flex items-center gap-2 px-4 py-2.5  text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors disabled:opacity-50"
  >
  {validateMut.isPending ? (
  <Loading02Icon size={16} className="animate-spin"/>
@@ -1074,7 +1082,7 @@ const PayrollDetail = ({
  {run.status === 'VALIDATED' && (
  <button
  onClick={() => setShowPayConfirm(true)}
- className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors"
+ className="flex items-center gap-2 px-4 py-2.5  text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors"
  >
  <CreditCardIcon size={16} />
  {hasPartialPayments ? `Payer le reste (${unpaidCount})` : 'Payer tout'}
@@ -1085,15 +1093,15 @@ const PayrollDetail = ({
 
  {/* Summary cards */}
  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
- <div className="bg-white rounded-2xl p-6">
+ <div className="bg-white  p-6">
  <p className="text-sm text-gray-500 mb-1">Total Brut</p>
  <p className="text-xl font-bold text-gray-800">{formatXAF(run.totalGross)}</p>
  </div>
- <div className="bg-white rounded-2xl p-6">
+ <div className="bg-white  p-6">
  <p className="text-sm text-gray-500 mb-1">Total Net</p>
  <p className="text-xl font-bold text-[#33cbcc]">{formatXAF(run.totalNet)}</p>
  </div>
- <div className="bg-white rounded-2xl p-6">
+ <div className="bg-white  p-6">
  <p className="text-sm text-gray-500 mb-1">Charges Patronales</p>
  <p className="text-xl font-bold text-[#283852]">{formatXAF(run.totalEmployerCharges)}</p>
  </div>
@@ -1101,7 +1109,7 @@ const PayrollDetail = ({
 
  {/* Payment progress (VALIDATED with partial payments) */}
  {run.status === 'VALIDATED' && payslips.length > 0 && (
- <div className="bg-white rounded-2xl p-4 flex items-center gap-4">
+ <div className="bg-white  p-4 flex items-center gap-4">
  <div className="flex-1">
  <div className="flex items-center justify-between mb-1.5">
  <span className="text-sm font-semibold text-gray-700">Progression des paiements</span>
@@ -1136,7 +1144,7 @@ const PayrollDetail = ({
 
  {/* Payslips table */}
  {payslips.length > 0 ? (
- <div className="bg-white rounded-2xl overflow-hidden">
+ <div className="bg-white  overflow-hidden">
  <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
  <h3 className="text-sm font-bold text-gray-800">
  Bulletins de paie ({payslips.length} employes)
@@ -1257,7 +1265,7 @@ const PayrollDetail = ({
  {canEditDeductions && (
  <button
  onClick={() => setEditingDeduction(ps)}
- className="p-1 rounded-md text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 opacity-0 group-hover/row:opacity-100 transition-all"
+ className="p-1  text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 opacity-0 group-hover/row:opacity-100 transition-all"
  title="Modifier retenue manuelle"
  >
  <PencilIcon size={12} />
@@ -1278,7 +1286,7 @@ const PayrollDetail = ({
  ) : (
  <button
  onClick={() => setPayingPayslip(ps)}
- className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors"
+ className="inline-flex items-center gap-1 px-2.5 py-1  text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc] transition-colors"
  >
  <CreditCardIcon size={11}/>
  Payer
@@ -1291,7 +1299,7 @@ const PayrollDetail = ({
  {canEditDeductions && (
  <button
  onClick={() => setEditingPayslip(ps)}
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all"
+ className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all"
  title="Modifier les retenues"
  >
  <Settings01Icon size={13} />
@@ -1301,7 +1309,7 @@ const PayrollDetail = ({
  <button
  onClick={() => handleDownloadPdf(ps)}
  disabled={downloadingId === ps.id}
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all disabled:opacity-50"
+ className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all disabled:opacity-50"
  title="Telecharger la fiche de paie"
  >
  {downloadingId === ps.id
@@ -1354,7 +1362,7 @@ const PayrollDetail = ({
  </div>
  </div>
  ) : (
- <div className="bg-white rounded-2xl p-12 text-center">
+ <div className="bg-white  p-12 text-center">
  <UserGroupIcon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-400 font-medium">Aucun bulletin de paie</p>
  <p className="text-sm text-gray-400 mt-1">
@@ -1431,31 +1439,34 @@ const ManualDeductionModal = ({
  <motion.div
  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+ className="fixed inset-0 z-[60] flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-sm p-6"
+ className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="flex items-center gap-3 mb-5">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center">
  <PencilIcon size={18} className="text-[#283852]"/>
  </div>
  <div>
- <h3 className="font-bold text-gray-800">Retenue manuelle</h3>
- <p className="text-xs text-gray-500">{empName} - Brut : {formatXAF(payslip.grossSalary)}</p>
+ <h3 className="font-bold text-[#1c2b3a]">Retenue manuelle</h3>
+ <p className="text-xs text-[#8892a4]">{empName} - Brut : {formatXAF(payslip.grossSalary)}</p>
  </div>
  </div>
- <div className="space-y-3 mb-5">
+ <div className="flex-1 p-6 space-y-4 overflow-y-auto">
  <div>
  <label className={labelCls}>Montant de la retenue</label>
  <input
  type="number"min="0"value={amount} onChange={(e) => setAmount(e.target.value)}
  autoFocus
- className={inputCls}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
- <p className="text-xs text-gray-400 mt-1">
+ <p className="text-xs text-[#8892a4] mt-1">
  Retenues auto : {formatXAF(payslip.totalDeductions)} - Net actuel : {formatXAF(payslip.netSalary)}
  </p>
  </div>
@@ -1464,18 +1475,18 @@ const ManualDeductionModal = ({
  <input
  type="text"value={note} onChange={(e) => setNote(e.target.value)}
  placeholder="Ex: Remboursement pret, retenue disciplinaire..."
- className={inputCls}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  </div>
  </div>
- <div className="flex gap-3">
- <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3">
+ <button onClick={onClose} className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors">
  Annuler
  </button>
  <button
  onClick={() => onSave(parseFloat(amount) || 0, note || undefined)}
  disabled={isPending}
- className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors disabled:opacity-60"
+ className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d42] transition-colors disabled:opacity-60"
  >
  {isPending ? 'En cours...' : 'Enregistrer'}
  </button>
@@ -1550,42 +1561,45 @@ const PayslipEditModal = ({
  <motion.div
  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+ className="fixed inset-0 z-[60] flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-md overflow-hidden"
+ className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="px-6 py-5 border-b border-gray-100">
+ <div className="px-6 py-5 border-b border-[#e5e8ef]">
  <div className="flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
+ <div className="w-10 h-10  bg-[#33cbcc]/10 flex items-center justify-center">
  <Settings01Icon size={20} className="text-[#33cbcc]"/>
  </div>
  <div>
- <h2 className="text-lg font-bold text-gray-800">Retenues</h2>
- <p className="text-xs text-gray-500">{empName} — Brut: {formatXAF(payslip.grossSalary)}</p>
+ <h2 className="text-lg font-bold text-[#1c2b3a]">Retenues</h2>
+ <p className="text-xs text-[#8892a4]">{empName} — Brut: {formatXAF(payslip.grossSalary)}</p>
  </div>
  </div>
- <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+ <button onClick={onClose} className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
  <Cancel01Icon size={18} />
  </button>
  </div>
  </div>
 
- <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
+ <div className="p-6 space-y-6 flex-1 overflow-y-auto">
  {/* Statutory toggles */}
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-3">
  Retenues legales
  </p>
  <div className="space-y-3">
  {toggleItems.map((item) => (
  <div key={item.key} className="flex items-center justify-between">
  <div>
- <p className="text-sm font-medium text-gray-800">{item.label}</p>
- <p className="text-[11px] text-gray-400">{item.desc}</p>
+ <p className="text-sm font-medium text-[#1c2b3a]">{item.label}</p>
+ <p className="text-[11px] text-[#8892a4]">{item.desc}</p>
  </div>
  <button
  type="button"
@@ -1605,21 +1619,21 @@ const PayslipEditModal = ({
 
  {/* Custom deductions */}
  <div>
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-3">
  Retenues personnalisees
  </p>
 
  {customDeductions.length > 0 && (
  <div className="space-y-2 mb-3">
  {customDeductions.map((d, i) => (
- <div key={i} className="flex items-center justify-between px-3 py-2 bg-gray-50 rounded-xl group">
+ <div key={i} className="flex items-center justify-between px-3 py-2 bg-[#f8f9fc] border border-[#e5e8ef] group">
  <div className="flex items-center gap-2">
- <span className="text-sm text-gray-700">{d.name}</span>
+ <span className="text-sm text-[#1c2b3a]">{d.name}</span>
  <span className="text-xs font-semibold text-[#283852]">-{formatXAF(d.amount)}</span>
  </div>
  <button
  onClick={() => removeCustomDeduction(i)}
- className="p-1 rounded-md text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 opacity-0 group-hover:opacity-100 transition-all"
+ className="p-1  text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 opacity-0 group-hover:opacity-100 transition-all"
  >
  <Delete02Icon size={13} />
  </button>
@@ -1660,27 +1674,27 @@ const PayslipEditModal = ({
  <button
  onClick={addCustomDeduction}
  disabled={!selectedType || !customAmount}
- className="px-3 py-2 rounded-xl text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
+ className="px-3 py-2  text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  <Add01Icon size={16} />
  </button>
  </div>
  ) : (
- <p className="text-xs text-gray-400">
+ <p className="text-xs text-[#8892a4]">
  Aucun type de retenue configure. Ajoutez-en via le bouton parametres.
  </p>
  )}
  </div>
  </div>
 
- <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
- <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3">
+ <button onClick={onClose} className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors">
  Annuler
  </button>
  <button
  onClick={handleSave}
  disabled={togglesMut.isPending}
- className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
+ className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  {togglesMut.isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Tick01Icon size={16} />}
  Enregistrer
@@ -1735,73 +1749,76 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
  <motion.div
  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+ className="fixed inset-0 z-[60] flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-md overflow-hidden"
+ className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
- <Settings01Icon size={20} className="text-gray-600"/>
+ <div className="w-10 h-10  bg-[#f8f9fc] border border-[#e5e8ef] flex items-center justify-center">
+ <Settings01Icon size={20} className="text-[#8892a4]"/>
  </div>
- <h2 className="text-lg font-bold text-gray-800">Types de retenues</h2>
+ <h2 className="text-lg font-bold text-[#1c2b3a]">Types de retenues</h2>
  </div>
- <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+ <button onClick={onClose} className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
  <Cancel01Icon size={18} />
  </button>
  </div>
 
- <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+ <div className="p-6 space-y-4 flex-1 overflow-y-auto">
  {isLoading ? (
- <div className="flex justify-center py-4"><Loading02Icon size={20} className="animate-spin text-gray-400"/></div>
+ <div className="flex justify-center py-4"><Loading02Icon size={20} className="animate-spin text-[#8892a4]"/></div>
  ) : types.length === 0 ? (
- <p className="text-sm text-gray-400 text-center py-4">Aucun type de retenue</p>
+ <p className="text-sm text-[#8892a4] text-center py-4">Aucun type de retenue</p>
  ) : (
  <div className="space-y-2">
  {types.map((dt) =>
  editingId === dt.id ? (
- <div key={dt.id} className="flex items-center gap-2 px-3 py-2.5 bg-[#33cbcc]/5 rounded-xl border">
+ <div key={dt.id} className="flex items-center gap-2 px-3 py-2.5 bg-[#33cbcc]/5 border border-[#e5e8ef]">
  <input type="text"value={editName} onChange={(e) => setEditName(e.target.value)}
  autoFocus
- className={inputCls + ' flex-1 !py-1.5 !text-xs'}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors flex-1 !py-1.5 !text-xs"
  onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditingId(null); }}
  />
  <input type="number"value={editAmount} onChange={(e) => setEditAmount(e.target.value)}
- className={inputCls + ' w-24 !py-1.5 !text-xs'}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors w-24 !py-1.5 !text-xs"
  onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') setEditingId(null); }}
  />
- <label className="flex items-center gap-1 text-xs text-gray-500 cursor-pointer">
+ <label className="flex items-center gap-1 text-xs text-[#8892a4] cursor-pointer">
  <input type="checkbox"checked={editIsPercentage} onChange={(e) => setEditIsPercentage(e.target.checked)}
- className="rounded border-gray-300"/>
+ className="border-[#e5e8ef]"/>
  %
  </label>
  <button onClick={saveEdit} disabled={updateMut.isPending}
- className="p-1.5 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors">
+ className="p-1.5 bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors">
  <Tick01Icon size={14} />
  </button>
  <button onClick={() => setEditingId(null)}
- className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+ className="p-1.5 bg-[#f8f9fc] text-[#8892a4] hover:bg-[#e5e8ef] transition-colors">
  <Cancel01Icon size={14} />
  </button>
  </div>
  ) : (
- <div key={dt.id} className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl group">
+ <div key={dt.id} className="flex items-center justify-between px-4 py-3 bg-[#f8f9fc] border border-[#e5e8ef] group">
  <div>
- <p className="text-sm font-medium text-gray-800">{dt.name}</p>
- <p className="text-xs text-gray-400">
+ <p className="text-sm font-medium text-[#1c2b3a]">{dt.name}</p>
+ <p className="text-xs text-[#8892a4]">
  {dt.isPercentage ? `${dt.defaultAmount}%` : formatXAF(dt.defaultAmount)}
  </p>
  </div>
  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
  <button onClick={() => startEdit(dt)}
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all">
+ className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all">
  <PencilIcon size={14} />
  </button>
  <button onClick={() => deleteMut.mutate(dt.id)} disabled={deleteMut.isPending}
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-all">
+ className="p-1.5  text-gray-400 hover:text-[#283852] hover:bg-[#283852]/10 transition-all">
  <Delete02Icon size={14} />
  </button>
  </div>
@@ -1811,28 +1828,28 @@ const DeductionTypeManager = ({ onClose }: { onClose: () => void }) => {
  </div>
  )}
 
- <div className="border-t border-gray-100 pt-4">
- <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">Ajouter un type</p>
+ <div className="border-t border-[#e5e8ef] pt-4">
+ <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-3">Ajouter un type</p>
  <div className="flex gap-2">
  <input
  type="text"value={name} onChange={(e) => setName(e.target.value)}
  placeholder="Nom (ex: Assurance)"
- className={inputCls + ' flex-1'}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors flex-1"
  />
  <input
  type="number"value={amount} onChange={(e) => setAmount(e.target.value)}
  placeholder="Montant"
- className={inputCls + ' w-28'}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors w-28"
  />
- <label className="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer whitespace-nowrap">
+ <label className="flex items-center gap-1.5 text-xs text-[#8892a4] cursor-pointer whitespace-nowrap">
  <input type="checkbox"checked={isPercentage} onChange={(e) => setIsPercentage(e.target.checked)}
- className="rounded border-gray-300"/>
+ className="border-[#e5e8ef]"/>
  %
  </label>
  <button
  onClick={handleAdd}
  disabled={!name.trim() || !amount || createMut.isPending}
- className="px-3 py-2 rounded-xl text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
+ className="px-3 py-2 text-white bg-[#33cbcc] hover:bg-[#2bb5b6] transition-colors disabled:opacity-50"
  >
  <Add01Icon size={16} />
  </button>
@@ -1854,7 +1871,7 @@ const PreviewCalculator = () => {
  const { data: preview, isLoading } = usePreviewPayroll(gross);
 
  return (
- <div className="bg-white rounded-2xl p-6">
+ <div className="bg-white  p-6">
  <div className="flex items-center gap-2 mb-4">
  <CalculatorIcon size={18} className="text-[#33cbcc]"/>
  <h3 className="text-sm font-bold text-gray-800">Simulateur de salaire</h3>
@@ -1886,7 +1903,7 @@ const PreviewCalculator = () => {
  <motion.div
  initial={{ opacity: 0, y: 10 }}
  animate={{ opacity: 1, y: 0 }}
- className="bg-gray-50 rounded-xl p-4 space-y-2"
+ className="bg-gray-50  p-4 space-y-2"
  >
  <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-3">
  Retenues salariales
@@ -1966,32 +1983,35 @@ const AdvanceModal = ({ emp, onClose }: { emp: SalaryEmployee; onClose: () => vo
  <motion.div
  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+ className="fixed inset-0 z-50 flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-sm p-6"
+ className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="flex items-center gap-3 mb-5">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center gap-3">
  <div className="w-10 h-10 rounded-full bg-[#283852]/10 flex items-center justify-center">
  <Money01Icon size={18} className="text-[#283852]"/>
  </div>
  <div>
- <h3 className="font-bold text-gray-800">Avance sur salaire</h3>
- <p className="text-xs text-gray-500">{emp.firstName} {emp.lastName}</p>
+ <h3 className="font-bold text-[#1c2b3a]">Avance sur salaire</h3>
+ <p className="text-xs text-[#8892a4]">{emp.firstName} {emp.lastName}</p>
  </div>
  </div>
- <div className="space-y-3 mb-5">
+ <div className="flex-1 p-6 space-y-4 overflow-y-auto">
  <div>
  <label className={labelCls}>Montant</label>
  <input
  type="number"min="1"value={amount} onChange={(e) => setAmount(e.target.value)}
  placeholder="0"autoFocus
- className={inputCls}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  {emp.salary > 0 && (
- <p className="text-xs text-gray-400 mt-1">Salaire mensuel : {formatXAF(emp.salary)}</p>
+ <p className="text-xs text-[#8892a4] mt-1">Salaire mensuel : {formatXAF(emp.salary)}</p>
  )}
  </div>
  <div>
@@ -1999,16 +2019,16 @@ const AdvanceModal = ({ emp, onClose }: { emp: SalaryEmployee; onClose: () => vo
  <input
  type="text"value={note} onChange={(e) => setNote(e.target.value)}
  placeholder="Motif de l'avance..."
- className={inputCls}
+ className="w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors"
  />
  </div>
  </div>
- <div className="flex gap-3">
- <button onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">Annuler</button>
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3">
+ <button onClick={onClose} className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors">Annuler</button>
  <button
  onClick={() => payAdvance.mutate({ id: emp.id, amount: parseFloat(amount), note: note || undefined }, { onSuccess: () => onClose() })}
  disabled={!isValid || payAdvance.isPending}
- className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors disabled:opacity-60"
+ className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white bg-[#283852] hover:bg-[#1e2d42] transition-colors disabled:opacity-60"
  >
  {payAdvance.isPending ? 'En cours...' : 'Payer l\'avance'}
  </button>
@@ -2065,12 +2085,12 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  type="number"min="0"value={value} onChange={(e) => setValue(e.target.value)}
  onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel(); }}
  autoFocus
- className="w-36 px-3 py-1.5 text-sm border border-[#33cbcc] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30"
+ className="w-36 px-3 py-1.5 text-sm border border-[#33cbcc]  focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30"
  />
- <button onClick={save} disabled={updateSalary.isPending} className="p-1.5 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors">
+ <button onClick={save} disabled={updateSalary.isPending} className="p-1.5  bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors">
  <Tick01Icon size={14} />
  </button>
- <button onClick={cancel} className="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+ <button onClick={cancel} className="p-1.5  bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
  <Cancel01Icon size={14} />
  </button>
  </div>
@@ -2080,7 +2100,7 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  {emp.salary > 0 ? formatXAF(emp.salary) : <span className="text-gray-400 font-normal">Non defini</span>}
  </span>
  <button onClick={() => setEditing(true)}
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 opacity-0 group-hover/sal:opacity-100 transition-all">
+ className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 opacity-0 group-hover/sal:opacity-100 transition-all">
  <PencilIcon size={13} />
  </button>
  </div>
@@ -2090,7 +2110,7 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
  <button
  onClick={() => setShowAdvanceModal(true)}
- className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors"
+ className="flex items-center gap-1.5 px-3 py-1.5  text-xs font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors"
  >
  <Money01Icon size={13} />
  Avance
@@ -2129,7 +2149,7 @@ const EmployeesTab = () => {
  return (
  <div className="space-y-4">
  {[...Array(5)].map((_, i) => (
- <div key={i} className="h-14 bg-gray-100 rounded-2xl animate-pulse"/>
+ <div key={i} className="h-14 bg-gray-100  animate-pulse"/>
  ))}
  </div>
  );
@@ -2139,15 +2159,15 @@ const EmployeesTab = () => {
  <div className="space-y-6">
  {/* Summary Cards */}
  <div className="grid grid-cols-3 gap-4">
- <div className="bg-white rounded-2xl border border-gray-100 p-5">
+ <div className="bg-white  border border-gray-100 p-5">
  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Masse salariale</p>
  <p className="text-2xl font-bold text-gray-800">{formatXAF(totalSalaries)}</p>
  </div>
- <div className="bg-white rounded-2xl border border-gray-100 p-5">
+ <div className="bg-white  border border-gray-100 p-5">
  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Employes</p>
  <p className="text-2xl font-bold text-gray-800">{employees.length}</p>
  </div>
- <div className="bg-white rounded-2xl border border-gray-100 p-5">
+ <div className="bg-white  border border-gray-100 p-5">
  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Salaire moyen</p>
  <p className="text-2xl font-bold text-gray-800">
  {withSalary > 0 ? formatXAF(Math.round(totalSalaries / withSalary)) : '\u2014'}
@@ -2156,7 +2176,7 @@ const EmployeesTab = () => {
  </div>
 
  {/* Table */}
- <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+ <div className="bg-white  border border-gray-100 overflow-hidden">
  <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
  <h2 className="font-semibold text-gray-700">Salaires des employes</h2>
  <div className="relative">
@@ -2164,7 +2184,7 @@ const EmployeesTab = () => {
  <input
  type="text" value={search} onChange={(e) => setSearch(e.target.value)}
  placeholder="Rechercher..."
- className="w-56 bg-[#f5f6fa] border border-[#e5e8ef] rounded-xl py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
+ className="w-56 bg-[#f5f6fa] border border-[#e5e8ef]  py-2.5 pl-9 pr-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#283852] transition-colors"
  />
  </div>
  </div>
@@ -2235,7 +2255,7 @@ export default function Payroll() {
  {activeTab === 'payroll' && (
  <button
  onClick={() => setShowCreateModal(true)}
- className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
+ className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5  text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
  >
  <Add01Icon size={16} />
  Nouvelle Paie
@@ -2244,12 +2264,12 @@ export default function Payroll() {
  </div>
 
  {/* Tabs */}
- <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+ <div className="flex gap-1 bg-gray-100 p-1  w-fit">
  {tabs.map((tab) => (
  <button
  key={tab.key}
  onClick={() => setActiveTab(tab.key)}
- className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+ className={`flex items-center gap-2 px-4 py-2  text-sm font-medium transition-all ${
  activeTab === tab.key
  ? 'bg-white text-gray-800 '
  : 'text-gray-500 hover:text-gray-700'
@@ -2268,7 +2288,7 @@ export default function Payroll() {
  {activeTab === 'payroll' && isLoading && (
  <div className="space-y-3">
  {[...Array(4)].map((_, i) => (
- <div key={i} className="h-16 bg-gray-100 rounded-2xl animate-pulse"/>
+ <div key={i} className="h-16 bg-gray-100  animate-pulse"/>
  ))}
  </div>
  )}
@@ -2277,7 +2297,7 @@ export default function Payroll() {
  <>
  {/* Payroll runs table */}
  {allRuns.length > 0 ? (
- <div className="bg-white rounded-2xl overflow-hidden">
+ <div className="bg-white  overflow-hidden">
  <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100">
  <div className="col-span-2">Periode</div>
  <div className="col-span-2">Statut</div>
@@ -2327,7 +2347,7 @@ export default function Payroll() {
  }}
  disabled={calculateMut.isPending}
  title="Calculer"
- className="p-1.5 rounded-lg text-[#283852] hover:text-[#283852] hover:bg-[#283852]/10 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-[#283852] hover:text-[#283852] hover:bg-[#283852]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <CalculatorIcon size={14} />
  </button>
@@ -2340,7 +2360,7 @@ export default function Payroll() {
  }}
  disabled={validateMut.isPending}
  title="Valider"
- className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <Tick01Icon size={14} />
  </button>
@@ -2352,7 +2372,7 @@ export default function Payroll() {
  setPayingRunId(run.id);
  }}
  title="Payer"
- className="p-1.5 rounded-lg text-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-[#33cbcc] hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-colors opacity-0 group-hover:opacity-100"
  >
  <CreditCardIcon size={14} />
  </button>
@@ -2363,7 +2383,7 @@ export default function Payroll() {
  setSelectedRunId(run.id);
  }}
  title="Details"
- className="p-1.5 rounded-lg text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
+ className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
  >
  <ViewIcon size={14} />
  </button>
@@ -2373,7 +2393,7 @@ export default function Payroll() {
  })}
  </div>
  ) : (
- <div className="bg-white rounded-2xl p-12 text-center">
+ <div className="bg-white  p-12 text-center">
  <Wallet01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-500 font-medium mb-2">Aucune paie creee</p>
  <p className="text-sm text-gray-400">Creez votre premiere paie pour commencer.</p>

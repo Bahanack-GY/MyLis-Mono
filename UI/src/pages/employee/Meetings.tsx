@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar01Icon, Search01Icon, Cancel01Icon, ViewIcon, UserGroupIcon, ClipboardIcon, RefreshIcon, Briefcase01Icon, UserAdd01Icon, Location01Icon, Clock01Icon, File01Icon, Tick01Icon, ArrowRight01Icon, UserIcon, Mic01Icon } from 'hugeicons-react';
@@ -8,582 +8,582 @@ import { UserMeetingsSkeleton } from '../../components/Skeleton';
 import { useAuth } from '../../contexts/AuthContext';
 
 /* ------------------------------------------------------------------ */
-/*  Types                                                              */
+/*  Types   */
 /* ------------------------------------------------------------------ */
 
 type MeetingStatus = 'scheduled' | 'in_progress' | 'completed' | 'cancelled';
 type MeetingType = 'standup' | 'review' | 'planning' | 'retrospective' | 'client' | 'onboarding';
 
 interface MeetingReport {
-    summary: string;
-    decisions: string[];
-    actionItems: { task: string; assignee: string }[];
+  summary: string;
+  decisions: string[];
+  actionItems: { task: string; assignee: string }[];
 }
 
 interface MeetingItem {
-    id: string;
-    title: string;
-    description: string;
-    type: MeetingType;
-    status: MeetingStatus;
-    date: string;
-    startTime: string;
-    endTime: string;
-    location: string;
-    organizerId: string;
-    secretaryId: string | null;
-    organizer: { name: string; avatar: string };
-    participants: { id: string; name: string; avatar: string; attended: boolean }[];
-    report: MeetingReport | null;
-    transcript: string | null;
+  id: string;
+  title: string;
+  description: string;
+  type: MeetingType;
+  status: MeetingStatus;
+  date: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  organizerId: string;
+  secretaryId: string | null;
+  organizer: { name: string; avatar: string };
+  participants: { id: string; name: string; avatar: string; attended: boolean }[];
+  report: MeetingReport | null;
+  transcript: string | null;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Constants                                                          */
+/*  Constants   */
 /* ------------------------------------------------------------------ */
 
 const STATUS_STYLES: Record<MeetingStatus, string> = {
-    scheduled: 'bg-[#283852]/10 text-[#283852]',
-    in_progress: 'bg-[#33cbcc]/10 text-[#33cbcc]',
-    completed: 'bg-gray-100 text-gray-600',
-    cancelled: 'bg-gray-100 text-gray-500',
+  scheduled: 'bg-[#283852]/10 text-[#283852]',
+  in_progress: 'bg-[#33cbcc]/10 text-[#33cbcc]',
+  completed: 'bg-gray-100 text-gray-600',
+  cancelled: 'bg-gray-100 text-gray-500',
 };
 
 const TYPE_ICONS: Record<MeetingType, React.ComponentType<{ size?: number; className?: string }>> = {
-    standup: UserGroupIcon,
-    review: ClipboardIcon,
-    planning: Calendar01Icon,
-    retrospective: RefreshIcon,
-    client: Briefcase01Icon,
-    onboarding: UserAdd01Icon,
+  standup: UserGroupIcon,
+  review: ClipboardIcon,
+  planning: Calendar01Icon,
+  retrospective: RefreshIcon,
+  client: Briefcase01Icon,
+  onboarding: UserAdd01Icon,
 };
 
 const STATUSES: MeetingStatus[] = ['scheduled', 'in_progress', 'completed', 'cancelled'];
 
 /* ------------------------------------------------------------------ */
-/*  Meeting Detail Modal (view-only)                                   */
+/*  Meeting Detail Modal (view-only)   */
 /* ------------------------------------------------------------------ */
 
 const MeetingDetailModal = ({
-    meeting,
-    onClose,
-    onAttend,
-    alreadyAttended,
-    isAttending,
-    isSecretary,
+  meeting,
+  onClose,
+  onAttend,
+  alreadyAttended,
+  isAttending,
+  isSecretary,
 }: {
-    meeting: MeetingItem;
-    onClose: () => void;
-    onAttend?: () => void;
-    alreadyAttended?: boolean;
-    isAttending?: boolean;
-    isSecretary?: boolean;
+  meeting: MeetingItem;
+  onClose: () => void;
+  onAttend?: () => void;
+  alreadyAttended?: boolean;
+  isAttending?: boolean;
+  isSecretary?: boolean;
 }) => {
-    const { t } = useTranslation();
-    const TypeIcon = TYPE_ICONS[meeting.type];
-    const [showTranscript, setShowTranscript] = useState(false);
-    const attendedCount = meeting.participants.filter(p => p.attended).length;
+  const { t } = useTranslation();
+  const TypeIcon = TYPE_ICONS[meeting.type];
+  const [showTranscript, setShowTranscript] = useState(false);
+  const attendedCount = meeting.participants.filter(p => p.attended).length;
 
-    useEffect(() => {
-        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
-        document.addEventListener('keydown', handleKey);
-        document.body.style.overflow = 'hidden';
-        return () => { document.removeEventListener('keydown', handleKey); document.body.style.overflow = ''; };
-    }, [onClose]);
+  useEffect(() => {
+  const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+  document.addEventListener('keydown', handleKey);
+  document.body.style.overflow = 'hidden';
+  return () => { document.removeEventListener('keydown', handleKey); document.body.style.overflow = ''; };
+  }, [onClose]);
 
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-        >
-            <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                onClick={e => e.stopPropagation()}
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col"
-            >
-                {/* Header */}
-                <div className="px-5 py-4 md:px-6 md:py-5 border-b border-gray-100 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-[#283852]/10 flex items-center justify-center shrink-0">
-                            <TypeIcon size={20} className="text-[#283852]" />
-                        </div>
-                        <div className="min-w-0">
-                            <h2 className="text-lg font-bold text-gray-800 truncate">{meeting.title}</h2>
-                            <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
-                                    {t(`meetings.types.${meeting.type}`)}
-                                </span>
-                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[meeting.status]}`}>
-                                    {t(`meetings.status.${meeting.status}`)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0">
-                        <Cancel01Icon size={18} />
-                    </button>
-                </div>
+  return (
+  <motion.div
+  initial={{ opacity: 0 }}
+  animate={{ opacity: 1 }}
+  exit={{ opacity: 0 }}
+  onClick={onClose}
+  className="fixed inset-0 z-50 flex justify-end bg-black/30"
+  >
+  <motion.div
+  initial={{ x: '100%' }}
+  animate={{ x: 0 }}
+  exit={{ x: '100%' }}
+  transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+  onClick={e => e.stopPropagation()}
+  className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
+  >
+  {/* Header */}
+  <div className="px-5 py-4 md:px-6 md:py-5 border-b border-[#e5e8ef] flex items-center justify-between shrink-0">
+  <div className="flex items-center gap-3 min-w-0">
+  <div className="w-10 h-10  bg-[#283852]/10 flex items-center justify-center shrink-0">
+  <TypeIcon size={20} className="text-[#283852]" />
+  </div>
+  <div className="min-w-0">
+  <h2 className="text-lg font-bold text-[#1c2b3a] truncate">{meeting.title}</h2>
+  <div className="flex items-center gap-2 mt-0.5">
+  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
+  {t(`meetings.types.${meeting.type}`)}
+  </span>
+  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[meeting.status]}`}>
+  {t(`meetings.status.${meeting.status}`)}
+  </span>
+  </div>
+  </div>
+  </div>
+  <button onClick={onClose} className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors shrink-0">
+  <Cancel01Icon size={18} />
+  </button>
+  </div>
 
-                {/* Content */}
-                <div className="p-5 md:p-6 space-y-6 overflow-y-auto flex-1">
-                    {/* Meeting Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-gray-50 rounded-xl p-4">
-                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                <Calendar01Icon size={12} />
-                                {t('meetings.detail.dateTime')}
-                            </div>
-                            <p className="text-sm font-medium text-gray-800">{meeting.date}</p>
-                            <p className="text-xs text-gray-500">{meeting.startTime} – {meeting.endTime}</p>
-                        </div>
-                        <div className="bg-gray-50 rounded-xl p-4">
-                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                <Location01Icon size={12} />
-                                {t('meetings.detail.location')}
-                            </div>
-                            <p className="text-sm font-medium text-gray-800">{meeting.location || '--'}</p>
-                        </div>
-                    </div>
+  {/* Content */}
+  <div className="p-5 md:p-6 space-y-6 overflow-y-auto flex-1">
+  {/* Meeting Info */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div className="bg-[#f8f9fc]  p-4">
+  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">
+  <Calendar01Icon size={12} />
+  {t('meetings.detail.dateTime')}
+  </div>
+  <p className="text-sm font-medium text-[#1c2b3a]">{meeting.date}</p>
+  <p className="text-xs text-[#8892a4]">{meeting.startTime} – {meeting.endTime}</p>
+  </div>
+  <div className="bg-[#f8f9fc]  p-4">
+  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">
+  <Location01Icon size={12} />
+  {t('meetings.detail.location')}
+  </div>
+  <p className="text-sm font-medium text-[#1c2b3a]">{meeting.location || '--'}</p>
+  </div>
+  </div>
 
-                    {/* Description */}
-                    {meeting.description && (
-                        <div>
-                            <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                                {t('meetings.detail.description')}
-                            </div>
-                            <p className="text-sm text-gray-600 leading-relaxed">{meeting.description}</p>
-                        </div>
-                    )}
+  {/* Description */}
+  {meeting.description && (
+  <div>
+  <div className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">
+  {t('meetings.detail.description')}
+  </div>
+  <p className="text-sm text-[#8892a4] leading-relaxed">{meeting.description}</p>
+  </div>
+  )}
 
-                    {/* Organizer */}
-                    <div>
-                        <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                            {t('meetings.detail.organizer')}
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                <UserIcon size={14} className="text-gray-400" />
-                            </div>
-                            <span className="text-sm font-medium text-gray-800">{meeting.organizer.name}</span>
-                        </div>
-                    </div>
+  {/* Organizer */}
+  <div>
+  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">
+  {t('meetings.detail.organizer')}
+  </div>
+  <div className="flex items-center gap-3">
+  <div className="w-8 h-8 rounded-full border border-[#e5e8ef] bg-[#f8f9fc] flex items-center justify-center">
+  <UserIcon size={14} className="text-[#8892a4]" />
+  </div>
+  <span className="text-sm font-medium text-[#1c2b3a]">{meeting.organizer.name}</span>
+  </div>
+  </div>
 
-                    {/* Participants + Attendance */}
-                    <div>
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                                {t('meetings.detail.participants')} ({meeting.participants.length})
-                            </div>
-                            {meeting.status === 'in_progress' && (
-                                <span className="text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-2 py-0.5 rounded-full">
-                                    {attendedCount}/{meeting.participants.length} {t('meetings.detail.attendance')}
-                                </span>
-                            )}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {meeting.participants.map((p) => (
-                                <div key={p.id} className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${p.attended ? 'bg-[#33cbcc]/10' : 'bg-gray-50'}`}>
-                                    {p.avatar ? (
-                                        <img src={p.avatar} alt="" className="w-6 h-6 rounded-full border border-gray-200" />
-                                    ) : (
-                                        <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center">
-                                            <UserIcon size={10} className="text-gray-400" />
-                                        </div>
-                                    )}
-                                    <span className="text-xs text-gray-600">{p.name}</span>
-                                    {p.attended && <Tick01Icon size={11} className="text-[#33cbcc] shrink-0" />}
-                                </div>
-                            ))}
-                            {meeting.participants.length === 0 && (
-                                <span className="text-xs text-gray-400 italic">{t('meetings.detail.noParticipants')}</span>
-                            )}
-                        </div>
-                    </div>
+  {/* Participants + Attendance */}
+  <div>
+  <div className="flex items-center justify-between mb-2">
+  <div className="flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">
+  {t('meetings.detail.participants')} ({meeting.participants.length})
+  </div>
+  {meeting.status === 'in_progress' && (
+  <span className="text-[10px] font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-2 py-0.5 rounded-full">
+  {attendedCount}/{meeting.participants.length} {t('meetings.detail.attendance')}
+  </span>
+  )}
+  </div>
+  <div className="flex flex-wrap gap-2">
+  {meeting.participants.map((p) => (
+  <div key={p.id} className={`flex items-center gap-2  px-3 py-1.5 ${p.attended ? 'bg-[#33cbcc]/10' : 'bg-[#f8f9fc]'}`}>
+  {p.avatar ? (
+  <img src={p.avatar} alt="" className="w-6 h-6 rounded-full border border-[#e5e8ef]" />
+  ) : (
+  <div className="w-6 h-6 rounded-full border border-[#e5e8ef] bg-[#f8f9fc] flex items-center justify-center">
+  <UserIcon size={10} className="text-[#8892a4]" />
+  </div>
+  )}
+  <span className="text-xs text-[#8892a4]">{p.name}</span>
+  {p.attended && <Tick01Icon size={11} className="text-[#33cbcc] shrink-0" />}
+  </div>
+  ))}
+  {meeting.participants.length === 0 && (
+  <span className="text-xs text-[#8892a4] italic">{t('meetings.detail.noParticipants')}</span>
+  )}
+  </div>
+  </div>
 
-                    {/* Transcript */}
-                    {meeting.transcript && (
-                        <div>
-                            <button
-                                onClick={() => setShowTranscript(v => !v)}
-                                className="flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2 hover:text-gray-600 transition-colors"
-                            >
-                                {t('meetings.detail.transcript')}
-                                <span className="ml-1 text-gray-300">{showTranscript ? '▲' : '▼'}</span>
-                            </button>
-                            {showTranscript && (
-                                <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap">
-                                    {meeting.transcript}
-                                </div>
-                            )}
-                        </div>
-                    )}
+  {/* Transcript */}
+  {meeting.transcript && (
+  <div>
+  <button
+  onClick={() => setShowTranscript(v => !v)}
+  className="flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2 hover:text-[#1c2b3a] transition-colors"
+  >
+  {t('meetings.detail.transcript')}
+  <span className="ml-1 text-[#b0bac9]">{showTranscript ? '▲' : '▼'}</span>
+  </button>
+  {showTranscript && (
+  <div className="bg-[#f8f9fc]  p-4 text-sm text-[#8892a4] leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap">
+  {meeting.transcript}
+  </div>
+  )}
+  </div>
+  )}
 
-                    {/* Report */}
-                    <div className="border-t border-gray-100 pt-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <File01Icon size={18} className="text-[#33cbcc]" />
-                            <h3 className="text-base font-bold text-gray-800">{t('meetings.detail.report')}</h3>
-                            {meeting.report && (
-                                <span className="w-2 h-2 rounded-full bg-[#33cbcc]" />
-                            )}
-                        </div>
+  {/* Report */}
+  <div className="border-t border-[#e5e8ef] pt-6">
+  <div className="flex items-center gap-2 mb-4">
+  <File01Icon size={18} className="text-[#33cbcc]" />
+  <h3 className="text-base font-bold text-[#1c2b3a]">{t('meetings.detail.report')}</h3>
+  {meeting.report && (
+  <span className="w-2 h-2 rounded-full bg-[#33cbcc]" />
+  )}
+  </div>
 
-                        {meeting.report ? (
-                            <div className="space-y-5">
-                                <div>
-                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('meetings.detail.summary')}</div>
-                                    <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 leading-relaxed">
-                                        {meeting.report.summary}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('meetings.detail.decisions')}</div>
-                                    <div className="space-y-2">
-                                        {meeting.report.decisions.map((d, i) => (
-                                            <div key={i} className="flex items-start gap-2.5">
-                                                <Tick01Icon size={16} className="text-[#33cbcc] shrink-0 mt-0.5" />
-                                                <span className="text-sm text-gray-700">{d}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">{t('meetings.detail.actionItems')}</div>
-                                    <div className="space-y-2">
-                                        {meeting.report.actionItems.map((ai, i) => (
-                                            <div key={i} className="flex items-start gap-2.5 bg-[#33cbcc]/5 rounded-xl px-4 py-3">
-                                                <ArrowRight01Icon size={14} className="text-[#33cbcc] shrink-0 mt-0.5" />
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm text-gray-700">{ai.task}</p>
-                                                    <p className="text-xs text-gray-400 mt-0.5">{ai.assignee}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="bg-gray-50 rounded-xl p-8 text-center">
-                                <File01Icon size={32} className="mx-auto text-gray-300 mb-3" />
-                                <p className="text-sm text-gray-400">{t('meetings.detail.reportPending')}</p>
-                            </div>
-                        )}
-                    </div>
-                </div>
+  {meeting.report ? (
+  <div className="space-y-5">
+  <div>
+  <div className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">{t('meetings.detail.summary')}</div>
+  <div className="bg-[#f8f9fc]  p-4 text-sm text-[#8892a4] leading-relaxed">
+  {meeting.report.summary}
+  </div>
+  </div>
+  <div>
+  <div className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">{t('meetings.detail.decisions')}</div>
+  <div className="space-y-2">
+  {meeting.report.decisions.map((d, i) => (
+  <div key={i} className="flex items-start gap-2.5">
+  <Tick01Icon size={16} className="text-[#33cbcc] shrink-0 mt-0.5" />
+  <span className="text-sm text-[#1c2b3a]">{d}</span>
+  </div>
+  ))}
+  </div>
+  </div>
+  <div>
+  <div className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-2">{t('meetings.detail.actionItems')}</div>
+  <div className="space-y-2">
+  {meeting.report.actionItems.map((ai, i) => (
+  <div key={i} className="flex items-start gap-2.5 bg-[#33cbcc]/5  px-4 py-3">
+  <ArrowRight01Icon size={14} className="text-[#33cbcc] shrink-0 mt-0.5" />
+  <div className="flex-1 min-w-0">
+  <p className="text-sm text-[#1c2b3a]">{ai.task}</p>
+  <p className="text-xs text-[#8892a4] mt-0.5">{ai.assignee}</p>
+  </div>
+  </div>
+  ))}
+  </div>
+  </div>
+  </div>
+  ) : (
+  <div className="bg-[#f8f9fc]  p-8 text-center">
+  <File01Icon size={32} className="mx-auto text-[#b0bac9] mb-3" />
+  <p className="text-sm text-[#8892a4]">{t('meetings.detail.reportPending')}</p>
+  </div>
+  )}
+  </div>
+  </div>
 
-                {/* Footer */}
-                <div className="px-5 py-4 md:px-6 border-t border-gray-100 shrink-0 space-y-2">
-                    {meeting.status === 'in_progress' && isSecretary && (
-                        <button
-                            onClick={() => {
-                                window.dispatchEvent(new CustomEvent('meeting:manual-record', {
-                                    detail: { meetingId: meeting.id, meetingTitle: meeting.title },
-                                }));
-                                onClose();
-                            }}
-                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-[#283852] text-white hover:bg-[#283852]/80 transition-colors shadow-lg shadow-[#283852]/20"
-                        >
-                            <Mic01Icon size={15} />
-                            {t('meetings.start.record', 'Record Meeting')}
-                        </button>
-                    )}
-                    {meeting.status === 'in_progress' && onAttend && (
-                        <button
-                            disabled={alreadyAttended || isAttending}
-                            onClick={onAttend}
-                            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                                alreadyAttended
-                                    ? 'bg-[#33cbcc]/10 text-[#33cbcc] cursor-default'
-                                    : isAttending
-                                        ? 'bg-[#33cbcc]/50 text-white cursor-not-allowed'
-                                        : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'
-                            }`}
-                        >
-                            <Tick01Icon size={15} className={isAttending ? 'animate-pulse' : ''} />
-                            {alreadyAttended
-                                ? t('meetings.attend.attended')
-                                : isAttending
-                                    ? '...'
-                                    : t('meetings.attend.button')}
-                        </button>
-                    )}
-                    <div className="flex justify-end">
-                        <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors">
-                            {t('meetings.detail.close')}
-                        </button>
-                    </div>
-                </div>
-            </motion.div>
-        </motion.div>
-    );
+  {/* Footer */}
+  <div className="px-5 py-4 md:px-6 border-t border-[#e5e8ef] shrink-0 space-y-2">
+  {meeting.status === 'in_progress' && isSecretary && (
+  <button
+  onClick={() => {
+  window.dispatchEvent(new CustomEvent('meeting:manual-record', {
+  detail: { meetingId: meeting.id, meetingTitle: meeting.title },
+  }));
+  onClose();
+  }}
+  className="w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold bg-[#283852] text-white hover:bg-[#283852]/80 transition-colors shadow-lg shadow-[#283852]/20"
+  >
+  <Mic01Icon size={15} />
+  {t('meetings.start.record', 'Record Meeting')}
+  </button>
+  )}
+  {meeting.status === 'in_progress' && onAttend && (
+  <button
+  disabled={alreadyAttended || isAttending}
+  onClick={onAttend}
+  className={`w-full flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
+  alreadyAttended
+  ? 'bg-[#33cbcc]/10 text-[#33cbcc] cursor-default'
+  : isAttending
+  ? 'bg-[#33cbcc]/50 text-white cursor-not-allowed'
+  : 'bg-[#33cbcc] text-white hover:bg-[#2bb5b6] shadow-lg shadow-[#33cbcc]/20'
+  }`}
+  >
+  <Tick01Icon size={15} className={isAttending ? 'animate-pulse' : ''} />
+  {alreadyAttended
+  ? t('meetings.attend.attended')
+  : isAttending
+  ? '...'
+  : t('meetings.attend.button')}
+  </button>
+  )}
+  <div className="flex justify-end">
+  <button onClick={onClose} className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors">
+  {t('meetings.detail.close')}
+  </button>
+  </div>
+  </div>
+  </motion.div>
+  </motion.div>
+  );
 };
 
 /* ------------------------------------------------------------------ */
-/*  Meetings Page (employee - view only)                               */
+/*  Meetings Page (employee - view only)   */
 /* ------------------------------------------------------------------ */
 
 const Meetings = () => {
-    const { t } = useTranslation();
-    const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState<MeetingStatus | 'all'>('all');
-    const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
+  const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<MeetingStatus | 'all'>('all');
+  const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
 
-    const { user } = useAuth();
-    const { data: apiMeetings, isLoading } = useMeetings();
-    const attendMeeting = useAttendMeeting();
+  const { user } = useAuth();
+  const { data: apiMeetings, isLoading } = useMeetings();
+  const attendMeeting = useAttendMeeting();
 
-    /* Map API meetings to display shape */
-    const meetings: MeetingItem[] = (apiMeetings || []).map((m: Meeting) => ({
-        id: m.id,
-        title: m.title,
-        description: m.description || '',
-        type: (m.type || 'standup') as MeetingType,
-        status: (m.status || 'scheduled') as MeetingStatus,
-        date: m.date,
-        startTime: m.startTime || '',
-        endTime: m.endTime || '',
-        location: m.location || '',
-        organizerId: m.organizerId || '',
-        secretaryId: m.secretaryId ?? null,
-        organizer: {
-            name: m.organizer?.email || '',
-            avatar: '',
-        },
-        participants: (m.participants || []).map(p => ({
-            id: p.id,
-            name: `${p.firstName} ${p.lastName}`,
-            avatar: p.avatarUrl || '',
-            attended: p.MeetingParticipant?.attended ?? false,
-        })),
-        report: m.report || null,
-        transcript: m.transcript ?? null,
-    }));
+  /* Map API meetings to display shape */
+  const meetings: MeetingItem[] = (apiMeetings || []).map((m: Meeting) => ({
+  id: m.id,
+  title: m.title,
+  description: m.description || '',
+  type: (m.type || 'standup') as MeetingType,
+  status: (m.status || 'scheduled') as MeetingStatus,
+  date: m.date,
+  startTime: m.startTime || '',
+  endTime: m.endTime || '',
+  location: m.location || '',
+  organizerId: m.organizerId || '',
+  secretaryId: m.secretaryId ?? null,
+  organizer: {
+  name: m.organizer?.email || '',
+  avatar: '',
+  },
+  participants: (m.participants || []).map(p => ({
+  id: p.id,
+  name: `${p.firstName} ${p.lastName}`,
+  avatar: p.avatarUrl || '',
+  attended: p.MeetingParticipant?.attended ?? false,
+  })),
+  report: m.report || null,
+  transcript: m.transcript ?? null,
+  }));
 
-    const selectedMeeting = selectedMeetingId ? (meetings.find(m => m.id === selectedMeetingId) ?? null) : null;
+  const selectedMeeting = selectedMeetingId ? (meetings.find(m => m.id === selectedMeetingId) ?? null) : null;
 
-    /* Loading */
-    if (isLoading) {
-        return <UserMeetingsSkeleton />;
-    }
+  /* Loading */
+  if (isLoading) {
+  return <UserMeetingsSkeleton />;
+  }
 
-    /* Filtered meetings */
-    const filteredMeetings = meetings.filter(m => {
-        const matchesSearch =
-            m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            m.organizer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            m.location.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = filterStatus === 'all' || m.status === filterStatus;
-        return matchesSearch && matchesStatus;
-    });
+  /* Filtered meetings */
+  const filteredMeetings = meetings.filter(m => {
+  const matchesSearch =
+  m.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  m.organizer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  m.location.toLowerCase().includes(searchQuery.toLowerCase());
+  const matchesStatus = filterStatus === 'all' || m.status === filterStatus;
+  return matchesSearch && matchesStatus;
+  });
 
-    /* Stats */
-    const scheduledCount = meetings.filter(m => m.status === 'scheduled').length;
-    const completedCount = meetings.filter(m => m.status === 'completed').length;
-    const reportsCount = meetings.filter(m => m.report !== null).length;
+  /* Stats */
+  const scheduledCount = meetings.filter(m => m.status === 'scheduled').length;
+  const completedCount = meetings.filter(m => m.status === 'completed').length;
+  const reportsCount = meetings.filter(m => m.report !== null).length;
 
-    const stats = [
-        { label: t('meetings.stats.total'), value: meetings.length, icon: Calendar01Icon, color: '#33cbcc' },
-        { label: t('meetings.stats.scheduled'), value: scheduledCount, icon: Calendar01Icon, color: '#283852' },
-        { label: t('meetings.stats.completed'), value: completedCount, icon: Tick01Icon, color: '#33cbcc' },
-        { label: t('meetings.stats.reports'), value: reportsCount, icon: File01Icon, color: '#283852' },
-    ];
+  const stats = [
+  { label: t('meetings.stats.total'), value: meetings.length, icon: Calendar01Icon, color: '#33cbcc' },
+  { label: t('meetings.stats.scheduled'), value: scheduledCount, icon: Calendar01Icon, color: '#283852' },
+  { label: t('meetings.stats.completed'), value: completedCount, icon: Tick01Icon, color: '#33cbcc' },
+  { label: t('meetings.stats.reports'), value: reportsCount, icon: File01Icon, color: '#283852' },
+  ];
 
-    /* Status filters */
-    const statusFilters: { key: MeetingStatus | 'all'; label: string }[] = [
-        { key: 'all', label: t('meetings.filterAll') },
-        ...STATUSES.map(s => ({ key: s as MeetingStatus, label: t(`meetings.status.${s}`) })),
-    ];
+  /* Status filters */
+  const statusFilters: { key: MeetingStatus | 'all'; label: string }[] = [
+  { key: 'all', label: t('meetings.filterAll') },
+  ...STATUSES.map(s => ({ key: s as MeetingStatus, label: t(`meetings.status.${s}`) })),
+  ];
 
-    return (
-        <div className="space-y-6 md:space-y-8">
-            {/* Header - no action button (employee view-only) */}
-            <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{t('meetings.title')}</h1>
-                <p className="text-gray-500 mt-1 text-sm md:text-base">{t('meetings.subtitle')}</p>
-            </div>
+  return (
+  <div className="space-y-6 md:space-y-8">
+  {/* Header - no action button (employee view-only) */}
+  <div>
+  <h1 className="text-2xl md:text-3xl font-bold text-gray-800">{t('meetings.title')}</h1>
+  <p className="text-gray-500 mt-1 text-sm md:text-base">{t('meetings.subtitle')}</p>
+  </div>
 
-            {/* Stat Cards - 2-col mobile / 4-col desktop */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                {stats.map((stat, i) => (
-                    <motion.div
-                        key={i}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer"
-                    >
-                        <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
-                            <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
-                        </div>
-                        <div className="p-5 bg-white relative overflow-hidden">
-                            <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
-                            <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
-                                <stat.icon size={110} strokeWidth={1.2} />
-                            </div>
-                        </div>
-                    </motion.div>
-                ))}
-            </div>
+  {/* Stat Cards - 2-col mobile / 4-col desktop */}
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+  {stats.map((stat, i) => (
+  <motion.div
+  key={i}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: i * 0.1 }}
+  className="border border-gray-100  overflow-hidden cursor-pointer"
+  >
+  <div className="px-5 py-3" style={{ backgroundColor: stat.color }}>
+  <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">{stat.label}</h3>
+  </div>
+  <div className="p-5 bg-white relative overflow-hidden">
+  <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none">{stat.value}</h2>
+  <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
+  <stat.icon size={110} strokeWidth={1.2} />
+  </div>
+  </div>
+  </motion.div>
+  ))}
+  </div>
 
-            {/* Search01Icon bar */}
-            <div className="flex items-center gap-3 bg-white border border-[#e5e8ef] rounded-2xl px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
-                <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
-                <input
-                    type="text"
-                    placeholder={t('meetings.searchPlaceholder')}
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
-                />
-            </div>
+  {/* Search01Icon bar */}
+  <div className="flex items-center gap-3 bg-white border border-[#e5e8ef]  px-4 py-3.5 focus-within:border-[#33cbcc] transition-colors">
+  <Search01Icon size={18} className="text-[#b0bac9] shrink-0" />
+  <input
+  type="text"
+  placeholder={t('meetings.searchPlaceholder')}
+  value={searchQuery}
+  onChange={e => setSearchQuery(e.target.value)}
+  className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
+  />
+  </div>
 
-            {/* Status filter pills */}
-            <div className="flex gap-2 flex-wrap">
-                {statusFilters.map(sf => (
-                    <button
-                        key={sf.key}
-                        onClick={() => setFilterStatus(sf.key)}
-                        className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-colors ${
-                            filterStatus === sf.key
-                                ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
-                                : 'bg-white text-gray-600 border border-gray-100 hover:border-[#33cbcc]/30'
-                        }`}
-                    >
-                        {sf.label}
-                    </button>
-                ))}
-            </div>
+  {/* Status filter pills */}
+  <div className="flex gap-2 flex-wrap">
+  {statusFilters.map(sf => (
+  <button
+  key={sf.key}
+  onClick={() => setFilterStatus(sf.key)}
+  className={`flex items-center gap-2 px-3 md:px-4 py-2  text-xs md:text-sm font-medium transition-colors ${
+  filterStatus === sf.key
+  ? 'bg-[#33cbcc] text-white shadow-lg shadow-[#33cbcc]/20'
+  : 'bg-white text-gray-600 border border-gray-100 hover:border-[#33cbcc]/30'
+  }`}
+  >
+  {sf.label}
+  </button>
+  ))}
+  </div>
 
-            {/* Meeting cards grid - 1-col mobile / 2-col tablet / 3-col desktop */}
-            {filteredMeetings.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {filteredMeetings.map((meeting, i) => {
-                        const TypeIcon = TYPE_ICONS[meeting.type];
-                        return (
-                            <motion.div
-                                key={meeting.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 + i * 0.05 }}
-                                className="bg-white rounded-2xl p-5 md:p-6 border border-gray-100 group hover:border-[#33cbcc]/30 transition-all cursor-pointer"
-                                onClick={() => setSelectedMeetingId(meeting.id)}
-                            >
-                                {/* Icon + View action */}
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-[#283852]/10 flex items-center justify-center">
-                                        <TypeIcon size={20} className="text-[#283852]" />
-                                    </div>
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button
-                                            onClick={e => { e.stopPropagation(); setSelectedMeetingId(meeting.id); }}
-                                            className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
-                                        >
-                                            <ViewIcon size={16} />
-                                        </button>
-                                    </div>
-                                </div>
+  {/* Meeting cards grid - 1-col mobile / 2-col tablet / 3-col desktop */}
+  {filteredMeetings.length > 0 && (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+  {filteredMeetings.map((meeting, i) => {
+  const TypeIcon = TYPE_ICONS[meeting.type];
+  return (
+  <motion.div
+  key={meeting.id}
+  initial={{ opacity: 0, y: 20 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.1 + i * 0.05 }}
+  className="bg-white  p-5 md:p-6 border border-gray-100 group hover:border-[#33cbcc]/30 transition-all cursor-pointer"
+  onClick={() => setSelectedMeetingId(meeting.id)}
+  >
+  {/* Icon + View action */}
+  <div className="flex items-start justify-between mb-4">
+  <div className="w-11 h-11 md:w-12 md:h-12  bg-[#283852]/10 flex items-center justify-center">
+  <TypeIcon size={20} className="text-[#283852]" />
+  </div>
+  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+  <button
+  onClick={e => { e.stopPropagation(); setSelectedMeetingId(meeting.id); }}
+  className="p-2  hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+  >
+  <ViewIcon size={16} />
+  </button>
+  </div>
+  </div>
 
-                                {/* Title */}
-                                <h3 className="font-medium text-gray-800 text-sm truncate mb-3">{meeting.title}</h3>
+  {/* Title */}
+  <h3 className="font-medium text-gray-800 text-sm truncate mb-3">{meeting.title}</h3>
 
-                                {/* Badges */}
-                                <div className="flex items-center gap-2 flex-wrap mb-4">
-                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
-                                        {t(`meetings.types.${meeting.type}`)}
-                                    </span>
-                                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[meeting.status]}`}>
-                                        {t(`meetings.status.${meeting.status}`)}
-                                    </span>
-                                    {meeting.report && (
-                                        <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc]">
-                                            <File01Icon size={10} />
-                                            {t('meetings.detail.report')}
-                                        </span>
-                                    )}
-                                </div>
+  {/* Badges */}
+  <div className="flex items-center gap-2 flex-wrap mb-4">
+  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#283852]/10 text-[#283852]">
+  {t(`meetings.types.${meeting.type}`)}
+  </span>
+  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[meeting.status]}`}>
+  {t(`meetings.status.${meeting.status}`)}
+  </span>
+  {meeting.report && (
+  <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#33cbcc]/10 text-[#33cbcc]">
+  <File01Icon size={10} />
+  {t('meetings.detail.report')}
+  </span>
+  )}
+  </div>
 
-                                {/* Date + Time */}
-                                <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
-                                    <span className="flex items-center gap-1">
-                                        <Calendar01Icon size={12} />
-                                        {meeting.date}
-                                    </span>
-                                    {meeting.startTime && (
-                                        <span className="flex items-center gap-1">
-                                            <Clock01Icon size={12} />
-                                            {meeting.startTime}
-                                        </span>
-                                    )}
-                                </div>
+  {/* Date + Time */}
+  <div className="flex items-center gap-3 text-xs text-gray-400 mb-4">
+  <span className="flex items-center gap-1">
+  <Calendar01Icon size={12} />
+  {meeting.date}
+  </span>
+  {meeting.startTime && (
+  <span className="flex items-center gap-1">
+  <Clock01Icon size={12} />
+  {meeting.startTime}
+  </span>
+  )}
+  </div>
 
-                                {/* Organizer + Participants */}
-                                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                    <div className="flex items-center gap-2 min-w-0">
-                                        <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center shrink-0">
-                                            <UserIcon size={10} className="text-gray-400" />
-                                        </div>
-                                        <span className="text-xs text-gray-500 truncate">{meeting.organizer.name.split('@')[0]}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1 shrink-0">
-                                        <div className="flex -space-x-2">
-                                            {meeting.participants.slice(0, 3).map((p) => (
-                                                p.avatar ? (
-                                                    <img key={p.id} src={p.avatar} alt="" className="w-5 h-5 rounded-full border-2 border-white" />
-                                                ) : (
-                                                    <div key={p.id} className="w-5 h-5 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center">
-                                                        <UserIcon size={8} className="text-gray-400" />
-                                                    </div>
-                                                )
-                                            ))}
-                                        </div>
-                                        {meeting.participants.length > 3 && (
-                                            <span className="text-[10px] text-gray-400 ml-1">+{meeting.participants.length - 3}</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        );
-                    })}
-                </div>
-            )}
+  {/* Organizer + Participants */}
+  <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+  <div className="flex items-center gap-2 min-w-0">
+  <div className="w-6 h-6 rounded-full border border-gray-200 bg-gray-100 flex items-center justify-center shrink-0">
+  <UserIcon size={10} className="text-gray-400" />
+  </div>
+  <span className="text-xs text-gray-500 truncate">{meeting.organizer.name.split('@')[0]}</span>
+  </div>
+  <div className="flex items-center gap-1 shrink-0">
+  <div className="flex -space-x-2">
+  {meeting.participants.slice(0, 3).map((p) => (
+  p.avatar ? (
+  <img key={p.id} src={p.avatar} alt="" className="w-5 h-5 rounded-full border-2 border-white" />
+  ) : (
+  <div key={p.id} className="w-5 h-5 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center">
+  <UserIcon size={8} className="text-gray-400" />
+  </div>
+  )
+  ))}
+  </div>
+  {meeting.participants.length > 3 && (
+  <span className="text-[10px] text-gray-400 ml-1">+{meeting.participants.length - 3}</span>
+  )}
+  </div>
+  </div>
+  </motion.div>
+  );
+  })}
+  </div>
+  )}
 
-            {/* Empty State */}
-            {filteredMeetings.length === 0 && (
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl border border-gray-100 p-12 text-center"
-                >
-                    <Calendar01Icon size={48} className="mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-400 font-medium">{t('meetings.noResults')}</p>
-                </motion.div>
-            )}
+  {/* Empty State */}
+  {filteredMeetings.length === 0 && (
+  <motion.div
+  initial={{ opacity: 0, y: 10 }}
+  animate={{ opacity: 1, y: 0 }}
+  className="bg-white  border border-gray-100 p-12 text-center"
+  >
+  <Calendar01Icon size={48} className="mx-auto text-gray-300 mb-4" />
+  <p className="text-gray-400 font-medium">{t('meetings.noResults')}</p>
+  </motion.div>
+  )}
 
-            {/* Meeting Detail Modal */}
-            <AnimatePresence>
-                {selectedMeeting && (
-                    <MeetingDetailModal
-                        meeting={selectedMeeting}
-                        onClose={() => setSelectedMeetingId(null)}
-                        isSecretary={!!user?.employeeId && selectedMeeting.secretaryId === user.employeeId}
-                        alreadyAttended={selectedMeeting.participants.find(p => p.id === user?.employeeId)?.attended ?? false}
-                        isAttending={attendMeeting.isPending}
-                        onAttend={() => {
-                            attendMeeting.mutate(selectedMeeting.id, {
-                                onSuccess: () => setSelectedMeetingId(null),
-                            });
-                        }}
-                    />
-                )}
-            </AnimatePresence>
-        </div>
-    );
+  {/* Meeting Detail Modal */}
+  <AnimatePresence>
+  {selectedMeeting && (
+  <MeetingDetailModal
+  meeting={selectedMeeting}
+  onClose={() => setSelectedMeetingId(null)}
+  isSecretary={!!user?.employeeId && selectedMeeting.secretaryId === user.employeeId}
+  alreadyAttended={selectedMeeting.participants.find(p => p.id === user?.employeeId)?.attended ?? false}
+  isAttending={attendMeeting.isPending}
+  onAttend={() => {
+  attendMeeting.mutate(selectedMeeting.id, {
+  onSuccess: () => setSelectedMeetingId(null),
+  });
+  }}
+  />
+  )}
+  </AnimatePresence>
+  </div>
+  );
 };
 
 export default Meetings;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, LockPasswordIcon, CircleUnlock01Icon, Alert02Icon, Tick01Icon } from 'hugeicons-react';
@@ -26,9 +26,9 @@ const formatDate = (dateStr: string | null | undefined) => {
 };
 
 const inputCls =
- 'w-full bg-white rounded-xl border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+ 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors';
 const labelCls =
- 'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
+ 'flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1.5';
 
 /* ------------------------------------------------------------------ */
 /* Hooks */
@@ -122,27 +122,27 @@ const CreateFiscalYearModal = ({ onClose }: { onClose: () => void }) => {
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+ className="fixed inset-0 z-50 flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ opacity: 0, scale: 0.95, y: 10 }}
- animate={{ opacity: 1, scale: 1, y: 0 }}
- exit={{ opacity: 0, scale: 0.95, y: 10 }}
- transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl w-full max-w-md overflow-hidden"
+ className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
  >
  {/* Header */}
- <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between">
  <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-xl bg-[#33cbcc]/10 flex items-center justify-center">
+ <div className="w-10 h-10  bg-[#33cbcc]/10 flex items-center justify-center">
  <Calendar01Icon size={20} className="text-[#33cbcc]"/>
  </div>
- <h2 className="text-lg font-bold text-gray-800">Nouvel exercice fiscal</h2>
+ <h2 className="text-lg font-bold text-[#1c2b3a]">Nouvel exercice fiscal</h2>
  </div>
  <button
  onClick={onClose}
- className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+ className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"
  >
  <Cancel01Icon size={18} />
  </button>
@@ -189,20 +189,20 @@ const CreateFiscalYearModal = ({ onClose }: { onClose: () => void }) => {
  </div>
 
  {/* Footer */}
- <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3 mt-auto">
  <button
  onClick={onClose}
- className="px-4 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+ className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
  >
  Annuler
  </button>
  <button
  disabled={!isValid || createMut.isPending}
  onClick={handleSubmit}
- className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors ${
+ className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-white transition-colors ${
  isValid && !createMut.isPending
- ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] '
- : 'bg-gray-300 cursor-not-allowed shadow-none'
+ ? 'bg-[#33cbcc] hover:bg-[#2bb5b6]'
+ : 'bg-gray-300 cursor-not-allowed'
  }`}
  >
  {createMut.isPending ? <Loading02Icon size={16} className="animate-spin"/> : <Add01Icon size={16} />}
@@ -255,33 +255,47 @@ const ConfirmModal = ({
  animate={{ opacity: 1 }}
  exit={{ opacity: 0 }}
  onClick={onClose}
- className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+ className="fixed inset-0 z-60 flex justify-end bg-black/30"
  >
  <motion.div
- initial={{ scale: 0.95, opacity: 0 }}
- animate={{ scale: 1, opacity: 1 }}
- exit={{ scale: 0.95, opacity: 0 }}
+ initial={{ x: '100%' }}
+ animate={{ x: 0 }}
+ exit={{ x: '100%' }}
+ transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
  onClick={(e) => e.stopPropagation()}
- className="bg-white rounded-2xl p-6 w-full max-w-sm"
+ className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef]"
  >
- <div className="flex items-center gap-3 mb-4">
- <div className={`p-2.5 rounded-xl ${iconBg}`}>
+ {/* Header */}
+ <div className="px-6 py-5 border-b border-[#e5e8ef] flex items-center justify-between">
+ <div className="flex items-center gap-3">
+ <div className={`p-2.5  ${iconBg}`}>
  <Icon size={20} className={iconColor} />
  </div>
- <h3 className="text-base font-semibold text-gray-800">{title}</h3>
+ <h3 className="text-base font-semibold text-[#1c2b3a]">{title}</h3>
  </div>
- <p className="text-sm text-gray-500 mb-6">{message}</p>
- <div className="flex gap-3 justify-end">
  <button
  onClick={onClose}
- className="px-4 py-2 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+ className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors"
+ >
+ <Cancel01Icon size={18} />
+ </button>
+ </div>
+ {/* Content */}
+ <div className="p-6 flex-1">
+ <p className="text-sm text-[#8892a4]">{message}</p>
+ </div>
+ {/* Footer */}
+ <div className="px-6 py-4 border-t border-[#e5e8ef] flex gap-3">
+ <button
+ onClick={onClose}
+ className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors"
  >
  Annuler
  </button>
  <button
  onClick={onConfirm}
  disabled={isPending}
- className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50 ${confirmColor}`}
+ className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold text-white transition-colors disabled:opacity-50 ${confirmColor}`}
  >
  {isPending && <Loading02Icon size={14} className="animate-spin"/>}
  {confirmLabel}
@@ -309,11 +323,11 @@ export default function FiscalYears() {
  if (isLoading) {
  return (
  <div className="space-y-6">
- <div className="h-8 bg-gray-200 rounded-lg w-64 animate-pulse"/>
+ <div className="h-8 bg-gray-200  w-64 animate-pulse"/>
  <div className="h-4 bg-gray-100 rounded w-48 animate-pulse"/>
  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
  {[...Array(3)].map((_, i) => (
- <div key={i} className="h-48 bg-gray-100 rounded-2xl animate-pulse"/>
+ <div key={i} className="h-48 bg-gray-100  animate-pulse"/>
  ))}
  </div>
  </div>
@@ -334,7 +348,7 @@ export default function FiscalYears() {
  </div>
  <button
  onClick={() => setShowCreateModal(true)}
- className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
+ className="flex items-center gap-2 bg-[#33cbcc] text-white px-5 py-2.5  text-sm font-semibold hover:bg-[#2bb5b6] transition-colors"
  >
  <Add01Icon size={16} />
  Nouvel Exercice
@@ -352,7 +366,7 @@ export default function FiscalYears() {
  initial={{ opacity: 0, y: 20 }}
  animate={{ opacity: 1, y: 0 }}
  transition={{ delay: i * 0.1 }}
- className={`bg-white rounded-2xl p-6 border-2 transition-colors ${
+ className={`bg-white  p-6 border-2 transition-colors ${
  isOpen ? '' : 'border-gray-100'
  }`}
  >
@@ -380,7 +394,7 @@ export default function FiscalYears() {
 
  {/* Closed info */}
  {!isOpen && fy.closedAt && (
- <div className="bg-gray-50 rounded-xl p-3 mb-4 space-y-1">
+ <div className="bg-gray-50  p-3 mb-4 space-y-1">
  <p className="text-xs text-gray-400">
  Cloture le {formatDate(fy.closedAt)}
  </p>
@@ -394,7 +408,7 @@ export default function FiscalYears() {
 
  {/* Open highlight */}
  {isOpen && (
- <div className="flex items-center gap-2 bg-[#33cbcc]/5 rounded-xl p-3 mb-4">
+ <div className="flex items-center gap-2 bg-[#33cbcc]/5  p-3 mb-4">
  <Tick01Icon size={14} className="text-[#33cbcc]"/>
  <span className="text-xs font-semibold text-[#33cbcc]">
  Exercice en cours
@@ -407,7 +421,7 @@ export default function FiscalYears() {
  {isOpen ? (
  <button
  onClick={() => setClosingId(fy.id)}
- className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors"
+ className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5  text-sm font-semibold text-[#283852] bg-[#283852]/10 hover:bg-[#283852]/20 transition-colors"
  >
  <LockPasswordIcon size={14} />
  Cloturer
@@ -415,7 +429,7 @@ export default function FiscalYears() {
  ) : (
  <button
  onClick={() => setReopeningId(fy.id)}
- className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
+ className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5  text-sm font-semibold text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors"
  >
  <CircleUnlock01Icon size={14} />
  Reouvrir
@@ -427,7 +441,7 @@ export default function FiscalYears() {
  })}
  </div>
  ) : (
- <div className="bg-white rounded-2xl p-12 text-center">
+ <div className="bg-white  p-12 text-center">
  <Calendar01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
  <p className="text-gray-500 font-medium mb-2">Aucun exercice fiscal</p>
  <p className="text-sm text-gray-400">Creez votre premier exercice fiscal pour commencer.</p>
