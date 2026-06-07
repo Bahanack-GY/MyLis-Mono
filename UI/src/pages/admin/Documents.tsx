@@ -24,7 +24,7 @@ import {
 
 /* ─── Types ─────────────────────────────────────────────── */
 
-type DocCategory = 'Contract' | 'SRS' | 'Design' | 'Technical' | 'Notes' | 'Brief' | 'Planning' | 'Education' | 'Recruitment';
+type DocCategory = 'Contract' | 'SRS' | 'Design' | 'Technical' | 'Notes' | 'Brief' | 'Planning' | 'Education' | 'Recruitment' | 'Rapport' | 'Facture' | 'Procedure' | 'PV' | 'Commercial' | 'Fiscal';
 
 interface DocItem {
     id: string;
@@ -54,9 +54,19 @@ const DOC_COLORS: Record<string, string> = {
     Planning: '#283852',
     Education: '#283852',
     Recruitment: '#33cbcc',
+    Rapport: '#f59e0b',
+    Facture: '#10b981',
+    Procedure: '#8b5cf6',
+    PV: '#ec4899',
+    Commercial: '#f97316',
+    Fiscal: '#ef4444',
 };
 
-const CATEGORIES: DocCategory[] = ['Contract', 'SRS', 'Design', 'Technical', 'Notes', 'Brief', 'Planning', 'Education', 'Recruitment'];
+const CATEGORIES: DocCategory[] = [
+    'Contract', 'SRS', 'Design', 'Technical', 'Notes', 'Brief',
+    'Planning', 'Education', 'Recruitment',
+    'Rapport', 'Facture', 'Procedure', 'PV', 'Commercial', 'Fiscal',
+];
 
 const DEPT_NAMES = ['Engineering', 'Design', 'Marketing', 'Sales', 'HR', 'Finance'];
 
@@ -323,9 +333,13 @@ const UploadDocumentModal = ({ onClose }: { onClose: () => void }) => {
                                     Contract: 'CONTRACT', SRS: 'OTHER', Design: 'OTHER',
                                     Technical: 'OTHER', Notes: 'OTHER', Brief: 'OTHER', Planning: 'OTHER',
                                     Education: 'DIPLOMA', Recruitment: 'OTHER',
+                                    Rapport: 'OTHER', Facture: 'OTHER', Procedure: 'OTHER',
+                                    PV: 'OTHER', Commercial: 'OTHER', Fiscal: 'OTHER',
                                 };
                                 const FOLDER_MAP: Record<string, string> = {
                                     Education: 'formation', Recruitment: 'recruitment', Contract: 'contracts',
+                                    Rapport: 'rapports', Facture: 'factures', Procedure: 'procedures',
+                                    PV: 'pv', Commercial: 'commercial', Fiscal: 'fiscal',
                                 };
                                 const folder = form.category ? FOLDER_MAP[form.category] || 'general' : 'general';
                                 const uploadResult = await documentsApi.uploadFile(form.file, folder);
@@ -389,7 +403,8 @@ const Documents = () => {
 
     // Map API documents to display shape
     const CATEGORY_DISPLAY_MAP: Record<string, DocCategory> = {
-        'CONTRACT': 'Contract', 'ID': 'Notes', 'DIPLOMA': 'SRS', 'OTHER': 'Technical',
+        'CONTRACT': 'Contract', 'ID': 'Notes', 'DIPLOMA': 'Education',
+        'RECRUITMENT': 'Recruitment', 'OTHER': 'Technical',
     };
     const hrDocuments: DocItem[] = (apiDocuments || []).map((d) => ({
         id: `doc-${d.id}`,
@@ -738,7 +753,8 @@ const Documents = () => {
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: i * 0.03 }}
-                                                    className="group p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all"
+                                                    onClick={() => { if (doc.filePath) window.open(getFileUrl(doc.filePath), '_blank'); }}
+                                                    className={`group p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:bg-gray-50/50 transition-all ${doc.filePath ? 'cursor-pointer' : ''}`}
                                                 >
                                                     <div className="flex items-center gap-4">
                                                         {/* File Icon */}
@@ -766,7 +782,7 @@ const Documents = () => {
                                                         </div>
 
                                                         {/* Actions */}
-                                                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <div onClick={e => e.stopPropagation()} className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             {doc.filePath ? (
                                                                 <>
                                                                     <a

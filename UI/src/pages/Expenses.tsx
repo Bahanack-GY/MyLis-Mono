@@ -1,15 +1,52 @@
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ExpenseModal from './ExpenseModal';
 import {
     LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell
 } from 'recharts';
-import { Add01Icon, File01Icon, Search01Icon, Delete02Icon, PencilIcon, ArrowLeft01Icon, ArrowRight01Icon, Briefcase01Icon, UserGroupIcon, Tag01Icon, ArrowUpRight01Icon, Building02Icon, Layers01Icon } from 'hugeicons-react';
+import { Add01Icon, File01Icon, Search01Icon, Delete02Icon, PencilIcon, ArrowLeft01Icon, ArrowRight01Icon, Briefcase01Icon, UserGroupIcon, ArrowUpRight01Icon, Building02Icon, Layers01Icon, Calendar01Icon, ArrowDown01Icon } from 'hugeicons-react';
 import { useExpenses, useExpenseStats, useDeleteExpense } from '../api/expenses/hooks';
 import { useDepartments } from '../api/departments/hooks';
 import { useChargeFamilies } from '../api/charge-natures/hooks';
 import { ExpensesSkeleton } from '../components/Skeleton';
 import type { Expense } from '../api/expenses/types';
+
+type FilterPreset = 'year' | 'month' | 'week' | 'custom';
+
+const PRESET_LABELS: Record<FilterPreset, string> = {
+    year: 'Cette année',
+    month: 'Ce mois',
+    week: 'Cette semaine',
+    custom: 'Personnalisé',
+};
+
+function toDateStr(d: Date) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function getDateRange(preset: FilterPreset, year: number, customFrom: string, customTo: string) {
+    const now = new Date();
+    if (preset === 'year') {
+        return { from: `${year}-01-01`, to: `${year}-12-31` };
+    }
+    if (preset === 'month') {
+        const first = new Date(now.getFullYear(), now.getMonth(), 1);
+        const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        return { from: toDateStr(first), to: toDateStr(last) };
+    }
+    if (preset === 'week') {
+        const day = now.getDay();
+        const mon = new Date(now);
+        mon.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+        const sun = new Date(mon);
+        sun.setDate(mon.getDate() + 6);
+        return { from: toDateStr(mon), to: toDateStr(sun) };
+    }
+    // custom
+    const fallbackFrom = toDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
+    const fallbackTo = toDateStr(now);
+    return { from: customFrom || fallbackFrom, to: customTo || fallbackTo };
+}
 
 const COLORS = ['#33cbcc', '#283852', '#33cbcc99', '#28385280', '#33cbcc50', '#283852', '#33cbcc', '#283852', '#33cbcc99', '#28385280'];
 
@@ -33,12 +70,21 @@ const FREQUENCY_LABELS: Record<string, string> = {
 
 export default function Expenses() {
     const [search, setSearch] = useState('');
+    const [filterPreset, setFilterPreset] = useState<FilterPreset>('year');
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [customFrom, setCustomFrom] = useState('');
+    const [customTo, setCustomTo] = useState('');
+    const [customOpen, setCustomOpen] = useState(false);
     const [selectedDeptId, setSelectedDeptId] = useState<string | undefined>(undefined);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
     const [page, setPage] = useState(1);
     const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
+    const { from, to } = useMemo(
+        () => getDateRange(filterPreset, selectedYear, customFrom, customTo),
+        [filterPreset, selectedYear, customFrom, customTo],
+    );
 
     const { data: departments = [] } = useDepartments();
     const { data: families = [] } = useChargeFamilies();
@@ -46,7 +92,7 @@ export default function Expenses() {
     const expenses = expensesPage?.data ?? [];
     const totalPages = expensesPage?.totalPages ?? 1;
     const total = expensesPage?.total ?? 0;
-    const { data: stats, isLoading: statsLoading } = useExpenseStats(selectedYear, selectedDeptId);
+    const { data: stats, isLoading: statsLoading } = useExpenseStats(undefined, selectedDeptId, from, to);
     const deleteExpense = useDeleteExpense();
     const [visibleSeries, setVisibleSeries] = useState<Set<string>>(new Set());
 
@@ -135,7 +181,7 @@ export default function Expenses() {
             </div>
 
             {/* Department Tabs */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 -mb-2">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
                 <button
                     onClick={() => handleDeptChange(undefined)}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all border ${
@@ -162,28 +208,84 @@ export default function Expenses() {
                 ))}
             </div>
 
-            {/* Year Selector + Stats Cards */}
-            <div className="flex items-center gap-3 mb-2">
-                <button
-                    onClick={() => setSelectedYear(y => y - 1)}
-                    className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors"
-                >
-                    <ArrowLeft01Icon size={18} />
-                </button>
-                <span className="text-lg font-bold text-gray-800 tabular-nums min-w-[60px] text-center">{selectedYear}</span>
-                <button
-                    onClick={() => setSelectedYear(y => y + 1)}
-                    disabled={selectedYear >= new Date().getFullYear()}
-                    className="p-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                    <ArrowRight01Icon size={18} />
-                </button>
+            {/* Period Filter */}
+            <div className="flex flex-wrap items-center gap-2">
+                {(['year', 'month', 'week', 'custom'] as FilterPreset[]).map(preset => (
+                    <button
+                        key={preset}
+                        onClick={() => { setFilterPreset(preset); if (preset === 'custom') setCustomOpen(true); else setCustomOpen(false); }}
+                        className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all border ${
+                            filterPreset === preset
+                                ? 'bg-[#33cbcc] text-white border-[#33cbcc] shadow-sm'
+                                : 'bg-white text-gray-600 border-gray-200 hover:border-[#33cbcc]/40 hover:text-[#33cbcc]'
+                        }`}
+                    >
+                        <Calendar01Icon size={13} />
+                        {PRESET_LABELS[preset]}
+                        {preset === 'custom' && filterPreset === 'custom' && (
+                            <ArrowDown01Icon size={12} className={customOpen ? 'rotate-180' : ''} />
+                        )}
+                    </button>
+                ))}
+
+                {/* Year navigation — only for "Cette année" */}
+                {filterPreset === 'year' && (
+                    <div className="flex items-center gap-2 ml-1">
+                        <button onClick={() => setSelectedYear(y => y - 1)} className="p-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors">
+                            <ArrowLeft01Icon size={15} />
+                        </button>
+                        <span className="text-sm font-bold text-gray-700 tabular-nums min-w-[44px] text-center">{selectedYear}</span>
+                        <button onClick={() => setSelectedYear(y => y + 1)} disabled={selectedYear >= new Date().getFullYear()} className="p-1.5 rounded-lg bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                            <ArrowRight01Icon size={15} />
+                        </button>
+                    </div>
+                )}
+
                 {selectedDeptName && (
                     <span className="text-sm font-medium text-[#33cbcc] bg-[#33cbcc]/10 px-3 py-1 rounded-lg">
                         {selectedDeptName}
                     </span>
                 )}
             </div>
+
+            {/* Custom date range inputs */}
+            <AnimatePresence>
+                {filterPreset === 'custom' && customOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.15 }}
+                        className="flex flex-wrap items-end gap-3 bg-white border border-gray-200 rounded-2xl px-5 py-4 shadow-sm"
+                    >
+                        <div>
+                            <label className="block text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Du</label>
+                            <input
+                                type="date"
+                                value={customFrom}
+                                onChange={e => setCustomFrom(e.target.value)}
+                                className="px-3 py-2 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:border-[#33cbcc] transition-colors"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-1">Au</label>
+                            <input
+                                type="date"
+                                value={customTo}
+                                onChange={e => setCustomTo(e.target.value)}
+                                className="px-3 py-2 border border-gray-200 rounded-xl text-sm text-gray-700 focus:outline-none focus:border-[#33cbcc] transition-colors"
+                            />
+                        </div>
+                        <button
+                            onClick={() => setCustomOpen(false)}
+                            disabled={!customFrom || !customTo}
+                            className="px-4 py-2 bg-[#33cbcc] text-white text-sm font-semibold rounded-xl hover:bg-[#2bb5b6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                        >
+                            Appliquer
+                        </button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer">
@@ -221,7 +323,7 @@ export default function Expenses() {
                     </div>
                     <div className="p-5 bg-white relative overflow-hidden">
                         <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none truncate">{formatFCFA(stats?.totalSalaries || 0)}</h2>
-                        <p className="text-xs text-gray-400 mt-1">Total versé en {selectedYear}</p>
+                        <p className="text-xs text-gray-400 mt-1">Total versé · {PRESET_LABELS[filterPreset]}</p>
                         <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: '#283852' }}>
                             <UserGroupIcon size={110} strokeWidth={1.2} />
                         </div>
@@ -234,29 +336,13 @@ export default function Expenses() {
                     </div>
                     <div className="p-5 bg-white relative overflow-hidden">
                         <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none truncate">{formatFCFA(stats?.totalProjects || 0)}</h2>
-                        <p className="text-xs text-gray-400 mt-1">Alloué sur {selectedYear}</p>
+                        <p className="text-xs text-gray-400 mt-1">Alloué · {PRESET_LABELS[filterPreset]}</p>
                         <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: '#33cbcc' }}>
                             <Briefcase01Icon size={110} strokeWidth={1.2} />
                         </div>
                     </div>
                 </motion.div>
 
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="border border-gray-100 rounded-2xl overflow-hidden cursor-pointer">
-                    <div className="px-5 py-3" style={{ backgroundColor: '#283852' }}>
-                        <h3 className="text-[11px] font-bold text-white/80 uppercase tracking-wide leading-snug truncate">Top Nature</h3>
-                    </div>
-                    <div className="p-5 bg-white relative overflow-hidden">
-                        <h2 className="text-3xl font-bold text-[#1c2b3a] leading-none truncate">
-                            {stats?.byCategory?.[0] ? formatFCFA(stats.byCategory[0].value) : '—'}
-                        </h2>
-                        <p className="text-xs text-gray-400 mt-1 truncate">
-                            {stats?.byCategory?.[0]?.name || 'Aucune charge'}
-                        </p>
-                        <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: '#283852' }}>
-                            <Tag01Icon size={110} strokeWidth={1.2} />
-                        </div>
-                    </div>
-                </motion.div>
             </div>
 
             {/* Family breakdown mini-cards */}
@@ -281,7 +367,7 @@ export default function Expenses() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                     <div>
-                        <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Évolution Mensuelle ({selectedYear})</h3>
+                        <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider">Évolution Mensuelle · {PRESET_LABELS[filterPreset]}{filterPreset === 'year' ? ` ${selectedYear}` : ''}</h3>
                         <p className="text-xs text-gray-500 mt-1">Salaires + charges par nature</p>
                     </div>
                 </div>

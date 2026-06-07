@@ -97,10 +97,20 @@ export class ExpensesService {
         return { success: true };
     }
 
-    async getStats(year?: number, departmentId?: string) {
-        const currentYear = year || new Date().getFullYear();
-        const startDate = `${currentYear}-01-01`;
-        const endDate = `${currentYear}-12-31`;
+    async getStats(year?: number, departmentId?: string, from?: string, to?: string) {
+        let startDate: string;
+        let endDate: string;
+        let currentYear: number;
+
+        if (from && to) {
+            startDate = from;
+            endDate = to;
+            currentYear = new Date(from).getFullYear();
+        } else {
+            currentYear = year || new Date().getFullYear();
+            startDate = `${currentYear}-01-01`;
+            endDate = `${currentYear}-12-31`;
+        }
 
         const expenseWhere: any = { date: { [Op.between]: [startDate, endDate] } };
         if (departmentId) {

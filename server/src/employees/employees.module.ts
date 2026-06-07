@@ -9,6 +9,7 @@ import { Department } from '../models/department.model';
 import { User } from '../models/user.model';
 import { Task } from '../models/task.model';
 import { Report } from '../models/report.model';
+import { Document } from '../models/document.model';
 import { EmployeesService } from './employees.service';
 import { EmployeesController } from './employees.controller';
 import { MonthlyRankingsService } from './monthly-rankings.service';
@@ -20,7 +21,7 @@ import { Position } from '../models/position.model';
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([Employee, EmployeeBadge, EmployeeTransferHistory, EmployeePromotionHistory, Department, User, Task, Report, EmployeeMonthlyRanking, Position]),
+        SequelizeModule.forFeature([Employee, EmployeeBadge, EmployeeTransferHistory, EmployeePromotionHistory, Department, User, Task, Report, EmployeeMonthlyRanking, Position, Document]),
         UsersModule,
         NotificationsModule,
         ChatModule,

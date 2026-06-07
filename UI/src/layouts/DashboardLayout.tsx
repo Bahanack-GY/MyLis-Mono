@@ -365,23 +365,13 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
 
 /* -- QuoteDownIcon Modal ------------------------------------------ */
 
-const QUOTE_COUNTDOWN = 10;
-
 const QuoteModal = ({ onClose }: { onClose: () => void }) => {
-    const [seconds, setSeconds] = useState(QUOTE_COUNTDOWN);
     const quote = getQuoteOfTheDay();
-    const canClose = seconds === 0;
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
         return () => { document.body.style.overflow = ''; };
     }, []);
-
-    useEffect(() => {
-        if (seconds === 0) return;
-        const id = setTimeout(() => setSeconds(s => s - 1), 1000);
-        return () => clearTimeout(id);
-    }, [seconds]);
 
     return (
         <motion.div
@@ -436,26 +426,11 @@ const QuoteModal = ({ onClose }: { onClose: () => void }) => {
                     </blockquote>
                     <p className="text-sm font-semibold text-[#283852] mb-6">— {quote.author}</p>
 
-                    {/* Countdown progress bar */}
-                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
-                        <motion.div
-                            className="h-full bg-[#283852] rounded-full"
-                            initial={{ width: '100%' }}
-                            animate={{ width: '0%' }}
-                            transition={{ duration: QUOTE_COUNTDOWN, ease: 'linear' }}
-                        />
-                    </div>
-
                     <button
                         onClick={onClose}
-                        disabled={!canClose}
-                        className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
-                            canClose
-                                ? 'bg-[#283852] text-white cursor-pointer'
-                                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                        }`}
+                        className="w-full py-3 rounded-xl font-semibold text-sm transition-all bg-[#283852] text-white cursor-pointer hover:bg-[#1e2d42]"
                     >
-                        {canClose ? 'Commencer la journée' : `Fermer dans ${seconds}s`}
+                        Commencer la journée
                     </button>
                 </div>
             </motion.div>

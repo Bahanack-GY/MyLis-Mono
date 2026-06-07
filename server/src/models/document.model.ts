@@ -39,7 +39,7 @@ export class Document extends Model {
     declare fileType: string;
 
     @Column({
-        type: DataType.ENUM('CONTRACT', 'ID', 'DIPLOMA', 'OTHER'),
+        type: DataType.ENUM('CONTRACT', 'ID', 'DIPLOMA', 'OTHER', 'RECRUITMENT'),
         defaultValue: 'OTHER',
     })
     declare category: string;

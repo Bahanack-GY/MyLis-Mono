@@ -556,10 +556,9 @@ export default function CommercialDashboard() {
                                                     {!isEditing && (
                                                         <button
                                                             onClick={() => startEditGoal(row.employeeId, row.targetAmount)}
-                                                            aria-label={`Définir objectif pour ${row.firstName} ${row.lastName}`}
-                                                            className="p-2 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-[#33cbcc] transition-colors"
+                                                            className="px-3 py-1.5 rounded-lg bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc] hover:text-white text-xs font-semibold transition-colors whitespace-nowrap"
                                                         >
-                                                            <PencilIcon size={14} />
+                                                            {t('commercial.goal.assignGoal', 'Assigner un objectif')}
                                                         </button>
                                                     )}
                                                 </td>

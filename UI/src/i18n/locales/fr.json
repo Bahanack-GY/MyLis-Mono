@@ -50,6 +50,7 @@
     "dismiss": "Licencier",
     "reinstate": "Réintégrer",
     "dismissedBanner": "Cet employé a été licencié et ne peut plus accéder au système.",
+    "dismissedBadge": "Ne fait plus partie de l'équipe",
     "dismissConfirmTitle": "Licencier l'employé",
     "dismissConfirmMessage": "Cela révoquera l'accès de {{name}}. Il/elle ne pourra plus se connecter.",
     "reinstateConfirmTitle": "Réintégrer l'employé",
@@ -1250,7 +1251,13 @@
       "brief": "Brief",
       "planning": "Planification",
       "education": "Formation",
-      "recruitment": "Recrutement"
+      "recruitment": "Recrutement",
+      "rapport": "Rapport",
+      "facture": "Facture",
+      "procedure": "Procédure",
+      "pv": "Procès-verbal",
+      "commercial": "Commercial",
+      "fiscal": "Fiscal"
     },
     "charts": {
       "byCategory": "Documents par Catégorie",
@@ -2830,6 +2837,7 @@
       "realized": "CA réalisé",
       "target": "Objectif",
       "noTarget": "Aucun objectif défini pour ce mois",
+      "assignGoal": "Assigner un objectif",
       "progress": "Progression",
       "remaining": "restants",
       "editGoal": "Modifier",

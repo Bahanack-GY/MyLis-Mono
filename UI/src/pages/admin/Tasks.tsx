@@ -8,6 +8,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recha
 import type { Task } from '../../api/tasks/types';
 import type { Subtask, TaskAttachment } from '../../api/tasks/types';
 import { TasksAdminSkeleton } from '../../components/Skeleton';
+import { API_URL } from '../../api/config';
 import { useEmployees } from '../../api/employees/hooks';
 import { useProjects } from '../../api/projects/hooks';
 import { useDepartments } from '../../api/departments/hooks';
@@ -406,7 +407,7 @@ const TaskDetailModal = ({ task, employee, onClose, onEdit, onDelete, onHistory 
                                         <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
                                         <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
                                         <a
-                                            href={att.filePath}
+                                            href={API_URL + att.filePath}
                                             download={att.fileName}
                                             target="_blank"
                                             rel="noopener noreferrer"
@@ -606,7 +607,7 @@ const EditGanttTaskModal = ({
                                             <File01Icon size={14} className="text-gray-400 shrink-0" />
                                             <span className="flex-1 text-sm text-gray-700 truncate">{att.fileName}</span>
                                             <span className="text-[10px] text-gray-400 shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
-                                            <a href={att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"><Download01Icon size={14} /></a>
+                                            <a href={API_URL + att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer" className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-[#33cbcc] transition-colors shrink-0"><Download01Icon size={14} /></a>
                                             <button
                                                 onClick={() => { if (window.confirm(t('tasksPage.deleteAttachmentConfirm', 'Delete this attachment?'))) deleteAttachment.mutate({ taskId: task.apiId!, attachmentId: att.id }); }}
                                                 className="p-1 rounded hover:bg-[#283852]/10 text-gray-400 hover:text-[#283852] transition-colors shrink-0"
@@ -1914,6 +1915,7 @@ const Tasks = () => {
                     ) :
 
                     distView === 'nature' ? (() => {
+                        const CHART_PALETTE = ['#33cbcc','#283852','#f59e0b','#8b5cf6','#ef4444','#10b981','#ec4899','#f97316','#06b6d4','#6366f1'];
                         const data = globalDist.natureDistribution;
                         if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">Aucune donnée</p>;
                         return (
@@ -1922,8 +1924,8 @@ const Tasks = () => {
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie data={data} dataKey="hours" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
-                                                {data.map((entry, i) => (
-                                                    <Cell key={i} fill={entry.color} />
+                                                {data.map((_entry, i) => (
+                                                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
                                                 ))}
                                             </Pie>
                                             <Tooltip formatter={(v: any) => [`${v}h`, 'Heures']} />
@@ -1933,7 +1935,7 @@ const Tasks = () => {
                                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {data.map((entry, i) => (
                                         <div key={i} className="flex items-center gap-2.5">
-                                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+                                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_PALETTE[i % CHART_PALETTE.length] }} />
                                             <div className="min-w-0">
                                                 <p className="text-xs font-medium text-gray-700 truncate">{entry.name}</p>
                                                 <p className="text-[11px] text-gray-400">{entry.hours}h · {entry.percentage}%</p>
@@ -1944,11 +1946,7 @@ const Tasks = () => {
                             </div>
                         );
                     })() : (() => {
-                        const ACTIVITY_COLORS: Record<string, string> = {
-                            VISITE_CLIENT: '#33cbcc', VISITE_PROSPECT: '#283852', APPEL: '#283852',
-                            EMAIL: '#33cbcc', REUNION: '#283852', DEMO: '#33cbcc99',
-                            RELANCE: '#28385280', AUTRE: '#9ca3af',
-                        };
+                        const CHART_PALETTE = ['#33cbcc','#283852','#f59e0b','#8b5cf6','#ef4444','#10b981','#ec4899','#f97316','#06b6d4','#6366f1'];
                         const ACTIVITY_LABELS: Record<string, string> = {
                             VISITE_CLIENT: 'Visite client', VISITE_PROSPECT: 'Visite prospect',
                             APPEL: 'Appel', EMAIL: 'Email', REUNION: 'Réunion',
@@ -1957,7 +1955,6 @@ const Tasks = () => {
                         const data = globalDist.activityDistribution.map(d => ({
                             ...d,
                             name: ACTIVITY_LABELS[d.type] || d.type,
-                            color: ACTIVITY_COLORS[d.type] || '#9ca3af',
                         }));
                         if (!data.length) return <p className="text-xs text-gray-400 text-center py-8">Aucune activité enregistrée</p>;
                         return (
@@ -1966,8 +1963,8 @@ const Tasks = () => {
                                     <ResponsiveContainer width="100%" height="100%">
                                         <PieChart>
                                             <Pie data={data} dataKey="count" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={90} paddingAngle={2}>
-                                                {data.map((entry, i) => (
-                                                    <Cell key={i} fill={entry.color} />
+                                                {data.map((_entry, i) => (
+                                                    <Cell key={i} fill={CHART_PALETTE[i % CHART_PALETTE.length]} />
                                                 ))}
                                             </Pie>
                                             <Tooltip formatter={(v: any) => [`${v}`, 'Activités']} />
@@ -1977,7 +1974,7 @@ const Tasks = () => {
                                 <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     {data.map((entry, i) => (
                                         <div key={i} className="flex items-center gap-2.5">
-                                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: entry.color }} />
+                                            <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: CHART_PALETTE[i % CHART_PALETTE.length] }} />
                                             <div className="min-w-0">
                                                 <p className="text-xs font-medium text-gray-700 truncate">{entry.name}</p>
                                                 <p className="text-[11px] text-gray-400">{entry.count} activité{entry.count > 1 ? 's' : ''} · {entry.percentage}%</p>

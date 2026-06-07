@@ -16,8 +16,8 @@ export const expensesApi = {
     getById: (id: string) =>
         api.get<Expense>(`/expenses/${id}`).then(res => res.data),
 
-    getStats: (year?: number, departmentId?: string) =>
-        api.get<ExpenseStats>('/expenses/stats', { params: { year, departmentId } }).then(res => res.data),
+    getStats: (year?: number, departmentId?: string, from?: string, to?: string) =>
+        api.get<ExpenseStats>('/expenses/stats', { params: { year, departmentId, from, to } }).then(res => res.data),
 
     create: (data: CreateExpenseDto) =>
         api.post<Expense>('/expenses', data).then(res => res.data),

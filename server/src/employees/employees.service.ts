@@ -10,6 +10,7 @@ import { Department } from '../models/department.model';
 import { Position } from '../models/position.model';
 import { Task } from '../models/task.model';
 import { Report } from '../models/report.model';
+import { Document } from '../models/document.model';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { ChatService } from '../chat/chat.service';
@@ -35,6 +36,8 @@ export class EmployeesService {
         private userModel: typeof User,
         @InjectModel(Report)
         private reportModel: typeof Report,
+        @InjectModel(Document)
+        private documentModel: typeof Document,
         @InjectConnection()
         private sequelize: Sequelize,
         private usersService: UsersService,
@@ -43,7 +46,7 @@ export class EmployeesService {
     ) { }
 
     async findAll(departmentId?: string): Promise<Employee[]> {
-        const where: any = {};
+        const where: any = { dismissed: { [Op.or]: [false, null] } };
         if (departmentId) where.departmentId = departmentId;
         return this.employeeModel.findAll({
             where,
@@ -95,7 +98,13 @@ export class EmployeesService {
         });
     }
 
-    async create(createEmployeeDto: any): Promise<Employee> {
+    private readonly DOC_TYPE_LABELS: Record<string, string> = {
+        cv: 'CV', coverLetter: 'Lettre de motivation', id: 'Pièce d\'identité',
+        references: 'Références', diploma: 'Diplôme', certificate: 'Certificat',
+        transcript: 'Relevé de notes', other: 'Autre',
+    };
+
+    async create(createEmployeeDto: any, uploadedById?: string): Promise<Employee> {
         // Hash password before transaction to avoid holding lock during slow bcrypt
         let existingUser = await this.usersService.findOne(createEmployeeDto.email);
 
@@ -148,6 +157,46 @@ export class EmployeesService {
             if (notifications.length > 0) {
                 await this.notificationsService.createMany(notifications);
             }
+        }
+
+        // 5. Create document records for education & recruitment docs
+        const fullName = `${createEmployeeDto.firstName || ''} ${createEmployeeDto.lastName || ''}`.trim();
+        const docsToCreate: any[] = [];
+
+        for (const doc of createEmployeeDto.educationDocs || []) {
+            if (!doc.filePath) continue;
+            const typeLabel = this.DOC_TYPE_LABELS[doc.type] || doc.type || 'Document';
+            docsToCreate.push({
+                name: `${fullName} - ${typeLabel} - ${doc.name || typeLabel}`,
+                filePath: doc.filePath,
+                fileType: doc.fileType || null,
+                category: 'DIPLOMA',
+                employeeId: employee.id,
+                uploadedById: uploadedById || null,
+                visibilityType: 'MANAGERS_ONLY',
+                allowedDepartmentIds: [],
+                allowedEmployeeIds: [],
+            });
+        }
+
+        for (const doc of createEmployeeDto.recruitmentDocs || []) {
+            if (!doc.filePath) continue;
+            const typeLabel = this.DOC_TYPE_LABELS[doc.type] || doc.type || 'Document';
+            docsToCreate.push({
+                name: `${fullName} - ${typeLabel} - ${doc.name || typeLabel}`,
+                filePath: doc.filePath,
+                fileType: doc.fileType || null,
+                category: 'RECRUITMENT',
+                employeeId: employee.id,
+                uploadedById: uploadedById || null,
+                visibilityType: 'MANAGERS_ONLY',
+                allowedDepartmentIds: [],
+                allowedEmployeeIds: [],
+            });
+        }
+
+        if (docsToCreate.length > 0) {
+            await this.documentModel.bulkCreate(docsToCreate);
         }
 
         return employee;

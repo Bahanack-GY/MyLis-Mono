@@ -50,6 +50,7 @@
     "dismiss": "Dismiss",
     "reinstate": "Reinstate",
     "dismissedBanner": "This employee has been dismissed and can no longer access the system.",
+    "dismissedBadge": "No longer part of the team",
     "dismissConfirmTitle": "Dismiss Employee",
     "dismissConfirmMessage": "This will revoke access for {{name}}. They will no longer be able to log in.",
     "reinstateConfirmTitle": "Reinstate Employee",
@@ -1250,7 +1251,13 @@
       "brief": "Brief",
       "planning": "Planning",
       "education": "Education",
-      "recruitment": "Recruitment"
+      "recruitment": "Recruitment",
+      "rapport": "Report",
+      "facture": "Invoice",
+      "procedure": "Procedure",
+      "pv": "Meeting Minutes",
+      "commercial": "Commercial",
+      "fiscal": "Fiscal"
     },
     "charts": {
       "byCategory": "Documents by Category",
@@ -2820,6 +2827,7 @@
       "realized": "Revenue Achieved",
       "target": "Target",
       "noTarget": "No goal set for this month",
+      "assignGoal": "Assign a goal",
       "progress": "Progress",
       "remaining": "remaining",
       "editGoal": "Edit",

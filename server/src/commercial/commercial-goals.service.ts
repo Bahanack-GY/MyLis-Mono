@@ -75,7 +75,7 @@ export class CommercialGoalsService {
         const userIds = commercialUsers.map(u => u.id);
 
         const employees = await this.employeeModel.findAll({
-            where: { userId: { [Op.in]: userIds } },
+            where: { userId: { [Op.in]: userIds }, dismissed: { [Op.or]: [false, null] } },
             attributes: ['id', 'firstName', 'lastName', 'avatarUrl', 'userId'],
         });
 

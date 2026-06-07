@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, useCallback, type ReactNode } from 'react';
 import { useProfile } from '../api/auth/hooks';
 import type { UserProfile, Role } from '../api/auth/types';
 
@@ -26,23 +26,42 @@ const AuthContext = createContext<AuthContextValue>({
     setToken: () => {},
 });
 
+const VIEW_MODE_KEY = 'view_mode';
+
+function loadViewMode(): ViewMode {
+    const saved = localStorage.getItem(VIEW_MODE_KEY);
+    return saved === 'employee' ? 'employee' : 'admin';
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [token, setTokenState] = useState<string | null>(localStorage.getItem('access_token'));
-    const [viewMode, setViewModeState] = useState<ViewMode>('admin');
+    const [viewMode, setViewModeState] = useState<ViewMode>(loadViewMode);
 
     const setToken = (newToken: string | null) => {
         if (newToken) {
             localStorage.setItem('access_token', newToken);
         } else {
             localStorage.removeItem('access_token');
+            localStorage.removeItem(VIEW_MODE_KEY);
         }
         setTokenState(newToken);
         setViewModeState('admin'); // reset on login/logout
     };
 
-    const setViewMode = useCallback((mode: ViewMode) => setViewModeState(mode), []);
+    const setViewMode = useCallback((mode: ViewMode) => {
+        localStorage.setItem(VIEW_MODE_KEY, mode);
+        setViewModeState(mode);
+    }, []);
 
     const { data: profile, isLoading } = useProfile(token);
+
+    // CEO's default view is the manager view; apply once when profile first loads
+    // and no explicit preference has been saved yet.
+    useEffect(() => {
+        if (profile?.role === 'CEO' && !localStorage.getItem(VIEW_MODE_KEY)) {
+            setViewMode('employee');
+        }
+    }, [profile?.role, setViewMode]);
 
     const value = useMemo<AuthContextValue>(() => {
         if (!token) {

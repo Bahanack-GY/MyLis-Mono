@@ -52,11 +52,16 @@ import {
 /* ─── Constants ─────────────────────────────────────────── */
 
 const STATUS_COLORS: Record<InvoiceStatus, string> = {
-    CREATED: '#283852',
-    SENT: '#283852',
-    PAID: '#33cbcc',
-    REJECTED: '#283852',
+    CREATED: '#6366f1',
+    SENT: '#f59e0b',
+    PAID: '#10b981',
+    REJECTED: '#ef4444',
 };
+
+const BAR_PALETTE = [
+    '#33cbcc','#283852','#f59e0b','#8b5cf6','#ef4444','#10b981',
+    '#ec4899','#f97316','#06b6d4','#6366f1','#84cc16','#14b8a6',
+];
 
 const STATUS_KEYS: InvoiceStatus[] = ['CREATED', 'SENT', 'PAID', 'REJECTED'];
 
@@ -934,7 +939,11 @@ const Invoices = () => {
                                         <XAxis dataKey="month" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
                                         <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
                                         <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }} formatter={(v) => [formatCurrency(v as number), 'Revenue']} />
-                                        <Bar dataKey="total" fill="#33cbcc" radius={[8, 8, 0, 0]} />
+                                        <Bar dataKey="total" radius={[8, 8, 0, 0]}>
+                                            {monthlyRevenueData.map((_entry, i) => (
+                                                <Cell key={i} fill={BAR_PALETTE[i % BAR_PALETTE.length]} />
+                                            ))}
+                                        </Bar>
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>

@@ -12,6 +12,8 @@ export const TOGGLEABLE_ROLES: Role[] = ['HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'CE
 export function useIsAdmin(): boolean {
     const { role, viewMode } = useAuth();
     if (role === null || !ADMIN_ROLES.includes(role)) return false;
+    // CEO's "manager view" (viewMode='employee') is still admin-level content
+    if (role === 'CEO') return true;
     return viewMode !== 'employee';
 }
 

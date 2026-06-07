@@ -207,7 +207,10 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
     const setMoreOpen = (v: boolean) => setMobileMenuOpen?.(v);
 
     const canToggleView = role !== null && TOGGLEABLE_ROLES.includes(role);
-    const effectiveRole: Role | null = canToggleView && viewMode === 'employee' ? 'EMPLOYEE' : role;
+    // CEO's "manager view" (viewMode='employee') uses MANAGER sections, not EMPLOYEE
+    const effectiveRole: Role | null = canToggleView && viewMode === 'employee'
+        ? (role === 'CEO' ? 'MANAGER' : 'EMPLOYEE')
+        : role;
 
     // Label for the active view (shown in the toggle button)
     const mgmtViewLabel = role === 'ACCOUNTANT'

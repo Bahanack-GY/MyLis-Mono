@@ -9,7 +9,10 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 
-const ALLOWED_FOLDERS = ['formation', 'recruitment', 'contracts', 'general', 'education'];
+const ALLOWED_FOLDERS = [
+    'formation', 'recruitment', 'contracts', 'general', 'education',
+    'rapports', 'factures', 'procedures', 'pv', 'commercial', 'fiscal',
+];
 // Allow all common file types
 const ALLOWED_EXTENSIONS = [
     // Documents

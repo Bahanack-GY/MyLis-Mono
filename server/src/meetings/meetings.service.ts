@@ -2,12 +2,14 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel, InjectConnection } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
+import { Op } from 'sequelize';
 import * as fs from 'fs';
 import { Meeting } from '../models/meeting.model';
 import { MeetingParticipant } from '../models/meeting-participant.model';
 import { Employee } from '../models/employee.model';
 import { User } from '../models/user.model';
 import { NotificationsService } from '../notifications/notifications.service';
+import { WhatsAppService } from '../whatsapp/whatsapp.service';
 
 @Injectable()
 export class MeetingsService {
@@ -25,6 +27,7 @@ export class MeetingsService {
         @InjectConnection()
         private sequelize: Sequelize,
         private notificationsService: NotificationsService,
+        private whatsAppService: WhatsAppService,
     ) { }
 
     async create(dto: any, userId: string) {
@@ -40,7 +43,12 @@ export class MeetingsService {
 
         // Notify participants after commit
         if (participantIds?.length) {
-            const employees = await this.employeeModel.findAll({ where: { id: participantIds }, attributes: ['id', 'userId'] });
+            const employees = await this.employeeModel.findAll({
+                where: { id: participantIds, dismissed: { [Op.or]: [false, null] } },
+                attributes: ['id', 'userId', 'phoneNumber', 'firstName', 'lastName'],
+            });
+
+            // In-app notifications
             const notifications = employees
                 .filter(e => e.getDataValue('userId'))
                 .map(e => ({
@@ -65,6 +73,29 @@ export class MeetingsService {
                         location: meetingData.location,
                     });
                 }
+            }
+
+            // WhatsApp notifications — one message per participant with a phone number
+            const dateStr = meetingData.date
+                ? new Date(meetingData.date).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+                : '';
+            const timeStr = [meetingData.startTime, meetingData.endTime].filter(Boolean).join(' – ');
+            const locationLine = meetingData.location ? `\n📍 *Lieu* : ${meetingData.location}` : '';
+
+            for (const emp of employees) {
+                const phone = emp.getDataValue('phoneNumber');
+                if (!phone) continue;
+                const firstName = emp.getDataValue('firstName') || '';
+                const message =
+                    `🗓️ *Invitation à une réunion*\n\n` +
+                    `Bonjour ${firstName},\n\n` +
+                    `Vous êtes convié(e) à la réunion suivante :\n\n` +
+                    `📌 *${meetingData.title}*\n` +
+                    `📅 *Date* : ${dateStr}\n` +
+                    `⏰ *Heure* : ${timeStr}` +
+                    `${locationLine}\n\n` +
+                    `_MyLIS_`;
+                this.whatsAppService.enqueue(phone, message);
             }
         }
 
@@ -180,7 +211,7 @@ export class MeetingsService {
         const employeeIds = participantRows.map(r => r.getDataValue('employeeId'));
         if (employeeIds.length) {
             const participantEmployees = await this.employeeModel.findAll({
-                where: { id: employeeIds },
+                where: { id: employeeIds, dismissed: { [Op.or]: [false, null] } },
                 attributes: ['userId'],
             });
             for (const emp of participantEmployees) {

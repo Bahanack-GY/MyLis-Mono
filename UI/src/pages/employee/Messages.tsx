@@ -565,52 +565,32 @@ const AttachmentRenderer = ({
 
                     if (isPdfType(att.fileType)) {
                         return (
-                            <div key={i} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg ${isOwn ? 'bg-white/10' : 'bg-gray-200/60'} max-w-[300px]`}>
+                            <a key={i} href={fileUrl} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity ${isOwn ? 'bg-white/10' : 'bg-gray-200/60'} max-w-[300px]`}>
                                 <File01Icon size={20} className="text-[#283852] shrink-0" />
                                 <div className="flex-1 min-w-0">
                                     <p className={`text-xs font-medium truncate ${isOwn ? 'text-white' : 'text-gray-700'}`}>{att.fileName}</p>
                                     <p className={`text-[10px] ${isOwn ? 'text-white/50' : 'text-gray-400'}`}>{formatFileSize(att.size)}</p>
                                 </div>
                                 <button
-                                    onClick={() => setPdfPreview({ src: fileUrl, name: att.fileName })}
+                                    onClick={e => { e.preventDefault(); e.stopPropagation(); setPdfPreview({ src: fileUrl, name: att.fileName }); }}
                                     className={`p-1 rounded hover:bg-black/10 ${isOwn ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}
                                     title="Aperçu"
                                 >
                                     <ViewIcon size={14} />
                                 </button>
-                                <a
-                                    href={fileUrl}
-                                    download={att.fileName}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`p-1 rounded hover:bg-black/10 ${isOwn ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}
-                                    title="Télécharger"
-                                >
-                                    <Download01Icon size={14} />
-                                </a>
-                            </div>
+                            </a>
                         );
                     }
 
                     const Icon = getFileIcon(att.fileType);
                     return (
-                        <div key={i} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg ${isOwn ? 'bg-white/10' : 'bg-gray-200/60'} max-w-[300px]`}>
+                        <a key={i} href={fileUrl} target="_blank" rel="noopener noreferrer" className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer hover:opacity-80 transition-opacity ${isOwn ? 'bg-white/10' : 'bg-gray-200/60'} max-w-[300px]`}>
                             <Icon size={20} className="text-[#33cbcc] shrink-0" />
                             <div className="flex-1 min-w-0">
                                 <p className={`text-xs font-medium truncate ${isOwn ? 'text-white' : 'text-gray-700'}`}>{att.fileName}</p>
                                 <p className={`text-[10px] ${isOwn ? 'text-white/50' : 'text-gray-400'}`}>{formatFileSize(att.size)}</p>
                             </div>
-                            <a
-                                href={fileUrl}
-                                download={att.fileName}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`p-1 rounded hover:bg-black/10 ${isOwn ? 'text-white/70 hover:text-white' : 'text-gray-500 hover:text-gray-700'}`}
-                                title="Télécharger"
-                            >
-                                <Download01Icon size={14} />
-                            </a>
-                        </div>
+                        </a>
                     );
                 })}
             </div>

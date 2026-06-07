@@ -21,7 +21,7 @@ export class EmployeesController {
         if (req.user.role === 'HEAD_OF_DEPARTMENT') {
             createEmployeeDto.departmentId = req.user.departmentId;
         }
-        return this.employeesService.create(createEmployeeDto);
+        return this.employeesService.create(createEmployeeDto, req.user.userId);
     }
 
     @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL')

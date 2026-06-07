@@ -9,12 +9,14 @@ import { User } from '../models/user.model';
 import { MeetingsService } from './meetings.service';
 import { MeetingsController } from './meetings.controller';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { WhatsAppModule } from '../whatsapp/whatsapp.module';
 
 @Module({
     imports: [
         SequelizeModule.forFeature([Meeting, MeetingParticipant, Employee, User]),
         MulterModule.register({}),
         NotificationsModule,
+        WhatsAppModule,
     ],
     controllers: [MeetingsController],
     providers: [MeetingsService],

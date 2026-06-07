@@ -584,6 +584,7 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
     const { t } = useTranslation();
     const [showTrophiesModal, setShowTrophiesModal] = useState(false);
     const [showBadgesModal, setShowBadgesModal] = useState(false);
+    const [photoOpen, setPhotoOpen] = useState(false);
 
     const { data: stats } = useEmployeeStats(employee.id);
     const { data: employeeTasks = [] } = useTasksByEmployee(employee.id);
@@ -681,13 +682,17 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
     const tasksPercent = totalTasks > 0 ? Math.round((inProgressTasks / totalTasks) * 100) : 0;
 
     return (
+        <>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
             {/* LEFT COLUMN */}
             <div className="lg:col-span-3 space-y-5">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl overflow-hidden">
                     {/* Photo filling top half */}
-                    <div className="h-48">
+                    <div className="h-48 relative group cursor-zoom-in" onClick={() => setPhotoOpen(true)}>
                         <img src={employee.avatar} alt={employee.name} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <ViewIcon size={28} className="text-white drop-shadow" />
+                        </div>
                     </div>
                     {/* Info section */}
                     <div className="bg-linear-to-b from-[#1a2740] to-[#0f1a2e] px-5 pb-5 pt-3 text-center">
@@ -1092,6 +1097,39 @@ const InfosView = ({ employee, teamMembers = [] }: { employee: EmployeeUI; teamM
             </AnimatePresence>
 
         </div>
+
+        <AnimatePresence>
+            {photoOpen && employee.avatar && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setPhotoOpen(false)}
+                    className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        onClick={e => e.stopPropagation()}
+                        className="relative"
+                    >
+                        <button
+                            onClick={() => setPhotoOpen(false)}
+                            className="absolute -top-10 right-0 p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white"
+                        >
+                            <Cancel01Icon size={18} />
+                        </button>
+                        <img
+                            src={employee.avatar}
+                            alt={employee.name}
+                            className="max-w-[90vw] max-h-[85vh] rounded-2xl object-contain shadow-2xl"
+                        />
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+        </>
     );
 };
 
@@ -1358,7 +1396,10 @@ const TasksView = ({ employee }: { employee: Employee }) => {
 
     // Fetch department projects and employee tasks
     const { data: departmentProjects } = useProjectsByDepartment(employee.departmentId);
-    const { data: apiTasks = [] } = useTasksByEmployee(employee.id);
+    const { data: rawApiTasks = [] } = useTasksByEmployee(employee.id);
+    const apiTasks = [...rawApiTasks].sort((a, b) =>
+        new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+    );
     const createTaskMutation = useCreateTask();
     const updateTaskMutation = useUpdateTask();
     const deleteTaskMutation = useDeleteTask();
@@ -3216,7 +3257,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
                                 isDismissed
                                     ? 'bg-[#33cbcc] hover:bg-[#2bb5b6] text-white shadow-lg shadow-[#33cbcc]/20'
-                                    : 'bg-[#283852] hover:bg-[#283852]/80 text-white shadow-lg shadow-[#283852]/20'
+                                    : 'bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20'
                             }`}
                         >
                             {isDismissed ? <UserCheck01Icon size={15} /> : <UserBlock01Icon size={15} />}

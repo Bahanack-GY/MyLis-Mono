@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { API_URL } from '../../api/config';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft01Icon, ArrowRight01Icon, Add01Icon, Calendar01Icon, Clock01Icon, Briefcase01Icon, Tag01Icon, ZapIcon, Cancel01Icon, Loading02Icon, PlayIcon, Tick01Icon, PencilIcon, Time01Icon, FloppyDiskIcon, Delete02Icon, Task01Icon, Attachment01Icon, Download01Icon, File01Icon, Target01Icon, RefreshIcon, Alert01Icon } from 'hugeicons-react';
@@ -414,7 +415,7 @@ const TaskDetailModal = ({
                                     <File01Icon size={13} className="text-[#b0bac9] shrink-0" />
                                     <span className="flex-1 text-sm text-[#1c2b3a] truncate">{att.fileName}</span>
                                     <span className="text-[10px] text-[#b0bac9] shrink-0">{(att.size / 1024).toFixed(0)} KB</span>
-                                    <a href={att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer"
+                                    <a href={API_URL + att.filePath} download={att.fileName} target="_blank" rel="noopener noreferrer"
                                         className="text-[#b0bac9] hover:text-[#33cbcc] transition-colors shrink-0">
                                         <Download01Icon size={13} />
                                     </a>

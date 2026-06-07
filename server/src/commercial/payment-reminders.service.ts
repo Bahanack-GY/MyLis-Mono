@@ -101,7 +101,7 @@ export class PaymentRemindersService {
         // 2. HEAD_OF_DEPARTMENT - department invoices
         if (department) {
             const hods = await this.employeeModel.findAll({
-                where: { departmentId: department.id },
+                where: { departmentId: department.id, dismissed: { [Op.or]: [false, null] } },
                 include: [{ model: User, where: { role: 'HEAD_OF_DEPARTMENT' } }],
             });
             recipients.push(...hods.map(e => e.userId).filter(Boolean));
@@ -110,7 +110,7 @@ export class PaymentRemindersService {
         // 3. COMMERCIAL - department invoices
         if (department) {
             const commercials = await this.employeeModel.findAll({
-                where: { departmentId: department.id },
+                where: { departmentId: department.id, dismissed: { [Op.or]: [false, null] } },
                 include: [{ model: User, where: { role: 'COMMERCIAL' } }],
             });
             recipients.push(...commercials.map(e => e.userId).filter(Boolean));
