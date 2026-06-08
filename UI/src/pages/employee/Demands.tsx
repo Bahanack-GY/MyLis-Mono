@@ -156,7 +156,7 @@ const CreateDemandModal = ({ onClose }: { onClose: () => void }) => {
   </p>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('demands.create.title')}</h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>
@@ -305,7 +305,7 @@ const CreateDemandModal = ({ onClose }: { onClose: () => void }) => {
   <button
   type="button"
   onClick={() => setProformaFile(null)}
-  className="text-[#b0bac9] hover:text-[#283852] transition-colors"
+  className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors"
   >
   <Cancel01Icon size={14} />
   </button>

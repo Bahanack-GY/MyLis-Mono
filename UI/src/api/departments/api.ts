@@ -48,6 +48,11 @@ export const departmentMonthlyTargetsApi = {
     getMonthlyStats: (departmentId: string, year: number) =>
         api.get<MonthlyStatRow[]>(`/organization/department-monthly-targets/${departmentId}/stats`, { params: { year } }).then(r => r.data),
 
+    getAllDepartmentsMonthlyStats: (year: number) =>
+        api.get<{ month: number; targetRevenue: number; actualRevenue: number }[]>(
+            '/organization/department-monthly-targets/all/stats', { params: { year } }
+        ).then(r => r.data),
+
     getByDepartmentAndYear: (departmentId: string, year: number) =>
         api.get<DepartmentMonthlyTarget[]>(`/organization/department-monthly-targets/${departmentId}`, { params: { year } }).then(r => r.data),
 };

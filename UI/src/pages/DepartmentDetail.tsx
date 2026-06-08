@@ -431,7 +431,7 @@ const CreateClientModal = ({ onClose, onCreated }: { onClose: () => void; onCrea
   </div>
   <h3 className="text-base font-bold text-[#1c2b3a]">{t('clients.createTitle')}</h3>
   </div>
-  <button onClick={onClose} className="p-1.5 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
+  <button onClick={onClose} className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
   <Cancel01Icon size={18} />
   </button>
   </div>
@@ -554,7 +554,7 @@ const AddProjectModal = ({
   </div>
   <h3 className="text-base font-bold text-[#1c2b3a]">{t('projects.createTitle')}</h3>
   </div>
-  <button onClick={onClose} className="p-1.5 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
+  <button onClick={onClose} className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
   <Cancel01Icon size={18} />
   </button>
   </div>
@@ -1938,7 +1938,7 @@ const SettingsView = ({ department }: { department: Department }) => {
   disabled={!nameChanged || !name.trim() || updateDept.isPending}
   className="flex items-center gap-2 px-4 py-2 bg-[#283852] text-white  text-sm font-medium hover:bg-[#1e2d42] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
   >
-  {updateDept.isPending && !pendingHodId
+  {updateDept.isPending
   ? <Loading02Icon size={14} className="animate-spin" />
   : <Tick01Icon size={14} />
   }

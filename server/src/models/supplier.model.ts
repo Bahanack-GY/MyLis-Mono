@@ -1,5 +1,6 @@
-import { Column, DataType, Model, Table, HasMany } from 'sequelize-typescript';
+import { Column, DataType, Model, Table, HasMany, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { SupplierInvoice } from './supplier-invoice.model';
+import { Account } from './account.model';
 
 @Table({
     tableName: 'suppliers',
@@ -41,4 +42,12 @@ export class Supplier extends Model {
 
     @HasMany(() => SupplierInvoice)
     declare invoices: SupplierInvoice[];
+
+    // Auxiliary accounting account under collective 401xxx
+    @ForeignKey(() => Account)
+    @Column({ type: DataType.UUID, allowNull: true })
+    declare accountId: string | null;
+
+    @BelongsTo(() => Account)
+    declare account: Account;
 }

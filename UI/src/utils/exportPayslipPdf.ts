@@ -8,18 +8,46 @@ export interface PayslipPdfData {
     employeeName: string;
     departmentName: string;
     position?: string;
+    contractType?: string;
+    riskClass?: number;
 
     /* Period */
     month: number;
     year: number;
 
-    /* Amounts */
+    /* Salary bases */
+    baseSalary?: number;
     grossSalary: number;
-    cnpsEmployee: number;
-    cnpsEmployer: number;
-    cfc: number;
+    grossCotisable?: number;
+    grossTaxable?: number;
+    netCategoriel?: number;
+
+    /* 2026 CNPS breakdown */
+    pvidEmployee?: number;
+    pvidEmployer?: number;
+    cnpsFamilyAllowance?: number;
+    atmp?: number;
+
+    /* CFC */
+    cfcEmployee?: number;
+    cfcEmployer?: number;
+
+    /* FNE */
+    fne?: number;
+
+    /* Fiscal (employee) */
     irpp: number;
-    communalTax: number;
+    cac?: number;
+    rav?: number;
+    tdl?: number;
+
+    /* Legacy compat */
+    cnpsEmployee?: number;
+    cnpsEmployer?: number;
+    cfc?: number;
+    communalTax?: number;
+
+    /* Aggregates */
     totalDeductions: number;
     totalEmployerCharges: number;
     manualDeductions: number;
@@ -30,6 +58,7 @@ export interface PayslipPdfData {
     /* Meta */
     payslipId: string;
     paidAt?: string;
+    complianceWarnings?: string[];
 }
 
 /* ── Helpers ───────────────────────────────────────────── */
@@ -200,6 +229,56 @@ export function exportPayslipPdf(data: PayslipPdfData, logoBase64?: string) {
 
     y += 26;
 
+    /* ── Employee detail info (position / contract / risk class) ── */
+    const extraInfoParts: string[] = [];
+    if (data.position) extraInfoParts.push(`Poste: ${data.position}`);
+    if (data.contractType) extraInfoParts.push(`Contrat: ${data.contractType}`);
+    if (data.riskClass) extraInfoParts.push(`Classe risque AT/MP: ${data.riskClass}`);
+    if (extraInfoParts.length > 0) {
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'italic');
+        doc.setTextColor(100, 100, 100);
+        doc.text(extraInfoParts.join('   |   '), MARGIN, y);
+        y += 6;
+    }
+
+    /* ── Detect 2026 mode ── */
+    const is2026 = data.pvidEmployee !== undefined || data.pvidEmployer !== undefined;
+
+    /* ── Salary bases section (2026 only) ── */
+    if (is2026 && (data.baseSalary || data.grossCotisable || data.netCategoriel)) {
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...BRAND);
+        doc.text('BASES DE CALCUL', MARGIN, y);
+        y += 2;
+
+        const baseRows: string[][] = [];
+        if (data.baseSalary) baseRows.push(['Salaire de base', formatCurrency(data.baseSalary)]);
+        baseRows.push(['Salaire Brut Total', formatCurrency(data.grossSalary)]);
+        if (data.grossCotisable !== undefined) baseRows.push(['Base cotisable CNPS/CFC', formatCurrency(data.grossCotisable)]);
+        if (data.grossTaxable !== undefined) baseRows.push(['Base taxable IRPP (brut taxable)', formatCurrency(data.grossTaxable)]);
+        if (data.netCategoriel !== undefined) baseRows.push(['Net categoriel (base IRPP nette)', formatCurrency(data.netCategoriel)]);
+
+        autoTable(doc, {
+            startY: y,
+            head: [['Designation', 'Montant']],
+            body: baseRows,
+            theme: 'grid',
+            headStyles: { fillColor: [80, 100, 130] as [number, number, number], textColor: 255, fontSize: 7.5, fontStyle: 'bold', cellPadding: 2 },
+            bodyStyles: { fontSize: 7.5, textColor: [50, 50, 50], cellPadding: 2 },
+            columnStyles: { 0: { cellWidth: 'auto' }, 1: { cellWidth: 45, halign: 'right', fontStyle: 'bold' } },
+            margin: { left: MARGIN, right: MARGIN },
+            didParseCell: (hookData) => {
+                if (hookData.row.index === 1) {
+                    hookData.cell.styles.fontStyle = 'bold';
+                    hookData.cell.styles.fillColor = [240, 245, 248];
+                }
+            },
+        });
+        y = (doc as any).lastAutoTable.finalY + 6;
+    }
+
     /* ── Deductions table ── */
     doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
@@ -211,18 +290,35 @@ export function exportPayslipPdf(data: PayslipPdfData, logoBase64?: string) {
     const customTotal = customDeds.reduce((s, d) => s + d.amount, 0);
     const allRetenues = data.totalDeductions + customTotal + (data.manualDeductions || 0);
 
-    const deductionRows: string[][] = [
-        ['Salaire Brut', '', '', formatCurrency(data.grossSalary)],
-    ];
+    const deductionRows: string[][] = [];
 
-    if (data.cnpsEmployee > 0)
-        deductionRows.push(['CNPS (Pension vieillesse)', '2,80%', formatCurrency(data.cnpsEmployee), '']);
-    if (data.cfc > 0)
-        deductionRows.push(['CFC (Credit Foncier)', '1,00%', formatCurrency(data.cfc), '']);
-    if (data.irpp > 0)
-        deductionRows.push(['IRPP (Impot sur le revenu)', 'Progressif', formatCurrency(data.irpp), '']);
-    if (data.communalTax > 0)
-        deductionRows.push(['Centimes additionnels communaux', '10% IRPP', formatCurrency(data.communalTax), '']);
+    if (is2026) {
+        // 2026 SYSCOHADA bulletin breakdown
+        deductionRows.push(['Salaire Brut', '', '', formatCurrency(data.grossSalary)]);
+        if ((data.pvidEmployee ?? 0) > 0)
+            deductionRows.push(['PVID Salarial (Pension vieillesse)', '4,20%', formatCurrency(data.pvidEmployee!), '']);
+        if ((data.cfcEmployee ?? 0) > 0)
+            deductionRows.push(['CFC Salarial (Credit Foncier)', '1,00%', formatCurrency(data.cfcEmployee!), '']);
+        if ((data.rav ?? 0) > 0)
+            deductionRows.push(['RAV (Redevance Audiovisuelle)', 'Tranches', formatCurrency(data.rav!), '']);
+        if ((data.tdl ?? 0) > 0)
+            deductionRows.push(['TDL (Taxe Developpement Local)', 'Tranches', formatCurrency(data.tdl!), '']);
+        if ((data.irpp ?? 0) > 0)
+            deductionRows.push(['IRPP (Impot sur Revenu)', 'Progressif', formatCurrency(data.irpp), '']);
+        if ((data.cac ?? 0) > 0)
+            deductionRows.push(['CAC (Centimes Additionnels)', '10% IRPP', formatCurrency(data.cac!), '']);
+    } else {
+        // Legacy bulletin
+        deductionRows.push(['Salaire Brut', '', '', formatCurrency(data.grossSalary)]);
+        if ((data.cnpsEmployee ?? 0) > 0)
+            deductionRows.push(['CNPS (Pension vieillesse)', '2,80%', formatCurrency(data.cnpsEmployee!), '']);
+        if ((data.cfc ?? 0) > 0)
+            deductionRows.push(['CFC (Credit Foncier)', '1,00%', formatCurrency(data.cfc!), '']);
+        if ((data.irpp ?? 0) > 0)
+            deductionRows.push(['IRPP (Impot sur le revenu)', 'Progressif', formatCurrency(data.irpp), '']);
+        if ((data.communalTax ?? 0) > 0)
+            deductionRows.push(['Centimes additionnels communaux', '10% IRPP', formatCurrency(data.communalTax!), '']);
+    }
 
     for (const cd of customDeds) {
         if (cd.amount > 0) deductionRows.push([cd.name, '', formatCurrency(cd.amount), '']);
@@ -233,9 +329,10 @@ export function exportPayslipPdf(data: PayslipPdfData, logoBase64?: string) {
         deductionRows.push([`Retenue manuelle${note}`, '', formatCurrency(data.manualDeductions), '']);
     }
 
-    deductionRows.push(
-        ['Total Retenues', '', '', formatCurrency(allRetenues)],
-    );
+    deductionRows.push(['Total Retenues', '', '', formatCurrency(allRetenues)]);
+
+    const totalDeductionRowIdx = deductionRows.length - 1;
+    const firstRowIdx = 0;
 
     autoTable(doc, {
         startY: y,
@@ -265,12 +362,10 @@ export function exportPayslipPdf(data: PayslipPdfData, logoBase64?: string) {
         },
         margin: { left: MARGIN, right: MARGIN },
         didParseCell: (hookData) => {
-            const rowIndex = hookData.row.index;
-            const isLastRow = rowIndex === deductionRows.length - 1;
-            const isFirstRow = rowIndex === 0;
-            if (isLastRow || isFirstRow) {
+            const i = hookData.row.index;
+            if (i === totalDeductionRowIdx || i === firstRowIdx) {
                 hookData.cell.styles.fontStyle = 'bold';
-                if (isLastRow) {
+                if (i === totalDeductionRowIdx) {
                     hookData.cell.styles.fillColor = [240, 245, 248];
                     hookData.cell.styles.textColor = [40, 56, 82];
                 }
@@ -287,13 +382,34 @@ export function exportPayslipPdf(data: PayslipPdfData, logoBase64?: string) {
     doc.text('CHARGES PATRONALES', MARGIN, y);
     y += 2;
 
+    const employerRows: string[][] = [];
+    if (is2026) {
+        if ((data.pvidEmployer ?? 0) > 0)
+            employerRows.push(['PVID Patronal (Pension vieillesse)', '4,20%', formatCurrency(data.pvidEmployer!)]);
+        if ((data.cnpsFamilyAllowance ?? 0) > 0)
+            employerRows.push(['Allocations Familiales (PF)', '7,00%', formatCurrency(data.cnpsFamilyAllowance!)]);
+        if ((data.atmp ?? 0) > 0) {
+            const riskLabel = data.riskClass ? ` Cl.${data.riskClass}` : '';
+            const atmpRates: Record<number, string> = { 1: '1,75%', 2: '2,50%', 3: '5,00%' };
+            const atmpRate = data.riskClass ? (atmpRates[data.riskClass] ?? '-') : '-';
+            employerRows.push([`AT/MP${riskLabel} (Accidents Travail)`, atmpRate, formatCurrency(data.atmp!)]);
+        }
+        if ((data.cfcEmployer ?? 0) > 0)
+            employerRows.push(['CFC Patronal (Credit Foncier)', '1,50%', formatCurrency(data.cfcEmployer!)]);
+        if ((data.fne ?? 0) > 0)
+            employerRows.push(['FNE (Fonds National Emploi)', '1,00%', formatCurrency(data.fne!)]);
+    } else {
+        if ((data.cnpsEmployer ?? 0) > 0)
+            employerRows.push(['CNPS Employeur (Pension vieillesse)', '11,20%', formatCurrency(data.cnpsEmployer!)]);
+    }
+    employerRows.push(['Total Charges Patronales', '', formatCurrency(data.totalEmployerCharges)]);
+
+    const totalEmplRowIdx = employerRows.length - 1;
+
     autoTable(doc, {
         startY: y,
         head: [['Designation', 'Taux', 'Montant']],
-        body: [
-            ['CNPS Employeur (Pension vieillesse)', '11,20%', formatCurrency(data.cnpsEmployer)],
-            ['Total Charges Patronales', '', formatCurrency(data.totalEmployerCharges)],
-        ],
+        body: employerRows,
         theme: 'striped',
         headStyles: {
             fillColor: [180, 140, 50] as [number, number, number],
@@ -317,7 +433,7 @@ export function exportPayslipPdf(data: PayslipPdfData, logoBase64?: string) {
         },
         margin: { left: MARGIN, right: MARGIN },
         didParseCell: (hookData) => {
-            if (hookData.row.index === 1) {
+            if (hookData.row.index === totalEmplRowIdx) {
                 hookData.cell.styles.fontStyle = 'bold';
                 hookData.cell.styles.fillColor = [255, 245, 225];
             }
@@ -394,6 +510,23 @@ export function exportPayslipPdf(data: PayslipPdfData, logoBase64?: string) {
     });
 
     y += 24;
+
+    /* ── Compliance warnings (2026) ── */
+    const warnings = data.complianceWarnings ?? [];
+    if (warnings.length > 0) {
+        doc.setFillColor(255, 245, 220);
+        const warnBoxH = 6 + warnings.length * 5;
+        doc.roundedRect(MARGIN, y, pw - MARGIN * 2, warnBoxH, 2, 2, 'F');
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(180, 100, 0);
+        doc.text('ALERTES DE CONFORMITE:', MARGIN + 4, y + 5);
+        doc.setFont('helvetica', 'normal');
+        warnings.forEach((w, i) => {
+            doc.text(`• ${w}`, MARGIN + 4, y + 10 + i * 5);
+        });
+        y += warnBoxH + 8;
+    }
 
     /* ── Footer line ── */
     const ph = doc.internal.pageSize.getHeight();

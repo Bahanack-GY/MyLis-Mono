@@ -1,13 +1,13 @@
 ﻿import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { Player } from '@lottiefiles/react-lottie-player';
-import { ClipboardIcon, Ticket01Icon, Calendar01Icon, GraduationScrollIcon, Clock01Icon, Award01Icon, CrownIcon, UserIcon, ArrowUpRight01Icon } from 'hugeicons-react';
+import { ClipboardIcon, Ticket01Icon, Calendar01Icon, Folder01Icon, Clock01Icon, Award01Icon, CrownIcon, UserIcon, ArrowUpRight01Icon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useMyTasks } from '../../api/tasks/hooks';
 import { useMyTickets } from '../../api/tickets/hooks';
 import { useMeetings } from '../../api/meetings/hooks';
-import { useFormations } from '../../api/formations/hooks';
+import { useProjects } from '../../api/projects/hooks';
 import { useLeaderboard } from '../../api/employees/hooks';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserDashboardSkeleton } from '../../components/Skeleton';
@@ -47,10 +47,10 @@ const Dashboard = () => {
   const { data: tasks, isLoading: loadingTasks } = useMyTasks();
   const { data: tickets, isLoading: loadingTickets } = useMyTickets();
   const { data: meetings, isLoading: loadingMeetings } = useMeetings();
-  const { data: formations, isLoading: loadingFormations } = useFormations();
+  const { data: projects, isLoading: loadingProjects } = useProjects(user?.departmentId ?? undefined);
   const { data: leaderboard } = useLeaderboard(1);
 
-  const isLoading = loadingTasks || loadingTickets || loadingMeetings || loadingFormations;
+  const isLoading = loadingTasks || loadingTickets || loadingMeetings || loadingProjects;
 
   const now = new Date();
   const upcomingMeetings = (meetings || [])
@@ -65,7 +65,7 @@ const Dashboard = () => {
   { title: t('dashboard.stats.myTasks'),   value: tasks?.length ?? 0,   icon: ClipboardIcon,   color: '#283852', link: '/tasks' },
   { title: t('dashboard.stats.myTickets'),   value: tickets?.length ?? 0,   icon: Ticket01Icon,   color: '#283852', link: '/tickets' },
   { title: t('dashboard.stats.upcomingMeetings'),value: upcomingMeetings.length,   icon: Calendar01Icon,   color: '#33cbcc', link: '/meetings' },
-  { title: t('dashboard.stats.myFormations'),   value: formations?.length ?? 0,   icon: GraduationScrollIcon, color: '#283852', link: '/formations' },
+  { title: t('dashboard.stats.myProjects'),   value: projects?.length ?? 0,   icon: Folder01Icon,   color: '#33cbcc', link: '/projects' },
   ];
 
   const firstName = user?.firstName ?? '';

@@ -3169,7 +3169,7 @@ const PromotionsView = ({ employee }: { employee: Employee }) => {
 const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetailProps) => {
   const { t } = useTranslation();
   const { role } = useAuth();
-  const isManager = role === 'MANAGER' || role === 'CEO';
+  const isManager = role === 'MANAGER' || role === 'CEO' || role === 'RH';
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDismissConfirm, setShowDismissConfirm] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
@@ -3326,7 +3326,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
   exit={{ x: '100%' }}
   transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
   onClick={e => e.stopPropagation()}
-  className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef] p-6"
+  className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef] overflow-y-auto p-6"
   >
   <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${isDismissed ? 'bg-[#33cbcc]/10' : 'bg-[#283852]/10'}`}>
   {isDismissed ? <UserCheck01Icon size={24} className="text-[#33cbcc]" /> : <UserBlock01Icon size={24} className="text-[#283852]" />}
@@ -3385,7 +3385,7 @@ const EmployeeDetail = ({ employee, activeTab, teamMembers = [] }: EmployeeDetai
   exit={{ x: '100%' }}
   transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
   onClick={e => e.stopPropagation()}
-  className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef] p-6"
+  className="bg-white w-full max-w-sm h-full flex flex-col border-l border-[#e5e8ef] overflow-y-auto p-6"
   >
   <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mb-4">
   <Building01Icon size={24} className="text-orange-500" />

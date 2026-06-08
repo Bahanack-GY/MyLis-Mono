@@ -1,4 +1,4 @@
-export type Role = 'MANAGER' | 'EMPLOYEE' | 'HEAD_OF_DEPARTMENT' | 'ACCOUNTANT' | 'COMMERCIAL' | 'STAGIAIRE' | 'CEO';
+export type Role = 'MANAGER' | 'EMPLOYEE' | 'HEAD_OF_DEPARTMENT' | 'ACCOUNTANT' | 'COMMERCIAL' | 'STAGIAIRE' | 'CEO' | 'RH';
 
 export interface LoginDto {
     email: string;

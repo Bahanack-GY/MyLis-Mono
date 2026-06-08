@@ -9,7 +9,7 @@ import { Roles } from '../auth/roles.decorator';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chat.gateway';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE', 'RH')
 @Controller('chat')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class ChatController {

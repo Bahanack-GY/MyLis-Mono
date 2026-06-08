@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -53,5 +53,23 @@ export class ReportsController {
     @Get('cash-flow/:fiscalYearId')
     cashFlow(@Param('fiscalYearId') fiscalYearId: string) {
         return this.reportsService.cashFlow(fiscalYearId);
+    }
+
+    @Get('six-column-balance/:fiscalYearId')
+    sixColumnBalance(
+        @Param('fiscalYearId') fiscalYearId: string,
+        @Query('from') from?: string,
+        @Query('to') to?: string,
+        @Query('departmentId') departmentId?: string,
+    ) {
+        return this.reportsService.sixColumnBalance(fiscalYearId, from, to, departmentId);
+    }
+
+    @Get('auxiliary-balance/:fiscalYearId/:collectiveAccountId')
+    auxiliaryBalance(
+        @Param('fiscalYearId') fiscalYearId: string,
+        @Param('collectiveAccountId') collectiveAccountId: string,
+    ) {
+        return this.reportsService.auxiliaryBalance(fiscalYearId, collectiveAccountId);
     }
 }

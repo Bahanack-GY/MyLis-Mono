@@ -9,8 +9,11 @@ import { User } from '../models/user.model';
 import { Department } from '../models/department.model';
 import { Expense } from '../models/expense.model';
 import { DeductionType } from '../models/deduction-type.model';
-import { PayrollCalculatorService } from './payroll-calculator.service';
+import { SalaryComponent } from '../models/salary-component.model';
+import { PayrollCalculatorService, SalaryComponentInput } from './payroll-calculator.service';
 import { JournalEngineService } from '../accounting/journal-engine.service';
+import { FiscalYear } from '../models/fiscal-year.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class PayrollService {
@@ -25,6 +28,10 @@ export class PayrollService {
         private expenseModel: typeof Expense,
         @InjectModel(DeductionType)
         private deductionTypeModel: typeof DeductionType,
+        @InjectModel(FiscalYear)
+        private fiscalYearModel: typeof FiscalYear,
+        @InjectModel(SalaryComponent)
+        private salaryComponentModel: typeof SalaryComponent,
         @InjectConnection()
         private sequelize: Sequelize,
         private calculator: PayrollCalculatorService,
@@ -76,6 +83,18 @@ export class PayrollService {
         return payslip;
     }
 
+    private async getTaxConfigForYear(year: number): Promise<Record<string, any>> {
+        const startDate = `${year}-01-01`;
+        const endDate = `${year}-12-31`;
+        const fy = await this.fiscalYearModel.findOne({
+            where: {
+                startDate: { [Op.lte]: endDate },
+                endDate: { [Op.gte]: startDate },
+            },
+        });
+        return fy?.taxConfig ?? {};
+    }
+
     /**
      * Create a new payroll run for a given month/year
      */
@@ -108,12 +127,24 @@ export class PayrollService {
             include: [{ model: User, attributes: ['role'] }],
         });
 
-        const eligibleEmployees = employees.filter(e => Number(e.getDataValue('salary')) > 0);
+        const eligibleEmployees = employees; // 0-base employees with components are included; skipped after calc if gross === 0
 
         // If re-calculating, preserve existing toggles & custom deductions per employee
         const existingPayslips = run.payslips || [];
         const existingByEmployee = new Map<string, Payslip>();
         existingPayslips.forEach(ps => existingByEmployee.set(ps.employeeId, ps));
+
+        const rateOverrides = await this.getTaxConfigForYear(run.year);
+
+        const allComponents = eligibleEmployees.length > 0 ? await this.salaryComponentModel.findAll({
+            where: { employeeId: eligibleEmployees.map(e => e.id), isActive: true },
+        }) : [];
+        const componentsByEmployee = new Map<string, SalaryComponentInput[]>();
+        for (const comp of allComponents) {
+            const list = componentsByEmployee.get(comp.employeeId) ?? [];
+            list.push(this.toComponentInput(comp));
+            componentsByEmployee.set(comp.employeeId, list);
+        }
 
         return this.sequelize.transaction(async (t) => {
             // Delete existing payslips for this run (re-calculation)
@@ -138,7 +169,10 @@ export class PayrollService {
                 const manualDeductions = prev ? Number(prev.manualDeductions) || 0 : 0;
                 const manualDeductionNote = prev?.manualDeductionNote || null;
 
-                const calc = this.calculator.calculate(grossSalary, toggles, customDeductions);
+                const components = componentsByEmployee.get(emp.id);
+                const calc = this.calculator.calculate(grossSalary, toggles, customDeductions, components, undefined, undefined, rateOverrides);
+
+                if (calc.grossSalary === 0) continue;
 
                 const netAfterManual = calc.netSalary - manualDeductions;
 
@@ -147,6 +181,24 @@ export class PayrollService {
                     employeeId: emp.id,
                     grossSalary: calc.grossSalary,
                     netSalary: netAfterManual,
+                    // 2026 fields
+                    baseSalary: calc.baseSalary,
+                    grossCotisable: calc.grossCotisable,
+                    grossTaxable: calc.grossTaxable,
+                    netCategoriel: calc.netCategoriel,
+                    pvidEmployee: calc.pvidEmployee,
+                    pvidEmployer: calc.pvidEmployer,
+                    cnpsFamilyAllowance: calc.cnpsFamilyAllowance,
+                    atmp: calc.atmp,
+                    cfcEmployee: calc.cfcEmployee,
+                    cfcEmployer: calc.cfcEmployer,
+                    fne: calc.fne,
+                    cac: calc.cac,
+                    rav: calc.rav,
+                    tdl: calc.tdl,
+                    riskClass: calc.riskClass,
+                    complianceWarnings: calc.complianceWarnings,
+                    // Legacy compat aliases
                     cnpsEmployee: calc.cnpsEmployee,
                     cnpsEmployer: calc.cnpsEmployer,
                     irpp: calc.irpp,
@@ -236,9 +288,19 @@ export class PayrollService {
                     employeeName: name,
                     grossSalary: Number(payslip.grossSalary),
                     netSalary: Number(payslip.netSalary),
+                    pvidEmployee: Number(payslip.pvidEmployee) || undefined,
+                    pvidEmployer: Number(payslip.pvidEmployer) || undefined,
+                    cnpsFamilyAllowance: Number(payslip.cnpsFamilyAllowance) || undefined,
+                    atmp: Number(payslip.atmp) || undefined,
+                    cfcEmployee: Number(payslip.cfcEmployee) || undefined,
+                    cfcEmployer: Number(payslip.cfcEmployer) || undefined,
+                    fne: Number(payslip.fne) || undefined,
+                    irpp: Number(payslip.irpp),
+                    cac: Number(payslip.cac) || undefined,
+                    rav: Number(payslip.rav) || undefined,
+                    tdl: Number(payslip.tdl) || undefined,
                     cnpsEmployee: Number(payslip.cnpsEmployee),
                     cnpsEmployer: Number(payslip.cnpsEmployer),
-                    irpp: Number(payslip.irpp),
                     cfc: Number(payslip.cfc),
                     communalTax: Number(payslip.communalTax),
                     date,
@@ -301,9 +363,19 @@ export class PayrollService {
                 employeeName: name,
                 grossSalary: Number(payslip.grossSalary),
                 netSalary: Number(payslip.netSalary),
+                pvidEmployee: Number(payslip.pvidEmployee) || undefined,
+                pvidEmployer: Number(payslip.pvidEmployer) || undefined,
+                cnpsFamilyAllowance: Number(payslip.cnpsFamilyAllowance) || undefined,
+                atmp: Number(payslip.atmp) || undefined,
+                cfcEmployee: Number(payslip.cfcEmployee) || undefined,
+                cfcEmployer: Number(payslip.cfcEmployer) || undefined,
+                fne: Number(payslip.fne) || undefined,
+                irpp: Number(payslip.irpp),
+                cac: Number(payslip.cac) || undefined,
+                rav: Number(payslip.rav) || undefined,
+                tdl: Number(payslip.tdl) || undefined,
                 cnpsEmployee: Number(payslip.cnpsEmployee),
                 cnpsEmployer: Number(payslip.cnpsEmployer),
-                irpp: Number(payslip.irpp),
                 cfc: Number(payslip.cfc),
                 communalTax: Number(payslip.communalTax),
                 date,
@@ -380,7 +452,7 @@ export class PayrollService {
         },
     ) {
         const payslip = await this.payslipModel.findByPk(payslipId, {
-            include: [{ model: PayrollRun, attributes: ['id', 'status'] }],
+            include: [{ model: PayrollRun, attributes: ['id', 'status', 'year'] }],
         });
         if (!payslip) throw new NotFoundException('Payslip not found');
         if (payslip.payrollRun.status !== 'CALCULATED') {
@@ -395,13 +467,34 @@ export class PayrollService {
         };
         const customDeductions = body.customDeductions ?? payslip.customDeductions ?? [];
 
-        const gross = Number(payslip.grossSalary);
+        const gross = Number(payslip.baseSalary ?? payslip.grossSalary);
         const manualDeductions = Number(payslip.manualDeductions) || 0;
-        const calc = this.calculator.calculate(gross, toggles, customDeductions);
+        const rateOverrides = await this.getTaxConfigForYear(payslip.payrollRun.year);
+        const rawComponents = await this.salaryComponentModel.findAll({
+            where: { employeeId: payslip.employeeId, isActive: true },
+        });
+        const components = rawComponents.length > 0 ? rawComponents.map(c => this.toComponentInput(c)) : undefined;
+        const calc = this.calculator.calculate(gross, toggles, customDeductions, components, undefined, undefined, rateOverrides);
 
         await payslip.update({
             ...toggles,
             customDeductions,
+            baseSalary: calc.baseSalary,
+            grossCotisable: calc.grossCotisable,
+            grossTaxable: calc.grossTaxable,
+            netCategoriel: calc.netCategoriel,
+            pvidEmployee: calc.pvidEmployee,
+            pvidEmployer: calc.pvidEmployer,
+            cnpsFamilyAllowance: calc.cnpsFamilyAllowance,
+            atmp: calc.atmp,
+            cfcEmployee: calc.cfcEmployee,
+            cfcEmployer: calc.cfcEmployer,
+            fne: calc.fne,
+            cac: calc.cac,
+            rav: calc.rav,
+            tdl: calc.tdl,
+            riskClass: calc.riskClass,
+            complianceWarnings: calc.complianceWarnings,
             cnpsEmployee: calc.cnpsEmployee,
             cnpsEmployer: calc.cnpsEmployer,
             cfc: calc.cfc,
@@ -549,6 +642,54 @@ export class PayrollService {
         return { success: true };
     }
 
+    /* ── Salary Components CRUD ── */
+
+    async getSalaryComponents(employeeId: string) {
+        const employee = await this.employeeModel.findByPk(employeeId);
+        if (!employee) throw new NotFoundException('Employee not found');
+        return this.salaryComponentModel.findAll({
+            where: { employeeId },
+            order: [['createdAt', 'ASC']],
+        });
+    }
+
+    async createSalaryComponent(employeeId: string, dto: any) {
+        const employee = await this.employeeModel.findByPk(employeeId);
+        if (!employee) throw new NotFoundException('Employee not found');
+        if (dto.amount !== undefined && Number(dto.amount) < 0) {
+            throw new BadRequestException('Component amount cannot be negative');
+        }
+        return this.salaryComponentModel.create({ ...dto, employeeId } as any);
+    }
+
+    async updateSalaryComponent(id: string, dto: any) {
+        const sc = await this.salaryComponentModel.findByPk(id);
+        if (!sc) throw new NotFoundException('Salary component not found');
+        if (dto.amount !== undefined && Number(dto.amount) < 0) {
+            throw new BadRequestException('Component amount cannot be negative');
+        }
+        return sc.update(dto);
+    }
+
+    async deleteSalaryComponent(id: string) {
+        const sc = await this.salaryComponentModel.findByPk(id);
+        if (!sc) throw new NotFoundException('Salary component not found');
+        await sc.destroy();
+        return { success: true };
+    }
+
+    private toComponentInput(comp: SalaryComponent): SalaryComponentInput {
+        return {
+            label: comp.label,
+            type: comp.type,
+            amount: Number(comp.amount),
+            cnpsBase: comp.cnpsBase,
+            taxable: comp.taxable,
+            cap: comp.cap != null ? Number(comp.cap) : null,
+            justificatifUrl: comp.justificatifUrl ?? null,
+        };
+    }
+
     /* ── Bulk toggle update ── */
 
     async bulkUpdateToggles(
@@ -568,12 +709,25 @@ export class PayrollService {
             throw new BadRequestException('Bulk toggles can only be applied on CALCULATED payroll runs');
         }
 
+        const rateOverrides = await this.getTaxConfigForYear(run.year);
+
         const payslips = await this.payslipModel.findAll({
             where: { payrollRunId: runId, id: payslipIds },
         });
 
         if (payslips.length === 0) {
             throw new BadRequestException('No matching payslips found');
+        }
+
+        const bulkEmployeeIds = [...new Set(payslips.map(p => p.employeeId))];
+        const bulkRawComponents = bulkEmployeeIds.length > 0 ? await this.salaryComponentModel.findAll({
+            where: { employeeId: bulkEmployeeIds, isActive: true },
+        }) : [];
+        const bulkComponentsByEmployee = new Map<string, SalaryComponentInput[]>();
+        for (const comp of bulkRawComponents) {
+            const list = bulkComponentsByEmployee.get(comp.employeeId) ?? [];
+            list.push(this.toComponentInput(comp));
+            bulkComponentsByEmployee.set(comp.employeeId, list);
         }
 
         await this.sequelize.transaction(async (t) => {
@@ -594,13 +748,30 @@ export class PayrollService {
                     }
                 }
 
-                const gross = Number(payslip.grossSalary);
+                const gross = Number(payslip.baseSalary ?? payslip.grossSalary);
                 const manualDeductions = Number(payslip.manualDeductions) || 0;
-                const calc = this.calculator.calculate(gross, newToggles, customDeductions);
+                const bulkComps = bulkComponentsByEmployee.get(payslip.employeeId);
+                const calc = this.calculator.calculate(gross, newToggles, customDeductions, bulkComps, undefined, undefined, rateOverrides);
 
                 await payslip.update({
                     ...newToggles,
                     customDeductions,
+                    baseSalary: calc.baseSalary,
+                    grossCotisable: calc.grossCotisable,
+                    grossTaxable: calc.grossTaxable,
+                    netCategoriel: calc.netCategoriel,
+                    pvidEmployee: calc.pvidEmployee,
+                    pvidEmployer: calc.pvidEmployer,
+                    cnpsFamilyAllowance: calc.cnpsFamilyAllowance,
+                    atmp: calc.atmp,
+                    cfcEmployee: calc.cfcEmployee,
+                    cfcEmployer: calc.cfcEmployer,
+                    fne: calc.fne,
+                    cac: calc.cac,
+                    rav: calc.rav,
+                    tdl: calc.tdl,
+                    riskClass: calc.riskClass,
+                    complianceWarnings: calc.complianceWarnings,
                     cnpsEmployee: calc.cnpsEmployee,
                     cnpsEmployer: calc.cnpsEmployer,
                     cfc: calc.cfc,

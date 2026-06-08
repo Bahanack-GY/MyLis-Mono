@@ -104,7 +104,7 @@ export const CreateInvoiceModal = ({ onClose, isProforma = false }: { onClose: (
   {isProforma ? 'Nouvelle Proforma' : t('invoices.create.title')}
   </h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>

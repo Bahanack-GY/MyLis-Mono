@@ -411,121 +411,169 @@ export class JournalEngineService {
     }
 
     /**
-     * Called when salary is paid
-     * Creates full payroll journal entry with all deductions
+     * SYSCOHADA 3-écriture journal de paie (Cameroun 2026)
+     *
+     * Écriture 1 (Journal PAI): charges salariales et retenues
+     *   D 6611xx Rémunérations brutes
+     *   C 421xxx Personnel (net à payer — compte auxiliaire nominatif si fourni)
+     *   C 431100 CNPS PVID salariale
+     *   C 442100 IRPP + CAC retenus
+     *   C 442800 CFC salarial + TDL + RAV
+     *   C 425xxx Acomptes récupérés (si > 0)
+     *
+     * Écriture 2 (Journal PAI): charges patronales
+     *   D 664000 CNPS patronal (PVID + PF + AT/MP)
+     *   D 641300 CFC patronal
+     *   D 641400 FNE
+     *   C 431200 CNPS patronale due
+     *   C 442800 CFC + FNE dus à l'État
+     *
+     * Écriture 3 (Journal BQ): règlement (optionnel, déclenché par pay())
+     *   D 421xxx Personnel
+     *   C 521000 Banque
      */
     async onSalaryPaid(params: {
         employeeName: string;
+        baseSalary?: number;
         grossSalary: number;
         netSalary: number;
-        cnpsEmployee: number;
-        cnpsEmployer: number;
-        irpp: number;
-        cfc: number;
-        communalTax: number;
+        // 2026 fields
+        pvidEmployee?: number;
+        pvidEmployer?: number;
+        cnpsFamilyAllowance?: number;
+        atmp?: number;
+        cfcEmployee?: number;
+        cfcEmployer?: number;
+        fne?: number;
+        irpp?: number;
+        cac?: number;
+        rav?: number;
+        tdl?: number;
+        advancesRecovered?: number;
+        // Legacy compat
+        cnpsEmployee?: number;
+        cnpsEmployer?: number;
+        cfc?: number;
+        communalTax?: number;
+        // Routing
+        auxiliaryAccountCode?: string | null; // e.g. '421000001' for the specific employee
         date: string;
         sourceId: string;
         userId: string;
     }): Promise<void> {
         try {
-            const lines: { accountCode: string; debit: number; credit: number; label?: string }[] = [];
+            const name = params.employeeName;
 
-            // Debit: Personnel charges (gross salary)
-            lines.push({
-                accountCode: '641000',
-                debit: params.grossSalary,
-                credit: 0,
-                label: `Salaire brut - ${params.employeeName}`,
-            });
+            // Resolve amounts — prefer 2026 fields, fall back to legacy
+            const pvidEmp    = params.pvidEmployee       ?? params.cnpsEmployee ?? 0;
+            const pvidPat    = params.pvidEmployer       ?? 0;
+            const pfPat      = params.cnpsFamilyAllowance ?? 0;
+            const atmpPat    = params.atmp               ?? 0;
+            const cfcEmp     = params.cfcEmployee        ?? params.cfc ?? 0;
+            const cfcPat     = params.cfcEmployer        ?? 0;
+            const fnePat     = params.fne                ?? 0;
+            const irppAmt    = params.irpp               ?? 0;
+            const cacAmt     = params.cac                ?? params.communalTax ?? 0;
+            const ravAmt     = params.rav                ?? 0;
+            const tdlAmt     = params.tdl                ?? 0;
+            const advances   = params.advancesRecovered  ?? 0;
 
-            // Credit: Net salary payable
-            lines.push({
-                accountCode: '421000',
-                debit: 0,
-                credit: params.netSalary,
-                label: `Salaire net - ${params.employeeName}`,
-            });
+            // Gross salary account: use 661100 (Appointements et salaires)
+            const grossAccount = '661100';
+            // Net salary destination: nominative aux if available, else collective 421000
+            const netAccount = params.auxiliaryAccountCode || '421000';
 
-            // Credit: CNPS employee part
-            if (params.cnpsEmployee > 0) {
-                lines.push({
-                    accountCode: '431100',
-                    debit: 0,
-                    credit: params.cnpsEmployee,
-                    label: `CNPS salariale - ${params.employeeName}`,
-                });
+            // ─ Écriture 1: Journal de paie ─
+            const e1Lines: { accountCode: string; debit: number; credit: number; label?: string }[] = [
+                { accountCode: grossAccount, debit: params.grossSalary, credit: 0, label: `Salaire brut — ${name}` },
+                { accountCode: netAccount,   debit: 0, credit: params.netSalary, label: `Net à payer — ${name}` },
+            ];
+
+            if (pvidEmp > 0) {
+                e1Lines.push({ accountCode: '431100', debit: 0, credit: pvidEmp, label: `CNPS PVID salarial — ${name}` });
             }
 
-            // Credit: IRPP
-            if (params.irpp > 0) {
-                lines.push({
-                    accountCode: '442000',
-                    debit: 0,
-                    credit: params.irpp,
-                    label: `IRPP - ${params.employeeName}`,
-                });
+            const fiscalRetenues = irppAmt + cacAmt;
+            if (fiscalRetenues > 0) {
+                e1Lines.push({ accountCode: '442100', debit: 0, credit: fiscalRetenues, label: `IRPP + CAC — ${name}` });
             }
 
-            // Credit: CFC
-            if (params.cfc > 0) {
-                lines.push({
-                    accountCode: '447000',
-                    debit: 0,
-                    credit: params.cfc,
-                    label: `CFC - ${params.employeeName}`,
-                });
+            const otherFiscal = cfcEmp + ravAmt + tdlAmt;
+            if (otherFiscal > 0) {
+                e1Lines.push({ accountCode: '442800', debit: 0, credit: otherFiscal, label: `CFC + TDL + RAV — ${name}` });
             }
 
-            // Credit: Communal tax
-            if (params.communalTax > 0) {
-                lines.push({
-                    accountCode: '448000',
-                    debit: 0,
-                    credit: params.communalTax,
-                    label: `Centimes communaux - ${params.employeeName}`,
-                });
+            if (advances > 0) {
+                e1Lines.push({ accountCode: '425000', debit: advances, credit: 0, label: `Acomptes récupérés — ${name}` });
             }
 
             await this.createAutoEntry({
-                journalCode: 'OD',
+                journalCode: 'PAI',
                 date: params.date,
-                description: `Salaire ${params.employeeName}`,
+                description: `Journal de paie — ${name}`,
                 reference: params.sourceId,
                 sourceType: 'SALARY',
                 sourceId: params.sourceId,
-                lines,
+                lines: e1Lines,
                 userId: params.userId,
             });
 
-            // Employer charges in a separate entry
-            if (params.cnpsEmployer > 0) {
+            // ─ Écriture 2: Charges patronales ─
+            const totalCnpsPat = pvidPat + pfPat + atmpPat;
+            const totalCfcFne  = cfcPat + fnePat;
+
+            if (totalCnpsPat > 0 || totalCfcFne > 0) {
+                const e2Lines: { accountCode: string; debit: number; credit: number; label?: string }[] = [];
+
+                if (totalCnpsPat > 0) {
+                    e2Lines.push({ accountCode: '664000', debit: totalCnpsPat, credit: 0, label: `CNPS patronal (PVID+PF+AT/MP) — ${name}` });
+                    e2Lines.push({ accountCode: '431200', debit: 0, credit: totalCnpsPat, label: `CNPS patronal dû — ${name}` });
+                }
+                if (cfcPat > 0) {
+                    e2Lines.push({ accountCode: '641300', debit: cfcPat, credit: 0, label: `CFC patronal — ${name}` });
+                    e2Lines.push({ accountCode: '442800', debit: 0, credit: cfcPat, label: `CFC patronal dû — ${name}` });
+                }
+                if (fnePat > 0) {
+                    e2Lines.push({ accountCode: '641400', debit: fnePat, credit: 0, label: `FNE — ${name}` });
+                    e2Lines.push({ accountCode: '442800', debit: 0, credit: fnePat, label: `FNE dû — ${name}` });
+                }
+
+                // Consolidate 442800 credits if both CFC and FNE exist (avoid duplicate lines)
+                const consolidatedLines = this.consolidateCreditLines(e2Lines, '442800');
+
                 await this.createAutoEntry({
-                    journalCode: 'OD',
+                    journalCode: 'PAI',
                     date: params.date,
-                    description: `Charges patronales ${params.employeeName}`,
+                    description: `Charges patronales — ${name}`,
                     reference: params.sourceId,
                     sourceType: 'SALARY',
-                    sourceId: params.sourceId,
-                    lines: [
-                        {
-                            accountCode: '645100',
-                            debit: params.cnpsEmployer,
-                            credit: 0,
-                            label: `CNPS patronale - ${params.employeeName}`,
-                        },
-                        {
-                            accountCode: '431200',
-                            debit: 0,
-                            credit: params.cnpsEmployer,
-                            label: `CNPS patronale due - ${params.employeeName}`,
-                        },
-                    ],
+                    sourceId: `${params.sourceId}-pat`,
+                    lines: consolidatedLines,
                     userId: params.userId,
                 });
             }
         } catch (error) {
             this.logger.error(`Failed to create journal entry for salary: ${error.message}`);
         }
+    }
+
+    /** Consolidate multiple credit lines for the same account code into one. */
+    private consolidateCreditLines(
+        lines: { accountCode: string; debit: number; credit: number; label?: string }[],
+        accountCode: string,
+    ) {
+        let consolidated = 0;
+        const filtered = lines.filter(l => {
+            if (l.accountCode === accountCode && l.credit > 0) {
+                consolidated += l.credit;
+                return false;
+            }
+            return true;
+        });
+        if (consolidated > 0) {
+            filtered.push({ accountCode, debit: 0, credit: consolidated, label: `Retenues fiscales et sociales dues` });
+        }
+        return filtered;
     }
 
     /**
@@ -671,6 +719,89 @@ export class JournalEngineService {
         } catch (error) {
             this.logger.error(`Failed to create journal entry for supplier invoice paid: ${error.message}`);
         }
+    }
+
+    // ===== OPENING BALANCES =====
+
+    /**
+     * Return the current opening-balance lines for a fiscal year (sourceType = OPENING_BALANCE).
+     */
+    async getOpeningBalances(fiscalYearId: string): Promise<{ accountCode: string; accountName: string; debit: number; credit: number }[]> {
+        const entries = await this.entryModel.findAll({ where: { sourceType: 'OPENING_BALANCE', sourceId: fiscalYearId } });
+        if (entries.length === 0) return [];
+
+        const lines = await this.lineModel.findAll({
+            where: { journalEntryId: entries.map(e => e.id) as any },
+            include: [{ model: Account, as: 'account', attributes: ['code', 'name'] }],
+        });
+
+        return lines.map((l: any) => ({
+            accountCode: l.account?.code || '',
+            accountName: l.account?.name || '',
+            debit: Number(l.debit) || 0,
+            credit: Number(l.credit) || 0,
+        }));
+    }
+
+    /**
+     * Import (replace) opening balances for a fiscal year.
+     * Creates a single OD entry dated startDate-1 so the SI query picks it up.
+     */
+    async importOpeningBalances(params: {
+        fiscalYearId: string;
+        startDate: string;
+        balances: { accountCode: string; debit: number; credit: number }[];
+        userId: string;
+    }): Promise<void> {
+        await this.deleteEntriesForSource('OPENING_BALANCE', params.fiscalYearId);
+
+        const nonZero = params.balances.filter(b => b.debit > 0 || b.credit > 0);
+        if (nonZero.length === 0) return;
+
+        const resolvedLines: { accountId: string; debit: number; credit: number; label: string }[] = [];
+        for (const b of nonZero) {
+            const account = await this.getAccountByCode(b.accountCode);
+            if (!account) { this.logger.warn(`Opening balance: account ${b.accountCode} not found — skipped`); continue; }
+            resolvedLines.push({ accountId: account.id, debit: Math.round(b.debit), credit: Math.round(b.credit), label: `Solde d'ouverture — ${account.name}` });
+        }
+        if (resolvedLines.length === 0) return;
+
+        // Date the entry one day before period start so SI query (date < periodStart) captures it
+        const d = new Date(params.startDate);
+        d.setDate(d.getDate() - 1);
+        const dateStr = d.toISOString().split('T')[0];
+
+        const journal = await this.getJournalByCode('OD');
+        if (!journal) return;
+
+        const totalDebit  = resolvedLines.reduce((s, l) => s + l.debit, 0);
+        const totalCredit = resolvedLines.reduce((s, l) => s + l.credit, 0);
+        const entryNumber = await this.generateEntryNumber('OD');
+
+        await this.sequelize.transaction(async (t) => {
+            const entry = await this.entryModel.create({
+                entryNumber,
+                journalId: journal.id,
+                fiscalYearId: params.fiscalYearId,
+                date: dateStr,
+                description: `Soldes d'ouverture — Reprise des balances`,
+                reference: `AN-${params.fiscalYearId.substring(0, 8).toUpperCase()}`,
+                sourceType: 'OPENING_BALANCE',
+                sourceId: params.fiscalYearId,
+                status: 'VALIDATED',
+                validatedAt: new Date(),
+                createdByUserId: params.userId,
+                totalDebit: Math.round(totalDebit),
+                totalCredit: Math.round(totalCredit),
+            } as any, { transaction: t });
+
+            await this.lineModel.bulkCreate(
+                resolvedLines.map(l => ({ journalEntryId: entry.id, ...l })),
+                { transaction: t },
+            );
+        });
+
+        this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTING_REPORTS).catch(() => {});
     }
 
     // ===== CARWASH INTEGRATION =====

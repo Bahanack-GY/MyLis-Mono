@@ -40,6 +40,21 @@ export class TaxDeclarationsController {
         return this.declarationsService.generateCnps(dto.month, dto.year);
     }
 
+    @Post('generate/irpp')
+    generateIrpp(@Body() dto: any) {
+        return this.declarationsService.generateIrpp(dto.fiscalYearId);
+    }
+
+    @Post('generate/is-quarterly')
+    generateIsQuarterly(@Body() dto: any) {
+        return this.declarationsService.generateIsQuarterly(dto.fiscalYearId);
+    }
+
+    @Post('generate/dsf')
+    generateDsf(@Body() dto: any) {
+        return this.declarationsService.generateDsf(dto.fiscalYearId);
+    }
+
     @Post(':id/validate')
     validate(@Param('id') id: string, @Request() req: any) {
         return this.declarationsService.validate(id, req.user.userId);

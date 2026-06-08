@@ -12,6 +12,7 @@ const apiPaths = [
   '/task-natures', '/charge-natures', '/teams', '/departments', '/gamification',
   '/payroll', '/tax', '/accounting', '/reminders',
   '/attendance', '/business-expenses', '/carwash', '/commercial-goals', '/fund-movements',
+  '/leaves', '/permissions',
   '/reports', '/suppliers', '/messages',
 ]
 

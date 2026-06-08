@@ -507,6 +507,8 @@
     "businessExpenses": "Frais de vie",
     "reminders": "Rappels",
     "attendance": "Présences",
+    "leaves": "Congés",
+    "permissions": "Autorisations",
     "sections": {
       "work": "Travail",
       "people": "Équipe",
@@ -516,7 +518,8 @@
       "commercial": "Commercial",
       "accounting": "Comptabilité",
       "carwash": "Carwash",
-      "discipline": "Discipline"
+      "discipline": "Discipline",
+      "hr": "Ressources Humaines"
     }
   },
   "planning": {
@@ -626,7 +629,8 @@
       "myTasks": "Mes tâches",
       "myTickets": "Mes tickets",
       "upcomingMeetings": "Réunions à venir",
-      "myFormations": "Mes formations"
+      "myFormations": "Mes formations",
+      "myProjects": "Projets"
     },
     "charts": {
       "productivity": "Analytique de Productivité",

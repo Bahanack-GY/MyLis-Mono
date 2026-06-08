@@ -95,22 +95,24 @@ const ALL_SECTIONS: Section[] = [
   },
   {
   key: 'people',
-  roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'],
+  roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'RH'],
   items: [
-  { icon: UserGroupIcon, label: 'employees', path: '/employees', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
-  { icon: Building01Icon, label: 'departments', path: '/departments', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
-  { icon: Award01Icon, label: 'monthlyRankings', path: '/employees/rankings', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'] },
+  { icon: UserGroupIcon, label: 'employees', path: '/employees', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'RH'] },
+  { icon: Building01Icon, label: 'departments', path: '/departments', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'RH'] },
+  { icon: Award01Icon, label: 'monthlyRankings', path: '/employees/rankings', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'RH'] },
   { icon: UserCircleIcon, label: 'clients', path: '/clients', roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT'] },
   ],
   },
   {
   key: 'requests',
-  roles: ['EMPLOYEE', 'COMMERCIAL'],
+  roles: ['EMPLOYEE', 'COMMERCIAL', 'STAGIAIRE'],
   items: [
   { icon: Ticket01Icon, label: 'tickets', path: '/tickets' },
   { icon: Money01Icon, label: 'demands', path: '/demands' },
   { icon: Money01Icon, label: 'businessExpenses', path: '/business-expenses' },
   { icon: GraduationScrollIcon, label: 'formations', path: '/formations' },
+  { icon: Calendar01Icon, label: 'leaves', path: '/leaves' },
+  { icon: Clock01Icon, label: 'permissions', path: '/permissions' },
   ],
   },
   {
@@ -136,9 +138,20 @@ const ALL_SECTIONS: Section[] = [
   },
   {
   key: 'discipline',
-  roles: ['MANAGER', 'HEAD_OF_DEPARTMENT'],
+  roles: ['MANAGER', 'HEAD_OF_DEPARTMENT', 'RH'],
   items: [
   { icon: Clock01Icon, label: 'attendance', path: '/discipline/attendance' },
+  ],
+  },
+  {
+  key: 'hr',
+  roles: ['RH'],
+  items: [
+  { icon: GraduationScrollIcon, label: 'formations', path: '/formations' },
+  { icon: File01Icon, label: 'documents', path: '/documents' },
+  { icon: Alert02Icon, label: 'sanctions', path: '/sanctions' },
+  { icon: Calendar01Icon, label: 'leaves', path: '/leaves' },
+  { icon: Clock01Icon, label: 'permissions', path: '/permissions' },
   ],
   },
   {
@@ -198,7 +211,7 @@ function filterSections(sections: Section[], role: Role | null): Section[] {
 }
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setMobileMenuOpen }: SidebarProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const logout = useLogout();
@@ -309,7 +322,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
   aria-label={isSidebarOpen ? t('sidebar.collapse', 'Collapse sidebar') : t('sidebar.expand', 'Expand sidebar')}
   aria-expanded={isSidebarOpen}
-  className="absolute -right-3 top-[52px] bg-[#33cbcc] p-1 rounded-full shadow-lg hover:bg-[#2bb5b6] transition-colors z-50"
+  className="absolute -right-3 top-[52px] bg-[#33cbcc] p-1.5 rounded-full shadow-lg hover:bg-[#2bb5b6] transition-colors z-50"
   >
   {isSidebarOpen ? <ArrowLeft01Icon size={14} aria-hidden="true" /> : <ArrowRight01Icon size={14} aria-hidden="true" />}
   </button>
@@ -432,7 +445,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
   <button
   onClick={() => setMoreOpen(false)}
   aria-label={t('common.close', 'Close')}
-  className="p-1.5  text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+  className="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
   >
   <Cancel01Icon size={18} aria-hidden="true" />
   </button>
@@ -501,8 +514,15 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
   </button>
   )}
   <button
+  onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'fr' : 'en')}
+  className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-gray-400 hover:bg-white/5 hover:text-white transition-colors"
+  >
+  <span className="text-sm font-bold uppercase min-w-[19px] text-center text-[#33cbcc]">{i18n.language}</span>
+  <span className="text-sm font-medium">{t('header.switchLanguage', { lang: i18n.language === 'en' ? 'Français' : 'English', defaultValue: i18n.language === 'en' ? 'Switch to Français' : 'Switch to English' })}</span>
+  </button>
+  <button
   onClick={() => { setMoreOpen(false); logout(); }}
-  className="w-full text-left flex items-center gap-3 px-3 py-2.5  text-gray-500 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
+  className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-gray-500 hover:bg-[#283852]/10 hover:text-[#283852] transition-colors"
   >
   <Logout01Icon size={19} aria-hidden="true" className="shrink-0" />
   <span className="text-sm font-medium">{t('sidebar.logout')}</span>
@@ -522,7 +542,7 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
   key={item.path}
   onClick={() => navigate(item.path)}
   aria-current={active ? 'page' : undefined}
-  className={`flex flex-col items-center gap-1 px-2 py-1.5  transition-all duration-200 min-w-[48px] ${
+  className={`flex flex-col items-center gap-1 px-2 py-2.5 transition-all duration-200 min-w-[48px] ${
   active ? 'text-[#33cbcc]' : 'text-gray-400'
   }`}
   >

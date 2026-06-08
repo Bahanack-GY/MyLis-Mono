@@ -36,7 +36,7 @@ const ALLOWED_EXTENSIONS = [
 ];
 const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024; // 5GB
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'RH')
 @Controller('hr/documents')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class DocumentsController {
@@ -128,7 +128,7 @@ export class DocumentsController {
         const doc = await this.documentsService.findOne(id);
         if (!doc) throw new NotFoundException('Document not found');
         const { role, userId } = req.user;
-        if (role !== 'MANAGER' && role !== 'HEAD_OF_DEPARTMENT' && doc.uploadedById !== userId) {
+        if (role !== 'MANAGER' && role !== 'HEAD_OF_DEPARTMENT' && role !== 'RH' && doc.uploadedById !== userId) {
             throw new BadRequestException('You can only delete your own documents');
         }
         return this.documentsService.remove(id);

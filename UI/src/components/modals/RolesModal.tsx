@@ -148,7 +148,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
   ← {t('common.back', 'Back')}
   </button>
   )}
-  <button onClick={onClose} aria-label={t('common.close', 'Close')} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} aria-hidden="true" />
   </button>
   </div>
@@ -415,7 +415,7 @@ const RolesModal = ({ onClose }: RolesModalProps) => {
   <p className="text-[10px] font-bold uppercase tracking-widest text-[#283852] mb-0.5">{t('common.confirm', 'Confirm')}</p>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('roles.modal.deleteTitle', 'Delete Role')}</h2>
   </div>
-  <button onClick={() => setConfirmDeleteId(null)} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={() => setConfirmDeleteId(null)} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>

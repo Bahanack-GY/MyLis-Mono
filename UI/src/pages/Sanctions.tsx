@@ -60,7 +60,7 @@ const SanctionDetailModal = ({ sanction, onClose, t }: { sanction: Sanction; onC
   </div>
 
   {/* Body */}
-  <div className="p-6 space-y-5">
+  <div className="p-6 space-y-5 flex-1 overflow-y-auto">
   {sanction.reason && (
   <div>
   <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1.5">{t('sanctions.detail.reason')}</p>

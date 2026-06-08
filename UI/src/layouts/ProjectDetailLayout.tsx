@@ -125,7 +125,7 @@ const EditProjectModal = ({ project, onClose }: { project: Project; onClose: () 
   </div>
   <h3 className="text-base font-bold text-[#1c2b3a]">{t('projects.editTitle')}</h3>
   </div>
-  <button onClick={onClose} className="p-1.5  hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
+  <button onClick={onClose} className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
   <Cancel01Icon size={18} />
   </button>
   </div>

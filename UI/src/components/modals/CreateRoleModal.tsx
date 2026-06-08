@@ -102,7 +102,7 @@ const CreateRoleModal = ({ onClose, departmentId }: CreateRoleModalProps) => {
   {t('positions.create.title', 'Create Role')}
   </h2>
   </div>
-  <button onClick={onClose} aria-label={t('common.close', 'Close')} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} aria-hidden="true" />
   </button>
   </div>

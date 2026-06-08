@@ -3,6 +3,7 @@ import { Department } from './department.model';
 import { Project } from './project.model';
 import { Lead } from './lead.model';
 import { ClientPayment } from './client-payment.model';
+import { Account } from './account.model';
 
 export enum ClientType {
     ONE_TIME = 'one_time',
@@ -58,4 +59,12 @@ export class Client extends Model {
 
     @HasMany(() => ClientPayment)
     declare payments: ClientPayment[];
+
+    // Auxiliary accounting account under collective 411xxx
+    @ForeignKey(() => Account)
+    @Column({ type: DataType.UUID, allowNull: true })
+    declare accountId: string | null;
+
+    @BelongsTo(() => Account)
+    declare account: Account;
 }

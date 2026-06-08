@@ -276,7 +276,7 @@ const ChangePasswordModal = ({ onClose }: { onClose: () => void }) => {
   </div>
 
   {/* Content */}
-  <div className="p-6 space-y-5">
+  <div className="p-6 space-y-5 flex-1 overflow-y-auto">
   {/* Current Password */}
   <div>
   <label className={labelCls}>

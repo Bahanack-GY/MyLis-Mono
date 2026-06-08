@@ -162,7 +162,7 @@ export default function TaskTimeChart({ employeeId }: Props) {
   <div className="flex items-center justify-between mb-3">
   <button
   onClick={() => setOffset(o => o - 1)}
-  className="p-1  hover:bg-gray-100 text-gray-500 transition-colors"
+  className="p-1.5 hover:bg-gray-100 text-gray-500 transition-colors"
   >
   <ArrowLeft01Icon size={16} />
   </button>
@@ -170,7 +170,7 @@ export default function TaskTimeChart({ employeeId }: Props) {
   <button
   onClick={() => setOffset(o => o + 1)}
   disabled={offset >= 0}
-  className="p-1  hover:bg-gray-100 text-gray-500 transition-colors disabled:opacity-30"
+  className="p-1.5 hover:bg-gray-100 text-gray-500 transition-colors disabled:opacity-30"
   >
   <ArrowRight01Icon size={16} />
   </button>

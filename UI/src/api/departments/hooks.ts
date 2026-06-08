@@ -170,6 +170,12 @@ export const useMonthlyStats = (departmentId: string, year: number) =>
         enabled: !!departmentId,
     });
 
+export const useAllDepartmentsMonthlyStats = (year: number) =>
+    useQuery({
+        queryKey: ['departments', 'all', 'monthlyStats', year],
+        queryFn: () => departmentMonthlyTargetsApi.getAllDepartmentsMonthlyStats(year),
+    });
+
 export const useUpsertMonthlyTarget = () => {
     const qc = useQueryClient();
     return useMutation({

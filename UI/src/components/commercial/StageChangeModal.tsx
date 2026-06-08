@@ -90,7 +90,7 @@ export default function StageChangeModal({ from, to, companyName, isPending, onC
   </h2>
   <p className="text-xs text-[#8892a4] mt-0.5">{companyName}</p>
   </div>
-  <button onClick={onCancel} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onCancel} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>

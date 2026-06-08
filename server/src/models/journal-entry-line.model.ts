@@ -9,6 +9,7 @@ import { Department } from './department.model';
         { fields: ['journalEntryId'] },
         { fields: ['accountId'] },
         { fields: ['accountId', 'journalEntryId'] },
+        { fields: ['auxiliaryAccountId'] },
     ],
 })
 export class JournalEntryLine extends Model {
@@ -36,7 +37,7 @@ export class JournalEntryLine extends Model {
     })
     declare accountId: string;
 
-    @BelongsTo(() => Account)
+    @BelongsTo(() => Account, { foreignKey: 'accountId', as: 'account' })
     declare account: Account;
 
     @Column({
@@ -58,6 +59,18 @@ export class JournalEntryLine extends Model {
         allowNull: true,
     })
     declare label: string | null;
+
+    // Auxiliary (nominative) account — null for non-tier accounts.
+    // accountId = collective (411000, 401000, 421000…), auxiliaryAccountId = the specific tier sub-account.
+    @ForeignKey(() => Account)
+    @Column({
+        type: DataType.UUID,
+        allowNull: true,
+    })
+    declare auxiliaryAccountId: string | null;
+
+    @BelongsTo(() => Account, { foreignKey: 'auxiliaryAccountId', as: 'auxiliaryAccount' })
+    declare auxiliaryAccount: Account;
 
     @ForeignKey(() => Department)
     @Column({

@@ -13,6 +13,7 @@ export interface SeedAccount {
     type: 'ASSET' | 'LIABILITY' | 'EQUITY' | 'REVENUE' | 'EXPENSE';
     categoryCode: string;
     parentCode?: string;
+    isCollective?: boolean;
 }
 
 export const SEED_CATEGORIES: SeedCategory[] = [
@@ -64,30 +65,36 @@ export const SEED_ACCOUNTS: SeedAccount[] = [
     { code: '370000', name: 'Produits intermédiaires et en-cours', type: 'ASSET', categoryCode: '3' },
 
     // ===== CLASS 4: THIRD-PARTY ACCOUNTS =====
-    { code: '401000', name: 'Fournisseurs', type: 'LIABILITY', categoryCode: '4' },
+    { code: '401000', name: 'Fournisseurs', type: 'LIABILITY', categoryCode: '4', isCollective: true },
     { code: '401100', name: 'Fournisseurs - Achats de biens', type: 'LIABILITY', categoryCode: '4', parentCode: '401000' },
     { code: '401200', name: 'Fournisseurs - Prestations de services', type: 'LIABILITY', categoryCode: '4', parentCode: '401000' },
     { code: '408000', name: 'Fournisseurs - Factures non parvenues', type: 'LIABILITY', categoryCode: '4', parentCode: '401000' },
-    { code: '411000', name: 'Clients', type: 'ASSET', categoryCode: '4' },
+    { code: '411000', name: 'Clients', type: 'ASSET', categoryCode: '4', isCollective: true },
     { code: '411100', name: 'Clients - Ventes de biens', type: 'ASSET', categoryCode: '4', parentCode: '411000' },
     { code: '411200', name: 'Clients - Prestations de services', type: 'ASSET', categoryCode: '4', parentCode: '411000' },
     { code: '416000', name: 'Clients douteux', type: 'ASSET', categoryCode: '4', parentCode: '411000' },
-    { code: '421000', name: 'Personnel - Rémunérations dues', type: 'LIABILITY', categoryCode: '4' },
-    { code: '422000', name: 'Personnel - Avances et acomptes', type: 'ASSET', categoryCode: '4' },
+    { code: '421000', name: 'Personnel - Rémunérations dues', type: 'LIABILITY', categoryCode: '4', isCollective: true },
+    { code: '425000', name: 'Personnel - Avances et acomptes', type: 'ASSET', categoryCode: '4', isCollective: true },
+    { code: '422000', name: 'Personnel - Avances et acomptes (ancien)', type: 'ASSET', categoryCode: '4', parentCode: '425000' },
     { code: '461000', name: 'Associés, comptes courants', type: 'LIABILITY', categoryCode: '4' },
+    // CNPS — organismes sociaux
     { code: '431000', name: 'Sécurité sociale (CNPS)', type: 'LIABILITY', categoryCode: '4' },
-    { code: '431100', name: 'CNPS - Part salariale', type: 'LIABILITY', categoryCode: '4', parentCode: '431000' },
-    { code: '431200', name: 'CNPS - Part patronale', type: 'LIABILITY', categoryCode: '4', parentCode: '431000' },
+    { code: '431100', name: 'CNPS - Part salariale (PVID)', type: 'LIABILITY', categoryCode: '4', parentCode: '431000' },
+    { code: '431200', name: 'CNPS - Part patronale (PF + PVID + AT/MP)', type: 'LIABILITY', categoryCode: '4', parentCode: '431000' },
+    // État — impôts et taxes
     { code: '441000', name: 'État - Impôts sur les bénéfices', type: 'LIABILITY', categoryCode: '4' },
-    { code: '442000', name: 'État - IRPP retenu à la source', type: 'LIABILITY', categoryCode: '4' },
+    { code: '442000', name: 'État - IRPP retenu à la source (ancien)', type: 'LIABILITY', categoryCode: '4' },
     { code: '443000', name: 'État - TVA', type: 'LIABILITY', categoryCode: '4' },
     { code: '443100', name: 'TVA collectée', type: 'LIABILITY', categoryCode: '4', parentCode: '443000' },
     { code: '443200', name: 'TVA déductible sur achats', type: 'ASSET', categoryCode: '4', parentCode: '443000' },
     { code: '443300', name: 'TVA déductible sur immobilisations', type: 'ASSET', categoryCode: '4', parentCode: '443000' },
     { code: '443400', name: 'TVA due à l\'État', type: 'LIABILITY', categoryCode: '4', parentCode: '443000' },
     { code: '444000', name: 'État - Autres impôts et taxes', type: 'LIABILITY', categoryCode: '4' },
+    // 4421 / 4428 — retenues fiscales paie (SYSCOHADA révisé)
+    { code: '442100', name: 'État - IRPP et CAC retenus à la source', type: 'LIABILITY', categoryCode: '4' },
+    { code: '442800', name: 'État - Autres retenues fiscales (CFC, TDL, RAV)', type: 'LIABILITY', categoryCode: '4' },
     { code: '445000', name: 'Organismes internationaux', type: 'LIABILITY', categoryCode: '4' },
-    { code: '447000', name: 'État - CFC (Crédit Foncier)', type: 'LIABILITY', categoryCode: '4' },
+    { code: '447000', name: 'État - CFC (Crédit Foncier) salarié', type: 'LIABILITY', categoryCode: '4' },
     { code: '448000', name: 'État - Centimes additionnels communaux', type: 'LIABILITY', categoryCode: '4' },
     { code: '471000', name: 'Comptes d\'attente - Débiteurs', type: 'ASSET', categoryCode: '4' },
     { code: '472000', name: 'Comptes d\'attente - Créditeurs', type: 'LIABILITY', categoryCode: '4' },
@@ -119,10 +126,23 @@ export const SEED_ACCOUNTS: SeedAccount[] = [
     { code: '626000', name: 'Frais postaux et de télécommunications', type: 'EXPENSE', categoryCode: '6' },
     { code: '627000', name: 'Frais de publicité et relations publiques', type: 'EXPENSE', categoryCode: '6' },
     { code: '631000', name: 'Impôts, taxes et versements assimilés', type: 'EXPENSE', categoryCode: '6' },
-    { code: '641000', name: 'Charges de personnel - Rémunérations', type: 'EXPENSE', categoryCode: '6' },
+    // Rémunérations (SYSCOHADA classe 66)
+    { code: '661000', name: 'Rémunérations du personnel (regroupement 66)', type: 'EXPENSE', categoryCode: '6' },
+    { code: '661100', name: 'Appointements, salaires et commissions (Personnel national)', type: 'EXPENSE', categoryCode: '6', parentCode: '661000' },
+    { code: '661200', name: 'Primes et gratifications (ancienneté, rendement)', type: 'EXPENSE', categoryCode: '6', parentCode: '661000' },
+    { code: '661300', name: 'Indemnités et avantages divers (transport, panier, etc.)', type: 'EXPENSE', categoryCode: '6', parentCode: '661000' },
+    // Charges sociales patronales (SYSCOHADA classe 664)
+    { code: '664000', name: 'Charges sociales sur rémunération (Part Patronale CNPS)', type: 'EXPENSE', categoryCode: '6' },
+    { code: '664100', name: 'CNPS Prestations Familiales (7% patronal)', type: 'EXPENSE', categoryCode: '6', parentCode: '664000' },
+    { code: '664200', name: 'CNPS PVID Patronal (4.2%)', type: 'EXPENSE', categoryCode: '6', parentCode: '664000' },
+    { code: '664300', name: 'CNPS AT/MP (Accidents du Travail - patronal)', type: 'EXPENSE', categoryCode: '6', parentCode: '664000' },
+    // Taxes sur salaires (classe 641-646 conservés pour compatibilité)
+    { code: '641000', name: 'Charges de personnel - Rémunérations (ancien)', type: 'EXPENSE', categoryCode: '6' },
+    { code: '641300', name: 'Taxes sur salaires - CFC patronal (1.5%)', type: 'EXPENSE', categoryCode: '6' },
+    { code: '641400', name: 'Taxes sur salaires - FNE (1% patronal)', type: 'EXPENSE', categoryCode: '6' },
     { code: '645000', name: 'Charges de personnel - Charges sociales', type: 'EXPENSE', categoryCode: '6' },
-    { code: '645100', name: 'Cotisations CNPS (part patronale)', type: 'EXPENSE', categoryCode: '6', parentCode: '645000' },
-    { code: '646000', name: 'Charges de personnel - CFC patronal', type: 'EXPENSE', categoryCode: '6' },
+    { code: '645100', name: 'Cotisations CNPS (part patronale, ancien)', type: 'EXPENSE', categoryCode: '6', parentCode: '645000' },
+    { code: '646000', name: 'Charges de personnel - CFC patronal (ancien)', type: 'EXPENSE', categoryCode: '6' },
     { code: '651000', name: 'Pertes sur créances clients', type: 'EXPENSE', categoryCode: '6' },
     { code: '661000', name: 'Charges d\'intérêts', type: 'EXPENSE', categoryCode: '6' },
     { code: '671000', name: 'Intérêts des emprunts', type: 'EXPENSE', categoryCode: '6' },
@@ -155,6 +175,8 @@ export const SEED_JOURNALS = [
     { code: 'BQ', name: 'Journal de Banque', type: 'BANK' as const },
     { code: 'CAI', name: 'Journal de Caisse', type: 'CASH' as const },
     { code: 'OD', name: 'Journal des Opérations Diverses', type: 'MISCELLANEOUS' as const },
+    { code: 'AN', name: 'Journal des À-Nouveaux', type: 'MISCELLANEOUS' as const },
+    { code: 'PAI', name: 'Journal de Paie', type: 'MISCELLANEOUS' as const },
 ];
 
 // Mapping from charge nature names to SYSCOHADA account codes

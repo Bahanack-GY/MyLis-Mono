@@ -5,6 +5,7 @@ import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, Tick01Icon, Cal
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../api/config';
+import ToggleSwitch from '../../components/ToggleSwitch';
 import { exportPayslipPdf } from '../../utils/exportPayslipPdf';
 import type { PayslipPdfData } from '../../utils/exportPayslipPdf';
 import logoSrc from '../../assets/logo-lis.png';
@@ -30,26 +31,52 @@ interface Payslip {
  payrollRunId: string;
  employeeId: string;
  grossSalary: number;
- cnpsEmployee: number;
- cnpsEmployer: number;
- cfc: number;
+ /* Legacy fields */
+ cnpsEmployee?: number;
+ cnpsEmployer?: number;
+ cfc?: number;
+ communalTax?: number;
+ /* 2026 CNPS fields */
+ pvidEmployee?: number;
+ pvidEmployer?: number;
+ cnpsFamilyAllowance?: number;
+ atmp?: number;
+ /* 2026 CFC */
+ cfcEmployee?: number;
+ cfcEmployer?: number;
+ /* 2026 FNE */
+ fne?: number;
+ /* Fiscal */
  irpp: number;
- communalTax: number;
+ cac?: number;
+ rav?: number;
+ tdl?: number;
+ /* Salary bases */
+ baseSalary?: number;
+ grossCotisable?: number;
+ grossTaxable?: number;
+ netCategoriel?: number;
+ riskClass?: number;
+ /* Aggregates */
  totalDeductions: number;
  manualDeductions: number;
  manualDeductionNote: string | null;
  netSalary: number;
  totalEmployerCharges: number;
+ /* Toggles */
  includeCnps: boolean;
  includeCfc: boolean;
  includeIrpp: boolean;
  includeCommunalTax: boolean;
  customDeductions: { name: string; amount: number }[];
+ complianceWarnings?: string[];
  paymentDate: string | null;
  employee?: {
  id: string;
  firstName: string;
  lastName: string;
+ position?: string;
+ contractType?: string;
  department?: { name: string };
  };
 }
@@ -81,6 +108,19 @@ interface DeductionType {
  name: string;
  isPercentage: boolean;
  defaultAmount: number;
+ isActive: boolean;
+}
+
+interface SalaryComponent {
+ id: string;
+ employeeId: string;
+ type: 'PRIME' | 'INDEMNITE' | 'AVANTAGE_NATURE';
+ label: string;
+ amount: number;
+ cnpsBase: boolean;
+ taxable: boolean;
+ cap: number | null;
+ justificatifUrl: string | null;
  isActive: boolean;
 }
 
@@ -140,21 +180,46 @@ async function downloadPayslipPdf(ps: Payslip, run: PayrollRun) {
  const pdfData: PayslipPdfData = {
  employeeName: ps.employee ? `${ps.employee.firstName} ${ps.employee.lastName}` : 'Employe',
  departmentName: ps.employee?.department?.name || '',
+ position: ps.employee?.position,
+ contractType: ps.employee?.contractType,
+ riskClass: ps.riskClass ?? undefined,
  month: run.month,
  year: run.year,
+ /* Salary bases */
+ baseSalary: ps.baseSalary ? Number(ps.baseSalary) : undefined,
  grossSalary: Number(ps.grossSalary),
- cnpsEmployee: Number(ps.cnpsEmployee),
- cnpsEmployer: Number(ps.cnpsEmployer),
- cfc: Number(ps.cfc),
+ grossCotisable: ps.grossCotisable ? Number(ps.grossCotisable) : undefined,
+ grossTaxable: ps.grossTaxable ? Number(ps.grossTaxable) : undefined,
+ netCategoriel: ps.netCategoriel ? Number(ps.netCategoriel) : undefined,
+ /* 2026 CNPS */
+ pvidEmployee: ps.pvidEmployee != null ? Number(ps.pvidEmployee) : undefined,
+ pvidEmployer: ps.pvidEmployer != null ? Number(ps.pvidEmployer) : undefined,
+ cnpsFamilyAllowance: ps.cnpsFamilyAllowance != null ? Number(ps.cnpsFamilyAllowance) : undefined,
+ atmp: ps.atmp != null ? Number(ps.atmp) : undefined,
+ /* 2026 CFC */
+ cfcEmployee: ps.cfcEmployee != null ? Number(ps.cfcEmployee) : undefined,
+ cfcEmployer: ps.cfcEmployer != null ? Number(ps.cfcEmployer) : undefined,
+ /* FNE */
+ fne: ps.fne != null ? Number(ps.fne) : undefined,
+ /* Fiscal */
  irpp: Number(ps.irpp),
- communalTax: Number(ps.communalTax),
+ cac: ps.cac != null ? Number(ps.cac) : undefined,
+ rav: ps.rav != null ? Number(ps.rav) : undefined,
+ tdl: ps.tdl != null ? Number(ps.tdl) : undefined,
+ /* Legacy fallback */
+ cnpsEmployee: ps.cnpsEmployee != null ? Number(ps.cnpsEmployee) : undefined,
+ cnpsEmployer: ps.cnpsEmployer != null ? Number(ps.cnpsEmployer) : undefined,
+ cfc: ps.cfc != null ? Number(ps.cfc) : undefined,
+ communalTax: ps.communalTax != null ? Number(ps.communalTax) : undefined,
+ /* Aggregates */
  totalDeductions: Number(ps.totalDeductions),
- totalEmployerCharges: Number(ps.cnpsEmployer),
+ totalEmployerCharges: Number(ps.totalEmployerCharges),
  manualDeductions: Number(ps.manualDeductions || 0),
  manualDeductionNote: ps.manualDeductionNote,
  customDeductions: ps.customDeductions || [],
  netSalary: Number(ps.netSalary),
  payslipId: ps.id,
+ complianceWarnings: ps.complianceWarnings ?? [],
  };
  exportPayslipPdf(pdfData, logoBase64);
 }
@@ -546,7 +611,7 @@ const PayConfirmModal = ({
  </div>
  <h3 className="text-base font-semibold text-[#1c2b3a]">Confirmer le paiement</h3>
  </div>
- <div className="flex-1 px-6 py-6">
+ <div className="flex-1 overflow-y-auto px-6 py-6">
  <p className="text-sm text-[#8892a4]">
  Etes-vous sur de vouloir proceder au paiement ? Cette action est irreversible.
  </p>
@@ -633,6 +698,13 @@ const BulkActionBar = ({
  });
  };
 
+ // Returns true if ALL selected payslips have the retenue enabled (defaults to true when none selected)
+ const retenueOn = (key: keyof Payslip) => {
+ const selected = payslips.filter(ps => selectedIds.has(ps.id));
+ if (selected.length === 0) return true;
+ return selected.every(ps => ps[key] !== false);
+ };
+
  const addCustomDeduction = () => {
  const dt = deductionTypes.find((d) => d.id === selectedType);
  if (!dt) return;
@@ -666,7 +738,7 @@ const BulkActionBar = ({
  });
  };
 
- if (selectedIds.size === 0) return null;
+ const noneSelected = selectedIds.size === 0;
 
  return (
  <motion.div
@@ -737,7 +809,7 @@ const BulkActionBar = ({
  onSuccess: () => setSelectedIds(new Set()),
  });
  }}
- disabled={bulkMut.isPending}
+ disabled={bulkMut.isPending || noneSelected}
  className="px-3 py-1.5 text-xs font-bold bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors disabled:opacity-50"
  >
  TOUT ON
@@ -757,7 +829,7 @@ const BulkActionBar = ({
  onSuccess: () => setSelectedIds(new Set()),
  });
  }}
- disabled={bulkMut.isPending}
+ disabled={bulkMut.isPending || noneSelected}
  className="px-3 py-1.5 text-xs font-bold bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
  >
  TOUT OFF
@@ -766,27 +838,18 @@ const BulkActionBar = ({
 
  <div className="border-l border-gray-200 mx-1"/>
 
- {[
+ {([
  { key: 'includeCnps', label: 'CNPS' },
  { key: 'includeCfc', label: 'CFC' },
  { key: 'includeIrpp', label: 'IRPP' },
  { key: 'includeCommunalTax', label: 'T.Comm' },
- ].map(({ key, label }) => (
- <div key={key} className="flex items-center  overflow-hidden border border-gray-200">
- <button
- onClick={() => applyToggle(key, true)}
- disabled={bulkMut.isPending}
- className="px-2.5 py-1.5 text-xs font-medium bg-[#33cbcc]/10 text-[#33cbcc] hover:bg-[#33cbcc]/20 transition-colors disabled:opacity-50"
- >
- {label} ON
- </button>
- <button
- onClick={() => applyToggle(key, false)}
- disabled={bulkMut.isPending}
- className="px-2.5 py-1.5 text-xs font-medium bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors disabled:opacity-50"
- >
- OFF
- </button>
+ ] as { key: keyof Payslip; label: string }[]).map(({ key, label }) => (
+ <div key={String(key)} className={noneSelected || bulkMut.isPending ? 'opacity-50 pointer-events-none' : ''}>
+ <ToggleSwitch
+   checked={retenueOn(key)}
+   onChange={v => applyToggle(String(key), v)}
+   labels={['Off', label]}
+ />
  </div>
  ))}
 
@@ -796,7 +859,7 @@ const BulkActionBar = ({
  <div className="relative">
  <button
  onClick={() => setShowAddDeduction(!showAddDeduction)}
- disabled={bulkMut.isPending}
+ disabled={bulkMut.isPending || noneSelected}
  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium  bg-[#283852]/10 text-[#283852] hover:bg-[#283852]/20 transition-colors border border-gray-200 disabled:opacity-50"
  >
  <Add01Icon size={12} />
@@ -1009,16 +1072,16 @@ const PayrollDetail = ({
  const totals = payslips.reduce(
  (acc, ps) => ({
  gross: acc.gross + (Number(ps.grossSalary) || 0),
- cnps: acc.cnps + (Number(ps.cnpsEmployee) || 0),
- cfc: acc.cfc + (Number(ps.cfc) || 0),
- irpp: acc.irpp + (Number(ps.irpp) || 0),
- communal: acc.communal + (Number(ps.communalTax) || 0),
+ pvid: acc.pvid + (Number(ps.pvidEmployee ?? ps.cnpsEmployee) || 0),
+ cfc: acc.cfc + (Number(ps.cfcEmployee ?? ps.cfc) || 0),
+ irpp: acc.irpp + (Number(ps.irpp) || 0) + (Number(ps.cac) || 0),
+ ravTdl: acc.ravTdl + (Number(ps.rav) || 0) + (Number(ps.tdl) || 0) + (Number(ps.communalTax) || 0),
  deductions: acc.deductions + (Number(ps.totalDeductions) || 0),
  custom: acc.custom + (ps.customDeductions || []).reduce((s: number, d: { amount: number }) => s + (Number(d.amount) || 0), 0),
  manual: acc.manual + (Number(ps.manualDeductions) || 0),
  net: acc.net + (Number(ps.netSalary) || 0),
  }),
- { gross: 0, cnps: 0, cfc: 0, irpp: 0, communal: 0, deductions: 0, custom: 0, manual: 0, net: 0 },
+ { gross: 0, pvid: 0, cfc: 0, irpp: 0, ravTdl: 0, deductions: 0, custom: 0, manual: 0, net: 0 },
  );
 
  const canEditDeductions = run.status === 'CALCULATED';
@@ -1179,10 +1242,10 @@ const PayrollDetail = ({
  <th className="px-6 py-3">Employe</th>
  <th className="px-4 py-3">Departement</th>
  <th className="px-4 py-3 text-right">Brut</th>
- <th className="px-4 py-3 text-right">CNPS</th>
+ <th className="px-4 py-3 text-right" title="PVID salarial 4.2% (2026) ou CNPS 2.8% (legacy)">PVID/CNPS</th>
  <th className="px-4 py-3 text-right">CFC</th>
- <th className="px-4 py-3 text-right">IRPP</th>
- <th className="px-4 py-3 text-right">T. Comm.</th>
+ <th className="px-4 py-3 text-right" title="IRPP + CAC (10% IRPP)">IRPP+CAC</th>
+ <th className="px-4 py-3 text-right" title="RAV + TDL (2026) ou Taxe Communale (legacy)">RAV+TDL</th>
  <th className="px-4 py-3 text-right">Retenues</th>
  <th className="px-4 py-3 text-right">Ret. Perso.</th>
  <th className="px-4 py-3 text-right">Ret. Man.</th>
@@ -1219,7 +1282,10 @@ const PayrollDetail = ({
  ? `${ps.employee.firstName} ${ps.employee.lastName}`
  : '--'}
  {((ps.customDeductions?.length || 0) > 0 || !(ps.includeCnps ?? true) || !(ps.includeCfc ?? true) || !(ps.includeIrpp ?? true) || !(ps.includeCommunalTax ?? true)) && (
- <span className="w-1.5 h-1.5 rounded-full bg-[#33cbcc] flex-shrink-0"title="Retenues personnalisees"/>
+ <span className="w-1.5 h-1.5 rounded-full bg-[#33cbcc] flex-shrink-0" title="Retenues personnalisees"/>
+ )}
+ {(ps.complianceWarnings?.length ?? 0) > 0 && (
+ <span className="w-1.5 h-1.5 rounded-full bg-amber-400 flex-shrink-0" title={ps.complianceWarnings!.join(' | ')}/>
  )}
  </div>
  </td>
@@ -1230,16 +1296,16 @@ const PayrollDetail = ({
  {formatXAF(ps.grossSalary)}
  </td>
  <td className="px-4 py-2.5 text-right text-gray-600 text-xs">
- {formatXAF(ps.cnpsEmployee)}
+ {formatXAF(ps.pvidEmployee ?? ps.cnpsEmployee ?? 0)}
  </td>
  <td className="px-4 py-2.5 text-right text-gray-600 text-xs">
- {formatXAF(ps.cfc)}
+ {formatXAF(ps.cfcEmployee ?? ps.cfc ?? 0)}
  </td>
  <td className="px-4 py-2.5 text-right text-gray-600 text-xs">
- {formatXAF(ps.irpp)}
+ {formatXAF((Number(ps.irpp) || 0) + (Number(ps.cac) || 0))}
  </td>
  <td className="px-4 py-2.5 text-right text-gray-600 text-xs">
- {formatXAF(ps.communalTax)}
+ {formatXAF((Number(ps.rav) || 0) + (Number(ps.tdl) || 0) + (Number(ps.communalTax) || 0))}
  </td>
  <td className="px-4 py-2.5 text-right font-medium text-[#283852] text-xs">
  {formatXAF(ps.totalDeductions)}
@@ -1331,7 +1397,7 @@ const PayrollDetail = ({
  {formatXAF(totals.gross)}
  </td>
  <td className="px-4 py-3 text-right text-gray-600 text-xs">
- {formatXAF(totals.cnps)}
+ {formatXAF(totals.pvid)}
  </td>
  <td className="px-4 py-3 text-right text-gray-600 text-xs">
  {formatXAF(totals.cfc)}
@@ -1340,7 +1406,7 @@ const PayrollDetail = ({
  {formatXAF(totals.irpp)}
  </td>
  <td className="px-4 py-3 text-right text-gray-600 text-xs">
- {formatXAF(totals.communal)}
+ {formatXAF(totals.ravTdl)}
  </td>
  <td className="px-4 py-3 text-right text-[#283852] text-xs">
  {formatXAF(totals.deductions)}
@@ -1509,6 +1575,16 @@ const PayslipEditModal = ({
 }) => {
  const togglesMut = useUpdatePayslipToggles();
  const { data: deductionTypes = [] } = useDeductionTypes();
+ const { data: liveComponents = [] } = useQuery<SalaryComponent[]>({
+  queryKey: ['salary-components', payslip.employeeId],
+  queryFn: () => api.get(`/payroll/employees/${payslip.employeeId}/salary-components`).then(r => r.data),
+ });
+
+ const effectiveGross = useMemo(() => {
+  const base = payslip.baseSalary ?? payslip.grossSalary;
+  const extras = liveComponents.filter(c => c.isActive).reduce((s, c) => s + Number(c.amount), 0);
+  return Number(base) + extras;
+ }, [liveComponents, payslip.baseSalary, payslip.grossSalary]);
 
  const [toggles, setToggles] = useState({
  includeCnps: payslip.includeCnps ?? true,
@@ -1579,7 +1655,7 @@ const PayslipEditModal = ({
  </div>
  <div>
  <h2 className="text-lg font-bold text-[#1c2b3a]">Retenues</h2>
- <p className="text-xs text-[#8892a4]">{empName} — Brut: {formatXAF(payslip.grossSalary)}</p>
+ <p className="text-xs text-[#8892a4]">{empName} — Brut: {formatXAF(effectiveGross)}</p>
  </div>
  </div>
  <button onClick={onClose} className="p-2 hover:bg-[#f8f9fc] text-[#8892a4] hover:text-[#1c2b3a] transition-colors">
@@ -1601,17 +1677,11 @@ const PayslipEditModal = ({
  <p className="text-sm font-medium text-[#1c2b3a]">{item.label}</p>
  <p className="text-[11px] text-[#8892a4]">{item.desc}</p>
  </div>
- <button
- type="button"
- onClick={() => setToggles((prev) => ({ ...prev, [item.key]: !prev[item.key] }))}
- className={`relative w-11 h-6 rounded-full transition-colors ${
- toggles[item.key] ? 'bg-[#33cbcc]' : 'bg-gray-300'
- }`}
- >
- <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${
- toggles[item.key] ? 'translate-x-5' : ''
- }`} />
- </button>
+ <ToggleSwitch
+   checked={toggles[item.key]}
+   onChange={v => setToggles(prev => ({ ...prev, [item.key]: v }))}
+   labels={['Off', 'On']}
+ />
  </div>
  ))}
  </div>
@@ -1684,6 +1754,12 @@ const PayslipEditModal = ({
  Aucun type de retenue configure. Ajoutez-en via le bouton parametres.
  </p>
  )}
+ </div>
+
+ {/* Composantes salariales */}
+ <div className="border-t border-[#e5e8ef] pt-4">
+ <SalaryComponentsPanel employeeId={payslip.employeeId} />
+ <p className="text-[10px] text-[#8892a4] mt-2 italic">Les composantes modifiées sont prises en compte au prochain "Enregistrer".</p>
  </div>
  </div>
 
@@ -2039,6 +2115,182 @@ const AdvanceModal = ({ emp, onClose }: { emp: SalaryEmployee; onClose: () => vo
 };
 
 /* ------------------------------------------------------------------ */
+/* Salary Components Panel */
+/* ------------------------------------------------------------------ */
+
+const SalaryComponentsPanel = ({ employeeId }: { employeeId: string }) => {
+ const queryClient = useQueryClient();
+ const [showForm, setShowForm] = useState(false);
+ const [editingComp, setEditingComp] = useState<SalaryComponent | null>(null);
+ const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+ const [form, setForm] = useState({ type: 'PRIME', label: '', amount: '', cnpsBase: true, taxable: true, cap: '' });
+
+ const { data: components = [], isLoading } = useQuery<SalaryComponent[]>({
+  queryKey: ['salary-components', employeeId],
+  queryFn: () => api.get(`/payroll/employees/${employeeId}/salary-components`).then(r => r.data),
+ });
+
+ const createComp = useMutation({
+  mutationFn: (data: any) => api.post(`/payroll/employees/${employeeId}/salary-components`, data).then(r => r.data),
+  onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['salary-components', employeeId] }); setShowForm(false); resetForm(); toast.success('Composante ajoutée'); },
+  onError: () => toast.error('Erreur lors de l\'ajout'),
+ });
+
+ const updateComp = useMutation({
+  mutationFn: ({ id, data }: { id: string; data: any }) => api.patch(`/payroll/salary-components/${id}`, data).then(r => r.data),
+  onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['salary-components', employeeId] }); setEditingComp(null); setShowForm(false); resetForm(); toast.success('Composante mise à jour'); },
+  onError: () => toast.error('Erreur lors de la mise à jour'),
+ });
+
+ const deleteComp = useMutation({
+  mutationFn: (id: string) => api.delete(`/payroll/salary-components/${id}`).then(r => r.data),
+  onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['salary-components', employeeId] }); toast.success('Composante supprimée'); },
+  onError: () => toast.error('Erreur lors de la suppression'),
+ });
+
+ const resetForm = () => setForm({ type: 'PRIME', label: '', amount: '', cnpsBase: true, taxable: true, cap: '' });
+
+ const startEdit = (comp: SalaryComponent) => {
+  setEditingComp(comp);
+  setForm({ type: comp.type, label: comp.label, amount: String(comp.amount), cnpsBase: comp.cnpsBase, taxable: comp.taxable, cap: comp.cap != null ? String(comp.cap) : '' });
+  setShowForm(true);
+ };
+
+ const handleSubmit = () => {
+  const data = { type: form.type, label: form.label.trim(), amount: Number(form.amount), cnpsBase: form.cnpsBase, taxable: form.taxable, cap: form.cap ? Number(form.cap) : null };
+  if (!data.label || form.amount.trim() === '') return;
+  if (editingComp) { updateComp.mutate({ id: editingComp.id, data }); } else { createComp.mutate(data); }
+ };
+
+ const typeBadge = (type: string) => {
+  if (type === 'PRIME') return 'bg-blue-50 text-blue-700 border border-blue-200';
+  if (type === 'INDEMNITE') return 'bg-purple-50 text-purple-700 border border-purple-200';
+  return 'bg-amber-50 text-amber-700 border border-amber-200';
+ };
+
+ const typeLabel = (type: string) => {
+  if (type === 'PRIME') return 'Prime';
+  if (type === 'INDEMNITE') return 'Indemnité';
+  return 'Avantage';
+ };
+
+ if (isLoading) return (
+  <div className="py-3 text-sm text-gray-400 flex items-center gap-2">
+   <Loading02Icon size={14} className="animate-spin" />
+   Chargement...
+  </div>
+ );
+
+ return (
+  <div className="py-3">
+   <div className="flex items-center justify-between mb-3">
+    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Composantes salariales</span>
+    {!showForm && (
+     <button
+      onClick={() => { resetForm(); setEditingComp(null); setShowForm(true); }}
+      className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-[#33cbcc] bg-[#33cbcc]/10 hover:bg-[#33cbcc]/20 transition-colors rounded"
+     >
+      <Add01Icon size={12} />
+      Ajouter
+     </button>
+    )}
+   </div>
+
+   {components.length === 0 && !showForm && (
+    <p className="text-xs text-gray-400 italic">Aucune composante définie</p>
+   )}
+
+   <div className="space-y-1.5">
+    {components.map(comp => (
+     editingComp?.id === comp.id && showForm ? null : (
+      <div key={comp.id} className="flex items-center gap-3 bg-white border border-gray-100 rounded px-3 py-2">
+       <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${typeBadge(comp.type)}`}>{typeLabel(comp.type)}</span>
+       <span className="text-sm font-medium text-gray-700 flex-1">{comp.label}</span>
+       <span className="text-sm font-semibold text-gray-800">{formatXAF(comp.amount)}</span>
+       <div className="flex items-center gap-1 ml-2">
+        <span className={`text-[10px] px-1.5 py-0.5 rounded ${comp.cnpsBase ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-400 line-through'}`}>CNPS</span>
+        <span className={`text-[10px] px-1.5 py-0.5 rounded ${comp.taxable ? 'bg-orange-50 text-orange-700' : 'bg-gray-100 text-gray-400 line-through'}`}>IRPP</span>
+       </div>
+       <button onClick={() => startEdit(comp)} className="p-1 text-gray-400 hover:text-[#33cbcc] transition-colors"><PencilIcon size={12} /></button>
+       {confirmDeleteId === comp.id ? (
+        <div className="flex items-center gap-1">
+         <button onClick={() => { deleteComp.mutate(comp.id); setConfirmDeleteId(null); }} className="text-[10px] px-1.5 py-0.5 bg-red-500 text-white rounded hover:bg-red-600 transition-colors">Suppr.</button>
+         <button onClick={() => setConfirmDeleteId(null)} className="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition-colors">Non</button>
+        </div>
+       ) : (
+        <button onClick={() => setConfirmDeleteId(comp.id)} className="p-1 text-gray-400 hover:text-red-500 transition-colors"><Delete02Icon size={12} /></button>
+       )}
+      </div>
+     )
+    ))}
+   </div>
+
+   {showForm && (
+    <div className="mt-2 bg-white border border-[#33cbcc]/30 rounded p-3">
+     <div className="grid grid-cols-2 gap-2 mb-2">
+      <select
+       value={form.type}
+       onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
+       className="px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#33cbcc]"
+      >
+       <option value="PRIME">Prime</option>
+       <option value="INDEMNITE">Indemnité</option>
+       <option value="AVANTAGE_NATURE">Avantage en nature</option>
+      </select>
+      <input
+       type="text"
+       placeholder="Libellé"
+       value={form.label}
+       onChange={e => setForm(f => ({ ...f, label: e.target.value }))}
+       className="px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#33cbcc]"
+      />
+      <input
+       type="number"
+       min="0"
+       placeholder="Montant (XAF)"
+       value={form.amount}
+       onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
+       className="px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#33cbcc]"
+      />
+      <input
+       type="number"
+       placeholder="Plafond exo. (optionnel)"
+       value={form.cap}
+       onChange={e => setForm(f => ({ ...f, cap: e.target.value }))}
+       className="px-2 py-1.5 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#33cbcc]"
+      />
+     </div>
+     <div className="flex items-center gap-4 mb-3">
+      <label className="flex items-center gap-1.5 cursor-pointer">
+       <input type="checkbox" checked={form.cnpsBase} onChange={e => setForm(f => ({ ...f, cnpsBase: e.target.checked }))} className="w-3.5 h-3.5 rounded border-gray-300 accent-[#33cbcc]" />
+       <span className="text-xs text-gray-600">Base CNPS</span>
+      </label>
+      <label className="flex items-center gap-1.5 cursor-pointer">
+       <input type="checkbox" checked={form.taxable} onChange={e => setForm(f => ({ ...f, taxable: e.target.checked }))} className="w-3.5 h-3.5 rounded border-gray-300 accent-[#33cbcc]" />
+       <span className="text-xs text-gray-600">Imposable IRPP</span>
+      </label>
+     </div>
+     <div className="flex items-center gap-2">
+      <button
+       onClick={handleSubmit}
+       disabled={createComp.isPending || updateComp.isPending}
+       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#33cbcc] hover:bg-[#33cbcc]/90 rounded transition-colors disabled:opacity-50"
+      >
+       <Tick01Icon size={12} />
+       {editingComp ? 'Modifier' : 'Ajouter'}
+      </button>
+      <button onClick={() => { setShowForm(false); setEditingComp(null); resetForm(); }} className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
+       <Cancel01Icon size={12} />
+       Annuler
+      </button>
+     </div>
+    </div>
+   )}
+  </div>
+ );
+};
+
+/* ------------------------------------------------------------------ */
 /* Salary Row */
 /* ------------------------------------------------------------------ */
 
@@ -2046,6 +2298,7 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  const [editing, setEditing] = useState(false);
  const [value, setValue] = useState(String(emp.salary));
  const [showAdvanceModal, setShowAdvanceModal] = useState(false);
+ const [showComponents, setShowComponents] = useState(false);
  const updateSalary = useUpdateSalary();
 
  const save = () => {
@@ -2100,14 +2353,14 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  {emp.salary > 0 ? formatXAF(emp.salary) : <span className="text-gray-400 font-normal">Non defini</span>}
  </span>
  <button onClick={() => setEditing(true)}
- className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 opacity-0 group-hover/sal:opacity-100 transition-all">
+ className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/10 transition-all">
  <PencilIcon size={13} />
  </button>
  </div>
  )}
  </td>
  <td className="px-6 py-4">
- <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+ <div className="flex items-center gap-2">
  <button
  onClick={() => setShowAdvanceModal(true)}
  className="flex items-center gap-1.5 px-3 py-1.5  text-xs font-semibold text-white bg-[#283852] hover:bg-[#283852] transition-colors"
@@ -2115,9 +2368,23 @@ const SalaryRow = ({ emp }: { emp: SalaryEmployee }) => {
  <Money01Icon size={13} />
  Avance
  </button>
+ <button
+ onClick={() => setShowComponents(v => !v)}
+ className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${showComponents ? 'text-[#33cbcc] bg-[#33cbcc]/10' : 'text-gray-600 bg-gray-100 hover:bg-gray-200'}`}
+ >
+ <Settings01Icon size={13} />
+ Primes
+ </button>
  </div>
  </td>
  </tr>
+ {showComponents && (
+ <tr className="bg-[#33cbcc]/5 border-b border-gray-100">
+ <td colSpan={5} className="px-6">
+ <SalaryComponentsPanel employeeId={emp.id} />
+ </td>
+ </tr>
+ )}
  <AnimatePresence>
  {showAdvanceModal && <AdvanceModal emp={emp} onClose={() => setShowAdvanceModal(false)} />}
  </AnimatePresence>
@@ -2237,11 +2504,6 @@ export default function Payroll() {
 
  const allRuns = runs || [];
 
- const tabs = [
- { key: 'payroll' as const, label: 'Bulletins de paie', icon: Wallet01Icon },
- { key: 'employees' as const, label: 'Employes & Salaires', icon: UserGroupIcon },
- ];
-
  return (
  <div className="space-y-6">
  {/* Header */}
@@ -2264,22 +2526,14 @@ export default function Payroll() {
  </div>
 
  {/* Tabs */}
- <div className="flex gap-1 bg-gray-100 p-1  w-fit">
- {tabs.map((tab) => (
- <button
- key={tab.key}
- onClick={() => setActiveTab(tab.key)}
- className={`flex items-center gap-2 px-4 py-2  text-sm font-medium transition-all ${
- activeTab === tab.key
- ? 'bg-white text-gray-800 '
- : 'text-gray-500 hover:text-gray-700'
- }`}
- >
- <tab.icon size={15} />
- {tab.label}
- </button>
- ))}
- </div>
+ <ToggleSwitch
+   checked={activeTab === 'employees'}
+   onChange={v => setActiveTab(v ? 'employees' : 'payroll')}
+   labels={[
+   <span className="flex items-center gap-1.5"><Wallet01Icon size={13} />Bulletins de paie</span>,
+   <span className="flex items-center gap-1.5"><UserGroupIcon size={13} />Employés & Salaires</span>,
+   ]}
+ />
 
  {/* Employees Tab */}
  {activeTab === 'employees' && <EmployeesTab />}

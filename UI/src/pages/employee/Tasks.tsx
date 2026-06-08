@@ -995,7 +995,7 @@ const EditSelfTaskModal = ({
   <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-0.5">{t('tasks.edit.modalTitle')}</p>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('tasks.selfAssign.titleLabel')}</h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors"><Cancel01Icon size={20} /></button>
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors"><Cancel01Icon size={20} /></button>
   </div>
   <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
   <div>
@@ -1121,7 +1121,7 @@ const TaskHistoryModal = ({ taskId, onClose }: { taskId: string; onClose: () => 
   <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-0.5">{t('tasks.history.title')}</p>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('tasks.history.title')}</h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors"><Cancel01Icon size={20} /></button>
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors"><Cancel01Icon size={20} /></button>
   </div>
   <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
   {isLoading ? (
@@ -1193,7 +1193,7 @@ const WeeklyComplianceBlockModal = ({ pendingTasks, onClose }: { pendingTasks: T
   <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-0.5">{t('tasks.weeklyCompliance.title')}</p>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('tasks.weeklyCompliance.title')}</h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>
@@ -1346,7 +1346,7 @@ const SelfAssignModal = ({ onClose }: { onClose: () => void }) => {
   </p>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('tasks.selfAssign.titlePlaceholder')}</h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>

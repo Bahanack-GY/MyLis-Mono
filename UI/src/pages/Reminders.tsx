@@ -110,7 +110,7 @@ const CreateModal = ({ onClose }: { onClose: () => void }) => {
   className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
   >
   {/* Header */}
-  <div className="flex items-center justify-between px-6 py-4 border-b border-[#e5e8ef]">
+  <div className="flex items-center justify-between px-6 py-4 border-b border-[#e5e8ef] shrink-0">
   <div className="flex items-center gap-3">
   <div className="w-8 h-8  bg-[#f8f9fc] flex items-center justify-center">
   <Notification01Icon size={16} className="text-[#1c2b3a]" />
@@ -123,7 +123,7 @@ const CreateModal = ({ onClose }: { onClose: () => void }) => {
   </div>
 
   {/* Body */}
-  <div className="px-6 py-5 space-y-4">
+  <div className="px-6 py-5 space-y-4 flex-1 overflow-y-auto">
   <div>
   <label className="block text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1.5">
   {t('remindersPage.title', 'Title')} *
@@ -215,7 +215,7 @@ const CreateModal = ({ onClose }: { onClose: () => void }) => {
   </div>
 
   {/* Footer */}
-  <div className="flex gap-2 px-6 py-4 border-t border-[#e5e8ef]">
+  <div className="flex gap-2 px-6 py-4 border-t border-[#e5e8ef] shrink-0">
   <button onClick={onClose} className="flex-1 py-3 text-sm font-semibold text-[#8892a4] border border-[#e5e8ef] hover:border-[#283852] hover:text-[#283852] transition-colors">
   {t('common.cancel', 'Cancel')}
   </button>
@@ -331,7 +331,7 @@ export default function Reminders() {
 
   return (
   <div className="min-h-screen bg-gray-50 p-4 md:p-6">
-  <div className="max-w-2xl mx-auto">
+  <div>
 
   {/* Header */}
   <div className="flex items-center justify-between mb-6">

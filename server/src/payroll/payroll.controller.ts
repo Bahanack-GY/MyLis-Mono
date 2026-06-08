@@ -88,6 +88,28 @@ export class PayrollController {
         return this.payrollService.updateSalary(id, Number(salary));
     }
 
+    /* ── Salary Components CRUD ── */
+
+    @Get('employees/:id/salary-components')
+    getSalaryComponents(@Param('id') id: string) {
+        return this.payrollService.getSalaryComponents(id);
+    }
+
+    @Post('employees/:id/salary-components')
+    createSalaryComponent(@Param('id') id: string, @Body() dto: any) {
+        return this.payrollService.createSalaryComponent(id, dto);
+    }
+
+    @Patch('salary-components/:id')
+    updateSalaryComponent(@Param('id') id: string, @Body() dto: any) {
+        return this.payrollService.updateSalaryComponent(id, dto);
+    }
+
+    @Delete('salary-components/:id')
+    deleteSalaryComponent(@Param('id') id: string) {
+        return this.payrollService.deleteSalaryComponent(id);
+    }
+
     @Post('advance/:id')
     payAdvance(
         @Param('id') id: string,

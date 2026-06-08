@@ -7,6 +7,8 @@ import { Department } from '../models/department.model';
 import { User } from '../models/user.model';
 import { Expense } from '../models/expense.model';
 import { DeductionType } from '../models/deduction-type.model';
+import { SalaryComponent } from '../models/salary-component.model';
+import { FiscalYear } from '../models/fiscal-year.model';
 import { PayrollController } from './payroll.controller';
 import { PayrollService } from './payroll.service';
 import { PayrollCalculatorService } from './payroll-calculator.service';
@@ -14,7 +16,7 @@ import { AccountingModule } from '../accounting/accounting.module';
 
 @Module({
     imports: [
-        SequelizeModule.forFeature([PayrollRun, Payslip, Employee, Department, User, Expense, DeductionType]),
+        SequelizeModule.forFeature([PayrollRun, Payslip, Employee, Department, User, Expense, DeductionType, SalaryComponent, FiscalYear]),
         AccountingModule,
     ],
     controllers: [PayrollController],

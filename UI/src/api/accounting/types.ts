@@ -72,6 +72,7 @@ export interface FiscalYear {
     status: 'OPEN' | 'CLOSED';
     closedAt: string | null;
     closedBy?: { id: string; email: string };
+    taxConfig?: Record<string, any>;
 }
 
 export interface CreditNote {

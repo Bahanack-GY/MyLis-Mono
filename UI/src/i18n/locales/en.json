@@ -507,6 +507,8 @@
     "businessExpenses": "Living Expenses",
     "reminders": "Reminders",
     "attendance": "Attendance",
+    "leaves": "Leave Requests",
+    "permissions": "Permissions",
     "sections": {
       "work": "Work",
       "people": "People",
@@ -516,7 +518,8 @@
       "commercial": "Commercial",
       "accounting": "Accounting",
       "carwash": "Carwash",
-      "discipline": "Discipline"
+      "discipline": "Discipline",
+      "hr": "Human Resources"
     }
   },
   "planning": {
@@ -626,7 +629,8 @@
       "myTasks": "My Tasks",
       "myTickets": "My Tickets",
       "upcomingMeetings": "Upcoming Meetings",
-      "myFormations": "My Trainings"
+      "myFormations": "My Trainings",
+      "myProjects": "Projects"
     },
     "charts": {
       "productivity": "Productivity Analytics",

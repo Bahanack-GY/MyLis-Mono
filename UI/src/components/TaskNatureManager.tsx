@@ -74,7 +74,7 @@ const TaskNatureManager = ({ onClose }: { onClose: () => void }) => {
   <p className="text-[10px] font-bold uppercase tracking-widest text-[#33cbcc] mb-0.5">{t('taskNatures.subtitle', 'Configuration')}</p>
   <h2 id="task-nature-modal-title" className="text-lg font-bold text-[#1c2b3a] leading-none">{t('taskNatures.manageTitle')}</h2>
   </div>
-  <button onClick={onClose} aria-label={t('common.close', 'Close')} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} aria-hidden="true" />
   </button>
   </div>

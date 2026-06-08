@@ -6,7 +6,7 @@ import { Roles } from '../auth/roles.decorator';
 
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER')
+@Roles('MANAGER', 'RH')
 @Controller('organization/teams')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class TeamsController {
@@ -17,13 +17,13 @@ export class TeamsController {
         return this.teamsService.create(createTeamDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL', 'RH')
     @Get()
     findAll() {
         return this.teamsService.findAll();
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL', 'RH')
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.teamsService.findOne(id);

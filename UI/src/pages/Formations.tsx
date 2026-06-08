@@ -198,7 +198,7 @@ const FormationDetailModal = ({ formation, onClose }: { formation: Formation; on
   </button>
   </div>
 
-  <div className="p-6 space-y-4">
+  <div className="p-6 space-y-4 flex-1 overflow-y-auto">
   <div className="flex items-center gap-2">
   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
   status === 'completed' ? 'bg-[#283852]/10 text-[#283852]' :

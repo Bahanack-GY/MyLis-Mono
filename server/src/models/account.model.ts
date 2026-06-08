@@ -66,6 +66,27 @@ export class Account extends Model {
         allowNull: false,
         defaultValue: false,
     })
+    declare isCollective: boolean;
+
+    // 'CLIENT' | 'SUPPLIER' | 'EMPLOYEE' — set on auxiliary (nominative) accounts only
+    @Column({
+        type: DataType.STRING(20),
+        allowNull: true,
+    })
+    declare thirdPartyType: 'CLIENT' | 'SUPPLIER' | 'EMPLOYEE' | null;
+
+    // FK to the third-party entity (clientId / supplierId / employeeId)
+    @Column({
+        type: DataType.UUID,
+        allowNull: true,
+    })
+    declare thirdPartyId: string | null;
+
+    @Column({
+        type: DataType.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    })
     declare isSystem: boolean;
 
     @Column({

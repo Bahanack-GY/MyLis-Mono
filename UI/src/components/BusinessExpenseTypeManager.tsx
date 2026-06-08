@@ -63,7 +63,7 @@ const BusinessExpenseTypeManager = ({ onClose }: { onClose: () => void }) => {
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('businessExpenseTypes.manageTitle')}</h2>
   </div>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>

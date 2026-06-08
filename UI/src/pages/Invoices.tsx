@@ -697,7 +697,10 @@ const InvoiceTable = ({ rows, onSelect }: { rows: Invoice[]; onSelect: (inv: Inv
   );
   }
   return (
-  <div className="bg-white  border border-gray-100 overflow-hidden">
+  <div className="bg-white border border-gray-100">
+  {/* Desktop table — hidden on small screens */}
+  <div className="hidden sm:block overflow-x-auto">
+  <div className="min-w-[640px]">
   <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
   <div className="col-span-2">{isProformaTab ? 'N° Proforma' : t('invoices.table.invoiceNumber')}</div>
   <div className="col-span-2">{t('invoices.table.client')}</div>
@@ -743,7 +746,7 @@ const InvoiceTable = ({ rows, onSelect }: { rows: Invoice[]; onSelect: (inv: Inv
   <div className="col-span-1 flex justify-end">
   <button
   onClick={e => { e.stopPropagation(); onSelect(invoice); }}
-  className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
+  className="p-1.5 text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
   >
   <ViewIcon size={14} />
   </button>
@@ -751,6 +754,46 @@ const InvoiceTable = ({ rows, onSelect }: { rows: Invoice[]; onSelect: (inv: Inv
   </motion.div>
   );
   })}
+  </div>
+  </div>
+
+  {/* Mobile card list — hidden on sm+ */}
+  <div className="sm:hidden divide-y divide-gray-100">
+  {rows.map((invoice, i) => {
+  const isOverdue = invoice.status === 'SENT' && invoice.dueDate && new Date(invoice.dueDate) < new Date();
+  const invoiceNum = invoice.type === 'PROFORMA' ? invoice.proformaNumber : invoice.type === 'ACOMPTE' ? invoice.acompteNumber : invoice.invoiceNumber;
+  const statusLabel = invoice.type === 'PROFORMA' ? 'En attente' : invoice.type === 'ACOMPTE' ? 'Payé' : t(`invoices.status.${invoice.status.toLowerCase()}`);
+  const statusColor = invoice.type === 'PROFORMA' || invoice.type === 'ACOMPTE' ? '#33cbcc' : STATUS_COLORS[invoice.status];
+  return (
+  <motion.button
+  key={invoice.id}
+  initial={{ opacity: 0, y: 8 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: i * 0.03 }}
+  onClick={() => onSelect(invoice)}
+  className="w-full text-left px-4 py-4 hover:bg-gray-50/60 transition-colors active:bg-gray-100"
+  >
+  <div className="flex items-start justify-between gap-3 mb-1.5">
+  <span className="text-sm font-semibold text-gray-800">{invoiceNum}</span>
+  <span className="text-sm font-bold text-gray-800 shrink-0">{formatCurrency(Number(invoice.total))}</span>
+  </div>
+  <div className="flex items-center justify-between gap-2">
+  <span className="text-xs text-gray-500 truncate">{invoice.client?.name || '—'}</span>
+  <div className="flex items-center gap-2 shrink-0">
+  {isOverdue && <Alert02Icon size={12} className="text-[#283852]" />}
+  <span className="text-[10px] font-semibold" style={{ color: statusColor }}>{statusLabel}</span>
+  </div>
+  </div>
+  {invoice.dueDate && (
+  <div className={`flex items-center gap-1 mt-1 text-xs ${isOverdue ? 'text-[#283852] font-semibold' : 'text-gray-400'}`}>
+  <Calendar01Icon size={11} />
+  {formatDate(invoice.dueDate)}
+  </div>
+  )}
+  </motion.button>
+  );
+  })}
+  </div>
   </div>
   );
 };

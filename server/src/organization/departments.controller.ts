@@ -6,7 +6,7 @@ import { Roles } from '../auth/roles.decorator';
 
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'RH')
 @Controller('organization/departments')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class DepartmentsController {
@@ -18,7 +18,7 @@ export class DepartmentsController {
         return this.departmentsService.create(createDepartmentDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'RH')
     @Get()
     findAll(@Query('search') search: string, @Query('page') page: string, @Query('limit') limit: string) {
         if (page && limit) {
@@ -31,7 +31,7 @@ export class DepartmentsController {
         return this.departmentsService.findAll();
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'RH')
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.departmentsService.findOne(id);

@@ -64,7 +64,7 @@ const StartedPopup = ({ event, onClose, queueCount }: { event: StartedEvent; onC
   </div>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{event.meetingTitle}</h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>
@@ -127,7 +127,7 @@ const InvitePopup = ({ event, onClose, queueCount }: { event: InviteEvent; onClo
   </div>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{event.meetingTitle}</h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>

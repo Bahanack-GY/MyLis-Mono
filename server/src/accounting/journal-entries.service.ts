@@ -65,7 +65,7 @@ export class JournalEntriesService {
                 { model: User, as: 'createdBy', attributes: ['id', 'email'] },
                 {
                     model: JournalEntryLine,
-                    include: [{ model: Account, attributes: ['id', 'code', 'name'] }],
+                    include: [{ model: Account, as: 'account', attributes: ['id', 'code', 'name'] }],
                 },
             ],
             order: [['date', 'DESC'], ['entryNumber', 'DESC']],
@@ -79,7 +79,7 @@ export class JournalEntriesService {
                 { model: FiscalYear, attributes: ['id', 'name', 'status'] },
                 {
                     model: JournalEntryLine,
-                    include: [{ model: Account, attributes: ['id', 'code', 'name', 'type'] }],
+                    include: [{ model: Account, as: 'account', attributes: ['id', 'code', 'name', 'type'] }],
                 },
                 { model: User, as: 'validatedBy', attributes: ['id', 'email'] },
             ],

@@ -1,11 +1,13 @@
-﻿import { useState, useMemo } from 'react';
+﻿import { useState, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { File01Icon, Download01Icon, Delete02Icon, Loading02Icon, Tick01Icon, CancelCircleIcon, Clock01Icon, Add01Icon, ArrowDown01Icon, ArrowUp01Icon, Search01Icon, Cancel01Icon, ArrowUpRight01Icon } from 'hugeicons-react';
+import { File01Icon, Download01Icon, Delete02Icon, Loading02Icon, Tick01Icon, CancelCircleIcon, Clock01Icon, Add01Icon, ArrowDown01Icon, ArrowUp01Icon, Search01Icon, Cancel01Icon, ArrowUpRight01Icon, Upload01Icon, Folder01Icon } from 'hugeicons-react';
 import { useReports, useGenerateReport, useDeleteReport, useReportLockStatus } from '../../api/reports/hooks';
 import { useAuth } from '../../contexts/AuthContext';
 import { exportReportPdf, loadReportLogoBase64 } from '../../utils/exportReportPdf';
 import logoSrc from '../../assets/logo-lis.png';
 import type { Report, ReportPeriod } from '../../api/reports/types';
+import { documentsApi } from '../../api/documents/api';
+import { useCreateDocument, useDocuments, useDeleteDocument } from '../../api/documents/hooks';
 
 /* ── Date helpers ────────────────────────────────────────── */
 
@@ -261,6 +263,46 @@ export default function EmployeeReports() {
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
 
+  const createDocument = useCreateDocument();
+  const deleteDocument = useDeleteDocument();
+  const { data: allDocuments = [] } = useDocuments();
+  const uploadedDocs = allDocuments.filter(d => d.filePath?.startsWith('uploads/rapports/'));
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const ACCEPTED = '.pdf,.docx,.pptx,.ppt,.doc';
+  const ACCEPTED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
+
+  const handleFileUpload = async (file: File) => {
+    if (!ACCEPTED_TYPES.includes(file.type) && !file.name.match(/\.(pdf|docx?|pptx?)$/i)) return;
+    setUploading(true);
+    try {
+      const res = await documentsApi.uploadFile(file, 'rapports');
+      createDocument.mutate({
+        name: file.name.replace(/\.[^.]+$/, ''),
+        filePath: res.filePath,
+        fileType: res.fileType,
+        category: 'OTHER',
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFileUpload(file);
+    e.target.value = '';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFileUpload(file);
+  };
+
   const hasFilters = search || filterStatus || filterFrom || filterTo;
 
   const clearFilters = () => {
@@ -322,7 +364,7 @@ export default function EmployeeReports() {
   };
 
   return (
-  <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5">
+  <div className="p-4 md:p-6 space-y-5">
   {/* ── Header ── */}
   <div className="flex items-center justify-between">
   <div>
@@ -341,6 +383,96 @@ export default function EmployeeReports() {
   {t('reports.generate')}
   </button>
   </div>
+
+  {/* ── Document upload ── */}
+  <div
+    className={`border-2 border-dashed transition-colors cursor-pointer ${dragOver ? 'border-[#33cbcc] bg-[#33cbcc]/5' : 'border-[#e5e8ef] hover:border-[#33cbcc]/50'}`}
+    onClick={() => fileInputRef.current?.click()}
+    onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+    onDragLeave={() => setDragOver(false)}
+    onDrop={handleDrop}
+  >
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept={ACCEPTED}
+      className="hidden"
+      onChange={handleFileChange}
+    />
+    <div className="flex items-center gap-4 px-6 py-4">
+      <div className="w-10 h-10 bg-[#33cbcc]/10 flex items-center justify-center shrink-0">
+        {uploading
+          ? <Loading02Icon size={20} className="animate-spin text-[#33cbcc]" />
+          : <Upload01Icon size={20} className="text-[#33cbcc]" />
+        }
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-[#1c2b3a]">
+          {uploading ? 'Envoi en cours…' : 'Déposer un document'}
+        </p>
+        <p className="text-xs text-[#8892a4] mt-0.5">PDF, Word, PowerPoint · Visible dans Documents</p>
+      </div>
+      <div className="flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] shrink-0">
+        <Folder01Icon size={14} />
+        Documents
+      </div>
+    </div>
+  </div>
+
+  {/* ── Uploaded documents ── */}
+  {uploadedDocs.length > 0 && (
+  <div className="bg-white border border-[#e5e8ef]">
+    <div className="px-5 py-3 border-b border-[#e5e8ef] flex items-center gap-2">
+      <Folder01Icon size={14} className="text-[#33cbcc]" />
+      <span className="text-xs font-semibold text-[#1c2b3a] uppercase tracking-widest">Documents déposés</span>
+      <span className="ml-auto text-xs text-[#8892a4]">{uploadedDocs.length}</span>
+    </div>
+    <div className="divide-y divide-[#e5e8ef]">
+      {uploadedDocs.map(doc => {
+        const ext = doc.filePath?.split('.').pop()?.toUpperCase() ?? 'FILE';
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3025';
+        const fileUrl = doc.filePath ? `${apiUrl}/${doc.filePath.substring(doc.filePath.indexOf('uploads/'))}` : '#';
+        const extColor = ext === 'PDF' ? '#e05e5e' : ext === 'DOCX' || ext === 'DOC' ? '#2563eb' : '#f59e0b';
+        return (
+          <div key={doc.id} className="flex items-center gap-3 px-5 py-3 hover:bg-[#f8f9fc] transition-colors">
+            <div className="w-8 h-8 flex items-center justify-center shrink-0" style={{ backgroundColor: `${extColor}15` }}>
+              <span className="text-[9px] font-bold" style={{ color: extColor }}>{ext}</span>
+            </div>
+            <span className="flex-1 text-sm text-[#1c2b3a] truncate">{doc.name}</span>
+            <div className="flex items-center gap-1 shrink-0">
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                className="p-1.5 text-[#8892a4] hover:text-[#1c2b3a] hover:bg-[#f0f2f5] transition-colors"
+                title="Ouvrir"
+              >
+                <ArrowUpRight01Icon size={14} />
+              </a>
+              <a
+                href={fileUrl}
+                download
+                onClick={e => e.stopPropagation()}
+                className="p-1.5 text-[#8892a4] hover:text-[#1c2b3a] hover:bg-[#f0f2f5] transition-colors"
+                title="Télécharger"
+              >
+                <Download01Icon size={14} />
+              </a>
+              <button
+                onClick={() => { if (confirm('Supprimer ce document ?')) deleteDocument.mutate(doc.id); }}
+                className="p-1.5 text-[#8892a4] hover:text-[#e05e5e] hover:bg-[#e05e5e]/5 transition-colors"
+                title="Supprimer"
+              >
+                <Delete02Icon size={14} />
+              </button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+  )}
 
   {/* ── Stat cards ── */}
   {!isLoading && (

@@ -399,7 +399,7 @@ const DeleteConfirmModal = ({
  </button>
  </div>
  {/* Content */}
- <div className="p-6 flex-1">
+ <div className="p-6 flex-1 overflow-y-auto">
  <p className="text-sm text-[#8892a4] mb-2">
  Voulez-vous vraiment supprimer le compte{' '}
  <strong className="text-[#1c2b3a]">

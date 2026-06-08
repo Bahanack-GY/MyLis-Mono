@@ -32,6 +32,9 @@ export const getFiscalYear = (id: string) => api.get(`/accounting/fiscal-years/$
 export const createFiscalYear = (data: any) => api.post('/accounting/fiscal-years', data).then(r => r.data);
 export const closeFiscalYear = (id: string) => api.post(`/accounting/fiscal-years/${id}/close`).then(r => r.data);
 export const reopenFiscalYear = (id: string) => api.post(`/accounting/fiscal-years/${id}/reopen`).then(r => r.data);
+export const updateFiscalYearTaxConfig = (id: string, taxConfig: any) => api.patch(`/accounting/fiscal-years/${id}/tax-config`, { taxConfig }).then(r => r.data);
+export const getFiscalYearOpeningBalances = (id: string) => api.get(`/accounting/fiscal-years/${id}/opening-balances`).then(r => r.data);
+export const importFiscalYearOpeningBalances = (id: string, balances: any[]) => api.post(`/accounting/fiscal-years/${id}/opening-balances`, { balances }).then(r => r.data);
 
 // Reports
 export const getGrandLivre = (fiscalYearId: string, accountId?: string, departmentId?: string) =>
@@ -55,6 +58,12 @@ export const validateCreditNote = (id: string) => api.post(`/accounting/credit-n
 
 export const getCashFlow = (fiscalYearId: string) =>
     api.get(`/accounting/reports/cash-flow/${fiscalYearId}`).then(r => r.data);
+
+export const getSixColumnBalance = (fiscalYearId: string, from?: string, to?: string, departmentId?: string) =>
+    api.get(`/accounting/reports/six-column-balance/${fiscalYearId}`, { params: { from, to, departmentId } }).then(r => r.data);
+
+export const getAuxiliaryBalance = (fiscalYearId: string, collectiveAccountId: string) =>
+    api.get(`/accounting/reports/auxiliary-balance/${fiscalYearId}/${collectiveAccountId}`).then(r => r.data);
 
 // Budgets
 export const getBudgets = (fiscalYearId: string) =>

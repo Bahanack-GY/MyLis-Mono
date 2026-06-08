@@ -1,7 +1,7 @@
-﻿import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, Tick01Icon, File01Icon, ViewIcon, Invoice01Icon, Building02Icon, UserGroupIcon, Clock01Icon, Alert02Icon, ArrowLeft01Icon, Shield01Icon } from 'hugeicons-react';
+import { Add01Icon, Cancel01Icon, Loading02Icon, Calendar01Icon, Tick01Icon, File01Icon, ViewIcon, Invoice01Icon, Building02Icon, UserGroupIcon, Clock01Icon, Alert02Icon, Shield01Icon } from 'hugeicons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../api/config';
@@ -14,15 +14,14 @@ import type { FiscalYear } from '../../api/accounting/types';
 
 interface TaxDeclaration {
  id: string;
- type: 'TVA' | 'IS' | 'CNPS';
+ type: 'TVA_MONTHLY' | 'IS_ANNUAL' | 'IS_QUARTERLY_ADVANCE' | 'IRPP_ANNUAL' | 'CNPS_MONTHLY' | 'DSF';
  fiscalYearId: string;
- month: number | null;
- year: number;
+ period: string;
  totalAmount: number;
  dueDate: string;
  status: 'DRAFT' | 'VALIDATED' | 'FILED';
  filedAt: string | null;
- details?: any;
+ data?: any;
  createdAt: string;
 }
 
@@ -61,13 +60,22 @@ const STATUS_COLORS: Record<string, { text: string; label: string }> = {
 };
 
 const TYPE_CONFIG: Record<string, { text: string; icon: any; label: string; full: string }> = {
- TVA: { text: 'text-gray-600', icon: Invoice01Icon, label: 'TVA', full: 'TVA Mensuelle' },
- IS: { text: 'text-gray-600', icon: Building02Icon, label: 'IS', full: 'Impot sur les Societes' },
- CNPS: { text: 'text-gray-600', icon: UserGroupIcon, label: 'CNPS', full: 'CNPS Mensuelle' },
+ TVA_MONTHLY: { text: 'text-gray-600', icon: Invoice01Icon, label: 'TVA', full: 'TVA Mensuelle' },
+ IS_ANNUAL: { text: 'text-gray-600', icon: Building02Icon, label: 'IS', full: 'Impot sur les Societes' },
+ IS_QUARTERLY_ADVANCE: { text: 'text-gray-600', icon: Building02Icon, label: 'IS-A', full: 'Acompte IS Trimestriel' },
+ CNPS_MONTHLY: { text: 'text-gray-600', icon: UserGroupIcon, label: 'CNPS', full: 'CNPS Mensuelle' },
+ IRPP_ANNUAL: { text: 'text-gray-600', icon: UserGroupIcon, label: 'IRPP', full: 'Impot sur le Revenu (IRPP)' },
+ DSF: { text: 'text-gray-600', icon: Building02Icon, label: 'DSF', full: 'Declaration Statistique et Fiscale' },
 };
 
-const inputCls =
- 'w-full bg-white  border border-gray-200 px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#33cbcc]/30 focus:border-[#33cbcc] transition-all';
+const parsePeriod = (period: string): string => {
+ const monthly = period.match(/^(\d{4})-(\d{2})$/);
+ if (monthly) return `${MONTHS[parseInt(monthly[2]) - 1]} ${monthly[1]}`;
+ const quarterly = period.match(/^(\d{4})-Q(\d)$/);
+ if (quarterly) return `T${quarterly[2]} ${quarterly[1]}`;
+ return period;
+};
+
 const labelCls =
  'flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5';
 
@@ -86,6 +94,12 @@ const taxApi = {
  api.post('/tax/declarations/generate/is', data).then((r) => r.data),
  generateCnps: (data: any) =>
  api.post('/tax/declarations/generate/cnps', data).then((r) => r.data),
+ generateIrpp: (data: any) =>
+ api.post('/tax/declarations/generate/irpp', data).then((r) => r.data),
+ generateIsQuarterly: (data: any) =>
+ api.post('/tax/declarations/generate/is-quarterly', data).then((r) => r.data),
+ generateDsf: (data: any) =>
+ api.post('/tax/declarations/generate/dsf', data).then((r) => r.data),
  validate: (id: string) =>
  api.post(`/tax/declarations/${id}/validate`).then((r) => r.data),
  markFiled: (id: string) =>
@@ -150,6 +164,42 @@ const useGenerateCnps = () => {
  });
 };
 
+const useGenerateIrpp = () => {
+ const qc = useQueryClient();
+ return useMutation({
+ mutationFn: (data: any) => taxApi.generateIrpp(data),
+ onSuccess: () => {
+ toast.success('Declaration IRPP generee');
+ qc.invalidateQueries({ queryKey: ['accounting', 'tax-declarations'] });
+ },
+ onError: () => toast.error('Erreur lors de la generation'),
+ });
+};
+
+const useGenerateIsQuarterly = () => {
+ const qc = useQueryClient();
+ return useMutation({
+ mutationFn: (data: any) => taxApi.generateIsQuarterly(data),
+ onSuccess: () => {
+ toast.success('4 acomptes IS trimestriels generes');
+ qc.invalidateQueries({ queryKey: ['accounting', 'tax-declarations'] });
+ },
+ onError: () => toast.error('Erreur lors de la generation'),
+ });
+};
+
+const useGenerateDsf = () => {
+ const qc = useQueryClient();
+ return useMutation({
+ mutationFn: (data: any) => taxApi.generateDsf(data),
+ onSuccess: () => {
+ toast.success('DSF generee');
+ qc.invalidateQueries({ queryKey: ['accounting', 'tax-declarations'] });
+ },
+ onError: () => toast.error('Erreur lors de la generation'),
+ });
+};
+
 const useValidateDeclaration = () => {
  const qc = useQueryClient();
  return useMutation({
@@ -178,12 +228,30 @@ const useMarkDeclarationFiled = () => {
 /* Generate Modal */
 /* ------------------------------------------------------------------ */
 
+type GenerateType = 'TVA' | 'IS' | 'CNPS' | 'IRPP' | 'IS_QUARTERLY' | 'DSF';
+
+const MODAL_TYPE_TO_CONFIG: Record<GenerateType, string> = {
+ TVA: 'TVA_MONTHLY',
+ IS: 'IS_ANNUAL',
+ CNPS: 'CNPS_MONTHLY',
+ IRPP: 'IRPP_ANNUAL',
+ IS_QUARTERLY: 'IS_QUARTERLY_ADVANCE',
+ DSF: 'DSF',
+};
+
+const ANNUAL_NOTES: Record<string, string> = {
+ IS: "La declaration IS sera generee pour l'exercice fiscal selectionne.",
+ IRPP: "La declaration IRPP agrege toutes les fiches de paie payees sur l'exercice.",
+ IS_QUARTERLY: "4 acomptes trimestriels IS seront generes (25% chacun) sur la base de la projection annuelle.",
+ DSF: "La DSF agrege les donnees comptables et salariales de l'exercice selectionne.",
+};
+
 const GenerateModal = ({
  type,
  fiscalYearId,
  onClose,
 }: {
- type: 'TVA' | 'IS' | 'CNPS';
+ type: GenerateType;
  fiscalYearId: string;
  onClose: () => void;
 }) => {
@@ -194,8 +262,11 @@ const GenerateModal = ({
  const generateTva = useGenerateTva();
  const generateIs = useGenerateIs();
  const generateCnps = useGenerateCnps();
+ const generateIrpp = useGenerateIrpp();
+ const generateIsQuarterly = useGenerateIsQuarterly();
+ const generateDsf = useGenerateDsf();
 
- const config = TYPE_CONFIG[type];
+ const config = TYPE_CONFIG[MODAL_TYPE_TO_CONFIG[type]];
  const needsMonth = type === 'TVA' || type === 'CNPS';
 
  useEffect(() => {
@@ -210,17 +281,21 @@ const GenerateModal = ({
  };
  }, [onClose]);
 
- const isPending = generateTva.isPending || generateIs.isPending || generateCnps.isPending;
+ const isPending =
+ generateTva.isPending || generateIs.isPending || generateCnps.isPending ||
+ generateIrpp.isPending || generateIsQuarterly.isPending || generateDsf.isPending;
 
  const handleGenerate = () => {
  if (isPending) return;
- const payload = needsMonth
- ? { fiscalYearId, month: Number(month), year: Number(year) }
- : { fiscalYearId };
+ const monthlyPayload = { fiscalYearId, month: Number(month), year: Number(year) };
+ const annualPayload = { fiscalYearId };
 
- if (type === 'TVA') generateTva.mutate(payload, { onSuccess: onClose });
- else if (type === 'IS') generateIs.mutate(payload, { onSuccess: onClose });
- else generateCnps.mutate(payload, { onSuccess: onClose });
+ if (type === 'TVA') generateTva.mutate(monthlyPayload, { onSuccess: onClose });
+ else if (type === 'IS') generateIs.mutate(annualPayload, { onSuccess: onClose });
+ else if (type === 'CNPS') generateCnps.mutate(monthlyPayload, { onSuccess: onClose });
+ else if (type === 'IRPP') generateIrpp.mutate(annualPayload, { onSuccess: onClose });
+ else if (type === 'IS_QUARTERLY') generateIsQuarterly.mutate(annualPayload, { onSuccess: onClose });
+ else generateDsf.mutate(annualPayload, { onSuccess: onClose });
  };
 
  const Icon = config.icon;
@@ -286,7 +361,7 @@ const GenerateModal = ({
  )}
  {!needsMonth && (
  <div className="bg-[#f8f9fc] p-4 text-sm text-[#8892a4]">
- La declaration IS sera generee pour l'exercice fiscal selectionne.
+ {ANNUAL_NOTES[type] || "La declaration sera generee pour l'exercice fiscal selectionne."}
  </div>
  )}
  </div>
@@ -326,7 +401,7 @@ const DeclarationDetailModal = ({
  const validateMut = useValidateDeclaration();
  const fileMut = useMarkDeclarationFiled();
 
- const config = TYPE_CONFIG[declaration.type] || TYPE_CONFIG.TVA;
+ const config = TYPE_CONFIG[declaration.type] || TYPE_CONFIG.TVA_MONTHLY;
  const statusStyle = STATUS_COLORS[declaration.status] || STATUS_COLORS.DRAFT;
  const Icon = config.icon;
 
@@ -390,8 +465,7 @@ const DeclarationDetailModal = ({
  <div>
  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider">Periode</p>
  <p className="text-sm font-medium text-[#1c2b3a] mt-1">
- {declaration.month ? `${MONTHS[declaration.month - 1]} ` : ''}
- {declaration.year}
+ {parsePeriod(declaration.period)}
  </p>
  </div>
  <div>
@@ -409,13 +483,13 @@ const DeclarationDetailModal = ({
  </div>
 
  {/* Details */}
- {declaration.details && (
+ {declaration.data && (
  <div>
  <p className="text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-3">
  Details du calcul
  </p>
  <div className="bg-[#f8f9fc] p-4 space-y-2">
- {Object.entries(declaration.details).map(([key, value]) => (
+ {Object.entries(declaration.data).map(([key, value]) => (
  <div key={key} className="flex justify-between text-sm">
  <span className="text-[#8892a4] capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
  <span className="font-medium text-[#1c2b3a]">
@@ -486,7 +560,7 @@ const DeclarationDetailModal = ({
 export default function TaxDeclarations() {
  const { t } = useTranslation();
  const [selectedFiscalYearId, setSelectedFiscalYearId] = useState('');
- const [generateType, setGenerateType] = useState<'TVA' | 'IS' | 'CNPS' | null>(null);
+ const [generateType, setGenerateType] = useState<GenerateType | null>(null);
  const [selectedDeclaration, setSelectedDeclaration] = useState<TaxDeclaration | null>(null);
 
  const { data: fiscalYears, isLoading: fyLoading } = useFiscalYears();
@@ -521,11 +595,11 @@ export default function TaxDeclarations() {
  <div>
  <h1 className="text-2xl font-bold text-gray-800">Declarations Fiscales</h1>
  <p className="text-sm text-gray-500 mt-1">
- TVA, Impot sur les Societes, CNPS
+ TVA, CNPS, IRPP, IS, DSF
  </p>
  </div>
 
- {/* Fiscal Year Selector */}
+ {/* Fiscal Year Selector + Generate Buttons */}
  <div className="bg-white  p-4 flex flex-col md:flex-row md:items-center gap-4">
  <div className="flex items-center gap-2 text-sm font-semibold text-gray-600">
  <Calendar01Icon size={16} className="text-[#33cbcc]"/>
@@ -544,18 +618,25 @@ export default function TaxDeclarations() {
  </select>
 
  <div className="md:ml-auto flex gap-2 flex-wrap">
- {(['TVA', 'IS', 'CNPS'] as const).map((type) => {
- const config = TYPE_CONFIG[type];
- const Icon = config.icon;
+ {([
+ { key: 'TVA' as const, configKey: 'TVA_MONTHLY' },
+ { key: 'CNPS' as const, configKey: 'CNPS_MONTHLY' },
+ { key: 'IRPP' as const, configKey: 'IRPP_ANNUAL' },
+ { key: 'IS' as const, configKey: 'IS_ANNUAL' },
+ { key: 'IS_QUARTERLY' as const, configKey: 'IS_QUARTERLY_ADVANCE' },
+ { key: 'DSF' as const, configKey: 'DSF' },
+ ]).map(({ key, configKey }) => {
+ const cfg = TYPE_CONFIG[configKey];
+ const Icon = cfg.icon;
  return (
  <button
- key={type}
- onClick={() => setGenerateType(type)}
+ key={key}
+ onClick={() => setGenerateType(key)}
  disabled={!selectedFiscalYearId}
  className="flex items-center gap-2 px-4 py-2.5  text-sm font-semibold text-white transition-colors bg-[#283852] hover:bg-[#1e2d3d] disabled:opacity-40"
  >
  <Icon size={14} />
- Generer {config.label}
+ {cfg.label}
  </button>
  );
  })}
@@ -588,10 +669,8 @@ export default function TaxDeclarations() {
  }`}
  >
  <div className="flex items-center justify-between mb-2">
- <span
- className={`text-xs font-semibold ${TYPE_CONFIG[obl.type]?.text || 'text-gray-500'}`}
- >
- {obl.type}
+ <span className={`text-xs font-semibold ${TYPE_CONFIG[obl.type]?.text || 'text-gray-500'}`}>
+ {TYPE_CONFIG[obl.type]?.label || obl.type}
  </span>
  {isUrgent && <Alert02Icon size={14} className="text-[#283852]"/>}
  </div>
@@ -631,7 +710,7 @@ export default function TaxDeclarations() {
  </div>
 
  {(declarations || []).map((decl, i) => {
- const config = TYPE_CONFIG[decl.type] || TYPE_CONFIG.TVA;
+ const config = TYPE_CONFIG[decl.type] || TYPE_CONFIG.TVA_MONTHLY;
  const statusStyle = STATUS_COLORS[decl.status] || STATUS_COLORS.DRAFT;
  const Icon = config.icon;
  const isOverdue = decl.status !== 'FILED' && new Date(decl.dueDate) < new Date();
@@ -646,36 +725,25 @@ export default function TaxDeclarations() {
  className="grid grid-cols-12 gap-4 px-6 py-4 border-t border-gray-100 items-center group hover:bg-gray-50/50 transition-colors cursor-pointer"
  >
  <div className="col-span-1">
- <span
- className={`inline-flex items-center gap-1 text-[10px] font-semibold ${config.text}`}
- >
+ <span className={`inline-flex items-center gap-1 text-[10px] font-semibold ${config.text}`}>
  <Icon size={10} />
  {config.label}
  </span>
  </div>
  <div className="col-span-2 text-sm text-gray-700">
- {decl.month ? `${MONTHS[decl.month - 1]} ` : ''}
- {decl.year}
+ {parsePeriod(decl.period)}
  </div>
  <div className="col-span-2 text-sm font-semibold text-gray-800 text-right">
  {formatXAF(decl.totalAmount)}
  </div>
  <div className="col-span-2">
- <span
- className={`text-xs ${
- isOverdue ? 'text-[#283852] font-semibold' : 'text-gray-500'
- }`}
- >
+ <span className={`text-xs ${isOverdue ? 'text-[#283852] font-semibold' : 'text-gray-500'}`}>
  {formatDate(decl.dueDate)}
- {isOverdue && (
- <Alert02Icon size={10} className="inline ml-1 text-[#283852]"/>
- )}
+ {isOverdue && <Alert02Icon size={10} className="inline ml-1 text-[#283852]"/>}
  </span>
  </div>
  <div className="col-span-1">
- <span
- className={`text-[10px] font-semibold ${statusStyle.text}`}
- >
+ <span className={`text-[10px] font-semibold ${statusStyle.text}`}>
  {statusStyle.label}
  </span>
  </div>
@@ -685,10 +753,7 @@ export default function TaxDeclarations() {
  <div className="col-span-2 flex justify-end gap-1">
  {decl.status === 'DRAFT' && (
  <button
- onClick={(e) => {
- e.stopPropagation();
- validateMut.mutate(decl.id);
- }}
+ onClick={(e) => { e.stopPropagation(); validateMut.mutate(decl.id); }}
  disabled={validateMut.isPending}
  title="Valider"
  className="p-1.5  text-gray-400 hover:text-[#283852] hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
@@ -698,10 +763,7 @@ export default function TaxDeclarations() {
  )}
  {decl.status === 'VALIDATED' && (
  <button
- onClick={(e) => {
- e.stopPropagation();
- fileMut.mutate(decl.id);
- }}
+ onClick={(e) => { e.stopPropagation(); fileMut.mutate(decl.id); }}
  disabled={fileMut.isPending}
  title="Marquer deposee"
  className="p-1.5  text-gray-400 hover:text-[#283852] hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100"
@@ -710,10 +772,7 @@ export default function TaxDeclarations() {
  </button>
  )}
  <button
- onClick={(e) => {
- e.stopPropagation();
- setSelectedDeclaration(decl);
- }}
+ onClick={(e) => { e.stopPropagation(); setSelectedDeclaration(decl); }}
  title="Details"
  className="p-1.5  text-gray-400 hover:text-[#33cbcc] hover:bg-[#33cbcc]/5 transition-colors opacity-0 group-hover:opacity-100"
  >

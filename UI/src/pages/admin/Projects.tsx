@@ -926,10 +926,10 @@ const Projects = () => {
   </div>
   </div>
 
-  {/* Chart + Projects Grid */}
-  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-  {/* Left column: Charts */}
-  <div className="space-y-6">
+  {/* Charts + Projects */}
+  <div className="space-y-8">
+  {/* Charts row: side by side */}
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
   {/* Area Chart */}
   <motion.div
   initial={{ opacity: 0, scale: 0.97 }}
@@ -969,7 +969,7 @@ const Projects = () => {
   </div>
 
   {/* Projects List */}
-  <div className="lg:col-span-2 space-y-4">
+  <div className="space-y-4">
   {filteredProjects.length === 0 && (
   <div className="bg-white border border-[#e5e8ef] p-12 text-center">
   <Briefcase01Icon size={40} className="mx-auto text-[#b0bac9] mb-4" />

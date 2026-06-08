@@ -67,6 +67,10 @@ import { TaxDeclaration } from '../models/tax-declaration.model';
 import { CreditNote } from '../models/credit-note.model';
 import { Budget } from '../models/budget.model';
 import { DeductionType } from '../models/deduction-type.model';
+import { SalaryComponent } from '../models/salary-component.model';
+import { Supplier } from '../models/supplier.model';
+import { SupplierInvoice } from '../models/supplier-invoice.model';
+import { SupplierInvoiceItem } from '../models/supplier-invoice-item.model';
 
 // Commercial models
 import { Lead } from '../models/lead.model';
@@ -150,6 +154,10 @@ async function migrate() {
             CreditNote,
             Budget,
             DeductionType,
+            SalaryComponent,
+            Supplier,
+            SupplierInvoice,
+            SupplierInvoiceItem,
 
             // Commercial (Lead depends on Employee + Client, LeadActivity depends on Lead)
             Lead,

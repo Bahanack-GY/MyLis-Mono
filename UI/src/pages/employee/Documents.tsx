@@ -281,10 +281,30 @@ const Documents = () => {
   'OTHER': 'Technical',
   };
 
+  const PATH_FOLDER_MAP: Record<string, DocCategory> = {
+  'rapports': 'Rapport',
+  'factures': 'Facture',
+  'procedures': 'Procedure',
+  'pv': 'PV',
+  'commercial': 'Commercial',
+  'fiscal': 'Fiscal',
+  'formation': 'Education',
+  'recruitment': 'Recruitment',
+  'contracts': 'Contract',
+  };
+
+  const resolveCategory = (d: DocType): DocCategory => {
+  if (d.category === 'OTHER' && d.filePath) {
+    const folder = d.filePath.split('/')[1];
+    if (folder && PATH_FOLDER_MAP[folder]) return PATH_FOLDER_MAP[folder];
+  }
+  return CATEGORY_DISPLAY_MAP[d.category] || 'Technical';
+  };
+
   const documents: DocItem[] = (apiDocuments || []).map((d: DocType) => ({
   id: `doc-${d.id}`,
   name: d.name,
-  type: CATEGORY_DISPLAY_MAP[d.category] || 'Technical',
+  type: resolveCategory(d),
   size: '',
   date: '',
   filePath: d.filePath || undefined,

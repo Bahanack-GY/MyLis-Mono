@@ -16,6 +16,14 @@ export class DepartmentMonthlyTargetsController {
         return this.service.upsert(dto);
     }
 
+    /** GET /organization/department-monthly-targets/all/stats?year=2025 */
+    @Roles('MANAGER', 'CEO')
+    @Get('all/stats')
+    getAllDepartmentsStats(@Query('year') year: string) {
+        const y = year ? parseInt(year, 10) : new Date().getFullYear();
+        return this.service.getAllDepartmentsMonthlyStats(y);
+    }
+
     /** GET /organization/department-monthly-targets/:departmentId/stats?year=2025 */
     @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE')
     @Get(':departmentId/stats')

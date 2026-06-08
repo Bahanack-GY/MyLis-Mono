@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import i18n from '../i18n/config';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search01Icon, FilterIcon, Add01Icon, Cancel01Icon, UserIcon, Mail01Icon, CallIcon, Briefcase01Icon, Building01Icon, Calendar01Icon, UserAdd01Icon, ZapIcon, GraduationScrollIcon, File01Icon, Delete02Icon, Target01Icon, Loading02Icon, ViewIcon, ViewOffIcon, Location01Icon, Upload01Icon, Tick01Icon, Camera01Icon, Shield01Icon, CalculatorIcon, DashboardSquare01Icon, ListViewIcon, ArrowUpRight01Icon, CrownIcon, Share01Icon } from 'hugeicons-react';
+import { Search01Icon, FilterIcon, Add01Icon, Cancel01Icon, UserIcon, Mail01Icon, CallIcon, Briefcase01Icon, Building01Icon, Calendar01Icon, UserAdd01Icon, ZapIcon, GraduationScrollIcon, File01Icon, Delete02Icon, Target01Icon, Loading02Icon, ViewIcon, ViewOffIcon, Location01Icon, Upload01Icon, Tick01Icon, Camera01Icon, Shield01Icon, CalculatorIcon, DashboardSquare01Icon, ListViewIcon, ArrowUpRight01Icon, CrownIcon, Share01Icon, UserGroupIcon } from 'hugeicons-react';
 import { useInfiniteEmployees, useCreateEmployee, useLeaderboard, useEmployees } from '../api/employees/hooks';
 import { EmployeesSkeleton } from '../components/Skeleton';
 import { useDepartmentScope, useAuth } from '../contexts/AuthContext';
@@ -27,7 +27,7 @@ const SKILLS = [
 
 /* ─── Create Employee Modal ────────────────────────────── */
 
-type UserType = 'employee' | 'manager' | 'accountant' | 'commercial' | 'stagiaire' | 'ceo';
+type UserType = 'employee' | 'manager' | 'accountant' | 'commercial' | 'stagiaire' | 'ceo' | 'rh';
 
 const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartmentId }: { onClose: () => void; initialUserType?: UserType; hodDepartmentId?: string }) => {
   const [userType, setUserType] = useState<UserType>(initialUserType);
@@ -36,6 +36,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   const commercialMode = userType === 'commercial';
   const stagiaireMode = userType === 'stagiaire';
   const ceoMode = userType === 'ceo';
+  const rhMode = userType === 'rh';
   const { t } = useTranslation();
   const createEmployee = useCreateEmployee();
   const { data: apiDepartments } = useDepartments();
@@ -140,7 +141,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   }));
   };
 
-  const isValid = form.firstName.trim().length > 0 && form.lastName.trim().length > 0 && (ceoMode || managerMode || accountantMode || commercialMode || stagiaireMode || (form.role !== '' && form.department !== ''));
+  const isValid = form.firstName.trim().length > 0 && form.lastName.trim().length > 0 && (ceoMode || managerMode || accountantMode || commercialMode || stagiaireMode || rhMode || (form.role !== '' && form.department !== ''));
 
   const inputCls = 'w-full bg-[#f8f9fc] border border-[#e5e8ef] px-4 py-3 text-sm text-[#1c2b3a] placeholder-[#b0bac9] focus:outline-none focus:border-[#33cbcc] focus:bg-white transition-colors';
   const labelCls = 'flex items-center gap-1.5 text-[10px] font-semibold text-[#8892a4] uppercase tracking-wider mb-1.5';
@@ -167,7 +168,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   <div className="flex items-center justify-between mb-4">
   <div className="flex items-center gap-3">
   <div className="w-10 h-10  bg-[#33cbcc]/10 flex items-center justify-center">
-  {ceoMode ? <CrownIcon size={20} className="text-[#33cbcc]" /> : managerMode ? <Shield01Icon size={20} className="text-[#33cbcc]" /> : accountantMode ? <CalculatorIcon size={20} className="text-[#33cbcc]" /> : commercialMode ? <Target01Icon size={20} className="text-[#33cbcc]" /> : stagiaireMode ? <GraduationScrollIcon size={20} className="text-[#33cbcc]" /> : <UserAdd01Icon size={20} className="text-[#33cbcc]" />}
+  {ceoMode ? <CrownIcon size={20} className="text-[#33cbcc]" /> : managerMode ? <Shield01Icon size={20} className="text-[#33cbcc]" /> : accountantMode ? <CalculatorIcon size={20} className="text-[#33cbcc]" /> : commercialMode ? <Target01Icon size={20} className="text-[#33cbcc]" /> : stagiaireMode ? <GraduationScrollIcon size={20} className="text-[#33cbcc]" /> : rhMode ? <UserGroupIcon size={20} className="text-[#33cbcc]" /> : <UserAdd01Icon size={20} className="text-[#33cbcc]" />}
   </div>
   <h2 className="text-lg font-bold text-[#1c2b3a]">{t('employees.create.title')}</h2>
   </div>
@@ -177,7 +178,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   </div>
   {/* Role type selector */}
   <div className="flex gap-2 p-1 bg-[#f8f9fc]  flex-wrap border border-[#e5e8ef]">
-  {(['employee', 'manager', 'accountant', 'commercial', 'stagiaire', 'ceo'] as UserType[]).map(type => (
+  {(['employee', 'manager', 'accountant', 'commercial', 'stagiaire', 'ceo', 'rh'] as UserType[]).map(type => (
   <button
   key={type}
   type="button"
@@ -194,7 +195,8 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   {type === 'commercial' && <Target01Icon size={13} />}
   {type === 'stagiaire' && <GraduationScrollIcon size={13} />}
   {type === 'ceo' && <CrownIcon size={13} />}
-  {type === 'employee' ? t('employees.addEmployee') : type === 'manager' ? t('employees.addManager') : type === 'accountant' ? t('employees.addAccountant') : type === 'commercial' ? t('employees.addCommercial') : type === 'stagiaire' ? 'Stagiaire' : 'CEO'}
+  {type === 'rh' && <UserGroupIcon size={13} />}
+  {type === 'employee' ? t('employees.addEmployee') : type === 'manager' ? t('employees.addManager') : type === 'accountant' ? t('employees.addAccountant') : type === 'commercial' ? t('employees.addCommercial') : type === 'stagiaire' ? 'Stagiaire' : type === 'rh' ? 'RH' : 'CEO'}
   </button>
   ))}
   </div>
@@ -449,7 +451,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   )}
 
   {/* Role + Department (not shown for managers, accountants, commercials or stagiaires) */}
-  {!managerMode && !accountantMode && !commercialMode && !stagiaireMode && (
+  {!managerMode && !accountantMode && !commercialMode && !stagiaireMode && !rhMode && !ceoMode && (
   <div className="grid grid-cols-2 gap-4">
   <div>
   <label className={labelCls}>
@@ -791,7 +793,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   avatarUrl: form.avatarUrl || undefined,
   educationDocs: uploadedEducationDocs,
   recruitmentDocs: uploadedRecruitmentDocs,
-  ...(ceoMode ? { userRole: 'CEO' } : managerMode ? { userRole: 'MANAGER' } : accountantMode ? { userRole: 'ACCOUNTANT' } : commercialMode ? { userRole: 'COMMERCIAL' } : stagiaireMode ? { userRole: 'STAGIAIRE', encadreurId: form.encadreurId || undefined } : {}),
+  ...(ceoMode ? { userRole: 'CEO' } : managerMode ? { userRole: 'MANAGER' } : accountantMode ? { userRole: 'ACCOUNTANT' } : commercialMode ? { userRole: 'COMMERCIAL' } : stagiaireMode ? { userRole: 'STAGIAIRE', encadreurId: form.encadreurId || undefined } : rhMode ? { userRole: 'RH' } : {}),
   }, {
   onSuccess: () => onClose(),
   onSettled: () => setIsUploading(false),
@@ -808,8 +810,8 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   : 'bg-gray-300 cursor-not-allowed shadow-none'
   }`}
   >
-  {(createEmployee.isPending || isUploading) ? <Loading02Icon size={16} className="animate-spin" /> : ceoMode ? <CrownIcon size={16} /> : managerMode ? <Shield01Icon size={16} /> : accountantMode ? <CalculatorIcon size={16} /> : commercialMode ? <Target01Icon size={16} /> : stagiaireMode ? <GraduationScrollIcon size={16} /> : <Add01Icon size={16} />}
-  {isUploading ? t('employees.create.uploading') : ceoMode ? 'Créer le CEO' : managerMode ? t('employees.createManager.submit') : accountantMode ? t('employees.createAccountant.submit') : commercialMode ? t('employees.createCommercial.submit') : stagiaireMode ? 'Créer le stagiaire' : t('employees.create.submit')}
+  {(createEmployee.isPending || isUploading) ? <Loading02Icon size={16} className="animate-spin" /> : ceoMode ? <CrownIcon size={16} /> : managerMode ? <Shield01Icon size={16} /> : accountantMode ? <CalculatorIcon size={16} /> : commercialMode ? <Target01Icon size={16} /> : stagiaireMode ? <GraduationScrollIcon size={16} /> : rhMode ? <UserGroupIcon size={16} /> : <Add01Icon size={16} />}
+  {isUploading ? t('employees.create.uploading') : ceoMode ? 'Créer le CEO' : managerMode ? t('employees.createManager.submit') : accountantMode ? t('employees.createAccountant.submit') : commercialMode ? t('employees.createCommercial.submit') : stagiaireMode ? 'Créer le stagiaire' : rhMode ? 'Créer le RH' : t('employees.create.submit')}
   </button>
   </div>
   </motion.div>
@@ -1230,7 +1232,7 @@ const Employees = () => {
   className="flex-1 bg-transparent outline-none text-sm text-[#1c2b3a] placeholder-[#b0bac9]"
   />
   {searchQuery && (
-  <button onClick={() => setSearchQuery('')} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={() => setSearchQuery('')} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={16} />
   </button>
   )}

@@ -5,6 +5,7 @@ import { FiscalYear } from '../models/fiscal-year.model';
 import { User } from '../models/user.model';
 import { CacheService } from '../cache/cache.service';
 import { CACHE_KEYS, CACHE_TTL, CACHE_PATTERNS } from '../cache/cache.keys';
+import { DEFAULT_TAX_CONFIG } from '../payroll/cameroon-tax.constants';
 
 @Injectable()
 export class FiscalYearsService {
@@ -69,7 +70,9 @@ export class FiscalYearsService {
         if (overlapping) {
             throw new ConflictException('A fiscal year already exists for this period');
         }
-        const result = await this.fiscalYearModel.create(dto);
+        // Merge caller-provided rates onto the current-year defaults
+        const taxConfig = { ...DEFAULT_TAX_CONFIG, ...(dto.taxConfig ?? {}) };
+        const result = await this.fiscalYearModel.create({ ...dto, taxConfig });
         await this.cache.invalidateByPattern(CACHE_PATTERNS.FISCAL_YEARS);
         return result;
     }
@@ -83,6 +86,14 @@ export class FiscalYearsService {
         // Closing a fiscal year invalidates reports and the open year cache
         await this.cache.invalidateByPattern(CACHE_PATTERNS.FISCAL_YEARS);
         await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTING_REPORTS);
+        return this.findOne(id);
+    }
+
+    async updateTaxConfig(id: string, taxConfig: any) {
+        const fy = await this.findOne(id);
+        const merged = { ...DEFAULT_TAX_CONFIG, ...(fy.taxConfig ?? {}), ...(taxConfig ?? {}) };
+        await fy.update({ taxConfig: merged });
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.FISCAL_YEARS);
         return this.findOne(id);
     }
 

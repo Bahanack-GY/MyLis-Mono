@@ -157,7 +157,7 @@ const MeetingRecordingPrompt = () => {
   <p className="text-xs text-gray-500 truncate max-w-[160px]">{activeMeetingTitle}</p>
   </div>
   </div>
-  <button onClick={dismiss} className="p-1  hover:bg-gray-100 text-gray-400 transition-colors shrink-0">
+  <button onClick={dismiss} className="p-2 hover:bg-gray-100 text-gray-400 transition-colors shrink-0">
   <Cancel01Icon size={14} />
   </button>
   </div>

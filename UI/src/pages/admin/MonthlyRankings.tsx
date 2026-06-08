@@ -274,7 +274,7 @@ export default function MonthlyRankings() {
   </h3>
   </div>
   </div>
-  <div className="flex-1 px-6 py-5">
+  <div className="flex-1 overflow-y-auto px-6 py-5">
   <p className="text-sm text-[#8892a4]">
   Cette action va enregistrer le top 3 et{' '}
   <span className="font-semibold text-red-600">remettre à zéro les points de tous les employés actifs</span>.

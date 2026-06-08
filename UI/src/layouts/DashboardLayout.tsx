@@ -133,8 +133,8 @@ const ReminderPopup = ({ onClose }: { onClose: () => void }) => {
   : t('remindersPage.popup.multiple', '{{count}} reminders coming up', { count: pending.length })}
   </span>
   </div>
-  <button onClick={onClose} className="p-1  hover:bg-white/10 transition-colors">
-  <Cancel01Icon size={14} />
+  <button onClick={onClose} className="p-2 hover:bg-white/10 transition-colors">
+  <Cancel01Icon size={16} />
   </button>
   </div>
   <div className="max-h-64 overflow-y-auto divide-y divide-[#f8f9fc]">
@@ -183,19 +183,19 @@ const WelcomeModal = ({ firstName, onClose }: { firstName: string; onClose: () =
   initial={{ opacity: 0 }}
   animate={{ opacity: 1 }}
   exit={{ opacity: 0 }}
-  className="fixed inset-0 z-200 flex justify-end bg-black/30"
+  className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
   onClick={onClose}
   >
   <motion.div
   role="dialog"
   aria-modal="true"
   aria-labelledby="welcome-modal-title"
-  initial={{ x: '100%' }}
-  animate={{ x: 0 }}
-  exit={{ x: '100%' }}
-  transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+  initial={{ scale: 0.9, opacity: 0, y: 16 }}
+  animate={{ scale: 1, opacity: 1, y: 0 }}
+  exit={{ scale: 0.9, opacity: 0, y: 16 }}
+  transition={{ type: 'spring', stiffness: 320, damping: 24 }}
   onClick={e => e.stopPropagation()}
-  className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
+  className="bg-white w-full max-w-md flex flex-col border border-[#e5e8ef] shadow-xl overflow-hidden"
   >
   <div className="bg-gradient-to-br from-[#33cbcc] to-[#2196F3] px-8 pt-10 pb-8 text-center relative overflow-hidden">
   <div className="absolute inset-0 opacity-10" aria-hidden="true">
@@ -296,7 +296,7 @@ const BirthdayModal = ({ people, onClose }: { people: BirthdayEmployee[]; onClos
   <button
   onClick={onClose}
   aria-label="Fermer"
-  className="absolute top-4 right-4 text-[#b0bac9] hover:text-[#283852] transition-colors"
+  className="absolute top-3 right-3 p-2 text-[#b0bac9] hover:text-[#283852] transition-colors"
   >
   <Cancel01Icon size={18} aria-hidden="true" />
   </button>
@@ -376,17 +376,17 @@ const QuoteModal = ({ onClose }: { onClose: () => void }) => {
   initial={{ opacity: 0 }}
   animate={{ opacity: 1 }}
   exit={{ opacity: 0 }}
-  className="fixed inset-0 z-200 flex justify-end bg-black/30"
+  className="fixed inset-0 z-200 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
   >
   <motion.div
   role="dialog"
   aria-modal="true"
   aria-labelledby="quote-modal-title"
-  initial={{ x: '100%' }}
-  animate={{ x: 0 }}
-  exit={{ x: '100%' }}
-  transition={{ type: 'tween', duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-  className="bg-white w-full max-w-md h-full flex flex-col border-l border-[#e5e8ef]"
+  initial={{ scale: 0.9, opacity: 0, y: 16 }}
+  animate={{ scale: 1, opacity: 1, y: 0 }}
+  exit={{ scale: 0.9, opacity: 0, y: 16 }}
+  transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+  className="bg-white w-full max-w-md flex flex-col border border-[#e5e8ef] shadow-xl overflow-hidden"
   >
   <div className="bg-[#283852] px-8 pt-10 pb-8 text-center relative overflow-hidden">
   <div className="absolute inset-0 opacity-10" aria-hidden="true">

@@ -42,7 +42,7 @@ const TransferHistoryModal = ({ employeeId, onClose }: TransferHistoryModalProps
   </div>
   <button
   onClick={onClose}
-  className="text-[#b0bac9] hover:text-[#283852] transition-colors"
+  className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors"
   >
   <Cancel01Icon size={20} />
   </button>

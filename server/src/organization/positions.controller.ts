@@ -5,7 +5,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER')
+@Roles('MANAGER', 'RH')
 @Controller('organization/positions')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class PositionsController {
@@ -16,13 +16,13 @@ export class PositionsController {
         return this.positionsService.create(createPositionDto);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL', 'RH')
     @Get()
     findAll() {
         return this.positionsService.findAll();
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'EMPLOYEE', 'COMMERCIAL', 'RH')
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.positionsService.findOne(id);

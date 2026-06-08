@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Ticket01Icon as TicketIcon, Search01Icon, Add01Icon, Cancel01Icon, Alert01Icon, Clock01Icon, CircleIcon, Bug01Icon, Idea01Icon, HelpCircleIcon, Message02Icon, UserIcon, AlignLeftIcon, Loading02Icon, Calendar01Icon, Building02Icon, Tick01Icon } from 'hugeicons-react';
 import { useMyTickets, useCreateTicket, useDepartmentTickets, useAcceptTicket } from '../../api/tickets/hooks';
+import ToggleSwitch from '../../components/ToggleSwitch';
 import { useDepartments } from '../../api/departments/hooks';
 import type { Ticket, CreateTicketDto, TicketPriority } from '../../api/tickets/types';
 import { UserTicketsSkeleton } from '../../components/Skeleton';
@@ -184,7 +185,7 @@ const CreateTicketModal = ({ onClose }: { onClose: () => void }) => {
   </p>
   <h2 className="text-lg font-bold text-[#1c2b3a] leading-none">{t('tickets.create.title')}</h2>
   </div>
-  <button onClick={onClose} className="text-[#b0bac9] hover:text-[#283852] transition-colors">
+  <button onClick={onClose} className="p-2 text-[#b0bac9] hover:text-[#283852] transition-colors">
   <Cancel01Icon size={20} />
   </button>
   </div>
@@ -642,12 +643,6 @@ const Tickets = () => {
   ...DISPLAY_STATUSES.map(s => ({ key: s as DisplayStatus, label: t(`tickets.status.${s}`) })),
   ];
 
-  /* ── Tabs ── */
-  const tabs: { key: TabKey; label: string }[] = [
-  { key: 'my', label: t('tickets.tabs.myTickets') },
-  { key: 'department', label: t('tickets.tabs.departmentTickets') },
-  ];
-
   if (isLoading) {
   return <UserTicketsSkeleton />;
   }
@@ -670,30 +665,15 @@ const Tickets = () => {
   </div>
 
   {/* ── Tabs ── */}
-  <div className="flex gap-px bg-gray-200 p-px">
-  {tabs.map(tab => {
-  const count = tab.key === 'my' ? myTickets.length : deptTickets.length;
-  return (
-  <button
-  key={tab.key}
-  onClick={() => { setActiveTab(tab.key); setFilterStatus('all'); setSearchQuery(''); }}
-  className={`flex-1 flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-semibold transition-all ${
-  activeTab === tab.key
-  ? 'bg-white text-gray-800'
-  : 'bg-gray-100 text-gray-500 hover:text-gray-700'
-  }`}
-  >
-  <span>{tab.label}</span>
-  <span className={`min-w-[22px] text-center text-xs font-bold px-1.5 py-0.5 transition-colors ${
-  activeTab === tab.key
-  ? 'bg-[#283852] text-white'
-  : 'bg-gray-200 text-gray-500'
-  }`}>
-  {count}
-  </span>
-  </button>
-  );
-  })}
+  <div className="flex items-center">
+  <ToggleSwitch
+    checked={activeTab === 'department'}
+    onChange={v => { setActiveTab(v ? 'department' : 'my'); setFilterStatus('all'); setSearchQuery(''); }}
+    labels={[
+    <span className="flex items-center gap-1.5">{t('tickets.tabs.myTickets')}<span className="text-[10px] font-bold bg-white/20 px-1">{myTickets.length}</span></span>,
+    <span className="flex items-center gap-1.5">{t('tickets.tabs.departmentTickets')}<span className="text-[10px] font-bold bg-white/20 px-1">{deptTickets.length}</span></span>,
+    ]}
+  />
   </div>
 
   {/* ── Cross-tab hint ── */}

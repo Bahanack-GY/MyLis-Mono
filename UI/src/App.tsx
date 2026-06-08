@@ -87,12 +87,21 @@ const FundMovements = lazy(() => import("./pages/accounting/FundMovements"))
 const Attendance = lazy(() => import("./pages/discipline/Attendance"))
 const MonthlyRankings = lazy(() => import("./pages/admin/MonthlyRankings"))
 
+// Leaves & Permissions (dual-view)
+const AdminLeaves = lazy(() => import("./pages/admin/Leaves"))
+const EmployeeLeaves = lazy(() => import("./pages/employee/Leaves"))
+const AdminPermissions = lazy(() => import("./pages/admin/Permissions"))
+const EmployeePermissions = lazy(() => import("./pages/employee/Permissions"))
+
 // CEO sees CeoDashboard in admin mode; toggling to "manager view" shows AdminDashboard.
 // Accountants are sent straight to the accounting dashboard.
 const DashboardRouter = () => {
   const { role, viewMode } = useAuth();
   if (role === 'ACCOUNTANT' && viewMode === 'admin') {
   return <Navigate to="/accounting" replace />;
+  }
+  if (role === 'RH') {
+  return <Navigate to="/employees" replace />;
   }
   if (role === 'CEO') {
   return viewMode === 'admin' ? <CeoDashboard /> : <AdminDashboard />;
@@ -160,8 +169,8 @@ function App() {
   } />
   </Route>
 
-  {/* Routes for MANAGER and HEAD_OF_DEPARTMENT only */}
-  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT']} />}>
+  {/* Routes for MANAGER, HEAD_OF_DEPARTMENT and RH */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'HEAD_OF_DEPARTMENT', 'RH']} />}>
   <Route element={<DashboardLayout />}>
   <Route path="/employees" element={<Employees />} />
   <Route path="/departments" element={<Departments />} />
@@ -223,10 +232,22 @@ function App() {
   </Route>
   </Route>
 
-  {/* Discipline — MANAGER + CEO + HEAD_OF_DEPARTMENT */}
-  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'CEO', 'HEAD_OF_DEPARTMENT']} />}>
+  {/* Discipline — MANAGER + CEO + HEAD_OF_DEPARTMENT + RH */}
+  <Route element={<ProtectedRoute allowedRoles={['MANAGER', 'CEO', 'HEAD_OF_DEPARTMENT', 'RH']} />}>
   <Route element={<DashboardLayout />}>
   <Route path="/discipline/attendance" element={<Attendance />} />
+  </Route>
+  </Route>
+
+  {/* Leaves — all authenticated users */}
+  <Route element={<ProtectedRoute />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/leaves" element={
+  <RolePageSwitch adminComponent={AdminLeaves} employeeComponent={EmployeeLeaves} />
+  } />
+  <Route path="/permissions" element={
+  <RolePageSwitch adminComponent={AdminPermissions} employeeComponent={EmployeePermissions} />
+  } />
   </Route>
   </Route>
 

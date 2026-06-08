@@ -1,19 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import {
     IRPP_BRACKETS,
-    IRPP_EXEMPT,
-    CNPS_EMPLOYEE_RATE,
-    CNPS_EMPLOYER_RATE,
-    CNPS_CEILING,
-    CFC_RATE,
-    COMMUNAL_TAX_RATE,
+    RAV_BRACKETS,
+    TDL_BRACKETS,
+    ATMP_DEFAULT_RISK_CLASS,
+    DEFAULT_TAX_CONFIG,
+    TaxRateConfig,
 } from './cameroon-tax.constants';
+
+// ─────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────
+
+export interface SalaryComponentInput {
+    label: string;
+    type: 'PRIME' | 'INDEMNITE' | 'AVANTAGE_NATURE';
+    amount: number;
+    cnpsBase: boolean;  // included in cotisable base
+    taxable: boolean;   // included in IRPP taxable base
+    cap?: number | null;        // exoneration cap (0 = uncapped)
+    justificatifUrl?: string | null;
+}
 
 export interface DeductionToggles {
     includeCnps: boolean;
     includeCfc: boolean;
     includeIrpp: boolean;
-    includeCommunalTax: boolean;
+    includeCommunalTax: boolean; // legacy alias for includeIrppCac
+    includeFne: boolean;
+    includeRav: boolean;
+    includeTdl: boolean;
 }
 
 export interface CustomDeduction {
@@ -21,163 +37,325 @@ export interface CustomDeduction {
     amount: number;
 }
 
-export interface PayrollCalculation {
-    grossSalary: number;
-    cnpsEmployee: number;
-    cnpsEmployer: number;
-    cfc: number;
-    taxableIncome: number;
-    irpp: number;
-    communalTax: number;
-    totalDeductions: number;
-    totalEmployerCharges: number;
-    netSalary: number;
-    details: PayrollLineItem[];
-    customDeductionsTotal: number;
-}
-
 export interface PayrollLineItem {
     label: string;
     base: number;
-    rate: number;
+    rate: number;       // 0 if not percentage-based
     employeeAmount: number;
     employerAmount: number;
 }
 
+export interface PayrollCalculation {
+    // Salary bases
+    baseSalary: number;
+    grossSalary: number;        // base + all components (brut global)
+    grossCotisable: number;     // brut cotisable (capped at CNPS_CEILING for CNPS, uncapped for AT/MP)
+    grossTaxable: number;       // brut fiscal = base + taxable components
+    netCategoriel: number;      // after abattements, before IRPP brackets
+
+    // CNPS breakdown
+    pvidEmployee: number;       // PVID 4.2% employee
+    pvidEmployer: number;       // PVID 4.2% employer
+    cnpsFamilyAllowance: number; // PF 7% employer
+    atmp: number;               // AT/MP employer
+
+    // CFC
+    cfcEmployee: number;        // 1% employee
+    cfcEmployer: number;        // 1.5% employer
+
+    // FNE
+    fne: number;                // 1% employer
+
+    // Fiscal deductions (employee)
+    irpp: number;
+    cac: number;                // 10% of IRPP
+    rav: number;
+    tdl: number;
+
+    // Aggregates
+    totalEmployeeDeductions: number;
+    totalEmployerCharges: number;
+    customDeductionsTotal: number;
+    netSalary: number;
+
+    // Compliance
+    complianceWarnings: string[];
+    riskClass: number;
+
+    // Itemized detail for payslip
+    details: PayrollLineItem[];
+
+    // Legacy compat
+    cnpsEmployee: number;
+    cnpsEmployer: number;
+    cfc: number;
+    taxableIncome: number;
+    communalTax: number;
+    totalDeductions: number;
+}
+
+// ─────────────────────────────────────────
+// Service
+// ─────────────────────────────────────────
+
 @Injectable()
 export class PayrollCalculatorService {
-    /**
-     * Calculate all payroll deductions from gross salary.
-     * Toggles allow excluding specific statutory deductions.
-     * Custom deductions are subtracted after statutory ones.
-     */
+
     calculate(
-        grossSalary: number,
+        grossSalaryOrBase: number,
         toggles?: Partial<DeductionToggles>,
         customDeductions?: CustomDeduction[],
+        components?: SalaryComponentInput[],
+        riskClass?: number,
+        baseSalary?: number,
+        rateOverrides?: Partial<TaxRateConfig>,
     ): PayrollCalculation {
-        const gross = Math.round(grossSalary);
         const opts: DeductionToggles = {
             includeCnps: true,
             includeCfc: true,
             includeIrpp: true,
             includeCommunalTax: true,
+            includeFne: true,
+            includeRav: true,
+            includeTdl: true,
             ...toggles,
         };
 
-        // 1. CNPS Employee contribution (2.8% capped at ceiling)
-        const cnpsBase = Math.min(gross, CNPS_CEILING);
-        const cnpsEmployee = opts.includeCnps ? Math.round(cnpsBase * CNPS_EMPLOYEE_RATE) : 0;
+        const r: TaxRateConfig = { ...DEFAULT_TAX_CONFIG, ...(rateOverrides ?? {}) };
+        const atmpRiskClass = riskClass || ATMP_DEFAULT_RISK_CLASS;
+        const base = Math.round(baseSalary ?? grossSalaryOrBase);
+        const warnings: string[] = [];
+        const details: PayrollLineItem[] = [];
 
-        // 2. CNPS Employer contribution (11.2% capped at ceiling)
-        const cnpsEmployer = opts.includeCnps ? Math.round(cnpsBase * CNPS_EMPLOYER_RATE) : 0;
+        // ── 1. Salary components ──
+        let componentsCotisable = 0;
+        let componentsTaxable = 0;
+        let componentsGross = 0;
 
-        // 3. CFC (1% of gross)
-        const cfc = opts.includeCfc ? Math.round(gross * CFC_RATE) : 0;
+        for (const comp of components || []) {
+            const amt = Math.round(comp.amount);
+            componentsGross += amt;
+            if (comp.cnpsBase) componentsCotisable += amt;
+            if (comp.taxable) componentsTaxable += amt;
 
-        // 4. Taxable income = gross - CNPS employee - CFC
-        const monthlyTaxable = gross - cnpsEmployee - cfc;
-
-        // 5. IRPP: annualize → apply brackets → divide by 12
-        let irpp = 0;
-        if (opts.includeIrpp) {
-            const annualTaxable = Math.max(0, monthlyTaxable * 12 - IRPP_EXEMPT);
-            const annualIrpp = this.calculateIrpp(annualTaxable);
-            irpp = Math.round(annualIrpp / 12);
+            // Sanity check: exonerated amount without justificatif
+            if (!comp.taxable && amt > 0 && !comp.justificatifUrl) {
+                if (comp.type === 'INDEMNITE') {
+                    warnings.push(`Indemnité "${comp.label}" exonérée sans justificatif — risque de requalification.`);
+                }
+            }
+            // Cap check for indemnités
+            if (comp.cap && comp.cap > 0 && amt > comp.cap) {
+                warnings.push(`"${comp.label}" dépasse le plafond d'exonération (${comp.cap.toLocaleString('fr-FR')} XAF). Excédent imposable.`);
+            }
         }
 
-        // 6. Communal tax = 10% of IRPP (only if IRPP is included)
-        const communalTax = opts.includeCommunalTax && opts.includeIrpp
-            ? Math.round(irpp * COMMUNAL_TAX_RATE)
-            : 0;
+        const gross = base + componentsGross; // brut global
+        const grossCotisable = Math.min(base + componentsCotisable, r.cnpsCeiling); // cotisable (plafonné)
+        const grossTaxable = base + componentsTaxable; // brut fiscal
 
-        // Custom deductions total
-        const customDeductionsTotal = (customDeductions || []).reduce(
-            (s, d) => s + Math.round(d.amount), 0,
-        );
+        details.push({ label: 'Salaire de base', base, rate: 1, employeeAmount: 0, employerAmount: 0 });
+        if (componentsGross > 0) {
+            details.push({ label: 'Primes, indemnités et avantages', base: componentsGross, rate: 1, employeeAmount: 0, employerAmount: 0 });
+        }
 
-        // Totals
-        const totalDeductions = cnpsEmployee + cfc + irpp + communalTax;
-        const totalEmployerCharges = cnpsEmployer;
-        const netSalary = gross - totalDeductions - customDeductionsTotal;
-
-        // Breakdown for payslip
-        const details: PayrollLineItem[] = [
-            { label: 'Salaire brut', base: gross, rate: 1, employeeAmount: 0, employerAmount: 0 },
-        ];
-
+        // ── 2. CNPS PVID (plafond cotisable) ──
+        let pvidEmployee = 0, pvidEmployer = 0;
         if (opts.includeCnps) {
+            pvidEmployee = Math.min(Math.round(grossCotisable * r.pvidEmployeeRate), r.pvidMonthlyCap);
+            pvidEmployer = Math.round(grossCotisable * r.pvidEmployerRate);
             details.push({
-                label: 'CNPS (Pension vieillesse)',
-                base: cnpsBase,
-                rate: CNPS_EMPLOYEE_RATE,
-                employeeAmount: cnpsEmployee,
-                employerAmount: cnpsEmployer,
+                label: 'CNPS PVID (Pension Vieillesse)',
+                base: grossCotisable,
+                rate: r.pvidEmployeeRate,
+                employeeAmount: pvidEmployee,
+                employerAmount: pvidEmployer,
             });
         }
 
-        if (opts.includeCfc) {
+        // ── 3. CNPS Prestations Familiales (patronal seulement) ──
+        let cnpsFamilyAllowance = 0;
+        if (opts.includeCnps) {
+            cnpsFamilyAllowance = Math.round(grossCotisable * r.pfEmployerRate);
             details.push({
-                label: 'CFC (Crédit Foncier)',
+                label: 'CNPS Prestations Familiales (patronal)',
+                base: grossCotisable,
+                rate: r.pfEmployerRate,
+                employeeAmount: 0,
+                employerAmount: cnpsFamilyAllowance,
+            });
+        }
+
+        // ── 4. CNPS AT/MP (patronal, assiette = brut GLOBAL non plafonné) ──
+        let atmp = 0;
+        if (opts.includeCnps) {
+            const atmpRate = (r.atmpRates[atmpRiskClass] ?? r.atmpRates[1]) as number;
+            atmp = Math.round(gross * atmpRate);
+            details.push({
+                label: `CNPS AT/MP (classe risque ${atmpRiskClass}, patronal)`,
                 base: gross,
-                rate: CFC_RATE,
-                employeeAmount: cfc,
-                employerAmount: 0,
+                rate: atmpRate,
+                employeeAmount: 0,
+                employerAmount: atmp,
             });
         }
 
+        // ── 5. CFC (employee + employer, assiette = brut taxable) ──
+        let cfcEmployee = 0, cfcEmployer = 0;
+        if (opts.includeCfc) {
+            cfcEmployee = Math.round(grossTaxable * r.cfcEmployeeRate);
+            cfcEmployer = Math.round(grossTaxable * r.cfcEmployerRate);
+            details.push({
+                label: 'CFC Crédit Foncier',
+                base: grossTaxable,
+                rate: r.cfcEmployeeRate,
+                employeeAmount: cfcEmployee,
+                employerAmount: cfcEmployer,
+            });
+        }
+
+        // ── 6. FNE (patronal, assiette = brut taxable) ──
+        let fne = 0;
+        if (opts.includeFne) {
+            fne = Math.round(grossTaxable * r.fneEmployerRate);
+            details.push({
+                label: 'FNE Fonds National de l\'Emploi (patronal)',
+                base: grossTaxable,
+                rate: r.fneEmployerRate,
+                employeeAmount: 0,
+                employerAmount: fne,
+            });
+        }
+
+        // ── 7. Net catégoriel pour IRPP ──
+        const annualGrossTaxable = grossTaxable * 12;
+        const abattementAnnual = Math.min(annualGrossTaxable * r.irppAbattementRate, r.irppAbattementAnnualCap);
+        const annualPvidEmployee = pvidEmployee * 12;
+        const netCategorielAnnual = Math.max(0,
+            annualGrossTaxable - abattementAnnual - annualPvidEmployee - r.irppFixedAbattementAnnual
+        );
+        const netCategoriel = Math.round(netCategorielAnnual / 12);
+
+        // ── 8. IRPP (barème progressif sur net catégoriel annuel) + CAC 10% ──
+        let irpp = 0, cac = 0;
         if (opts.includeIrpp) {
+            const annualIrpp = this.calculateIrppBrackets(netCategorielAnnual);
+            irpp = Math.round(annualIrpp / 12);
+            cac = opts.includeCommunalTax ? Math.round(irpp * r.cacRate) : 0;
             details.push({
                 label: 'IRPP (Impôt sur le revenu)',
-                base: monthlyTaxable,
+                base: netCategoriel,
                 rate: 0,
                 employeeAmount: irpp,
                 employerAmount: 0,
             });
+            if (cac > 0) {
+                details.push({
+                    label: 'CAC — Centimes Additionnels Communaux (10% IRPP)',
+                    base: irpp,
+                    rate: r.cacRate,
+                    employeeAmount: cac,
+                    employerAmount: 0,
+                });
+            }
         }
 
-        if (opts.includeCommunalTax && opts.includeIrpp) {
-            details.push({
-                label: 'Centimes additionnels communaux',
-                base: irpp,
-                rate: COMMUNAL_TAX_RATE,
-                employeeAmount: communalTax,
-                employerAmount: 0,
-            });
+        // ── 9. RAV — Redevance Audiovisuelle (salariale, mensuelle, brut fiscal) ──
+        let rav = 0;
+        if (opts.includeRav) {
+            rav = this.calculateRav(grossTaxable);
+            if (rav > 0) {
+                details.push({
+                    label: 'RAV Redevance Audiovisuelle',
+                    base: grossTaxable,
+                    rate: 0,
+                    employeeAmount: rav,
+                    employerAmount: 0,
+                });
+            }
         }
+
+        // ── 10. TDL — Taxe de Développement Local (salariale, annuelle ÷12, base salary) ──
+        let tdl = 0;
+        if (opts.includeTdl) {
+            tdl = this.calculateTdl(base);
+            if (tdl > 0) {
+                details.push({
+                    label: 'TDL Taxe de Développement Local (mensuel)',
+                    base,
+                    rate: 0,
+                    employeeAmount: tdl,
+                    employerAmount: 0,
+                });
+            }
+        }
+
+        // ── 11. Custom deductions ──
+        const customDeductionsTotal = (customDeductions || []).reduce((s, d) => s + Math.round(d.amount), 0);
+
+        // ── 12. Totals ──
+        const totalEmployeeDeductions = pvidEmployee + cfcEmployee + irpp + cac + rav + tdl;
+        const totalEmployerCharges = pvidEmployer + cnpsFamilyAllowance + atmp + cfcEmployer + fne;
+        const netSalary = gross - totalEmployeeDeductions - customDeductionsTotal;
 
         return {
+            baseSalary: base,
             grossSalary: gross,
-            cnpsEmployee,
-            cnpsEmployer,
-            cfc,
-            taxableIncome: monthlyTaxable,
+            grossCotisable,
+            grossTaxable,
+            netCategoriel,
+            pvidEmployee,
+            pvidEmployer,
+            cnpsFamilyAllowance,
+            atmp,
+            cfcEmployee,
+            cfcEmployer,
+            fne,
             irpp,
-            communalTax,
-            totalDeductions,
+            cac,
+            rav,
+            tdl,
+            totalEmployeeDeductions,
             totalEmployerCharges,
-            netSalary,
-            details,
             customDeductionsTotal,
+            netSalary,
+            complianceWarnings: warnings,
+            riskClass: atmpRiskClass,
+            details,
+            // Legacy compat fields
+            cnpsEmployee: pvidEmployee,
+            cnpsEmployer: pvidEmployer + cnpsFamilyAllowance + atmp,
+            cfc: cfcEmployee,
+            taxableIncome: netCategoriel,
+            communalTax: cac,
+            totalDeductions: totalEmployeeDeductions,
         };
     }
 
-    /**
-     * Apply progressive IRPP brackets on annual taxable income
-     */
-    private calculateIrpp(annualTaxable: number): number {
+    private calculateIrppBrackets(annualNetCategoriel: number): number {
         let tax = 0;
-        let remaining = annualTaxable;
-
+        let remaining = Math.max(0, annualNetCategoriel);
         for (const bracket of IRPP_BRACKETS) {
             if (remaining <= 0) break;
-            const bracketWidth = bracket.max === Infinity
-                ? remaining
-                : Math.min(remaining, bracket.max - bracket.min + 1);
-            tax += bracketWidth * bracket.rate;
-            remaining -= bracketWidth;
+            const bracketMax = bracket.max === Infinity ? remaining : bracket.max - bracket.min + 1;
+            const taxable = Math.min(remaining, bracketMax);
+            tax += taxable * bracket.rate;
+            remaining -= taxable;
         }
-
         return Math.round(tax);
+    }
+
+    private calculateRav(monthlyGrossTaxable: number): number {
+        for (const bracket of RAV_BRACKETS) {
+            if (monthlyGrossTaxable <= bracket.max) return bracket.amount;
+        }
+        return 0;
+    }
+
+    private calculateTdl(monthlyBaseSalary: number): number {
+        for (const bracket of TDL_BRACKETS) {
+            if (monthlyBaseSalary <= bracket.max) return Math.round(bracket.annual / 12);
+        }
+        return 0;
     }
 }

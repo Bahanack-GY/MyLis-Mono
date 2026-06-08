@@ -226,7 +226,7 @@ const Clients = () => {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'one_time' | 'subscription'>('all');
   const [filterDepartment, setFilterDepartment] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
@@ -544,7 +544,7 @@ const Clients = () => {
   <div className="flex items-center gap-1">
   <button
   onClick={e => handleEdit(e, client)}
-  className="p-2  hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+  className="p-2  hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
   >
   <PencilIcon size={14} />
   </button>
@@ -552,7 +552,7 @@ const Clients = () => {
   <button
   onClick={e => handleDelete(e, client.id)}
   disabled={deleteClient.isPending}
-  className="p-2  hover:bg-gray-100 text-gray-400 hover:text-[#283852] transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
+  className="p-2  hover:bg-gray-100 text-gray-400 hover:text-[#283852] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
   >
   {deleteClient.isPending ? <Loading02Icon size={14} className="animate-spin" /> : <Delete02Icon size={14} />}
   </button>
@@ -655,7 +655,7 @@ const Clients = () => {
   )}
   {!rev.paid && !rev.pending && <span className="text-xs text-gray-300">—</span>}
   </div>
-  <div className="col-span-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+  <div className="col-span-2 flex items-center gap-1">
   <button
   onClick={e => handleEdit(e, client)}
   className="p-1.5  hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"

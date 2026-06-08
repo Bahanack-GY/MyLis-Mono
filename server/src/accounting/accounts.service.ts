@@ -119,6 +119,96 @@ export class AccountsService {
         return { deleted: true };
     }
 
+    // ===== AUXILIARY ACCOUNTS (double-indexation) =====
+
+    /**
+     * Create a nominative auxiliary account under a collective parent.
+     * Auto-generates code: parent.code + 3-digit sequence (e.g. 411000 → 411000001).
+     */
+    async createAuxiliary(params: {
+        collectiveCode: string;
+        thirdPartyType: 'CLIENT' | 'SUPPLIER' | 'EMPLOYEE';
+        thirdPartyId: string;
+        name: string;
+    }): Promise<Account> {
+        const collective = await this.accountModel.findOne({ where: { code: params.collectiveCode } });
+        if (!collective) throw new NotFoundException(`Collective account ${params.collectiveCode} not found`);
+
+        // Check if auxiliary already exists for this third party
+        const existing = await this.accountModel.findOne({
+            where: {
+                parentId: collective.id,
+                thirdPartyType: params.thirdPartyType,
+                thirdPartyId: params.thirdPartyId,
+            },
+        });
+        if (existing) return existing;
+
+        // Count existing children to determine next sequence
+        const childCount = await this.accountModel.count({ where: { parentId: collective.id } });
+        const seq = String(childCount + 1).padStart(3, '0');
+        const code = `${collective.code}${seq}`;
+
+        const auxiliary = await this.accountModel.create({
+            code,
+            name: params.name,
+            type: collective.type,
+            categoryId: collective.categoryId,
+            parentId: collective.id,
+            isCollective: false,
+            thirdPartyType: params.thirdPartyType,
+            thirdPartyId: params.thirdPartyId,
+            isSystem: false,
+            isActive: true,
+        } as any);
+
+        await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTS);
+        return auxiliary;
+    }
+
+    /**
+     * Resolve (or auto-create) the auxiliary account for a third party under a collective.
+     */
+    async resolveAuxiliary(params: {
+        collectiveCode: string;
+        thirdPartyType: 'CLIENT' | 'SUPPLIER' | 'EMPLOYEE';
+        thirdPartyId: string;
+        name: string;
+    }): Promise<Account | null> {
+        const collective = await this.accountModel.findOne({ where: { code: params.collectiveCode } });
+        if (!collective) return null;
+
+        const existing = await this.accountModel.findOne({
+            where: {
+                parentId: collective.id,
+                thirdPartyType: params.thirdPartyType,
+                thirdPartyId: params.thirdPartyId,
+            },
+        });
+        if (existing) return existing;
+
+        return this.createAuxiliary(params);
+    }
+
+    /**
+     * List all auxiliary accounts under a collective (drill-down).
+     */
+    async listAuxiliaries(collectiveId: string): Promise<Account[]> {
+        return this.accountModel.findAll({
+            where: { parentId: collectiveId, isCollective: false },
+            order: [['code', 'ASC']],
+        });
+    }
+
+    /**
+     * Find auxiliary account by third-party ID.
+     */
+    async findByThirdParty(thirdPartyType: string, thirdPartyId: string): Promise<Account | null> {
+        return this.accountModel.findOne({
+            where: { thirdPartyType, thirdPartyId },
+        });
+    }
+
     // ===== CATEGORIES =====
 
     async findAllCategories() {
@@ -162,32 +252,32 @@ export class AccountsService {
     // ===== SEED =====
 
     async seed() {
-        // Check if already seeded
-        const existingCategories = await this.categoryModel.count();
-        if (existingCategories > 0) {
-            return { message: 'Already seeded', categories: existingCategories };
-        }
-
-        // 1. Create categories
+        // 1. Upsert categories (idempotent)
         const categoryMap = new Map<string, string>();
         for (const cat of SEED_CATEGORIES) {
-            const created = await this.categoryModel.create(cat as any);
-            categoryMap.set(cat.code, created.id);
+            const [record] = await this.categoryModel.findOrCreate({
+                where: { code: cat.code } as any,
+                defaults: cat as any,
+            });
+            categoryMap.set(cat.code, record.id);
         }
 
-        // 2. Create accounts (two passes: first without parents, then update parent references)
+        // 2. Upsert accounts — first pass without parentId
         const accountMap = new Map<string, string>();
-        // First pass: create all accounts without parentId
         for (const acc of SEED_ACCOUNTS) {
-            const created = await this.accountModel.create({
-                code: acc.code,
-                name: acc.name,
-                type: acc.type,
-                categoryId: categoryMap.get(acc.categoryCode),
-                isSystem: true,
-                isActive: true,
-            } as any);
-            accountMap.set(acc.code, created.id);
+            const [record] = await this.accountModel.findOrCreate({
+                where: { code: acc.code } as any,
+                defaults: {
+                    code: acc.code,
+                    name: acc.name,
+                    type: acc.type,
+                    categoryId: categoryMap.get(acc.categoryCode),
+                    isCollective: acc.isCollective ?? false,
+                    isSystem: true,
+                    isActive: true,
+                } as any,
+            });
+            accountMap.set(acc.code, record.id);
         }
 
         // Second pass: set parent references
@@ -204,16 +294,19 @@ export class AccountsService {
             }
         }
 
-        // 3. Create journals
+        // 3. Upsert journals
         for (const journal of SEED_JOURNALS) {
-            await this.journalModel.create(journal as any);
+            await this.journalModel.findOrCreate({
+                where: { code: journal.code } as any,
+                defaults: journal as any,
+            });
         }
 
         await this.cache.invalidateByPattern(CACHE_PATTERNS.ACCOUNTS);
         await this.cache.del(CACHE_KEYS.JOURNALS);
 
         return {
-            message: 'SYSCOHADA chart of accounts seeded successfully',
+            message: 'SYSCOHADA chart of accounts seeded (idempotent)',
             categories: SEED_CATEGORIES.length,
             accounts: SEED_ACCOUNTS.length,
             journals: SEED_JOURNALS.length,

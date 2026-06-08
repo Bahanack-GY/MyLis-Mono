@@ -109,7 +109,7 @@ function PaymentModal({
   {t('commercial.followUp.recordPayment')}
   </h3>
   </div>
-  <button onClick={onClose} className="p-1  hover:bg-[#f8f9fc] transition-colors">
+  <button onClick={onClose} className="p-2 hover:bg-[#f8f9fc] transition-colors">
   <Cancel01Icon size={18} className="text-[#8892a4]" />
   </button>
   </div>

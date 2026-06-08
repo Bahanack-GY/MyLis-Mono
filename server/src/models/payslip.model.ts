@@ -118,6 +118,67 @@ export class Payslip extends Model {
     })
     declare details: any;
 
+    // ── 2026 Cameroon compliance fields (all nullable for backward compat) ──
+
+    // CNPS Pension Vieillesse-Invalidité-Décès (PVID): 4.2% employee + 4.2% employer, ceiling 750k
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare pvidEmployee: number;
+
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare pvidEmployer: number;
+
+    // CNPS Prestations Familiales: 7% employer-only, ceiling 750k
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare cnpsFamilyAllowance: number;
+
+    // CNPS AT/MP: employer-only (1.75/2.5/5%), no ceiling
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare atmp: number;
+
+    // CFC employee (1%) and employer (1.5%), no ceiling
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare cfcEmployee: number;
+
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare cfcEmployer: number;
+
+    // FNE: 1% employer-only, no ceiling
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare fne: number;
+
+    // RAV: employee-only, monthly bracket
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare rav: number;
+
+    // TDL (Taxe de Développement Local): employee-only, annual bracket prorated monthly
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare tdl: number;
+
+    // Centimes Additionnels Communaux on IRPP (10%)
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true, defaultValue: 0 })
+    declare cac: number;
+
+    // Salary breakdown for payslip display
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true })
+    declare baseSalary: number | null;
+
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true })
+    declare grossTaxable: number | null;
+
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true })
+    declare grossCotisable: number | null;
+
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true })
+    declare netCategoriel: number | null;
+
+    // CNPS risk class used for AT/MP calculation
+    @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: 1 })
+    declare riskClass: number | null;
+
+    // Compliance warnings generated during calculation
+    @Column({ type: DataType.JSONB, allowNull: true })
+    declare complianceWarnings: string[] | null;
+
     /* ── Deduction toggles (default: all enabled) ── */
 
     @Column({

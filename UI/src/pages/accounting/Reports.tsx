@@ -1,7 +1,7 @@
 ﻿import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
-import { BookOpen01Icon, JusticeScale01Icon, PieChartIcon, ArrowUpRight01Icon, Calendar01Icon, Tick01Icon, Alert02Icon, ArrowUp01Icon, ArrowDown01Icon, Loading02Icon } from 'hugeicons-react';
+import { BookOpen01Icon, JusticeScale01Icon, PieChartIcon, ArrowUpRight01Icon, Calendar01Icon, Tick01Icon, Alert02Icon, ArrowUp01Icon, ArrowDown01Icon, Loading02Icon, ArrowRight01Icon } from 'hugeicons-react';
 import { useQuery } from '@tanstack/react-query';
 import {
  getFiscalYears,
@@ -9,6 +9,8 @@ import {
  getTrialBalance,
  getBalanceSheet,
  getIncomeStatement,
+ getSixColumnBalance,
+ getAuxiliaryBalance,
 } from '../../api/accounting/api';
 import { useDepartments } from '../../api/departments/hooks';
 import type {
@@ -194,11 +196,81 @@ const GrandLivreTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; d
 };
 
 /* ------------------------------------------------------------------ */
-/* Balance (Trial Balance) Tab */
+/* Balance à 6 colonnes SYSCOHADA Tab */
 /* ------------------------------------------------------------------ */
 
+const EquilibriumBadge = ({ ok, label }: { ok: boolean; label: string }) => (
+ <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${ok ? 'text-[#33cbcc] bg-[#33cbcc]/10' : 'text-red-500 bg-red-50'}`}>
+ {ok ? <Tick01Icon size={10} /> : <Alert02Icon size={10} />}
+ {label}
+ </span>
+);
+
+const AuxiliaryDrillDown = ({ fiscalYearId, accountId, accountName, onClose }: { fiscalYearId: string; accountId: string; accountName: string; onClose: () => void }) => {
+ const { data, isLoading } = useQuery<any>({
+ queryKey: ['accounting', 'reports', 'auxiliary-balance', fiscalYearId, accountId],
+ queryFn: () => getAuxiliaryBalance(fiscalYearId, accountId),
+ enabled: !!fiscalYearId && !!accountId,
+ });
+
+ return (
+ <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+ <div className="bg-white w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col overflow-hidden shadow-xl">
+ <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0">
+ <div>
+ <h3 className="text-sm font-bold text-gray-800">Auxiliaires — {accountName}</h3>
+ {data && (
+ <span className={`text-xs ${data.concordant ? 'text-[#33cbcc]' : 'text-red-500'}`}>
+ {data.concordant ? '✓ Concordant' : '⚠ Écart collectif/auxiliaires'}
+ </span>
+ )}
+ </div>
+ <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg font-bold">×</button>
+ </div>
+ <div className="overflow-y-auto flex-1 p-6">
+ {isLoading ? (
+ <div className="flex justify-center py-8"><Loading02Icon size={20} className="animate-spin text-[#33cbcc]" /></div>
+ ) : !data || data.auxiliaries.length === 0 ? (
+ <p className="text-center text-gray-400 py-8">Aucun auxiliaire enregistré pour ce compte</p>
+ ) : (
+ <table className="w-full text-left text-sm">
+ <thead>
+ <tr className="text-[10px] font-semibold text-gray-400 uppercase border-b border-gray-100">
+ <th className="py-2 pr-4">Code</th>
+ <th className="py-2 pr-4">Tiers</th>
+ <th className="py-2 text-right pr-4">Débit</th>
+ <th className="py-2 text-right pr-4">Crédit</th>
+ <th className="py-2 text-right">Solde</th>
+ </tr>
+ </thead>
+ <tbody className="divide-y divide-gray-50">
+ {data.auxiliaries.map((aux: any) => (
+ <tr key={aux.auxiliaryAccountId} className="hover:bg-gray-50">
+ <td className="py-2 pr-4 font-mono text-xs text-[#33cbcc]">{aux.code}</td>
+ <td className="py-2 pr-4 text-gray-700">{aux.name}</td>
+ <td className="py-2 pr-4 text-right">{aux.totalDebit > 0 ? formatXAF(aux.totalDebit) : ''}</td>
+ <td className="py-2 pr-4 text-right">{aux.totalCredit > 0 ? formatXAF(aux.totalCredit) : ''}</td>
+ <td className={`py-2 text-right font-bold ${aux.balance >= 0 ? 'text-[#33cbcc]' : 'text-[#283852]'}`}>
+ {formatXAF(Math.abs(aux.balance))}{aux.balance < 0 ? ' Cr' : ''}
+ </td>
+ </tr>
+ ))}
+ </tbody>
+ </table>
+ )}
+ </div>
+ </div>
+ </div>
+ );
+};
+
 const BalanceTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; departmentId?: string }) => {
- const { data, isLoading } = useTrialBalance(fiscalYearId, departmentId);
+ const [drillDown, setDrillDown] = useState<{ id: string; name: string } | null>(null);
+ const { data, isLoading } = useQuery<any>({
+ queryKey: ['accounting', 'reports', 'six-column-balance', fiscalYearId, departmentId],
+ queryFn: () => getSixColumnBalance(fiscalYearId, undefined, undefined, departmentId),
+ enabled: !!fiscalYearId,
+ });
 
  if (isLoading) {
  return (
@@ -212,92 +284,96 @@ const BalanceTab = ({ fiscalYearId, departmentId }: { fiscalYearId: string; depa
  return (
  <div className="text-center py-16">
  <JusticeScale01Icon size={48} className="mx-auto text-gray-300 mb-4"/>
- <p className="text-gray-400 font-medium">Aucune donnee pour cet exercice</p>
+ <p className="text-gray-400 font-medium">Aucune donnée pour cet exercice</p>
  </div>
  );
  }
 
+ const { totals, equilibrium } = data;
+
  return (
- <div className="bg-white  overflow-hidden">
- {/* Balanced indicator */}
- <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between">
- <h3 className="text-sm font-bold text-gray-800">Balance des comptes</h3>
- {data.totals.isBalanced ? (
- <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#33cbcc] bg-[#33cbcc]/10 px-3 py-1 rounded-full">
- <Tick01Icon size={12} />
- Equilibree
- </span>
- ) : (
- <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#283852] bg-[#283852]/10 px-3 py-1 rounded-full">
- <Alert02Icon size={12} />
- Desequilibree
- </span>
+ <div className="bg-white overflow-hidden">
+ {drillDown && (
+ <AuxiliaryDrillDown
+ fiscalYearId={fiscalYearId}
+ accountId={drillDown.id}
+ accountName={drillDown.name}
+ onClose={() => setDrillDown(null)}
+ />
  )}
+
+ {/* Header: 3 equilibrium checks */}
+ <div className="px-6 py-3 border-b border-gray-100 flex items-center justify-between flex-wrap gap-2">
+ <h3 className="text-sm font-bold text-gray-800">Balance à 6 colonnes — SYSCOHADA</h3>
+ <div className="flex gap-2 flex-wrap">
+ <EquilibriumBadge ok={equilibrium.openingBalanced} label="Soldes ouverture" />
+ <EquilibriumBadge ok={equilibrium.movementsBalanced} label="Mouvements" />
+ <EquilibriumBadge ok={equilibrium.closingBalanced} label="Soldes clôture" />
+ </div>
  </div>
 
- <table className="w-full text-left">
+ <div className="overflow-x-auto">
+ <table className="w-full text-left min-w-[900px]">
  <thead>
- <tr className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100 bg-gray-50">
- <th className="px-6 py-3">Code</th>
- <th className="px-6 py-3">Nom du compte</th>
- <th className="px-6 py-3 text-right">Debit</th>
- <th className="px-6 py-3 text-right">Credit</th>
- <th className="px-6 py-3 text-right">Solde Debiteur</th>
- <th className="px-6 py-3 text-right">Solde Crediteur</th>
+ <tr className="bg-gray-50 border-b border-gray-100">
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase" rowSpan={2}>Code</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase" rowSpan={2}>Libellé</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase text-center border-l border-gray-200" colSpan={2}>Soldes d'Ouverture</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase text-center border-l border-gray-200" colSpan={2}>Mouvements</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-500 uppercase text-center border-l border-gray-200" colSpan={2}>Soldes de Clôture</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase text-center border-l border-gray-200" rowSpan={2}></th>
+ </tr>
+ <tr className="bg-gray-50 border-b-2 border-gray-200">
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase text-right border-l border-gray-200">Débit</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase text-right">Crédit</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase text-right border-l border-gray-200">Débit</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-gray-400 uppercase text-right">Crédit</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-[#33cbcc] uppercase text-right border-l border-gray-200">Débit</th>
+ <th className="px-3 py-2 text-[10px] font-semibold text-[#283852] uppercase text-right">Crédit</th>
  </tr>
  </thead>
  <tbody className="divide-y divide-gray-50">
- {data.accounts.map((row: TrialBalanceAccount, idx: number) => (
- <tr key={idx} className="hover:bg-gray-50/50 transition-colors text-sm">
- <td className="px-6 py-2.5 font-mono text-xs font-semibold text-gray-600">
- {row.account.code}
- </td>
- <td className="px-6 py-2.5 text-gray-700">{row.account.name}</td>
- <td className="px-6 py-2.5 text-right font-medium text-gray-800">
- {row.totalDebit > 0 ? formatXAF(row.totalDebit) : ''}
- </td>
- <td className="px-6 py-2.5 text-right font-medium text-gray-800">
- {row.totalCredit > 0 ? formatXAF(row.totalCredit) : ''}
- </td>
- <td className="px-6 py-2.5 text-right font-bold text-[#33cbcc]">
- {row.debitBalance > 0 ? formatXAF(row.debitBalance) : ''}
- </td>
- <td className="px-6 py-2.5 text-right font-bold text-[#283852]">
- {row.creditBalance > 0 ? formatXAF(row.creditBalance) : ''}
+ {data.accounts.map((row: any, idx: number) => {
+ const isCollective = row.account?.isCollective;
+ return (
+ <tr key={idx} className={`hover:bg-gray-50/50 transition-colors text-sm ${isCollective ? 'font-semibold bg-gray-50/30' : ''}`}>
+ <td className="px-3 py-2 font-mono text-xs text-[#33cbcc] whitespace-nowrap">{row.account?.code}</td>
+ <td className="px-3 py-2 text-gray-700 max-w-[200px] truncate">{row.account?.name}</td>
+ <td className="px-3 py-2 text-right text-gray-600 border-l border-gray-100">{row.siDebit > 0 ? formatXAF(row.siDebit) : ''}</td>
+ <td className="px-3 py-2 text-right text-gray-600">{row.siCredit > 0 ? formatXAF(row.siCredit) : ''}</td>
+ <td className="px-3 py-2 text-right text-gray-800 border-l border-gray-100">{row.mvtDebit > 0 ? formatXAF(row.mvtDebit) : ''}</td>
+ <td className="px-3 py-2 text-right text-gray-800">{row.mvtCredit > 0 ? formatXAF(row.mvtCredit) : ''}</td>
+ <td className="px-3 py-2 text-right font-bold text-[#33cbcc] border-l border-gray-100">{row.sfDebit > 0 ? formatXAF(row.sfDebit) : ''}</td>
+ <td className="px-3 py-2 text-right font-bold text-[#283852]">{row.sfCredit > 0 ? formatXAF(row.sfCredit) : ''}</td>
+ <td className="px-3 py-2 text-center border-l border-gray-100">
+ {isCollective && (
+ <button
+ onClick={() => setDrillDown({ id: row.account.id, name: row.account.name })}
+ className="text-[#33cbcc] hover:text-[#283852] transition-colors"
+ title="Voir les auxiliaires"
+ >
+ <ArrowRight01Icon size={14} />
+ </button>
+ )}
  </td>
  </tr>
- ))}
+ );
+ })}
  </tbody>
  <tfoot>
- <tr className="bg-gray-50 border-t-2 border-gray-200">
- <td className="px-6 py-3 font-bold text-gray-800"colSpan={2}>
- Totaux
- </td>
- <td className="px-6 py-3 text-right font-bold text-gray-800">
- {formatXAF(data.totals.totalDebit)}
- </td>
- <td className="px-6 py-3 text-right font-bold text-gray-800">
- {formatXAF(data.totals.totalCredit)}
- </td>
- <td className="px-6 py-3 text-right font-bold text-[#33cbcc]">
- {formatXAF(
- data.accounts.reduce(
- (s: number, r: TrialBalanceAccount) => s + r.debitBalance,
- 0,
- ),
- )}
- </td>
- <td className="px-6 py-3 text-right font-bold text-[#283852]">
- {formatXAF(
- data.accounts.reduce(
- (s: number, r: TrialBalanceAccount) => s + r.creditBalance,
- 0,
- ),
- )}
- </td>
+ <tr className="bg-gray-50 border-t-2 border-gray-200 font-bold text-sm">
+ <td className="px-3 py-3 text-gray-800" colSpan={2}>TOTAUX</td>
+ <td className="px-3 py-3 text-right text-gray-800 border-l border-gray-200">{formatXAF(totals.siDebit)}</td>
+ <td className="px-3 py-3 text-right text-gray-800">{formatXAF(totals.siCredit)}</td>
+ <td className="px-3 py-3 text-right text-gray-800 border-l border-gray-200">{formatXAF(totals.mvtDebit)}</td>
+ <td className="px-3 py-3 text-right text-gray-800">{formatXAF(totals.mvtCredit)}</td>
+ <td className="px-3 py-3 text-right text-[#33cbcc] border-l border-gray-200">{formatXAF(totals.sfDebit)}</td>
+ <td className="px-3 py-3 text-right text-[#283852]">{formatXAF(totals.sfCredit)}</td>
+ <td></td>
  </tr>
  </tfoot>
  </table>
+ </div>
  </div>
  );
 };

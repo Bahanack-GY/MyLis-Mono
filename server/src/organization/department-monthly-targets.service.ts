@@ -191,6 +191,26 @@ export class DepartmentMonthlyTargetsService {
         return result;
     }
 
+    /** Aggregate monthly stats across ALL departments for a given year (for MANAGER/CEO) */
+    async getAllDepartmentsMonthlyStats(year: number) {
+        const departments = await this.departmentModel.findAll({ attributes: ['id'] });
+        const allStats = await Promise.all(
+            departments.map(d => this.getMonthlyStats(d.getDataValue('id'), year)),
+        );
+
+        const aggregated: { month: number; targetRevenue: number; actualRevenue: number }[] = [];
+        for (let m = 1; m <= 12; m++) {
+            let target = 0;
+            let actual = 0;
+            allStats.forEach(stats => {
+                const row = stats.find(s => s.month === m);
+                if (row) { target += row.targetRevenue; actual += row.actualRevenue; }
+            });
+            aggregated.push({ month: m, targetRevenue: target, actualRevenue: actual });
+        }
+        return aggregated;
+    }
+
     /** Get all explicitly set targets for a department/year */
     getByDepartmentAndYear(departmentId: string, year: number) {
         return this.monthlyTargetModel.findAll({

@@ -7,6 +7,7 @@ import { JournalEntry } from '../models/journal-entry.model';
 import { JournalEntryLine } from '../models/journal-entry-line.model';
 import { Account } from '../models/account.model';
 import { AccountCategory } from '../models/account-category.model';
+import { FiscalYear } from '../models/fiscal-year.model';
 import { CacheService } from '../cache/cache.service';
 import { CACHE_KEYS, CACHE_TTL } from '../cache/cache.keys';
 
@@ -21,6 +22,8 @@ export class ReportsService {
         private accountModel: typeof Account,
         @InjectModel(AccountCategory)
         private categoryModel: typeof AccountCategory,
+        @InjectModel(FiscalYear)
+        private fiscalYearModel: typeof FiscalYear,
         @InjectConnection()
         private sequelize: Sequelize,
         private cache: CacheService,
@@ -48,6 +51,7 @@ export class ReportsService {
                 },
                 {
                     model: Account,
+                    as: 'account',
                     attributes: ['id', 'code', 'name', 'type'],
                 },
             ],
@@ -120,6 +124,7 @@ export class ReportsService {
                 },
                 {
                     model: Account,
+                    as: 'account',
                     attributes: ['id', 'code', 'name', 'type'],
                     include: [{ model: AccountCategory, attributes: ['id', 'code', 'name'] }],
                 },
@@ -397,6 +402,200 @@ export class ReportsService {
         };
         await this.cache.set(key, result, CACHE_TTL.REPORTS);
         return result;
+    }
+
+    /**
+     * Balance à 6 colonnes SYSCOHADA
+     * Colonnes: SI Débit / SI Crédit / Mvt Débit / Mvt Crédit / SF Débit / SF Crédit
+     * SI = soldes d'ouverture = Σ écritures VALIDATED avant fromDate (all fiscal years, incl. AN)
+     * M  = mouvements de la période [fromDate, toDate]
+     * SF = solde final orienté selon la nature du compte
+     * 3 contrôles d'équilibre renvoyés.
+     */
+    async sixColumnBalance(fiscalYearId: string, fromDate?: string, toDate?: string, departmentId?: string) {
+        // Resolve period dates from fiscal year if not provided
+        const fiscalYear = await this.sequelize.query(
+            `SELECT "startDate", "endDate" FROM fiscal_years WHERE id = :id`,
+            { replacements: { id: fiscalYearId }, type: 'SELECT' as any },
+        ) as any[];
+        const fy = fiscalYear[0];
+        const periodStart: string = fromDate || fy?.startDate || '';
+        const periodEnd: string = toDate || fy?.endDate || '';
+
+        if (!periodStart || !periodEnd) throw new Error('Cannot resolve period dates for six-column balance');
+
+        const deptFilter = departmentId ? `AND jel."departmentId" = '${departmentId}'` : '';
+
+        // ── Opening balances (SI): all validated entries BEFORE periodStart ──
+        const [siRows] = await this.sequelize.query(`
+            SELECT
+                jel."accountId",
+                COALESCE(SUM(jel."debit"), 0)  AS si_debit,
+                COALESCE(SUM(jel."credit"), 0) AS si_credit
+            FROM journal_entry_lines jel
+            JOIN journal_entries je ON je.id = jel."journalEntryId"
+            WHERE je.status = 'VALIDATED'
+              AND je."date" < :periodStart
+              ${deptFilter}
+            GROUP BY jel."accountId"
+        `, { replacements: { periodStart } });
+
+        // ── Period movements (M): validated entries in [periodStart, periodEnd] for this FY ──
+        const [mRows] = await this.sequelize.query(`
+            SELECT
+                jel."accountId",
+                COALESCE(SUM(jel."debit"), 0)  AS m_debit,
+                COALESCE(SUM(jel."credit"), 0) AS m_credit
+            FROM journal_entry_lines jel
+            JOIN journal_entries je ON je.id = jel."journalEntryId"
+            WHERE je."fiscalYearId" = :fiscalYearId
+              AND je.status = 'VALIDATED'
+              AND je."date" >= :periodStart
+              AND je."date" <= :periodEnd
+              ${deptFilter}
+            GROUP BY jel."accountId"
+        `, { replacements: { fiscalYearId, periodStart, periodEnd } });
+
+        // Collect all account IDs
+        const accountIds = new Set<string>([
+            ...(siRows as any[]).map(r => r.accountId),
+            ...(mRows as any[]).map(r => r.accountId),
+        ]);
+
+        if (accountIds.size === 0) {
+            return {
+                accounts: [],
+                totals: { siDebit: 0, siCredit: 0, mvtDebit: 0, mvtCredit: 0, sfDebit: 0, sfCredit: 0 },
+                equilibrium: { openingBalanced: true, movementsBalanced: true, closingBalanced: true },
+            };
+        }
+
+        // Fetch account details
+        const accounts = await this.accountModel.findAll({
+            where: { id: Array.from(accountIds) as any },
+            include: [{ model: AccountCategory, attributes: ['id', 'code', 'name'] }],
+            order: [['code', 'ASC']],
+        });
+        const accountMap = new Map(accounts.map(a => [a.id, a.get({ plain: true }) as any]));
+
+        const siMap = new Map((siRows as any[]).map(r => [r.accountId, r]));
+        const mMap = new Map((mRows as any[]).map(r => [r.accountId, r]));
+
+        let totSiD = 0, totSiC = 0, totMD = 0, totMC = 0, totSfD = 0, totSfC = 0;
+
+        const rows = Array.from(accountIds).map(accountId => {
+            const account = accountMap.get(accountId);
+            const si = siMap.get(accountId);
+            const m = mMap.get(accountId);
+
+            const siD = Number(si?.si_debit || 0);
+            const siC = Number(si?.si_credit || 0);
+            const mD  = Number(m?.m_debit || 0);
+            const mC  = Number(m?.m_credit || 0);
+
+            // Determine account nature from type
+            const type = account?.type || 'ASSET';
+            const isDebitNature = type === 'ASSET' || type === 'EXPENSE';
+
+            let sfD = 0, sfC = 0;
+            if (isDebitNature) {
+                const net = siD - siC + mD - mC;
+                sfD = Math.max(0, net);
+                sfC = net < 0 ? Math.abs(net) : 0;
+            } else {
+                const net = siC - siD + mC - mD;
+                sfC = Math.max(0, net);
+                sfD = net < 0 ? Math.abs(net) : 0;
+            }
+
+            totSiD += siD; totSiC += siC;
+            totMD  += mD;  totMC  += mC;
+            totSfD += sfD; totSfC += sfC;
+
+            return { account, siDebit: siD, siCredit: siC, mvtDebit: mD, mvtCredit: mC, sfDebit: sfD, sfCredit: sfC };
+        }).filter(r => r.account).sort((a, b) => (a.account?.code || '').localeCompare(b.account?.code || ''));
+
+        const r2 = (n: number) => Math.round(n * 100) / 100;
+        return {
+            accounts: rows,
+            totals: {
+                siDebit:  r2(totSiD), siCredit:  r2(totSiC),
+                mvtDebit: r2(totMD),  mvtCredit: r2(totMC),
+                sfDebit:  r2(totSfD), sfCredit:  r2(totSfC),
+            },
+            equilibrium: {
+                openingBalanced:   Math.abs(totSiD - totSiC) < 0.01,
+                movementsBalanced: Math.abs(totMD  - totMC)  < 0.01,
+                closingBalanced:   Math.abs(totSfD - totSfC) < 0.01,
+            },
+        };
+    }
+
+    /**
+     * Balance auxiliaire — drill-down depuis un compte collectif vers ses sous-comptes nominatifs.
+     * Renvoie les mouvements groupés par auxiliaryAccountId pour la période du fiscal year.
+     */
+    async auxiliaryBalance(fiscalYearId: string, collectiveAccountId: string) {
+        const [rows] = await this.sequelize.query(`
+            SELECT
+                jel."auxiliaryAccountId",
+                a.code AS "auxCode",
+                a.name AS "auxName",
+                a."thirdPartyType",
+                a."thirdPartyId",
+                COALESCE(SUM(jel."debit"),  0) AS total_debit,
+                COALESCE(SUM(jel."credit"), 0) AS total_credit
+            FROM journal_entry_lines jel
+            JOIN journal_entries je ON je.id = jel."journalEntryId"
+            LEFT JOIN accounts a ON a.id = jel."auxiliaryAccountId"
+            WHERE je."fiscalYearId" = :fiscalYearId
+              AND je.status = 'VALIDATED'
+              AND jel."accountId" = :collectiveAccountId
+              AND jel."auxiliaryAccountId" IS NOT NULL
+            GROUP BY jel."auxiliaryAccountId", a.code, a.name, a."thirdPartyType", a."thirdPartyId"
+            ORDER BY a.code ASC
+        `, { replacements: { fiscalYearId, collectiveAccountId } });
+
+        // Concordance: collective balance should equal sum of auxiliaries
+        const collectiveData = await this.lineModel.findAll({
+            where: { accountId: collectiveAccountId } as any,
+            attributes: [
+                [this.sequelize.fn('SUM', this.sequelize.col('JournalEntryLine.debit')), 'totalDebit'],
+                [this.sequelize.fn('SUM', this.sequelize.col('JournalEntryLine.credit')), 'totalCredit'],
+            ],
+            include: [{
+                model: JournalEntry,
+                where: { fiscalYearId, status: 'VALIDATED' },
+                attributes: [],
+            }],
+            raw: true,
+        } as any);
+
+        const collectiveTotals = (collectiveData[0] as any) || { totalDebit: 0, totalCredit: 0 };
+        const auxDebitSum  = (rows as any[]).reduce((s, r) => s + Number(r.total_debit), 0);
+        const auxCreditSum = (rows as any[]).reduce((s, r) => s + Number(r.total_credit), 0);
+
+        const concordant =
+            Math.abs(Number(collectiveTotals.totalDebit) - auxDebitSum) < 0.01 &&
+            Math.abs(Number(collectiveTotals.totalCredit) - auxCreditSum) < 0.01;
+
+        return {
+            auxiliaries: (rows as any[]).map(r => ({
+                auxiliaryAccountId: r.auxiliaryAccountId,
+                code: r.auxCode,
+                name: r.auxName,
+                thirdPartyType: r.thirdPartyType,
+                thirdPartyId: r.thirdPartyId,
+                totalDebit: Number(r.total_debit),
+                totalCredit: Number(r.total_credit),
+                balance: Number(r.total_debit) - Number(r.total_credit),
+            })),
+            concordant,
+            collectiveTotals: {
+                totalDebit: Number(collectiveTotals.totalDebit),
+                totalCredit: Number(collectiveTotals.totalCredit),
+            },
+        };
     }
 
     /**

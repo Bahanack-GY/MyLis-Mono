@@ -7,7 +7,7 @@ import { Roles } from '../auth/roles.decorator';
 
 import { RolesGuard } from '../auth/roles.guard';
 
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'RH')
 @Controller('employees')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class EmployeesController {
@@ -24,7 +24,7 @@ export class EmployeesController {
         return this.employeesService.create(createEmployeeDto, req.user.userId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL', 'RH')
     @Get()
     findAll(
         @Query('departmentId') departmentId: string,
@@ -47,25 +47,25 @@ export class EmployeesController {
         return this.employeesService.findAll(deptId);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE', 'RH')
     @Get('leaderboard')
     getLeaderboard(@Query('limit') limit?: string) {
         return this.employeesService.getLeaderboard(limit ? parseInt(limit, 10) : 5);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE', 'RH')
     @Get('birthdays/today')
     getTodayBirthdays() {
         return this.employeesService.getTodayBirthdays();
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'RH')
     @Get(':id/stats')
     getStats(@Param('id') id: string) {
         return this.employeesService.getEmployeeStats(id);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'RH')
     @Get(':id/badges')
     getBadges(@Param('id') id: string) {
         return this.employeesService.getEmployeeBadges(id);
@@ -88,7 +88,7 @@ export class EmployeesController {
         return this.employeesService.reinstate(id);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'RH')
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.employeesService.findOne(id);
@@ -144,7 +144,7 @@ export class EmployeesController {
         return this.employeesService.getPromotionHistory(id);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'RH')
     @Get(':id/reports')
     getEmployeeReports(@Param('id') id: string, @Request() req) {
         return this.employeesService.getEmployeeReports(id, req.user.role, req.user.departmentId);
@@ -152,27 +152,27 @@ export class EmployeesController {
 
     // ── Monthly Rankings ──────────────────────────────────────────────────
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE', 'RH')
     @Get('rankings/years')
     getRankingYears() {
         return this.monthlyRankingsService.getAvailableYears();
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE', 'RH')
     @Get('rankings/monthly')
     getMonthlyRankings(@Query('year') year?: string) {
         const y = year ? parseInt(year, 10) : new Date().getFullYear();
         return this.monthlyRankingsService.getMonthlyRankings(y);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'EMPLOYEE', 'ACCOUNTANT', 'COMMERCIAL', 'STAGIAIRE', 'RH')
     @Get('rankings/yearly')
     getYearlyRanking(@Query('year') year?: string) {
         const y = year ? parseInt(year, 10) : new Date().getFullYear();
         return this.monthlyRankingsService.getYearlyRanking(y);
     }
 
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'RH')
     @Post('rankings/snapshot')
     triggerSnapshot(@Body() body: { year?: number; month?: number; resetPoints?: boolean }) {
         const now = new Date();

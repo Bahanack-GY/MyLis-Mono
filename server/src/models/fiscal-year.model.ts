@@ -56,4 +56,10 @@ export class FiscalYear extends Model {
 
     @BelongsTo(() => User)
     declare closedBy: User;
+
+    @Column({
+        type: DataType.JSONB,
+        allowNull: true,
+    })
+    declare taxConfig: Record<string, any> | null;
 }

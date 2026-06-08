@@ -1,6 +1,7 @@
 
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany, BelongsToMany } from 'sequelize-typescript';
 import { User } from './user.model';
+import { Account } from './account.model';
 import { Department } from './department.model';
 import { Position } from './position.model';
 import { Team } from './team.model';
@@ -12,6 +13,7 @@ import { Sanction } from './sanction.model';
 import { Project } from './project.model';
 import { ProjectMember } from './project-member.model';
 import { EmployeeBadge } from './employee-badge.model';
+import { SalaryComponent } from './salary-component.model';
 
 @Table({
     indexes: [
@@ -87,6 +89,26 @@ export class Employee extends Model {
     @Column(DataType.FLOAT)
     declare salary: number;
 
+    // Base salary (separate from total gross — used for cotisable/taxable base)
+    @Column({ type: DataType.DECIMAL(15, 2), allowNull: true })
+    declare baseSalary: number | null;
+
+    // Contract type: CDI, CDD, CDII, STAGE, etc.
+    @Column({ type: DataType.STRING(20), allowNull: true })
+    declare contractType: string | null;
+
+    // CNPS risk class for AT/MP: 1=1.75%, 2=2.5%, 3=5%
+    @Column({ type: DataType.INTEGER, allowNull: true, defaultValue: 1 })
+    declare riskClass: number | null;
+
+    // Auxiliary accounting account under collective 421xxx
+    @ForeignKey(() => Account)
+    @Column({ type: DataType.UUID, allowNull: true })
+    declare accountId: string | null;
+
+    @BelongsTo(() => Account)
+    declare account: Account;
+
     @Column({
         type: DataType.JSON,
         allowNull: true,
@@ -159,4 +181,7 @@ export class Employee extends Model {
 
     @HasMany(() => Employee, 'encadreurId')
     declare stagiaires: Employee[];
+
+    @HasMany(() => SalaryComponent)
+    declare salaryComponents: SalaryComponent[];
 }
