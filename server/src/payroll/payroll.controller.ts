@@ -28,6 +28,11 @@ export class PayrollController {
         return this.payrollService.findOne(id);
     }
 
+    @Get('runs/:id/export')
+    getRunExportData(@Param('id') id: string) {
+        return this.payrollService.getRunExportData(id);
+    }
+
     @Get('payslips/:id')
     findPayslip(@Param('id') id: string) {
         return this.payrollService.findPayslip(id);

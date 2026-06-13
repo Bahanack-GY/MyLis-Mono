@@ -154,8 +154,23 @@ const Header = ({ onMobileMenuOpen }: { onMobileMenuOpen?: () => void }) => {
   aria-label={t('header.viewProfile', 'View profile')}
   className="flex items-center gap-2 md:gap-3 cursor-pointer hover:bg-gray-50 p-2 md:p-2 transition-colors"
   >
-  <div className="w-8 h-8 md:w-10 md:h-10  bg-[#283852] overflow-hidden flex items-center justify-center">
-  <span className="text-xs md:text-sm font-bold text-white">
+  <div className="w-8 h-8 md:w-10 md:h-10  bg-[#283852] overflow-hidden flex items-center justify-center shrink-0">
+  {profile?.avatarUrl ? (
+  <img
+  src={profile.avatarUrl}
+  alt={displayName}
+  className="w-full h-full object-cover"
+  onError={e => {
+  const el = e.currentTarget;
+  el.style.display = 'none';
+  el.nextElementSibling?.removeAttribute('hidden');
+  }}
+  />
+  ) : null}
+  <span
+  hidden={!!profile?.avatarUrl}
+  className="text-xs md:text-sm font-bold text-white"
+  >
   {initials}
   </span>
   </div>

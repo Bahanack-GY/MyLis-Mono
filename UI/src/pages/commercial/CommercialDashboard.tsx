@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line,
 } from 'recharts';
-import { Target01Icon, UserGroupIcon, CallIcon, DollarCircleIcon, ArrowUpRight01Icon, ShoppingCart01Icon, Award01Icon, UserAdd01Icon, PercentIcon, BarChartHorizontalIcon, Activity01Icon, ArrowLeft01Icon, ArrowRight01Icon, PencilIcon, Tick01Icon, Cancel01Icon as XIcon, Flag01Icon } from 'hugeicons-react';
+import { Target01Icon, UserGroupIcon, CallIcon, DollarCircleIcon, ArrowUpRight01Icon, ArrowDownRight01Icon, ShoppingCart01Icon, Award01Icon, UserAdd01Icon, PercentIcon, BarChartHorizontalIcon, Activity01Icon, ArrowLeft01Icon, ArrowRight01Icon, PencilIcon, Tick01Icon, Cancel01Icon as XIcon, Flag01Icon } from 'hugeicons-react';
 import { useCommercialKpis, useLeadStats, useMyGoal, useTeamPerformance, useSetGoal } from '../../api/commercial/hooks';
 import { useAuth } from '../../contexts/AuthContext';
 import { useEmployees } from '../../api/employees/hooks';
@@ -42,6 +42,46 @@ function getDateRange(preset: DatePreset, customFrom: string, customTo: string) 
   }
 }
 
+function getPrevCommercialRange(preset: DatePreset, currentFrom?: string, currentTo?: string): { from?: string; to?: string } {
+  const now = new Date();
+  switch (preset) {
+  case 'this_month': {
+  const end = new Date(now.getFullYear(), now.getMonth(), 0);
+  const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  return { from: start.toISOString().split('T')[0], to: end.toISOString().split('T')[0] };
+  }
+  case 'this_quarter': {
+  const qMonth = Math.floor(now.getMonth() / 3) * 3;
+  const end = new Date(now.getFullYear(), qMonth, 0);
+  const start = new Date(now.getFullYear(), qMonth - 3, 1);
+  return { from: start.toISOString().split('T')[0], to: end.toISOString().split('T')[0] };
+  }
+  case 'this_year': {
+  const y = now.getFullYear() - 1;
+  return { from: `${y}-01-01`, to: `${y}-12-31` };
+  }
+  case 'all':
+  return {};
+  case 'custom': {
+  if (!currentFrom || !currentTo) return {};
+  const start = new Date(currentFrom);
+  const end = new Date(currentTo);
+  const dur = end.getTime() - start.getTime();
+  const prevEnd = new Date(start.getTime() - 1);
+  const prevStart = new Date(prevEnd.getTime() - dur);
+  return { from: prevStart.toISOString().split('T')[0], to: prevEnd.toISOString().split('T')[0] };
+  }
+  }
+}
+
+const VS_COM_LABELS: Record<DatePreset, string> = {
+  this_month: 'vs. mois dern.',
+  this_quarter: 'vs. trim. dern.',
+  this_year: 'vs. an. dern.',
+  all: '',
+  custom: 'vs. période préc.',
+};
+
 const formatFCFA = (n: number) => new Intl.NumberFormat('fr-FR').format(Math.round(n)) + ' FCFA';
 
 const STAGE_COLORS: Record<string, string> = {
@@ -69,9 +109,40 @@ function progressColor(pct: number | null): string {
   return '#ef4444';
 }
 
+// ── Trend Badge ──
+function TrendBadge({ current, previous, isPositiveGood = true, vsLabel }: {
+  current: number; previous: number; isPositiveGood?: boolean; vsLabel: string;
+}) {
+  if (!vsLabel || (previous === 0 && current === 0)) return null;
+  const pct = previous === 0
+  ? (current > 0 ? 100 : null)
+  : Math.round(((current - previous) / Math.abs(previous)) * 100);
+  if (pct === null) return null;
+  const isUp = pct > 0;
+  const isNeutral = pct === 0;
+  const isGood = isNeutral ? true : isPositiveGood ? isUp : !isUp;
+  const bg = isNeutral ? '#F9FAFB' : isGood ? '#f0fdf4' : '#fef2f2';
+  const border = isNeutral ? '#E5E7EB' : isGood ? '#bbf7d0' : '#fecaca';
+  const color = isNeutral ? '#6B7280' : isGood ? '#16a34a' : '#dc2626';
+  return (
+  <div className="flex items-center gap-1.5 mt-1.5">
+  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold border"
+  style={{ backgroundColor: bg, borderColor: border, color }}>
+  {!isNeutral && (isUp
+  ? <ArrowUpRight01Icon size={10} strokeWidth={2.5} />
+  : <ArrowDownRight01Icon size={10} strokeWidth={2.5} />
+  )}
+  {isNeutral ? '—' : `${isUp ? '+' : ''}${pct}%`}
+  </span>
+  <span className="text-[10px] text-gray-400 font-medium">{vsLabel}</span>
+  </div>
+  );
+}
+
 // ── Inline KPI Card ──
-function KpiCard({ icon: Icon, label, value, subtitle, delay = 0, color = '#33cbcc' }: {
+function KpiCard({ icon: Icon, label, value, subtitle, delay = 0, color = '#33cbcc', trend }: {
   icon: any; label: string; value: string; subtitle?: string; delay?: number; color?: string;
+  trend?: { current: number; previous: number; isPositiveGood?: boolean; vsLabel: string };
 }) {
   return (
   <motion.div
@@ -85,6 +156,14 @@ function KpiCard({ icon: Icon, label, value, subtitle, delay = 0, color = '#33cb
   </div>
   <div className="p-5 bg-white relative overflow-hidden">
   <h3 className="text-3xl font-bold text-[#1c2b3a] leading-none">{value}</h3>
+  {trend && (
+  <TrendBadge
+  current={trend.current}
+  previous={trend.previous}
+  isPositiveGood={trend.isPositiveGood ?? true}
+  vsLabel={trend.vsLabel}
+  />
+  )}
   {subtitle && <p className="text-xs text-gray-400 mt-1">{subtitle}</p>}
   <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color }}>
   <Icon size={110} strokeWidth={1.2} />
@@ -110,8 +189,8 @@ const SOURCE_LABELS: Record<string, string> = {
 // ── Main Component ──
 export default function CommercialDashboard() {
   const { t } = useTranslation();
-  const { role, user } = useAuth();
-  const isCommercial = role === 'COMMERCIAL';
+  const { role, user, secondaryView, viewMode } = useAuth();
+  const isCommercial = role === 'COMMERCIAL' || (role === 'RH' && secondaryView === 'COMMERCIAL' && viewMode === 'employee');
   const isManager = role === 'MANAGER' || role === 'HEAD_OF_DEPARTMENT';
 
   // Goal period (month navigator — independent of the KPI date filter)
@@ -193,6 +272,20 @@ export default function CommercialDashboard() {
   // API data
   const { data: kpis, isLoading: kpisLoading } = useCommercialKpis(kpiFilters);
   const { data: leadStats, isLoading: statsLoading } = useLeadStats(leadStatsFilters);
+
+  // Previous period for trend badges
+  const { from: prevFrom, to: prevTo } = useMemo(
+  () => getPrevCommercialRange(datePreset, from, to),
+  [datePreset, from, to],
+  );
+  const prevKpiFilters = useMemo(() => ({
+  dateFrom: prevFrom,
+  dateTo: prevTo,
+  ...(isCommercial && user?.employeeId ? { employeeId: user.employeeId } : {}),
+  ...(isManager && selectedEmployeeId ? { employeeId: selectedEmployeeId } : {}),
+  }), [prevFrom, prevTo, isCommercial, isManager, user?.employeeId, selectedEmployeeId]);
+  const { data: prevKpis } = useCommercialKpis(datePreset !== 'all' ? prevKpiFilters : {} as any);
+  const vsLabel = VS_COM_LABELS[datePreset];
 
   const isLoading = kpisLoading || statsLoading;
 
@@ -580,6 +673,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : String(kpis?.totalVisites || 0)}
   subtitle={t('commercial.kpi.totalVisitesSubtitle', 'Toutes activites terrain')}
   delay={0}
+  trend={{ current: kpis?.totalVisites || 0, previous: prevKpis?.totalVisites || 0, vsLabel }}
   />
   <KpiCard
   icon={UserGroupIcon}
@@ -587,6 +681,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : String(kpis?.visitesClients || 0)}
   subtitle={t('commercial.kpi.visitesClientsSubtitle', 'Clients existants')}
   delay={0.05}
+  trend={{ current: kpis?.visitesClients || 0, previous: prevKpis?.visitesClients || 0, vsLabel }}
   />
   <KpiCard
   icon={CallIcon}
@@ -594,6 +689,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : String(kpis?.visitesProspects || 0)}
   subtitle={t('commercial.kpi.visitesProspectsSubtitle', 'Nouveaux prospects')}
   delay={0.1}
+  trend={{ current: kpis?.visitesProspects || 0, previous: prevKpis?.visitesProspects || 0, vsLabel }}
   />
   <KpiCard
   icon={DollarCircleIcon}
@@ -601,6 +697,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : formatFCFA(kpis?.coutVisites || 0)}
   subtitle={t('commercial.kpi.coutVisitesSubtitle', 'Charges deplacement')}
   delay={0.15}
+  trend={{ current: kpis?.coutVisites || 0, previous: prevKpis?.coutVisites || 0, vsLabel }}
   />
   </div>
 
@@ -612,6 +709,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : formatFCFA(kpis?.chiffreAffaire || 0)}
   subtitle={t('commercial.kpi.chiffreAffaireSubtitle', 'CA realise')}
   delay={0.2}
+  trend={{ current: kpis?.chiffreAffaire || 0, previous: prevKpis?.chiffreAffaire || 0, vsLabel }}
   />
   <KpiCard
   icon={ShoppingCart01Icon}
@@ -619,6 +717,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : formatFCFA(kpis?.panierMoyen || 0)}
   subtitle={t('commercial.kpi.panierMoyenSubtitle', 'Par transaction')}
   delay={0.25}
+  trend={{ current: kpis?.panierMoyen || 0, previous: prevKpis?.panierMoyen || 0, vsLabel }}
   />
   <KpiCard
   icon={Award01Icon}
@@ -626,6 +725,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : formatFCFA(kpis?.margeParVisite || 0)}
   subtitle={t('commercial.kpi.margeVisiteSubtitle', 'Rentabilite terrain')}
   delay={0.3}
+  trend={{ current: kpis?.margeParVisite || 0, previous: prevKpis?.margeParVisite || 0, vsLabel }}
   />
   <KpiCard
   icon={UserAdd01Icon}
@@ -633,6 +733,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : String(kpis?.nouveauxClients || 0)}
   subtitle={t('commercial.kpi.nouveauxClientsSubtitle', 'Leads convertis')}
   delay={0.35}
+  trend={{ current: kpis?.nouveauxClients || 0, previous: prevKpis?.nouveauxClients || 0, vsLabel }}
   />
   </div>
 
@@ -644,6 +745,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : `${(kpis?.tauxAcquisition || 0).toFixed(1)}%`}
   subtitle={t('commercial.kpi.tauxAcquisitionSubtitle', 'Nouveaux / total')}
   delay={0.4}
+  trend={{ current: kpis?.tauxAcquisition || 0, previous: prevKpis?.tauxAcquisition || 0, vsLabel }}
   />
   <KpiCard
   icon={BarChartHorizontalIcon}
@@ -651,6 +753,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : formatFCFA(kpis?.pipelineValue || 0)}
   subtitle={t('commercial.kpi.pipelineValueSubtitle', 'Valeur des opportunites')}
   delay={0.45}
+  trend={{ current: kpis?.pipelineValue || 0, previous: prevKpis?.pipelineValue || 0, vsLabel }}
   />
   <KpiCard
   icon={Award01Icon}
@@ -658,6 +761,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : `${(kpis?.winRate || 0).toFixed(1)}%`}
   subtitle={t('commercial.kpi.winRateSubtitle', 'Affaires gagnees')}
   delay={0.5}
+  trend={{ current: kpis?.winRate || 0, previous: prevKpis?.winRate || 0, vsLabel }}
   />
   <KpiCard
   icon={Activity01Icon}
@@ -665,6 +769,7 @@ export default function CommercialDashboard() {
   value={isLoading ? '...' : `${(kpis?.conversionRate || 0).toFixed(1)}%`}
   subtitle={t('commercial.kpi.conversionRateSubtitle', 'Lead vers client')}
   delay={0.55}
+  trend={{ current: kpis?.conversionRate || 0, previous: prevKpis?.conversionRate || 0, vsLabel }}
   />
   </div>
 

@@ -6,7 +6,7 @@ import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('lead-activities')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'RH')
 export class LeadActivitiesController {
     constructor(private readonly activitiesService: LeadActivitiesService) { }
 

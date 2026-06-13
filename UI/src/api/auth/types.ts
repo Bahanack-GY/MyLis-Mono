@@ -43,6 +43,7 @@ export interface UserProfile {
     educationDocs?: EducationDoc[];
     points?: number;
     completedTasksCount?: number;
+    secondaryView?: 'EMPLOYEE' | 'COMMERCIAL' | null;
 }
 
 export interface EmployeeBadge {

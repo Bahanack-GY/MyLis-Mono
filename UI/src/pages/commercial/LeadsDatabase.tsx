@@ -93,8 +93,8 @@ interface LeadModalProps {
 
 function LeadModal({ isOpen, onClose, lead }: LeadModalProps) {
   const { t } = useTranslation();
-  const { role } = useAuth();
-  const isCommercial = role === 'COMMERCIAL';
+  const { role, secondaryView, viewMode } = useAuth();
+  const isCommercial = role === 'COMMERCIAL' || (role === 'RH' && secondaryView === 'COMMERCIAL' && viewMode === 'employee');
   const createLead = useCreateLead();
   const updateLead = useUpdateLead();
   const { data: employees } = useEmployees();

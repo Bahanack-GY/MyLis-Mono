@@ -484,7 +484,7 @@ function ActivityPanel({
 
 export default function LeadFollowUp() {
   const { t } = useTranslation();
-  const { user, role } = useAuth();
+  const { user, role, secondaryView, viewMode } = useAuth();
   const employeeId = user?.employeeId ?? '';
 
   const [search, setSearch] = useState('');
@@ -496,7 +496,7 @@ export default function LeadFollowUp() {
   const [logFor, setLogFor] = useState<Lead | null>(null);
   const [mobileShowPanel, setMobileShowPanel] = useState(false);
 
-  const isCommercial = role === 'COMMERCIAL';
+  const isCommercial = role === 'COMMERCIAL' || (role === 'RH' && secondaryView === 'COMMERCIAL' && viewMode === 'employee');
 
   const filters = useMemo(() => ({
   page,

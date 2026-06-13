@@ -41,6 +41,7 @@ import { RemindersModule } from './reminders/reminders.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { LeavesModule } from './leaves/leaves.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { RhSalaryModule } from './rh-salary/rh-salary.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { RolesGuard } from './auth/roles.guard';
 import { ActivityInterceptor } from './logs/activity.interceptor';
@@ -103,6 +104,7 @@ import { ActivityInterceptor } from './logs/activity.interceptor';
     AttendanceModule,
     LeavesModule,
     PermissionsModule,
+    RhSalaryModule,
   ],
   controllers: [AppController],
   providers: [

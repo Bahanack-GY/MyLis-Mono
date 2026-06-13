@@ -104,6 +104,7 @@ export class AuthService {
             educationDocs: employee?.getDataValue('educationDocs') || [],
             points: employee?.getDataValue('points') || 0,
             completedTasksCount,
+            secondaryView: employee?.getDataValue('secondaryView') || null,
         };
     }
 

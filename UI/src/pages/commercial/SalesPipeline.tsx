@@ -991,9 +991,9 @@ const PipelineDashboard = ({
 
 const SalesPipeline = () => {
   const { t } = useTranslation();
-  const { role, user } = useAuth();
+  const { role, user, secondaryView, viewMode } = useAuth();
   const isManager = role === 'MANAGER';
-  const isCommercial = role === 'COMMERCIAL';
+  const isCommercial = role === 'COMMERCIAL' || (role === 'RH' && secondaryView === 'COMMERCIAL' && viewMode === 'employee');
 
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState<SaleStage | 'ALL'>('ALL');

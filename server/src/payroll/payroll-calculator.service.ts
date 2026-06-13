@@ -14,7 +14,7 @@ import {
 
 export interface SalaryComponentInput {
     label: string;
-    type: 'PRIME' | 'INDEMNITE' | 'AVANTAGE_NATURE';
+    type: 'PRIME' | 'INDEMNITE' | 'AVANTAGE_NATURE' | 'RETENUE';
     amount: number;
     cnpsBase: boolean;  // included in cotisable base
     taxable: boolean;   // included in IRPP taxable base

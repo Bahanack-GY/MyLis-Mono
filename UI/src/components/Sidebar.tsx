@@ -147,6 +147,7 @@ const ALL_SECTIONS: Section[] = [
   key: 'hr',
   roles: ['RH'],
   items: [
+  { icon: CalculatorIcon, label: 'salaryCalculation', path: '/rh/salary' },
   { icon: GraduationScrollIcon, label: 'formations', path: '/formations' },
   { icon: File01Icon, label: 'documents', path: '/documents' },
   { icon: Alert02Icon, label: 'sanctions', path: '/sanctions' },
@@ -215,25 +216,30 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, mobileMenuOpen = false, setM
   const navigate = useNavigate();
   const location = useLocation();
   const logout = useLogout();
-  const { role, viewMode, setViewMode } = useAuth();
+  const { role, viewMode, setViewMode, secondaryView } = useAuth();
   const moreOpen = mobileMenuOpen;
   const setMoreOpen = (v: boolean) => setMobileMenuOpen?.(v);
 
-  const canToggleView = role !== null && TOGGLEABLE_ROLES.includes(role);
+  const canToggleView = role !== null && (TOGGLEABLE_ROLES.includes(role) || (role === 'RH' && !!secondaryView));
   // CEO's "manager view" (viewMode='employee') uses MANAGER sections, not EMPLOYEE
+  // RH's secondary view uses EMPLOYEE or COMMERCIAL sections depending on secondaryView
   const effectiveRole: Role | null = canToggleView && viewMode === 'employee'
-  ? (role === 'CEO' ? 'MANAGER' : 'EMPLOYEE')
+  ? (role === 'CEO' ? 'MANAGER' : role === 'RH' ? ((secondaryView as Role) || 'EMPLOYEE') : 'EMPLOYEE')
   : role;
 
-  // Label for the active view (shown in the toggle button)
-  const mgmtViewLabel = role === 'ACCOUNTANT'
+  // Label for the active admin view (shown in the toggle button)
+  const mgmtViewLabel = role === 'RH'
+  ? t('sidebar.rhView', 'Vue RH')
+  : role === 'ACCOUNTANT'
   ? t('sidebar.accountingView', 'Comptabilité')
   : role === 'CEO'
   ? t('sidebar.ceoView', 'Vue Directeur')
   : t('sidebar.hodView', 'Chef de département');
-  // Label shown when in the "other" (non-admin) toggled view
+  // Label shown when in the toggled secondary view
   const altViewLabel = role === 'CEO'
   ? t('sidebar.managerView', 'Vue Manager')
+  : role === 'RH' && secondaryView === 'COMMERCIAL'
+  ? t('sidebar.commercialView', 'Commercial')
   : t('sidebar.employeeView', 'Employé');
 
   const sections = useMemo(() => filterSections(ALL_SECTIONS, effectiveRole), [effectiveRole]);

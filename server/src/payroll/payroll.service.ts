@@ -564,6 +564,53 @@ export class PayrollService {
         }));
     }
 
+    /**
+     * Returns full payroll run data enriched with each employee's active salary components.
+     * Used for the état de paie Excel export.
+     */
+    async getRunExportData(id: string) {
+        const run = await this.payrollRunModel.findByPk(id, {
+            include: [
+                {
+                    model: Payslip,
+                    include: [
+                        {
+                            model: Employee,
+                            attributes: ['id', 'firstName', 'lastName', 'salary'],
+                            include: [{ model: Department, attributes: ['name'] }],
+                        },
+                    ],
+                },
+            ],
+        });
+        if (!run) throw new NotFoundException('Payroll run not found');
+
+        const payslips = (run.payslips || []) as Payslip[];
+        const empIds = payslips.map(ps => ps.employeeId).filter(Boolean);
+
+        const components = empIds.length > 0
+            ? await this.salaryComponentModel.findAll({ where: { employeeId: empIds, isActive: true } })
+            : [];
+
+        const compsByEmp = new Map<string, { type: string; label: string; amount: number }[]>();
+        for (const c of components) {
+            const list = compsByEmp.get(c.employeeId) ?? [];
+            list.push({ type: c.type, label: c.label, amount: Number(c.amount) });
+            compsByEmp.set(c.employeeId, list);
+        }
+
+        return {
+            id: run.id,
+            month: run.month,
+            year: run.year,
+            status: run.status,
+            payslips: payslips.map(ps => ({
+                ...ps.get({ plain: true }),
+                salaryComponents: compsByEmp.get(ps.employeeId) ?? [],
+            })),
+        };
+    }
+
     /* ── Employee salary management (merged from old SalaryModule) ── */
 
     async findAllEmployees() {

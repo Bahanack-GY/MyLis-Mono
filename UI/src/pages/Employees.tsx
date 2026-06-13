@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 import i18n from '../i18n/config';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search01Icon, FilterIcon, Add01Icon, Cancel01Icon, UserIcon, Mail01Icon, CallIcon, Briefcase01Icon, Building01Icon, Calendar01Icon, UserAdd01Icon, ZapIcon, GraduationScrollIcon, File01Icon, Delete02Icon, Target01Icon, Loading02Icon, ViewIcon, ViewOffIcon, Location01Icon, Upload01Icon, Tick01Icon, Camera01Icon, Shield01Icon, CalculatorIcon, DashboardSquare01Icon, ListViewIcon, ArrowUpRight01Icon, CrownIcon, Share01Icon, UserGroupIcon } from 'hugeicons-react';
+import { Search01Icon, FilterIcon, Add01Icon, Cancel01Icon, UserIcon, Mail01Icon, CallIcon, Briefcase01Icon, Building01Icon, Calendar01Icon, UserAdd01Icon, ZapIcon, GraduationScrollIcon, File01Icon, Delete02Icon, Target01Icon, Loading02Icon, ViewIcon, ViewOffIcon, Location01Icon, Upload01Icon, Tick01Icon, Camera01Icon, Shield01Icon, CalculatorIcon, DashboardSquare01Icon, ListViewIcon, ArrowUpRight01Icon, CrownIcon, Share01Icon, UserGroupIcon, Download01Icon } from 'hugeicons-react';
+import { exportEmployeesExcel } from '../utils/exportEmployeesExcel';
 import { useInfiniteEmployees, useCreateEmployee, useLeaderboard, useEmployees } from '../api/employees/hooks';
 import { EmployeesSkeleton } from '../components/Skeleton';
 import { useDepartmentScope, useAuth } from '../contexts/AuthContext';
@@ -66,6 +67,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   educationDocs: [] as { name: string; type: string; file: File | null }[],
   recruitmentDocs: [] as { name: string; type: string; file: File | null }[],
   encadreurId: '',
+  secondaryView: '' as '' | 'EMPLOYEE' | 'COMMERCIAL',
   });
 
   useEffect(() => {
@@ -450,6 +452,26 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   </div>
   )}
 
+  {/* Secondary view selector (RH only) */}
+  {rhMode && (
+  <div>
+  <label className={labelCls}>
+  <DashboardSquare01Icon size={12} />
+  Vue secondaire (optionnelle)
+  </label>
+  <select
+  value={form.secondaryView}
+  onChange={e => setForm(prev => ({ ...prev, secondaryView: e.target.value as '' | 'EMPLOYEE' | 'COMMERCIAL' }))}
+  className={inputCls}
+  >
+  <option value="">Aucune — vue RH uniquement</option>
+  <option value="EMPLOYEE">Vue Employé</option>
+  <option value="COMMERCIAL">Vue Commercial</option>
+  </select>
+  <p className="text-xs text-[#8892a4] mt-1">Permet au RH de basculer entre la vue RH et cette vue secondaire</p>
+  </div>
+  )}
+
   {/* Role + Department (not shown for managers, accountants, commercials or stagiaires) */}
   {!managerMode && !accountantMode && !commercialMode && !stagiaireMode && !rhMode && !ceoMode && (
   <div className="grid grid-cols-2 gap-4">
@@ -793,7 +815,7 @@ const CreateEmployeeModal = ({ onClose, initialUserType = 'employee', hodDepartm
   avatarUrl: form.avatarUrl || undefined,
   educationDocs: uploadedEducationDocs,
   recruitmentDocs: uploadedRecruitmentDocs,
-  ...(ceoMode ? { userRole: 'CEO' } : managerMode ? { userRole: 'MANAGER' } : accountantMode ? { userRole: 'ACCOUNTANT' } : commercialMode ? { userRole: 'COMMERCIAL' } : stagiaireMode ? { userRole: 'STAGIAIRE', encadreurId: form.encadreurId || undefined } : rhMode ? { userRole: 'RH' } : {}),
+  ...(ceoMode ? { userRole: 'CEO' } : managerMode ? { userRole: 'MANAGER' } : accountantMode ? { userRole: 'ACCOUNTANT' } : commercialMode ? { userRole: 'COMMERCIAL' } : stagiaireMode ? { userRole: 'STAGIAIRE', encadreurId: form.encadreurId || undefined } : rhMode ? { userRole: 'RH', secondaryView: form.secondaryView || null } : {}),
   }, {
   onSuccess: () => onClose(),
   onSettled: () => setIsUploading(false),
@@ -1105,6 +1127,7 @@ const Employees = () => {
   const { role, departmentId } = useAuth();
   const { data: apiDepartments } = useDepartments();
   const { data: leaderboard } = useLeaderboard();
+  const { data: allEmployeesForExport } = useEmployees(deptScope);
 
   useEffect(() => {
   const t = setTimeout(() => setDebouncedSearch(searchQuery), 300);
@@ -1205,6 +1228,19 @@ const Employees = () => {
   </button>
   ))}
   </div>
+
+  {/* Excel export — admin only */}
+  {role !== 'ACCOUNTANT' && (
+  <button
+  onClick={() => exportEmployeesExcel(allEmployeesForExport || [])}
+  disabled={!allEmployeesForExport?.length}
+  title="Exporter en Excel"
+  className="flex items-center gap-2 border border-[#e5e8ef] bg-white px-4 py-2.5 text-sm font-semibold text-[#283852] hover:border-[#33cbcc] hover:text-[#33cbcc] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+  >
+  <Download01Icon size={15} />
+  Excel
+  </button>
+  )}
 
   {role !== 'ACCOUNTANT' && (
   <motion.button

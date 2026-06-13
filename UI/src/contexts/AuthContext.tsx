@@ -8,6 +8,7 @@ interface AuthContextValue {
   user: UserProfile | null;
   role: Role | null;
   departmentId: string | null;
+  secondaryView: 'EMPLOYEE' | 'COMMERCIAL' | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   viewMode: ViewMode;
@@ -19,6 +20,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   role: null,
   departmentId: null,
+  secondaryView: null,
   isAuthenticated: false,
   isLoading: true,
   viewMode: 'admin',
@@ -65,11 +67,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<AuthContextValue>(() => {
   if (!token) {
-  return { user: null, role: null, departmentId: null, isAuthenticated: false, isLoading: false, viewMode: 'admin', setViewMode, setToken };
+  return { user: null, role: null, departmentId: null, secondaryView: null, isAuthenticated: false, isLoading: false, viewMode: 'admin', setViewMode, setToken };
   }
 
   if (isLoading) {
-  return { user: null, role: null, departmentId: null, isAuthenticated: false, isLoading: true, viewMode, setViewMode, setToken };
+  return { user: null, role: null, departmentId: null, secondaryView: null, isAuthenticated: false, isLoading: true, viewMode, setViewMode, setToken };
   }
 
   if (profile) {
@@ -77,6 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   user: profile,
   role: profile.role,
   departmentId: profile.departmentId,
+  secondaryView: profile.secondaryView ?? null,
   isAuthenticated: true,
   isLoading: false,
   viewMode,
@@ -85,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
   }
 
-  return { user: null, role: null, departmentId: null, isAuthenticated: false, isLoading: false, viewMode: 'admin', setViewMode, setToken };
+  return { user: null, role: null, departmentId: null, secondaryView: null, isAuthenticated: false, isLoading: false, viewMode: 'admin', setViewMode, setToken };
   }, [profile, isLoading, token, viewMode, setViewMode]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

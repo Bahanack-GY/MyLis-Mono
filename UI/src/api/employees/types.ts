@@ -20,6 +20,7 @@ export interface Employee {
     encadreurId?: string | null;
     encadreur?: { id: string; firstName: string; lastName: string; avatarUrl?: string } | null;
     stagiaires?: { id: string; firstName: string; lastName: string; avatarUrl?: string }[];
+    secondaryView?: 'EMPLOYEE' | 'COMMERCIAL' | null;
     user?: { id: string; email: string; role: string };
     department?: { id: string; name: string };
     position?: { id: string; title: string };
@@ -46,6 +47,7 @@ export interface CreateEmployeeDto {
     recruitmentDocs?: { name: string; type: string; filePath?: string }[];
     userRole?: string;
     encadreurId?: string | null;
+    secondaryView?: 'EMPLOYEE' | 'COMMERCIAL' | null;
 }
 
 export type UpdateEmployeeDto = Partial<CreateEmployeeDto>;

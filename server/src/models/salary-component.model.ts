@@ -23,9 +23,9 @@ export class SalaryComponent extends Model {
     @BelongsTo(() => Employee)
     declare employee: Employee;
 
-    // PRIME | INDEMNITE | AVANTAGE_NATURE
+    // PRIME | INDEMNITE | AVANTAGE_NATURE | RETENUE
     @Column({ type: DataType.STRING(30), allowNull: false })
-    declare type: 'PRIME' | 'INDEMNITE' | 'AVANTAGE_NATURE';
+    declare type: 'PRIME' | 'INDEMNITE' | 'AVANTAGE_NATURE' | 'RETENUE';
 
     @Column({ type: DataType.STRING, allowNull: false })
     declare label: string;

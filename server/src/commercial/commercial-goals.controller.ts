@@ -14,7 +14,7 @@ export class CommercialGoalsController {
      * Manager view: returns all commercials with their CA vs goal for the period.
      */
     @Get()
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'RH')
     getTeamPerformance(@Query() query: { year?: string; month?: string }) {
         const now = new Date();
         const year = query.year ? parseInt(query.year, 10) : now.getFullYear();
@@ -27,7 +27,7 @@ export class CommercialGoalsController {
      * Commercial view: returns own CA vs goal for the period.
      */
     @Get('my')
-    @Roles('COMMERCIAL', 'MANAGER', 'HEAD_OF_DEPARTMENT')
+    @Roles('COMMERCIAL', 'MANAGER', 'HEAD_OF_DEPARTMENT', 'RH')
     getMyGoal(@Request() req: any, @Query() query: { year?: string; month?: string }) {
         const now = new Date();
         const year = query.year ? parseInt(query.year, 10) : now.getFullYear();
@@ -41,7 +41,7 @@ export class CommercialGoalsController {
      * Manager view: returns a specific commercial's CA vs goal for the period.
      */
     @Get('employee-goal')
-    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL')
+    @Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'COMMERCIAL', 'RH')
     getEmployeeGoal(@Query() query: { employeeId: string; year?: string; month?: string }) {
         const now = new Date();
         const year = query.year ? parseInt(query.year, 10) : now.getFullYear();

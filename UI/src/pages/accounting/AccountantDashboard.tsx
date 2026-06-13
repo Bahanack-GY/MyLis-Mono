@@ -140,21 +140,22 @@ const KpiCard = ({ label, value, delta, icon: Icon, index, accent, onClick }: Kp
   <Icon size={110} strokeWidth={1.2} />
   </div>
   {delta ? (
-  <div className="mt-4 flex items-center gap-1">
-  {delta.positive ? (
-  <ArrowUpRight01Icon size={12} className="text-[#22c55e]" />
-  ) : (
-  <ArrowDownRight01Icon size={12} className="text-[#ef4444]" />
-  )}
+  <div className="flex items-center gap-1.5 mt-1.5">
   <span
-  className={`text-[11px] font-semibold ${
-  delta.positive ? 'text-[#22c55e]' : 'text-[#ef4444]'
-  }`}
+  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold border"
+  style={{
+  backgroundColor: delta.positive ? '#f0fdf4' : '#fef2f2',
+  borderColor: delta.positive ? '#bbf7d0' : '#fecaca',
+  color: delta.positive ? '#16a34a' : '#dc2626',
+  }}
   >
-  {delta.positive ? '+' : ''}
-  {delta.value.toFixed(1)}%
+  {delta.positive
+  ? <ArrowUpRight01Icon size={10} strokeWidth={2.5} />
+  : <ArrowDownRight01Icon size={10} strokeWidth={2.5} />
+  }
+  {delta.positive ? '+' : ''}{delta.value.toFixed(1)}%
   </span>
-  <span className="text-[10px] text-gray-400">vs ex. precedent</span>
+  <span className="text-[10px] text-gray-400 font-medium">vs ex. precedent</span>
   </div>
   ) : onClick ? (
   <div className="mt-4 flex items-center gap-1 text-[#33cbcc] opacity-0 group-hover:opacity-100 transition-opacity">
@@ -260,14 +261,27 @@ const AccountantDashboard = () => {
   const { data: departments = [] } = useDepartments();
 
   // Fiscal year data
-  const { isLoading: loadingFY } = useFiscalYears();
+  const { data: fiscalYears = [], isLoading: loadingFY } = useFiscalYears();
   const { data: openFY, isLoading: loadingOpenFY } = useOpenFiscalYear();
 
   const fiscalYearId = (openFY as FiscalYear | undefined)?.id ?? '';
 
+  // Previous fiscal year for trend deltas
+  const prevFiscalYearId = useMemo(() => {
+  const fys = fiscalYears as FiscalYear[];
+  const currentYear = openFY ? new Date((openFY as FiscalYear).startDate).getFullYear() : null;
+  if (!currentYear) return '';
+  const prev = fys.find(fy => new Date(fy.startDate).getFullYear() === currentYear - 1);
+  return prev?.id ?? '';
+  }, [fiscalYears, openFY]);
+
   // KPIs and income statement
   const { data: kpis, isLoading: loadingKpis } = useDashboardKpis(
   fiscalYearId,
+  selectedDeptId || undefined,
+  );
+  const { data: prevKpisRaw } = useDashboardKpis(
+  prevFiscalYearId,
   selectedDeptId || undefined,
   );
   const { isLoading: loadingIS } = useIncomeStatement(fiscalYearId);
@@ -489,12 +503,26 @@ const AccountantDashboard = () => {
 
   /* ── KPI definitions ──────────────────────────────────────────── */
 
+  const prevKpis = prevKpisRaw as DashboardKpis | undefined;
+  const prevTotalRevenue = prevKpis?.totalRevenue ?? 0;
+  const prevTotalExpenses = prevKpis?.totalExpenses ?? 0;
+  const prevNetProfit = prevTotalRevenue - prevTotalExpenses;
+  const prevProfitMargin = prevTotalRevenue > 0 ? (prevNetProfit / prevTotalRevenue) * 100 : 0;
+
+  const calcDelta = (current: number, previous: number, isPositiveGood = true): { value: number; positive: boolean } | undefined => {
+  if (!prevFiscalYearId || previous === 0) return undefined;
+  const pct = ((current - previous) / Math.abs(previous)) * 100;
+  const isUp = pct >= 0;
+  return { value: Math.abs(Math.round(pct * 10) / 10), positive: isPositiveGood ? isUp : !isUp };
+  };
+
   const kpis5 = [
   {
   label: 'Chiffre d\'affaires',
   value: fmt(totalRevenue),
   icon: Money01Icon,
   accent: CHART_TEAL,
+  delta: calcDelta(totalRevenue, prevTotalRevenue),
   },
   {
   label: 'Marge brute',
@@ -507,18 +535,21 @@ const AccountantDashboard = () => {
   value: fmt(netProfit),
   icon: BarChartHorizontalIcon,
   accent: netProfit >= 0 ? CHART_NAVY : CHART_RED,
+  delta: calcDelta(netProfit, prevNetProfit),
   },
   {
   label: 'Marge nette',
   value: `${profitMargin.toFixed(1)} %`,
   icon: PercentIcon,
   accent: CHART_AMBER,
+  delta: calcDelta(profitMargin, prevProfitMargin),
   },
   {
   label: 'Charges totales',
   value: fmt(totalExpenses),
   icon: ArrowDownRight01Icon,
   accent: CHART_RED,
+  delta: calcDelta(totalExpenses, prevTotalExpenses, false),
   },
   ];
 

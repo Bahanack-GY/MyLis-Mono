@@ -8,6 +8,7 @@ import api from '../../api/config';
 import ToggleSwitch from '../../components/ToggleSwitch';
 import { exportPayslipPdf } from '../../utils/exportPayslipPdf';
 import type { PayslipPdfData } from '../../utils/exportPayslipPdf';
+import { exportEtatDePaieExcel } from '../../utils/exportEtatDePaieExcel';
 import logoSrc from '../../assets/logo-lis.png';
 
 /* ------------------------------------------------------------------ */
@@ -114,7 +115,7 @@ interface DeductionType {
 interface SalaryComponent {
  id: string;
  employeeId: string;
- type: 'PRIME' | 'INDEMNITE' | 'AVANTAGE_NATURE';
+ type: 'PRIME' | 'INDEMNITE' | 'AVANTAGE_NATURE' | 'RETENUE';
  label: string;
  amount: number;
  cnpsBase: boolean;
@@ -1047,6 +1048,20 @@ const PayrollDetail = ({
  const [showDeductionTypes, setShowDeductionTypes] = useState(false);
  const [downloadingId, setDownloadingId] = useState<string | null>(null);
  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+ const [isExporting, setIsExporting] = useState(false);
+
+ const handleExportExcel = async () => {
+ if (!run) return;
+ setIsExporting(true);
+ try {
+ const data = await api.get(`/payroll/runs/${run.id}/export`).then(r => r.data);
+ exportEtatDePaieExcel(data);
+ } catch {
+ toast.error('Erreur lors de l\'export Excel');
+ } finally {
+ setIsExporting(false);
+ }
+ };
 
  const handleDownloadPdf = async (ps: Payslip) => {
  if (!run) return;
@@ -1114,6 +1129,19 @@ const PayrollDetail = ({
  >
  <Settings01Icon size={18} />
  </button>
+ {(run.status === 'CALCULATED' || run.status === 'VALIDATED' || run.status === 'PAID') && (
+ <button
+ onClick={handleExportExcel}
+ disabled={isExporting}
+ className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-700 bg-white border border-gray-200 hover:bg-gray-50 transition-colors disabled:opacity-50"
+ title="Exporter l'état de paie en Excel"
+ >
+ {isExporting
+ ? <Loading02Icon size={16} className="animate-spin" />
+ : <Download01Icon size={16} />}
+ État de paie
+ </button>
+ )}
  {(run.status === 'DRAFT' || run.status === 'CALCULATED') && (
  <button
  onClick={() => calculateMut.mutate(run.id)}

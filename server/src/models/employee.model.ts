@@ -182,6 +182,9 @@ export class Employee extends Model {
     @HasMany(() => Employee, 'encadreurId')
     declare stagiaires: Employee[];
 
+    @Column({ type: DataType.STRING(20), allowNull: true })
+    declare secondaryView: 'EMPLOYEE' | 'COMMERCIAL' | null;
+
     @HasMany(() => SalaryComponent)
     declare salaryComponents: SalaryComponent[];
 }

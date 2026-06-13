@@ -92,6 +92,98 @@ const cardVariants = {
   }),
 };
 
+/* ─── Period helpers ─────────────────────────────────────── */
+
+function getPreviousPeriodRange(preset: DatePreset, currentFrom: string, currentTo: string): { from: string; to: string } {
+  const now = new Date();
+  switch (preset) {
+    case 'today': {
+      const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      const e = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
+      return { from: s.toISOString(), to: e.toISOString() };
+    }
+    case 'this_week': {
+      const d = now.getDay();
+      const thisMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (d === 0 ? -6 : 1 - d));
+      const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const prevSunday = new Date(thisMonday.getTime() - 1);
+      return { from: prevMonday.toISOString(), to: prevSunday.toISOString() };
+    }
+    case 'this_month': {
+      const firstThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastPrev = new Date(firstThisMonth.getTime() - 1);
+      const firstPrev = new Date(lastPrev.getFullYear(), lastPrev.getMonth(), 1);
+      return { from: firstPrev.toISOString(), to: lastPrev.toISOString() };
+    }
+    case 'this_year': {
+      const firstThisYear = new Date(now.getFullYear(), 0, 1);
+      const lastPrev = new Date(firstThisYear.getTime() - 1);
+      const firstPrev = new Date(lastPrev.getFullYear(), 0, 1);
+      return { from: firstPrev.toISOString(), to: lastPrev.toISOString() };
+    }
+    case 'custom': {
+      const start = new Date(currentFrom);
+      const end = new Date(currentTo);
+      const duration = end.getTime() - start.getTime();
+      const prevEnd = new Date(start.getTime() - 1);
+      const prevStart = new Date(prevEnd.getTime() - duration);
+      return { from: prevStart.toISOString(), to: prevEnd.toISOString() };
+    }
+  }
+}
+
+const VS_LABELS: Record<DatePreset, string> = {
+  today: 'vs. hier',
+  this_week: 'vs. sem. dern.',
+  this_month: 'vs. mois dern.',
+  this_year: 'vs. an. dern.',
+  custom: 'vs. période préc.',
+};
+
+/* ─── Trend Badge ────────────────────────────────────────── */
+
+const TrendBadge = ({
+  current,
+  previous,
+  isPositiveGood = true,
+  vsLabel,
+}: {
+  current: number;
+  previous: number;
+  isPositiveGood?: boolean;
+  vsLabel: string;
+}) => {
+  if (previous === 0 && current === 0) return null;
+  const pct = previous === 0
+    ? (current > 0 ? 100 : null)
+    : Math.round(((current - previous) / Math.abs(previous)) * 100);
+  if (pct === null) return null;
+
+  const isUp = pct > 0;
+  const isNeutral = pct === 0;
+  const isGood = isNeutral ? true : isPositiveGood ? isUp : !isUp;
+
+  const bg = isNeutral ? '#F9FAFB' : isGood ? '#f0fdf4' : '#fef2f2';
+  const border = isNeutral ? '#E5E7EB' : isGood ? '#bbf7d0' : '#fecaca';
+  const color = isNeutral ? '#6B7280' : isGood ? '#16a34a' : '#dc2626';
+
+  return (
+    <div className="flex items-center gap-1.5 mt-1.5">
+      <span
+        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold border"
+        style={{ backgroundColor: bg, borderColor: border, color }}
+      >
+        {!isNeutral && (isUp
+          ? <ArrowUpRight01Icon size={10} strokeWidth={2.5} />
+          : <ArrowDownRight01Icon size={10} strokeWidth={2.5} />
+        )}
+        {isNeutral ? '—' : `${isUp ? '+' : ''}${pct}%`}
+      </span>
+      <span className="text-[10px] text-gray-400 font-medium">{vsLabel}</span>
+    </div>
+  );
+};
+
 /* ─── KPI Card ───────────────────────────────────────────── */
 
 interface KpiCardProps {
@@ -102,9 +194,10 @@ interface KpiCardProps {
   accent?: string;
   index: number;
   onClick?: () => void;
+  trend?: { current: number; previous: number; isPositiveGood?: boolean; vsLabel: string };
 }
 
-const KpiCard = ({ label, value, sub, icon: Icon, accent = TEAL, index, onClick }: KpiCardProps) => (
+const KpiCard = ({ label, value, sub, icon: Icon, accent = TEAL, index, onClick, trend }: KpiCardProps) => (
   <motion.div
   custom={index}
   variants={cardVariants}
@@ -118,6 +211,14 @@ const KpiCard = ({ label, value, sub, icon: Icon, accent = TEAL, index, onClick 
   </div>
   <div className="p-5 bg-white relative overflow-hidden">
   <p className="text-3xl font-bold text-[#1c2b3a] leading-none">{value}</p>
+  {trend && (
+  <TrendBadge
+  current={trend.current}
+  previous={trend.previous}
+  isPositiveGood={trend.isPositiveGood ?? true}
+  vsLabel={trend.vsLabel}
+  />
+  )}
   {sub && <p className="text-[11px] text-gray-400 mt-1">{sub}</p>}
   <div className="absolute -right-4 -bottom-4 opacity-[0.14] pointer-events-none" style={{ color: accent }}>
   <Icon size={110} strokeWidth={1.2} />
@@ -267,6 +368,13 @@ const CeoDashboard = () => {
   [committed],
   );
 
+  const { from: prevFrom, to: prevTo } = useMemo(
+  () => getPreviousPeriodRange(committed.preset, from, to),
+  [committed.preset, from, to],
+  );
+
+  const vsLabel = VS_LABELS[committed.preset];
+
   /* ── Data ───────────────────────────────────────── */
 
   const { data: departments = [] } = useDepartments();
@@ -275,6 +383,8 @@ const CeoDashboard = () => {
   const { data: invoiceStats } = useInvoiceStats(selectedDeptId || undefined, from, to);
   const { data: expenseStats } = useExpenseStats(new Date().getFullYear(), selectedDeptId || undefined);
   const { data: demandStats } = useDemandStats(selectedDeptId || undefined, from, to);
+  const { data: prevInvoiceStats } = useInvoiceStats(selectedDeptId || undefined, prevFrom, prevTo);
+  const { data: prevDemandStats } = useDemandStats(selectedDeptId || undefined, prevFrom, prevTo);
   const { data: revenueByDeptRaw } = useRevenueByDepartment(from, to);
   const { data: openFY } = useOpenFiscalYear();
   const fiscalYearId = (openFY as FiscalYear | undefined)?.id ?? '';
@@ -293,6 +403,11 @@ const CeoDashboard = () => {
   const employeeCount = employees.length;
   const demandPending = demandStats?.totalPending ?? 0;
   const demandTotal = demandStats?.total ?? 0;
+
+  // Previous period KPI values for trend badges
+  const prevRevenue = prevInvoiceStats?.totalRevenue ?? 0;
+  const prevPendingAmount = prevInvoiceStats?.totalPending ?? 0;
+  const prevDemandPending = prevDemandStats?.totalPending ?? 0;
 
   /* ── Monthly trend chart (global — full fiscal year) */
 
@@ -398,6 +513,7 @@ const CeoDashboard = () => {
   icon={ArrowUpRight01Icon}
   accent={TEAL}
   onClick={() => navigate('/invoices')}
+  trend={{ current: revenue, previous: prevRevenue, vsLabel }}
   />
   <KpiCard
   index={1}
@@ -415,6 +531,7 @@ const CeoDashboard = () => {
   sub={netProfit >= 0 ? 'Bénéficiaire' : 'Déficitaire'}
   icon={BarChartHorizontalIcon}
   accent={netProfit >= 0 ? '#22c55e' : '#ef4444'}
+  trend={{ current: revenue, previous: prevRevenue, vsLabel }}
   />
   </div>
 
@@ -446,6 +563,7 @@ const CeoDashboard = () => {
   icon={Wallet01Icon}
   accent="#f59e0b"
   onClick={() => navigate('/invoices')}
+  trend={{ current: pendingAmount, previous: prevPendingAmount, isPositiveGood: false, vsLabel }}
   />
   <KpiCard
   index={6}
@@ -455,6 +573,7 @@ const CeoDashboard = () => {
   icon={Money01Icon}
   accent="#8b5cf6"
   onClick={() => navigate('/demands')}
+  trend={{ current: demandPending, previous: prevDemandPending, isPositiveGood: false, vsLabel }}
   />
   </div>
 

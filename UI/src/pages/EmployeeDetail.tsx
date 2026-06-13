@@ -99,6 +99,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
   const { data: allEmployees } = useEmployees();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isStagiaire = employee.user?.role === 'STAGIAIRE';
+  const isRH = employee.user?.role === 'RH';
 
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -118,6 +119,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
   skills: [...(employee.skills || [])],
   avatarUrl: employee.avatarUrl || '',
   encadreurId: employee.encadreurId || '',
+  secondaryView: (employee.secondaryView || '') as '' | 'EMPLOYEE' | 'COMMERCIAL',
   });
 
   const [skillInput, setSkillInput] = useState('');
@@ -189,6 +191,7 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
   skills: form.skills,
   avatarUrl: form.avatarUrl || undefined,
   ...(isStagiaire && { encadreurId: form.encadreurId || null }),
+  ...(isRH && { secondaryView: form.secondaryView || null }),
   },
   }, { onSuccess: () => onClose() });
   };
@@ -450,6 +453,26 @@ const EditEmployeeModal = ({ employee, onClose }: { employee: EmployeeUI; onClos
   <option key={e.id} value={e.id}>{e.firstName} {e.lastName}</option>
   ))}
   </select>
+  </div>
+  )}
+
+  {/* Secondary view selector (RH only) */}
+  {isRH && (
+  <div>
+  <label className={labelCls}>
+  <DashboardSquare01Icon size={12} />
+  Vue secondaire
+  </label>
+  <select
+  value={form.secondaryView}
+  onChange={e => setForm(prev => ({ ...prev, secondaryView: e.target.value as '' | 'EMPLOYEE' | 'COMMERCIAL' }))}
+  className={inputCls}
+  >
+  <option value="">Aucune — vue RH uniquement</option>
+  <option value="EMPLOYEE">Vue Employé</option>
+  <option value="COMMERCIAL">Vue Commercial</option>
+  </select>
+  <p className="text-xs text-[#8892a4] mt-1">Permet au RH de basculer entre la vue RH et cette vue secondaire</p>
   </div>
   )}
 

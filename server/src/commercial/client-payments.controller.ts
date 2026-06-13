@@ -6,7 +6,7 @@ import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('client-payments')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL')
+@Roles('MANAGER', 'HEAD_OF_DEPARTMENT', 'ACCOUNTANT', 'COMMERCIAL', 'RH')
 export class ClientPaymentsController {
     constructor(private readonly paymentsService: ClientPaymentsService) { }
 

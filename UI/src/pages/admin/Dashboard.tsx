@@ -14,7 +14,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { UserGroupIcon, Briefcase01Icon, Tick01Icon, ArrowUpRight01Icon, DollarCircleIcon, CreditCardIcon, Coins01Icon, Clock01Icon, Calendar01Icon, ArrowDown01Icon } from 'hugeicons-react';
+import { UserGroupIcon, Briefcase01Icon, Tick01Icon, ArrowUpRight01Icon, ArrowDownRight01Icon, DollarCircleIcon, CreditCardIcon, Coins01Icon, Clock01Icon, Calendar01Icon, ArrowDown01Icon } from 'hugeicons-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useEmployees } from '../../api/employees/hooks';
@@ -61,6 +61,94 @@ function getDateRange(preset: DatePreset, customFrom?: string, customTo?: string
   }
 }
 
+function getPreviousPeriodRange(preset: DatePreset, currentFrom: string, currentTo: string): { from: string; to: string } {
+  const now = new Date();
+  switch (preset) {
+    case 'today': {
+      const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      const e = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 23, 59, 59, 999);
+      return { from: s.toISOString(), to: e.toISOString() };
+    }
+    case 'this_week': {
+      const d = now.getDay();
+      const thisMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + (d === 0 ? -6 : 1 - d));
+      const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const prevSunday = new Date(thisMonday.getTime() - 1);
+      return { from: prevMonday.toISOString(), to: prevSunday.toISOString() };
+    }
+    case 'this_month': {
+      const firstThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastPrev = new Date(firstThisMonth.getTime() - 1);
+      const firstPrev = new Date(lastPrev.getFullYear(), lastPrev.getMonth(), 1);
+      return { from: firstPrev.toISOString(), to: lastPrev.toISOString() };
+    }
+    case 'this_year': {
+      const firstThisYear = new Date(now.getFullYear(), 0, 1);
+      const lastPrev = new Date(firstThisYear.getTime() - 1);
+      const firstPrev = new Date(lastPrev.getFullYear(), 0, 1);
+      return { from: firstPrev.toISOString(), to: lastPrev.toISOString() };
+    }
+    case 'custom': {
+      const start = new Date(currentFrom);
+      const end = new Date(currentTo);
+      const duration = end.getTime() - start.getTime();
+      const prevEnd = new Date(start.getTime() - 1);
+      const prevStart = new Date(prevEnd.getTime() - duration);
+      return { from: prevStart.toISOString(), to: prevEnd.toISOString() };
+    }
+  }
+}
+
+const VS_LABELS: Record<DatePreset, string> = {
+  today: 'vs. hier',
+  this_week: 'vs. sem. dern.',
+  this_month: 'vs. mois dern.',
+  this_year: 'vs. an. dern.',
+  custom: 'vs. période préc.',
+};
+
+const TrendBadge = ({
+  current,
+  previous,
+  isPositiveGood = true,
+  vsLabel,
+}: {
+  current: number;
+  previous: number;
+  isPositiveGood?: boolean;
+  vsLabel: string;
+}) => {
+  if (previous === 0 && current === 0) return null;
+  const pct = previous === 0
+    ? (current > 0 ? 100 : null)
+    : Math.round(((current - previous) / Math.abs(previous)) * 100);
+  if (pct === null) return null;
+
+  const isUp = pct > 0;
+  const isNeutral = pct === 0;
+  const isGood = isNeutral ? true : isPositiveGood ? isUp : !isUp;
+
+  const bg = isNeutral ? '#F9FAFB' : isGood ? '#f0fdf4' : '#fef2f2';
+  const border = isNeutral ? '#E5E7EB' : isGood ? '#bbf7d0' : '#fecaca';
+  const color = isNeutral ? '#6B7280' : isGood ? '#16a34a' : '#dc2626';
+
+  return (
+    <div className="flex items-center gap-1.5 mt-1.5">
+      <span
+        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold border"
+        style={{ backgroundColor: bg, borderColor: border, color }}
+      >
+        {!isNeutral && (isUp
+          ? <ArrowUpRight01Icon size={10} strokeWidth={2.5} />
+          : <ArrowDownRight01Icon size={10} strokeWidth={2.5} />
+        )}
+        {isNeutral ? '—' : `${isUp ? '+' : ''}${pct}%`}
+      </span>
+      <span className="text-[10px] text-gray-400 font-medium">{vsLabel}</span>
+    </div>
+  );
+};
+
 const Dashboard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -87,6 +175,14 @@ const Dashboard = () => {
   const { data: revenueByDeptRaw } = useRevenueByDepartment(from, to);
   const { data: serviceStats } = useServiceStats(from, to, deptScope);
 
+  // Previous period — for trend badges
+  const { from: prevFrom, to: prevTo } = useMemo(
+    () => getPreviousPeriodRange(datePreset, from, to),
+    [datePreset, from, to],
+  );
+  const { data: prevApiTasks } = useTasks(deptScope, prevFrom, prevTo);
+  const { data: prevInvoiceStats } = useInvoiceStats(deptScope, prevFrom, prevTo);
+
   // For HOD, show only their department in the revenue chart
   const revenueByDept = deptScope
   ? (revenueByDeptRaw || []).filter(d => d.departmentId === deptScope)
@@ -111,15 +207,28 @@ const Dashboard = () => {
   const profit = revenue - totalExpenses;
   const pending = invoiceStats?.totalPending ?? 0;
 
+  // Previous period stats for trend badges
+  const prevTasksCompleted = prevApiTasks?.filter(t => t.state === 'COMPLETED').length ?? 0;
+  const prevTotalTasks = prevApiTasks?.length ?? 0;
+  const prevEfficiency = prevTotalTasks > 0 ? Math.round((prevTasksCompleted / prevTotalTasks) * 100) : 0;
+  const prevRevenue = prevInvoiceStats?.totalRevenue ?? 0;
+  const prevPending = prevInvoiceStats?.totalPending ?? 0;
+
+  const vsLabel = VS_LABELS[datePreset];
+
   const stats = [
   { title: t('dashboard.stats.totalEmployees'), value: String(totalEmployees), icon: UserGroupIcon, color: '#283852', link: '/employees' },
   { title: t('dashboard.stats.activeProjects'), value: String(activeProjects), icon: Briefcase01Icon, color: '#283852', link: '/projects' },
-  { title: t('dashboard.stats.tasksCompleted'), value: String(tasksCompleted), icon: Tick01Icon, color: '#283852', link: '/tasks' },
-  { title: t('dashboard.stats.efficiency'), value: `${efficiency}%`, icon: ArrowUpRight01Icon, color: '#283852' },
-  { title: t('dashboard.stats.revenue'), value: formatFCFA(revenue), icon: DollarCircleIcon, color: '#283852' },
+  { title: t('dashboard.stats.tasksCompleted'), value: String(tasksCompleted), icon: Tick01Icon, color: '#283852', link: '/tasks',
+    trend: { current: tasksCompleted, previous: prevTasksCompleted } },
+  { title: t('dashboard.stats.efficiency'), value: `${efficiency}%`, icon: ArrowUpRight01Icon, color: '#283852',
+    trend: { current: efficiency, previous: prevEfficiency } },
+  { title: t('dashboard.stats.revenue'), value: formatFCFA(revenue), icon: DollarCircleIcon, color: '#283852',
+    trend: { current: revenue, previous: prevRevenue } },
   { title: t('dashboard.stats.expenses'), value: formatFCFA(totalExpenses), icon: CreditCardIcon, color: '#283852', link: '/expenses' },
   { title: t('dashboard.stats.profit'), value: formatFCFA(profit), icon: Coins01Icon, color: '#283852' },
-  { title: t('dashboard.stats.pending'), value: formatFCFA(pending), icon: Clock01Icon, color: '#283852' },
+  { title: t('dashboard.stats.pending'), value: formatFCFA(pending), icon: Clock01Icon, color: '#283852',
+    trend: { current: pending, previous: prevPending, isPositiveGood: false } },
   ];
 
   // Derive chart data from real tasks grouped by day of week
@@ -270,6 +379,14 @@ const Dashboard = () => {
   <h2 className={`font-bold text-[#1c2b3a] truncate leading-tight ${stat.value.length > 10 ? 'text-xl' : 'text-4xl'}`}>
   {stat.value}
   </h2>
+  {stat.trend && (
+  <TrendBadge
+  current={stat.trend.current}
+  previous={stat.trend.previous}
+  isPositiveGood={stat.trend.isPositiveGood ?? true}
+  vsLabel={vsLabel}
+  />
+  )}
   <div className="absolute -right-4 -bottom-4 opacity-[0.14]" style={{ color: stat.color }}>
   <stat.icon size={110} strokeWidth={1.2} />
   </div>

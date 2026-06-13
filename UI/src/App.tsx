@@ -83,6 +83,9 @@ const Suppliers = lazy(() => import("./pages/accounting/Suppliers"))
 const CashFlow = lazy(() => import("./pages/accounting/CashFlow"))
 const FundMovements = lazy(() => import("./pages/accounting/FundMovements"))
 
+// RH-specific pages
+const RhSalaryCalculation = lazy(() => import("./pages/rh/SalaryCalculation"))
+
 // Discipline (MANAGER + CEO + HEAD_OF_DEPARTMENT)
 const Attendance = lazy(() => import("./pages/discipline/Attendance"))
 const MonthlyRankings = lazy(() => import("./pages/admin/MonthlyRankings"))
@@ -96,11 +99,15 @@ const EmployeePermissions = lazy(() => import("./pages/employee/Permissions"))
 // CEO sees CeoDashboard in admin mode; toggling to "manager view" shows AdminDashboard.
 // Accountants are sent straight to the accounting dashboard.
 const DashboardRouter = () => {
-  const { role, viewMode } = useAuth();
+  const { role, viewMode, secondaryView } = useAuth();
   if (role === 'ACCOUNTANT' && viewMode === 'admin') {
   return <Navigate to="/accounting" replace />;
   }
   if (role === 'RH') {
+  if (viewMode === 'employee' && secondaryView) {
+  if (secondaryView === 'COMMERCIAL') return <Navigate to="/commercial" replace />;
+  return <EmployeeDashboard />;
+  }
   return <Navigate to="/employees" replace />;
   }
   if (role === 'CEO') {
@@ -229,6 +236,13 @@ function App() {
   <Route path="/accounting/ai-reports" element={<AIReports />} />
   <Route path="/accounting/suppliers" element={<Suppliers />} />
   <Route path="/accounting/cash-flow" element={<CashFlow />} />
+  </Route>
+  </Route>
+
+  {/* RH Salary Calculation — RH + MANAGER */}
+  <Route element={<ProtectedRoute allowedRoles={['RH', 'MANAGER']} />}>
+  <Route element={<DashboardLayout />}>
+  <Route path="/rh/salary" element={<RhSalaryCalculation />} />
   </Route>
   </Route>
 
